@@ -39,7 +39,7 @@ export const usePaymentStore = create<PaymentStoreState>()(
                 }
             },
             cancelOrder: async () => {
-                set({ order: null, isLoading: false, });
+                set({ order: null, isLoading: false});
             },
             refoundOrder: async () => {
 

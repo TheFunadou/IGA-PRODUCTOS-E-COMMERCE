@@ -36,11 +36,11 @@ export const findProductVersionCardsRandom = async (options: ProductVersionRando
 
 
 export const getProductVersionDetailService = async (sku: string): Promise<ProductVersionDetailType> => {
-    const response = await axios.get<ProductVersionDetailType>(`${BASE_URL}/product/product-version/detail/${sku}`);
+    const response = await axios.get<ProductVersionDetailType>(`${BASE_URL}/product/product-version/detail/${sku}`,{withCredentials:true});
     return response.data;
 };
 
 export const getSeachProductVersionByName = async (input: string): Promise<SearchedProductType[]> => {
-    const response = await axios.get<SearchedProductType[]>(`${BASE_URL}/product/product-version/search`, { params: { input } });
+    const response = await axios.get<SearchedProductType[]>(`${BASE_URL}/product/product-version/search`, { params: { input }, withCredentials:true });
     return response.data;
 };

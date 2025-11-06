@@ -3,6 +3,7 @@ import { SiMercadopago } from "react-icons/si";
 import type { PaymentMethodDetails, PaymentMethodsType } from "../ShoppingTypes";
 import { LiaMinusSolid, LiaPlusSolid } from "react-icons/lia";
 import { formatPrice } from "../../products/Helpers";
+import { useLocation } from "react-router-dom";
 
 
 const PaymentExiting = () => {
@@ -17,11 +18,18 @@ const PaymentExiting = () => {
         }
     };
 
+    const {search} = useLocation();
+    const query = new URLSearchParams(search);
+
+    const externalID = query.get("payment_id");
+    const internalID = query.get("external_reference");
+
     return (
         <div className="w-full animate-fade-in-up">
             <div className="w-full bg-base-300 px-5 py-10 rounded-xl ">
-                <p className="text-3xl font-bold bg-success flex items-center gap-2 rounded-xl p-3"><FaCheckCircle className=" text-white" />Pago exitoso</p>
-                <p className="mt-1 text-lg">Tu pago fue procesado exitosamente</p>
+                <p className="text-3xl font-bold bg-success flex items-center gap-2 rounded-xl p-3"><FaCheckCircle className=" text-white" />Pago procesado exitosamente</p>
+                <p className="mt-1 text-lg">Folio de operación: {internalID}</p>
+                <p className="mt-1 text-lg">ID de operación: {externalID}</p>
                 <section className="w-full flex gap-5 mt-5">
                     <div className="w-1/4 p-5 bg-white rounded-xl">
                         <p className="text-2xl font-bold">Información de envio</p>
@@ -72,19 +80,19 @@ const PaymentExiting = () => {
                         <section className="w-full mt-5 bg-base-200 rounded-xl px-5 pt-5">
                             <div className="w-full">
                                 <p className="text-2xl font-bold">Casco de seguridad industrial tipo coraza a dilectrico</p>
-                                <p className="text-lg text-gray-500">Cascos de seguridad industrial - tipo coraza a - ajuste de matraca - clase e</p>
+                                <p className="text-lg text-gray-500 bg-gray-200 w-fit rounded-xl px-3">Cascos de seguridad industrial - tipo coraza a - ajuste de matraca - clase e</p>
                                 <div className="w-full flex mt-2">
                                     <figure className="w-15/100 rounded-xl">
                                         <img className="rounded-xl border border-gray-300" src="https://igaproductos.com.mx/wp-content/uploads/2024/07/hit_intervalo_amarillo-e1722380739491.jpg" alt="" />
                                     </figure>
                                     <div className="w-65/100 text-xl ml-4 flex flex-col gap-3">
-                                        <p className="w-1/6 bg-gray-200 rounded-xl px-2">Linea básica</p>
-                                        <p>Color: <span className="rounded-full px-3 bg-primary mr-2"></span>Azul</p>
-                                        <p className="w-1/6 bg-primary px-2 rounded-xl text-white text-center">x 2pz</p>
+                                        <p className="w-fit bg-gray-200 rounded-xl px-3">Linea básica</p>
+                                        <p className="w-fit  rounded-xl px-3 py-1 bg-gray-200"><span className="rounded-full px-3 bg-primary mr-2"></span>Azul</p>
+                                        <p className="w-fit bg-primary px-5 py-1 rounded-xl text-white text-center">x 2pz</p>
                                     </div>
                                     <div className="w-20/100">
                                         <div>
-                                            <p className="text-xl  bg-gray-200 rounded-xl px-2">Precio unitario</p>
+                                            <p className="text-xl bg-gray-200 rounded-xl px-2">Precio unitario</p>
                                             <p className="text-2xl">$220.00</p>
                                         </div>
                                         <div className="mt-3">

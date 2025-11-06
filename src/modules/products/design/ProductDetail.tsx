@@ -9,7 +9,6 @@ import ImageMagnifier from "../components/ImageMagnifier";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import { useShoppingCartActions } from "../../shopping/hooks/useShoppingCart";
 import { useFavorite } from "../hooks/useProductFavorites";
-import type { ProductVersionCardType } from "../ProductTypes";
 
 const ProductDetail = () => {
     const params = useParams();
@@ -18,7 +17,7 @@ const ProductDetail = () => {
         isLoading,
         error,
         refetch
-    } = useFetchProductVersionDetail(params.sku);
+    } = useFetchProductVersionDetail(params?.sku);
 
     const [selectProductQty, setSelectProductQty] = useState<string>("1");
     const [productQty, setProductQty] = useState<number>(1);
@@ -150,7 +149,7 @@ const ProductDetail = () => {
                                 )}
                             </div>
                             <div className="w-full py-5 border-b border-b-gray-400 flex items-center justify-between">
-                                <p className="text-2xl font-bold">{data && data.product_version.color_line}: <span className="ml-2">{data && data.product_version.color_name} <span className="ml-2 px-5 py-1 border border-gray-300 rounded-full" style={{ backgroundColor: color }}></span></span></p>
+                                <p className="text-2xl font-bold">{data && data.product_version.color_line}: <span className="ml-2 px-6 py-2  rounded-full" style={{ backgroundColor: color }}></span><span className="ml-2">{data && data.product_version.color_name}</span></p>
                                 <a href={(data && data.product_version.technical_sheet_url) ?? "#"} target="_blank" className="underline text-primary font-bold">Ver ficha tecnica...</a>
                             </div>
                             <div className="py-5 border-b border-b-gray-400">

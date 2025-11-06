@@ -17,7 +17,7 @@ import { useFetchAds } from "../../../layouts/hooks/useAds";
 
 const ShoppingCart = () => {
     const { items, checkAllItems, uncheckAllItems, clearShoppingCart, toogleCheckItem, removeItem, updateItemQty } = useShoppingCartStore();
-    const { order } = usePaymentStore();
+    const { order, cancelOrder} = usePaymentStore();
     const { isAuth, favorites, isLoading: favLoading } = useAuthStore();
     const navigate = useNavigate();
     const {
@@ -123,6 +123,8 @@ const ShoppingCart = () => {
                                         Proceder al pago
                                     </button>
                                 )}
+
+                                {/* <button type="button" onClick={() => cancelOrder} className="btn btn-primary">Clear order</button> */}
                             </div>
                         }
                     </div>

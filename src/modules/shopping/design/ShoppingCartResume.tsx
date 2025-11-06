@@ -59,6 +59,7 @@ const ShoppingCartResume = () => {
     }, [addresses]);
 
     const handleCreateOrder = async () => {
+        if (!selectedAddress) showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
         if (selectedAddress) {
             const products: PaymentShoppingCart[] = selectedProducts.map(item => {
                 return {
@@ -72,7 +73,6 @@ const ShoppingCartResume = () => {
                 payment_method: paymentMethod
             });
         };
-        showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
     };
 
     // If the order exists 

@@ -40,7 +40,7 @@ const Shop = () => {
         isLoading: subcategoriesLoading,
         error: subcategoriesError,
         refetch: refetchSubcategories
-    } = useFetchSubcategories(selectedCategory?.id)
+    } = useFetchSubcategories(selectedCategory?.id);
 
     const {
         data: pvCards,
@@ -52,9 +52,20 @@ const Shop = () => {
         moreExpensive: expensive,
         page: currentPage,
         onlyFavorites: isAuth ? showFavorites : undefined,
-        category: selectedCategory?.name,
+        category: selectedCategory ? selectedCategory.name : undefined,
         subcategoryPath: subcategoriesPath.length > 0 ? subcategoriesPath : undefined,
-    })
+    });
+
+    // Debug
+useEffect(() => {
+    console.log('=== DEBUG CATEGORIES ===');
+    console.log('Categories:', categories);
+    console.log('Type:', typeof categories);
+    console.log('Is Array:', Array.isArray(categories));
+    console.log('Error:', categoriesError);
+    console.log('Loading:', categoriesLoading);
+    console.log('BASE_URL:', import.meta.env.VITE_BACKEND_URL); // o process.env.REACT_APP_API_URL
+}, [categories, categoriesError, categoriesLoading]);
 
     const totalPages = useMemo(() => {
         if (!pvCards?.total_records) return 1;
