@@ -12,9 +12,10 @@ import { useAuthStore } from "../../auth/states/authStore";
 import DeleteAddressForm from "../components/DeleteAddressForm";
 import type { CustomerAddressType } from "../CustomerTypes";
 import UpdateAddresssForm from "../components/UpdateAddressForm";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 const CustomerAddresses = () => {
-    //temp
+    const { theme } = useThemeStore();
     const { authCustomer } = useAuthStore();
     const newAddressModal = useRef<HTMLDialogElement>(null);
     const deleteAddressModal = useRef<HTMLDialogElement>(null);
@@ -25,9 +26,9 @@ const CustomerAddresses = () => {
         isLoading,
         error,
         refetch
-    } = useFetchCustomerAddresses(authCustomer?.uuid);
+    } = useFetchCustomerAddresses();
     return (
-        <div className="w-full bg-base-300 px-5 py-10 rounded-xl min-h-screen">
+        <div className={clsx("w-full px-5 py-10 rounded-xl min-h-screen", theme === "ligth" && "bg-base-300", theme === "dark" && "bg-slate-900")}>
             <p className="text-3xl font-bold">Direcciones de envio</p>
             <div className="flex gap-2 mt-2">
                 <button
@@ -46,7 +47,7 @@ const CustomerAddresses = () => {
                     <div className="w-full skeleton py-15"></div>
                 </div>
             ) : (
-                <div className="w-full bg-white px-5 pt-5 py-5 mt-5 rounded-xl">
+                <div className={clsx("w-full px-5 pt-5 py-5 mt-5 rounded-xl", theme === "ligth" && "bg-white", theme === "dark" && "bg-slate-950")}>
                     {error ? (
                         <div className="w-full">
                             <p className="mt-2 text-xl">Ocurrio un error inesperado al obtener las direcciones de envio.</p>
@@ -67,7 +68,7 @@ const CustomerAddresses = () => {
                                             <div className="w-85/100">
                                                 <p className="text-2xl font-bold">{`${data.recipient_name} ${data.recipient_last_name}`}</p>
                                                 <p className="text-lg">{data.country_phone_code} {data.contact_number}</p>
-                                                <p className="text-lg">{`${data.street_name}, #${data.number} EXT.${data.aditional_number === "N/A" ? "": `${data.aditional_number} INT.`} ${data.neighborhood}, ${data.zip_code}, ${data.city}, ${data.state}, ${data.country}`}</p>
+                                                <p className="text-lg">{`${data.street_name}, #${data.number} EXT.${data.aditional_number === "N/A" ? "" : `${data.aditional_number} INT.`} ${data.neighborhood}, ${data.zip_code}, ${data.city}, ${data.state}, ${data.country}`}</p>
                                                 {data.default_address === true && <p className="text-xl font-bold">Dirección predeterminada</p>}
                                             </div>
                                             <div className="w-15/100 text-right">
@@ -93,7 +94,7 @@ const CustomerAddresses = () => {
             )}
             {newAddressModal && <NewAddressForm ref={newAddressModal} customer={authCustomer?.uuid} onCreated={() => closeModal(newAddressModal.current)} />}
             {deleteAddressModal && <DeleteAddressForm ref={deleteAddressModal} address={selected?.uuid!} customer={authCustomer?.uuid} onDeleted={() => closeModal(deleteAddressModal.current)} />}
-            {updateAddressModal && <UpdateAddresssForm ref={updateAddressModal}address={selected?.uuid!}  versionData={selected}  customer={authCustomer?.uuid} onUpdated={() => closeModal(updateAddressModal.current)}/>}
+            {updateAddressModal && <UpdateAddresssForm ref={updateAddressModal} address={selected?.uuid!} versionData={selected} customer={authCustomer?.uuid} onUpdated={() => closeModal(updateAddressModal.current)} />}
         </div>
     );
 };

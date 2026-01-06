@@ -24,12 +24,24 @@ export const useFetchMainCategories = () => {
  * @param categoryID --ID of father category to search desecendants
  * @returns --An array of
  */
-export const useFetchSubcategories = (categoryID: number | undefined) => {
+// export const useFetchSubcategories = (categoryID: number | undefined) => {
+//     return useQuery<SubcategoriesType[]>({
+//         queryKey: ["subcategories", categoryID],
+//         // Enable when categoryID isnt provided
+//         queryFn: async () => getCategoryDescendantsService(categoryID!),
+//         enabled: !!categoryID,
+//         staleTime: 5 * 60 * 1000,
+//         gcTime: 10 * 60 * 1000,
+//         refetchOnWindowFocus: false,
+//     });
+// };
+
+export const useFetchSubcategories = (categoryUUID: string | undefined) => {
     return useQuery<SubcategoriesType[]>({
-        queryKey: ["subcategories", categoryID],
+        queryKey: ["subcategories", categoryUUID],
         // Enable when categoryID isnt provided
-        queryFn: async () => getCategoryDescendantsService(categoryID!),
-        enabled: !!categoryID,
+        queryFn: async () => getCategoryDescendantsService(categoryUUID!),
+        enabled: !!categoryUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

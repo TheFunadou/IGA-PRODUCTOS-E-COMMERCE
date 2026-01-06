@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 type Props = {
     refName: RefObject<HTMLDialogElement | null>;
-    onResponse: (response:boolean) => void;
+    onResponse: (response: boolean) => void;
 }
 
 const GuestAdvertisement = ({ refName, onResponse }: Props) => {
@@ -17,7 +17,7 @@ const GuestAdvertisement = ({ refName, onResponse }: Props) => {
                 <div >
                     <p className="text-xl font-bold">Aviso</p>
                     <div className="mt-5">
-                        <p className="text-justify">Los detalles de tu compra seran enviados por correo electronico, pero tu compra no generara un historial en nuestra plataforma, asi como te perderias de otros beneficios y funciones estas seguro de continuar?</p>
+                        <p className="text-justify">Los detalles de tu pedido seran enviados a tu correo electronico, pero no podras ver el historial de tus compras en nuestra plataforma, estas seguro de continuar como invitado?</p>
                         <div className="w-1/2 flex gap-5 mt-5">
                             <Link to={"/nueva-cuenta"} className="btn btn-primary">Registrarme</Link>
                             <button className="btn btn-error text-white" onClick={() => onResponse(true)}>Quiero continuar como invitado</button>

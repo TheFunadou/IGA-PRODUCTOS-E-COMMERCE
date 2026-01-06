@@ -2,7 +2,7 @@ import { persist } from "zustand/middleware";
 import { useAuthStore } from "../../auth/states/authStore";
 import { create } from "zustand";
 import { PaymentFactory } from "../PaymentFactory";
-import type { CreateOrderType, PaymentOrder } from "../PaymentTypes";
+import type { CreateOrderType, PaymentOrder } from "../../orders/OrdersTypes";
 
 interface PaymentStoreState {
     order: PaymentOrder | null;
@@ -10,14 +10,13 @@ interface PaymentStoreState {
     createOrder: (data: CreateOrderType) => Promise<void>;
     cancelOrder: () => Promise<void>;
     refoundOrder: () => Promise<void>;
+    success: () => void;
 };
 
 export const usePaymentStore = create<PaymentStoreState>()(
     persist(
         (set) => ({
             order: null,
-            orderProducts: [],
-            paymentMethod: null,
             isLoading: false,
 
             createOrder: async (data: CreateOrderType): Promise<void> => {
@@ -39,11 +38,15 @@ export const usePaymentStore = create<PaymentStoreState>()(
                 }
             },
             cancelOrder: async () => {
-                set({ order: null, isLoading: false});
+                set({ order: null, isLoading: false });
             },
             refoundOrder: async () => {
 
-            }
+            },
+            success() {
+                usePaymentStore.persist.clearStorage();
+                usePaymentStore.setState({ order: null, isLoading: false })
+            },
         }),
         {
             name: "order",

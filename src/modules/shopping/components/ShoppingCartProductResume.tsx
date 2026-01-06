@@ -1,4 +1,3 @@
-import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 import ButtonQtyCounter from "./ButtonQtyCounter";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { formatPrice, makeSlug } from "../../products/Helpers";
@@ -6,19 +5,20 @@ import { Link } from "react-router-dom";
 import type { ShoppingCartType } from "../ShoppingTypes";
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import clsx from "clsx";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 type Props = {
     data: ShoppingCartType;
     onToggleCheck?: (sku: string) => void;
-    onRemoveItem?: (sku: string) => Promise<void>;
-    onUpdateQty?: (sku: string, qty: number) => Promise<void>;
+    onRemoveItem?: (sku: string) => void;
+    onUpdateQty?: (values: { sku: string, newQuantity: number }) => void;
     lock?: boolean;
     isAuth?: boolean;
 };
 
 
 const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdateQty, lock = false, isAuth }: Props) => {
-    const isFavorite = false;
+    const { theme } = useThemeStore();
     const subtotalProduct: number = parseFloat(data.product_version.unit_price) * data.quantity;
     const debouncedOnToogleCheck = onToggleCheck && useDebounceCallback(() => onToggleCheck(data.product_version.sku), isAuth ? 300 : 0);
 
@@ -44,9 +44,18 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                         </Link>
                         <div className="breadcrumbs">
                             <ul>
-                                <li className="text-lg text-gray-500">{data.category}</li>
+                                <li className={clsx(
+                                    "text-lg",
+                                    theme === "ligth" ? "text-gray-500" : "text-gray-200"
+                                )}>{data.category}</li>
                                 {data.product_attributes.map((breadcrumb, index) => (
-                                    <li className="text-lg text-gray-500" key={index}>{breadcrumb.category_attribute.description}</li>
+                                    <li
+                                        className={clsx(
+                                            "text-lg",
+                                            theme === "ligth" ? "text-gray-500" : "text-gray-200"
+                                        )}
+                                        key={index}>{breadcrumb.category_attribute.description}
+                                    </li>
                                 ))}
                             </ul>
                         </div>
@@ -56,15 +65,15 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                     </div>
                 </div>
                 <div className="w-full flex mt-1">
-                    <figure className="w-15/100">
+                    <figure className="w-50 h-50">
                         <Link to={`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.product_version.sku.toLowerCase()}`} onClick={(e) => { handleLockPropagation(e, lock) }}>
-                            <img className="rounded-xl border border-gray-300" src={data.product_images.find(img => img.main_image === true)?.image_url} alt={data.product_name} />
+                            <img className="w-full h-full object-cover rounded-xl border border-gray-300" src={data.product_images.find(img => img.main_image === true)?.image_url} alt={data.product_name} />
                         </Link>
                     </figure>
                     <div className=" w-65/100 flex px-5">
                         <div className="w-1/2  text-xl flex flex-col gap-4">
                             <p>{data.product_version.color_line}</p>
-                            <p><span className="mr-2 px-4 py-1 rounded-full" style={{ backgroundColor: data.product_version.color_code }}></span>{data.product_version.color_name}</p>
+                            <p><span className={clsx("mr-2 px-4 py-1 rounded-full", theme === "dark" && "border border-slate-500")} style={{ backgroundColor: data.product_version.color_code }}></span>{data.product_version.color_name}</p>
                             {lock === true && <p className="w-35 p-1 rounded-3xl text-center text-white bg-primary ">x {data.quantity} pz</p>}
                             <div className={lock ? "hidden" : "block"}>
                                 <p>Cantidad</p>
@@ -80,7 +89,7 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                                 />
                             </div>
                         </div>
-                        {isAuth &&
+                        {/* {isAuth &&
                             <div className={clsx("w-1/2  text-xl flex flex-col gap-3", lock ? "hidden" : "block")}>
                                 <button className="text-left text-primary" disabled={lock === true}>
                                     {isFavorite ? (
@@ -96,7 +105,7 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                                     )}
                                 </button>
                             </div>
-                        }
+                        } */}
                     </div>
                     <div className=" w-20/100">
                         <div className="mb-2">

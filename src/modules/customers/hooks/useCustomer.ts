@@ -1,18 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CustomerAddressType, NewAddressType, UpdateAddressType } from "../CustomerTypes";
-import { createAddressService, deleteAddressService, getCustomerAddressesService, updateAddressService } from "../services/CustomerService";
+import type { CustomerAddressType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
+import { createAddressService, deleteAddressService, getCustomerAddressesService, getCustomerFavorites, toggleFavoriteService, updateAddressService } from "../services/CustomerService";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+import { useAuthStore } from "../../auth/states/authStore";
+import type { ProductVersionCardType, ProductVersionDetailType, PVCardsResponseType } from "../../products/ProductTypes";
 
 export const customerQueryKeys = {
     addresses: (customer: string | undefined) => buildKey("customer:addresses", { customer }),
+    favorites: (customer: string | undefined) => buildKey("customer:favorites", { customer })
 };
 
-export const useFetchCustomerAddresses = (customer: string | undefined) => {
+export const useFetchCustomerAddresses = () => {
+    const { isAuth, authCustomer } = useAuthStore();
     return useQuery<CustomerAddressType[]>({
-        queryKey: customerQueryKeys.addresses(customer!),
+        queryKey: customerQueryKeys.addresses(authCustomer?.uuid!),
         queryFn: async () => await getCustomerAddressesService(),
-        enabled: !!customer,
+        enabled: !!isAuth,
         staleTime: 10 * 60000,
         gcTime: 15 * 60000,
         refetchOnWindowFocus: false
@@ -31,24 +35,18 @@ export function useAddAddress(customer: string | undefined) {
 
         onMutate: async (newAddress: NewAddressType) => {
             if (!customer) return { previousAddresses: undefined, tempUUID: "" };
-
             const queryKey = customerQueryKeys.addresses(customer);
             await queryClient.cancelQueries({ queryKey });
-
             const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
             const tempUUID = `temp-${Date.now()}`;
-
-            // ✅ Optimistic update inmediato
             queryClient.setQueryData<CustomerAddressType[]>(
                 queryKey,
                 (old) => {
                     if (!old) return [{ ...newAddress, uuid: tempUUID } as CustomerAddressType];
-
                     let updatedAddresses = old;
                     if (newAddress.default_address) {
                         updatedAddresses = old.map(addr => ({ ...addr, default_address: false }));
-                    }
-
+                    };
                     return [
                         { ...newAddress, uuid: tempUUID } as CustomerAddressType,
                         ...updatedAddresses
@@ -61,13 +59,8 @@ export function useAddAddress(customer: string | undefined) {
 
         onSuccess: (savedAddress, newAddress, context) => {
             if (!customer) return;
-
             const queryKey = customerQueryKeys.addresses(customer);
-
-            // ✅ Invalida para traer el estado real del servidor
-            // Esto traerá la data correcta incluyendo cambios del backend
             queryClient.invalidateQueries({ queryKey });
-
             showTriggerAlert("Successfull", "Dirección de envío creada exitosamente", {
                 duration: 3500,
                 delay: 1000
@@ -76,12 +69,8 @@ export function useAddAddress(customer: string | undefined) {
 
         onError: (error, newAddress, context) => {
             if (!customer || !context) return;
-
             const queryKey = customerQueryKeys.addresses(customer);
-            // ✅ Restaurar estado anterior si falla
             queryClient.setQueryData(queryKey, context.previousAddresses);
-
-            console.error('❌ Error al agregar dirección:', error);
             showTriggerAlert("Error", "No se pudo crear la dirección", {
                 duration: 3500
             });
@@ -101,13 +90,9 @@ export function useDeleteAddress(customer: string | undefined) {
 
         onMutate: async (addressUUID: string) => {
             if (!customer) return { previousAddresses: undefined };
-
             const queryKey = customerQueryKeys.addresses(customer);
             await queryClient.cancelQueries({ queryKey });
-
             const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
-
-            // ✅ Optimistic update: remover inmediatamente
             queryClient.setQueryData<CustomerAddressType[]>(
                 queryKey,
                 (old) => {
@@ -121,24 +106,15 @@ export function useDeleteAddress(customer: string | undefined) {
 
         onSuccess: (message) => {
             if (!customer) return;
-
             const queryKey = customerQueryKeys.addresses(customer);
-
-            // ✅ Invalida para sincronizar con cambios del servidor
-            // (por ejemplo, si se asignó automáticamente una nueva dirección default)
             queryClient.invalidateQueries({ queryKey });
-
             showTriggerAlert("Successfull", message, { duration: 3500, delay: 1000 });
         },
 
         onError: (error, addressUUID, context) => {
             if (!customer || !context) return;
-
-            // ✅ Restaurar estado anterior si falla
             const queryKey = customerQueryKeys.addresses(customer);
             queryClient.setQueryData(queryKey, context.previousAddresses);
-
-            console.error('❌ Error al eliminar la dirección:', error);
             showTriggerAlert("Error", "No se pudo eliminar la dirección", {
                 duration: 3500
             });
@@ -159,32 +135,23 @@ export function useUpdateAddress(customer: string | undefined) {
         }): Promise<string> => {
             return await updateAddressService(addressUUID, data);
         },
-
         onMutate: async ({ addressUUID, data }) => {
             if (!customer) return { previousAddresses: undefined };
-
             const queryKey = customerQueryKeys.addresses(customer);
             await queryClient.cancelQueries({ queryKey });
-
             const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
-
-            // ✅ Optimistic update inmediato
             queryClient.setQueryData<CustomerAddressType[]>(
                 queryKey,
                 (old) => {
                     if (!old) return [];
 
                     return old.map(addr => {
-                        // Actualizar la dirección objetivo
                         if (addr.uuid === addressUUID) {
                             return { ...addr, ...data };
-                        }
-
-                        // Si se está marcando como default, desmarcar las demás
+                        };
                         if (data.default_address === true) {
                             return { ...addr, default_address: false };
-                        }
-
+                        };
                         return addr;
                     });
                 }
@@ -222,3 +189,110 @@ export function useUpdateAddress(customer: string | undefined) {
         },
     });
 };
+
+
+export const useFetchCustomerFavorites = () => {
+    const { isAuth, authCustomer } = useAuthStore();
+    return useQuery<ProductVersionCardType[] | null>({
+        queryKey: customerQueryKeys.favorites(authCustomer?.uuid!),
+        queryFn: async () => await getCustomerFavorites(),
+        enabled: !!isAuth,
+        staleTime: 10 * 60000,
+        gcTime: 15 * 60000,
+        refetchOnWindowFocus: false
+    });
+};
+
+export function useToggleFavorite() {
+    const queryClient = useQueryClient();
+    const { showTriggerAlert } = useTriggerAlert();
+    const { isAuth, authCustomer } = useAuthStore();
+
+    return useMutation({
+        mutationFn: async ({ sku }: { sku: string, product: ProductVersionCardType }): Promise<onToogleFavoriteType> => {
+            return await toggleFavoriteService(sku);
+        },
+        onMutate: async ({ sku, product }) => {
+            if (!authCustomer && !isAuth) return { previousFavorites: undefined };
+
+            const queryKey = customerQueryKeys.favorites(authCustomer?.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousFavorites = queryClient.getQueryData<ProductVersionCardType[]>(queryKey);
+            const exists = previousFavorites?.some(fav => fav.product_version.sku === sku);
+            const isAdding = !exists;
+
+            queryClient.setQueryData<ProductVersionCardType[]>(
+                queryKey, (old) => {
+                    if (!old) return [product];
+                    return exists ? old.filter(fav => fav.product_version.sku !== sku) : [product, ...old];
+                }
+            );
+
+            queryClient.setQueriesData<PVCardsResponseType>(
+                { queryKey: ['product:product_version'] }, // Busca todas las queries que empiecen con 'products'
+                (oldData) => {
+                    if (!oldData?.product_version_cards) return oldData;
+
+                    return {
+                        ...oldData,
+                        product_version_cards: oldData.product_version_cards.map(card =>
+                            card.product_version.sku === sku
+                                ? { ...card, isFavorite: isAdding }
+                                : card
+                        )
+                    };
+                }
+            );
+
+            queryClient.setQueriesData<ProductVersionDetailType>(
+                {
+                    queryKey: ['product:product_version:detail'],
+                    predicate: (query) => query.state.data !== undefined
+                },
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    if (oldData.product_version.sku === sku) {
+                        return {
+                            ...oldData,
+                            isFavorite: isAdding
+                        }
+                    };
+                    return oldData;
+                }
+            );
+
+            if (isAdding) {
+                showTriggerAlert("Successfull", "Agregado a favoritos", {
+                    favoriteType: "add",
+                    duration: 3500,
+                });
+            } else {
+                showTriggerAlert("Successfull", "Removido de favoritos", {
+                    favoriteType: "remove",
+                    duration: 3500,
+                });
+            };
+
+            return { previousFavorites };
+        },
+        onSuccess: () => {
+            if (!authCustomer && !isAuth) return;
+
+            queryClient.invalidateQueries({
+                queryKey: customerQueryKeys.favorites(authCustomer?.uuid!),
+                refetchType: "none"
+            });
+        },
+        onError: (error, variables, context) => {
+            if (!authCustomer || !context) return;
+            queryClient.setQueryData(
+                customerQueryKeys.favorites(authCustomer.uuid!),
+                context.previousFavorites
+            );
+            showTriggerAlert("Error", "Ocurrio un error inesperado", {
+                duration: 3500
+            });
+        }
+    })
+
+}

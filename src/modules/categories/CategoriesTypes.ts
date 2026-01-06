@@ -1,19 +1,14 @@
-
 export type CategoryType = {
-  id: number;
+  uuid: string;
   name: string;
 };
 
 export type SubcategoriesType = {
-  id: number;
-  category_id: number;
+  uuid: string;
   description: string;
   level: number;
-  father_id: number | null;
+  father_uuid: string | null;
   children?: SubcategoriesType[];
 };
 
-export type SelectedCategoryType = {
-    category_id:number;
-    subcategories_path:number[];
-};
+

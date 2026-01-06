@@ -95,23 +95,6 @@ const NewAddressForm = ({ ref, onCreated, customer }: Props) => {
                                 />
                                 {errors.recipient_last_name && <p className="text-error text-sm">{errors.recipient_last_name.message}</p>}
                             </div>
-                            {/* <div>
-                                <label htmlFor="email">Correo electronico</label>
-                                <input
-                                    type="text"
-                                    className="input w-full"
-                                    placeholder="alguien@correo.com" 
-                                    {...register("",
-                                        {
-                                            required: "Los apellidos del remitente es requerido",
-                                            pattern: {
-                                                value: /^[A-Za-z\s]+$/,
-                                                message: "Solo se admiten mayusculas, minusculas y espacios"
-                                            }
-                                        }
-                                    )}
-                                    />
-                            </div> */}
                             <div>
                                 <label htmlFor="email">Número telefonico</label>
                                 <article className="flex gap-3">

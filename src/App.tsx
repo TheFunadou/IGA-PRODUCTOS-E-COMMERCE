@@ -33,6 +33,13 @@ import PaymentPending from "./modules/shopping/design/PaymentPending"
 import PaymentError from "./modules/shopping/design/PaymentError"
 import NotFoundPage from "./global/design/NotFoundPage"
 import PoliticaPrivacidad from "./modules/policies/PoliticaPrivacidad"
+import Orders from "./modules/orders/design/Orders"
+import CustomerFavorites from "./modules/customers/design/CustomerFavorites"
+import CreateAccount from "./modules/auth/design/CreateAccount"
+import CustomerPersonalInfo from "./modules/customers/design/CustomerPersonalInfo"
+import Ticket from "./modules/orders/design/Ticket"
+import { useThemeStore } from "./layouts/states/themeStore"
+import { useEffect } from "react"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -80,7 +87,7 @@ const router = createBrowserRouter([
 
           // Auth
           { path: "/iniciar-sesion", element: <Login /> },
-          { path: "/nueva-cuenta", element: <NewAccount /> },
+          { path: "/nueva-cuenta", element: <CreateAccount /> },
 
           // Home
           { path: "/", element: <Home /> },
@@ -91,6 +98,11 @@ const router = createBrowserRouter([
 
           // Shopping Cart
           { path: "/carrito-de-compras", element: <ShoppingCart /> },
+
+          // Orders
+          { path: "/mis-compras", element: <Orders /> },
+          { path: "/mis-favoritos", element: <CustomerFavorites /> },
+          { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 
           // Checkout
           { path: "/resumen-de-carrito", element: <ShoppingCartResume /> },
@@ -108,17 +120,20 @@ const router = createBrowserRouter([
           { path: "/distribuidores", element: <Distributors /> },
 
           // Policies
-          {path: "/politica-de-privacidad", element: <PoliticaPrivacidad/>},
+          { path: "/politica-de-privacidad", element: <PoliticaPrivacidad /> },
 
           // Test routes
           { path: "/test", element: <ProductDetailSkeleton /> },
         ]
-      }
+      },
+      { path: "/pagar-productos/ticket/:order_id", element: <Ticket /> }
     ]
   }
 ]);
 
 function App() {
+  const { theme } = useThemeStore();
+  useEffect(() => { document.documentElement.setAttribute("data-theme", theme) }, [theme]);
   return <RouterProvider router={router} />
 }
 

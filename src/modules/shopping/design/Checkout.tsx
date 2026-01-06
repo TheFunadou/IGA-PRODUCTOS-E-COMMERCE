@@ -3,7 +3,7 @@ import { useAuthStore } from "../../auth/states/authStore";
 import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import { formatPrice } from "../../products/Helpers";
 import { useState } from "react";
-import type { PaymentMethodDetails, PaymentMethodsType, ShoppingCartType } from "../ShoppingTypes";
+import type { PaymentMethodDetails, PaymentProvidersType, ShoppingCartType } from "../ShoppingTypes";
 import { LiaPlusSolid } from "react-icons/lia";
 import { LiaMinusSolid } from "react-icons/lia";
 import { SiMercadopago } from "react-icons/si";
@@ -33,7 +33,7 @@ const Checkout = () => {
     const shipping: number = 0;
     const total: number = subtotal + shipping;
 
-    const paymentMethods: Record<Exclude<PaymentMethodsType, null>, PaymentMethodDetails> = {
+    const paymentMethods: Record<Exclude<PaymentProvidersType, null>, PaymentMethodDetails> = {
         paypal: {
             icon: <FaCcPaypal />,
             description: "PayPal"

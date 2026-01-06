@@ -7,7 +7,7 @@ type Props = {
   limit: number;
   className?: string;
   sku: string;
-  onUpdateQty?: (sku: string, qty: number) => Promise<void>;
+  onUpdateQty?: (values: { sku: string, newQuantity: number }) => void;
   disabled?: boolean;
   isAuth: boolean;
 };
@@ -64,7 +64,7 @@ const ButtonQtyCounter = ({
       try {
         setIsUpdating(true);
         isUpdatingRef.current = true; // Mark that we are updating
-        await onUpdateQty(sku, debouncedQuantity);
+        onUpdateQty({ sku, newQuantity: debouncedQuantity });
         console.log("Updating quantity....");
         lastSentQuantity.current = debouncedQuantity;
       } catch (error) {

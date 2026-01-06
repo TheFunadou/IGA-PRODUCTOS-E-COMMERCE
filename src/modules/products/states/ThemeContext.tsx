@@ -9,8 +9,8 @@ import type { ReactNode } from "react";
 type ThemeType = "ligth" | "dark";
 
 const Theme = {
-    ligth: "bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-900 bg-[length:100%_500px] bg-no-repeat",
-    dark: "bg-slate-900 bg-gradient-to-t from-bg-slate-900 to-blue-900 bg-[length:100%_500px] bg-no-repeat"
+    ligth: "bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat",
+    dark: "bg-slate-900 bg-gradient-to-t from-bg-slate-900 to-blue-950 bg-[length:100%_500px] bg-no-repeat"
 };
 
 type ThemeContextTheme = {

@@ -1,10 +1,13 @@
-import axios from "axios";
+import api from "../../../api/api.config";
 import type { SubcategoriesType } from "../CategoriesTypes";
 
-const BASEURL = import.meta.env.VITE_BACKEND_URL;
+// export const getCategoryDescendantsService = async (categoryUUID: string): Promise<SubcategoriesType[]> => {
+//     const response = await axios.get<SubcategoriesType[]>(`${BASEURL}/categories/subcategories/${categoryUUID}`, { withCredentials: true });
+//     return response.data;
+// }
 
-export const getCategoryDescendantsService = async (category_id: number): Promise<SubcategoriesType[]> => {
-    const response = await axios.get<SubcategoriesType[]>(`${BASEURL}/categories/subcategories/${category_id}`,{withCredentials:true});
-    return response.data;
+export const getCategoryDescendantsService = async (categoryUUID: string): Promise<SubcategoriesType[]> => {
+    const { data } = await api.get<SubcategoriesType[]>("subcategories/" + categoryUUID);
+    return data;
 }
 

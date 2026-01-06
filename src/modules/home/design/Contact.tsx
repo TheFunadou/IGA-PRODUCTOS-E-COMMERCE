@@ -20,7 +20,7 @@ const Contact = () => {
         //     shouldDirty: true
         // });
     }, [country]);
-    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<ContactForm>();
+    const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<ContactForm>();
 
 
 
@@ -108,11 +108,12 @@ const Contact = () => {
                             <option value="Quiero ser distribuidor">Quiero ser distribuidor</option>
                             <option value="Quiero una cotización">Quiero una cotización</option>
                             <option value="Ventas">Ventas</option>
+                            <option value="Facturación">Facturación</option>
                         </select>
                     </div>
                     <div>
                         <label htmlFor="message">Mensaje</label>
-                        <textarea id="message" className="textarea w-full" placeholder="Escribe un mensaje que desees transmitir"/>
+                        <textarea id="message" className="textarea w-full" placeholder="Escribe un mensaje que desees transmitir" />
                     </div>
                     <button type="submit" className="btn btn-primary w-full">Enviar formulario</button>
                 </form>

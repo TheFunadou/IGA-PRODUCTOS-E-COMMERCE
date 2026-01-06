@@ -1,46 +1,54 @@
-import { useEffect, useState, useMemo } from "react";
-import type { CategoryType, SubcategoriesType } from "../../categories/CategoriesTypes";
+import { useEffect, useState } from "react";
+// import type { CategoryType, SubcategoriesType } from "../../categories/CategoriesTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { IoIosArrowDown } from "react-icons/io";
-import { buildHierarchyTree, findAncestors } from "../../categories/CategoriesUtils";
+// import { buildHierarchyTree, findAncestors } from "../../categories/CategoriesUtils";
 import clsx from "clsx";
 import SubcategoryMenu from "../../categories/components/SubcategoryMenu";
-import ProductVersionCardSkinny from "../../products/components/ProductVersionCardSkinny";
 import { useFetchProductVersionCards } from "../../products/hooks/useFetchProductVersionCards";
-import { useFetchMainCategories, useFetchSubcategories } from "../../categories/hooks/useFetchCategories";
+// import { useFetchMainCategories, useFetchSubcategories } from "../../categories/hooks/useFetchCategories";
 import ProductVersionCardSkinnySkeleton from "../../products/components/ProductVersionCardSkinnySkeleton";
 import { useAuthStore } from "../../auth/states/authStore";
 import PaginationComponent from "../../../global/components/PaginationComponent";
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
+import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
+// import useDebounce from "../../../global/hooks/useDebounce";
+import { useCategories } from "../../categories/hooks/useCategories";
+import { useSearchParams } from "react-router-dom";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 const Shop = () => {
-    const [subcategories, setSubcategories] = useState<SubcategoriesType[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<CategoryType | undefined>(undefined);
-    const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
-    const [subcategoriesPath, setSubcategoriesPath] = useState<number[]>([]);
+    const { theme } = useThemeStore();
+    const [searchParams] = useSearchParams();
+    const categoryParam = searchParams.get("category");
+    // const subcategoryPathParam = searchParams.getAll("sub").map(Number);
+    const subcategoryPathParam = searchParams.getAll("sub");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [expensive, setExpensive] = useState<boolean | undefined>(undefined);
     const [favoriteCheck, setFavoriteCheck] = useState<boolean>(false);
     const [showFavorites, setShowFavorites] = useState<boolean | undefined>(undefined);
-    // const [showProductsCounter, setShowProductsCounter] = useState<number>(0);
-    const [countedItems, setCountedItems] = useState<number>(0);
-
     const { isAuth } = useAuthStore();
+
+    const {
+        categories,
+        categoriesLoading,
+        categoriesError,
+        refetchCategories,
+        subcategories,
+        subcategoriesLoading,
+        subcategoriesError,
+        refetchSubcategories,
+        subcategoriesBreadcrumb,
+        selectedCategory,
+        handleSubcategoryNavigate,
+        handleSetClear,
+        handleChangeCategory,
+    } = useCategories({
+        enableQueryParamsNavigate: true,
+        initCategory: categoryParam ? categoryParam : undefined,
+        initSubcategoryPath: subcategoryPathParam.length > 0 ? subcategoryPathParam : undefined
+    });
     const MAX_PRODUCT_LIMIT_PER_PAGE: number = 8;
-
-    const {
-        data: categories,
-        isLoading: categoriesLoading,
-        error: categoriesError,
-        refetch: refetchCategories
-    } = useFetchMainCategories();
-
-    const {
-        data: flatSubcategories,
-        isLoading: subcategoriesLoading,
-        error: subcategoriesError,
-        refetch: refetchSubcategories
-    } = useFetchSubcategories(selectedCategory?.id);
 
     const {
         data: pvCards,
@@ -52,67 +60,11 @@ const Shop = () => {
         moreExpensive: expensive,
         page: currentPage,
         onlyFavorites: isAuth ? showFavorites : undefined,
-        category: selectedCategory ? selectedCategory.name : undefined,
-        subcategoryPath: subcategoriesPath.length > 0 ? subcategoriesPath : undefined,
+        category: categoryParam ? categoryParam : undefined,
+        subcategoryPath: subcategoryPathParam.length > 0 ? subcategoryPathParam : undefined,
     });
 
-    // Debug
-useEffect(() => {
-    console.log('=== DEBUG CATEGORIES ===');
-    console.log('Categories:', categories);
-    console.log('Type:', typeof categories);
-    console.log('Is Array:', Array.isArray(categories));
-    console.log('Error:', categoriesError);
-    console.log('Loading:', categoriesLoading);
-    console.log('BASE_URL:', import.meta.env.VITE_BACKEND_URL); // o process.env.REACT_APP_API_URL
-}, [categories, categoriesError, categoriesLoading]);
-
-    const totalPages = useMemo(() => {
-        if (!pvCards?.total_records) return 1;
-        return Math.ceil(pvCards.total_records / MAX_PRODUCT_LIMIT_PER_PAGE);
-    }, [pvCards?.total_records, MAX_PRODUCT_LIMIT_PER_PAGE]);
-
     const handlePageChange = (page: number) => setCurrentPage(page);
-
-    /**
-     * -Rebuild herarchy tree when flatSubcategories have data
-     */
-    useEffect(() => {
-        if (flatSubcategories && flatSubcategories.length > 0) {
-            const buildTree: SubcategoriesType[] = buildHierarchyTree(flatSubcategories);
-            setSubcategories(buildTree);
-        } else {
-            setSubcategories([]);
-        }
-    }, [flatSubcategories]);
-
-    const handleSubcategoryNavigate = (subcategory_id: number) => {
-        if (!flatSubcategories && !subcategories.length) return;
-
-        const path: number[] = findAncestors(subcategories, subcategory_id);
-        console.log(path);
-        setSubcategoriesPath(path);
-
-        if (flatSubcategories) {
-            const breadcrumb: string[] = flatSubcategories
-                .filter(item => path.includes(item.id))
-                .sort((a, b) => path.indexOf(a.id) - path.indexOf(b.id))
-                .map(item => item.description);
-            setBreadcrumb(breadcrumb);
-        }
-    };
-
-    const handleReturntoShop = () => {
-        setSelectedCategory(undefined);
-        setBreadcrumb([]);
-        setSubcategoriesPath([]);
-    };
-
-    const handleChangeCategory = (category: CategoryType) => {
-        if (selectedCategory === undefined || selectedCategory.id !== category.id) {
-            setSelectedCategory({ id: category.id, name: category.name });
-        }
-    };
 
     const handlePrincingFilter = (value: string) => {
         setExpensive(value === "expensive" ? true : undefined);
@@ -126,17 +78,12 @@ useEffect(() => {
         handleSetFavoriteFilter();
     }, [favoriteCheck, handleSetFavoriteFilter]);
 
-    useEffect(() => {
-        if(pvCards && pvCards.product_version_cards.length> 0) {
-            setCountedItems(prev => prev + pvCards.product_version_cards.length);
-        }
-    },[pvCards]);
 
     return (
-        <div className="flex">
-            <div className="w-1/4 pr-5 relative">
-                <div className="w-full rounded-xl bg-white px-5 py-10 sticky top-5 border border-gray-300">
-                    <p className="text-2xl font-bold text-blue-950 border-b pb-5">Categorias de productos</p>
+        <div className={clsx("flex rounded-2xl p-10", theme === "ligth" ? "bg-white" : "bg-slate-950")}>
+            <div className="w-20/100 relative">
+                <div className="w-full border-r border-gray-300 sticky top-5 pr-5">
+                    <p className={clsx("text-2xl font-bold border-b pb-5", theme === "ligth" ? "text-blue-950" : "text-white")}>Categorias de productos</p>
                     <div className="w-full font-bold text-xl mt-5">
                         {categoriesLoading ? (
                             <div className="w-full flex flex-col gap-5">
@@ -155,20 +102,30 @@ useEffect(() => {
                                     </div>
                                 ) : (
                                     <div className="w-full flex flex-col gap-5">
-                                        <button className="w-min" onClick={handleReturntoShop}>Tienda</button>
+                                        <button className={clsx(
+                                            "w-fit rounded-xl px-2 py-1",
+                                            !selectedCategory && theme === "ligth" ? "bg-gray-200" : "",
+                                            !selectedCategory && theme === "dark" ? "border" : "",
+
+                                        )} onClick={handleSetClear}>Tienda</button>
                                         {categories && categories.length > 0 && categories.map((category, index) => (
                                             <div key={index} className="w-full">
                                                 <button
-                                                    className="w-min text-left flex font-normal text-lg"
+                                                    className={clsx(
+                                                        "w-60/100 px-2 py-1 text-left flex items-center justify-between font-normal text-lg",
+                                                        selectedCategory && category.uuid === selectedCategory.uuid && theme === "ligth" ? "bg-gray-200 rounded-xl" : "",
+                                                        selectedCategory && category.uuid === selectedCategory.uuid && theme === "dark" ? "border  rounded-xl" : ""
+
+                                                    )}
                                                     type="button"
                                                     onClick={() => handleChangeCategory(category)}
                                                 >
                                                     {category.name}
-                                                    <IoIosArrowDown className="ml-3 text-blue-950" />
+                                                    <IoIosArrowDown className={clsx(theme === "ligth" ? "text-blue-950" : "text-white")} />
                                                 </button>
                                                 <div className={clsx(
                                                     "w-full",
-                                                    subcategories.length > 0 && selectedCategory && category.id === selectedCategory.id ? "block" : "hidden"
+                                                    subcategories.length > 0 && selectedCategory && category.uuid === selectedCategory.uuid ? "block" : "hidden"
                                                 )}>
                                                     {subcategoriesLoading ? (
                                                         "Cargando subcategorias..."
@@ -211,28 +168,30 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
-            <div className="w-3/4">
-                <div className="w-full rounded-xl bg-white px-5 py-10 border border-gray-300">
-                    <div className="px-5">
-                        <p className="text-3xl text-blue-950 font-bold">{(selectedCategory && selectedCategory.name) ?? "Tienda de productos"}</p>
-                        {breadcrumb.length > 0 &&
+            <div className="w-80/100 px-5">
+                <div className="w-full">
+                    <div>
+                        <p className={clsx(
+                            "text-3xl font-bold",
+                            theme === "ligth" ? "text-blue-950" : "text-white"
+                        )}>{(selectedCategory && selectedCategory.name) ?? "Tienda de productos"}</p>
+                        {subcategoriesBreadcrumb.length > 0 &&
                             <div className="breadcrumbs">
                                 <ul>
-                                    {breadcrumb.map((crumb, index) => (
+                                    {subcategoriesBreadcrumb.map((crumb, index) => (
                                         <li className="text-lg" key={index}>{crumb}</li>
                                     ))}
                                 </ul>
                             </div>
                         }
                         <div className="w-full flex justify-between items-end mt-5">
-                            {/* <p className="text-lg text-gray-500">Mostrando {countedItems} de {pvCards?.total_records ?? 0}</p> */}
                             <select className="select" onChange={(e) => handlePrincingFilter(e.target.value)}>
                                 <option value="cheap">Mas baratos</option>
                                 <option value="expensive">Mas caros</option>
                             </select>
                         </div>
                     </div>
-                    {productCardsIsLoading ? (
+                    {productCardsIsLoading && !productCardsError && !pvCards && (
                         <div className="w-full">
                             <div className="w-full flex flex-wrap gap-5 mt-5">
                                 <ProductVersionCardSkinnySkeleton />
@@ -241,30 +200,27 @@ useEffect(() => {
                                 <ProductVersionCardSkinnySkeleton />
                             </div>
                         </div>
-                    ) : (
+                    )}
+                    {productCardsError && !pvCards && !productCardsIsLoading && (
+                        <div className="h-150">
+                            <p className="text-error py-5 text-lg">{getErrorMessage(productCardsError)}</p>
+                            <button className="btn btn-primary" onClick={() => productCardsRefetch()}>Reintentar</button>
+                        </div>
+                    )}
+                    {!productCardsIsLoading && !productCardsError && pvCards && pvCards.data && pvCards.data.length > 0 && (
                         <div className="w-full">
-                            {productCardsError ? (
-                                <div className="h-150">
-                                    <p className="text-error py-5 text-lg">{getErrorMessage(productCardsError)}</p>
-                                    <button className="btn btn-primary" onClick={() => productCardsRefetch()}>Reintentar</button>
-                                </div>
-                            ) : (
-                                <div className="w-full animate-slide-up-fade">
-                                    <div className="w-full flex flex-wrap gap-5">
-                                        {pvCards && pvCards.product_version_cards && pvCards.product_version_cards.length > 0 ? (
-                                            pvCards.product_version_cards.map((data, index) => (
-                                                <ProductVersionCardSkinny key={`${index}-${data.product_version.sku}`} className="w-75 h-135" versionData={data} />
-                                            ))
-                                        ) : (
-                                            <p className="text-gray-500 py-5 text-center w-full">No hay productos disponibles.</p>
-                                        )}
-
-                                    </div>
-                                    <div>
-                                        <PaginationComponent currentPage={currentPage} onPageChange={handlePageChange} totalPages={totalPages} />
-                                    </div>
-                                </div>
-                            )}
+                            <div className="w-full flex flex-wrap gap-5 mt-5">
+                                {pvCards && pvCards.data && pvCards.data.length > 0 ? (
+                                    pvCards.data.map((data, index) => (
+                                        <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} className="w-75 h-135" versionData={data} />
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500 py-5 text-center w-full">No hay productos disponibles.</p>
+                                )}
+                            </div>
+                            <div className="mt-5">
+                                <PaginationComponent currentPage={currentPage} onPageChange={handlePageChange} totalPages={pvCards.totalPages} />
+                            </div>
                         </div>
                     )}
                 </div>

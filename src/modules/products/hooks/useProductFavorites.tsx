@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
+import { useToggleFavorite } from "../../customers/hooks/useCustomer";
+import type { ProductVersionCardType } from "../ProductTypes";
 
 
 type Props = {
-    sku: string | undefined;
-    initialFavoriteState: boolean | undefined;
+    sku?: string;
+    initialFavoriteState?: boolean;
+    item?: ProductVersionCardType;
 };
 
-export function useFavorite({ sku, initialFavoriteState = false }: Props) {
+export function useFavorite({ sku, item, initialFavoriteState = false }: Props) {
     const { isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
+    const mutationToggleFavorite = useToggleFavorite();
     const [isFavorite, setIsFavorite] = useState<boolean | undefined>(initialFavoriteState);
 
-    const executeFavoriteLogic = (newState: boolean) => {
+    useEffect(() => {
+        setIsFavorite(initialFavoriteState);
+    }, [initialFavoriteState]);
+
+    const executeFavoriteLogic = async (newState: boolean) => {
         setIsFavorite(newState);
-        if (newState === true) {
-            showTriggerAlert("Favorite", "Producto agregado a favoritos", { duration: 3500, favoriteType: "add" })
-        } else {
-            showTriggerAlert("Favorite", "Producto removido de favoritos", { duration: 3500, favoriteType: "remove" })
-        };
+        if (!sku || !item) return;
+        await mutationToggleFavorite.mutateAsync({ sku: sku, product: item });
     };
 
     const debounceExecute = useDebounceCallback(executeFavoriteLogic, 400);

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useThemeStore } from '../../../layouts/states/themeStore';
+import clsx from 'clsx';
 
 interface CarouselProps {
   images: string[];
@@ -13,7 +15,8 @@ const InfiniteCarousel = ({
   autoPlayInterval = 3000,
   showControls = true,
   showDots = true
-}:CarouselProps) => {
+}: CarouselProps) => {
+  const { theme } = useThemeStore();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
@@ -29,7 +32,7 @@ const InfiniteCarousel = ({
   const goToPrevious = useCallback(() => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
   }, [images.length, isTransitioning]);
@@ -83,19 +86,19 @@ const InfiniteCarousel = ({
       {/* Contenedor principal del carrusel */}
       <div className="relative overflow-hidden">
         {/* Imágenes */}
-        <div 
+        <div
           className="flex transition-transform duration-300 ease-in-out h-full"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {images.map((image, index) => (
             <div
               key={index}
-              className="min-w-full h-full flex items-center justify-center"
+              className="min-w-full h-full flex items-center justify-center "
             >
               <img
                 src={image}
                 alt={`Slide ${index + 1}`}
-                className="w-full object-contain rounded-lg shadow-lg"
+                className="w-full object-contain rounded-t-lg shadow-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = `https://via.placeholder.com/800x400/e2e8f0/64748b?text=Imagen+${index + 1}`;
@@ -141,17 +144,16 @@ const InfiniteCarousel = ({
 
       {/* Indicadores de puntos */}
       {showDots && images.length > 1 && (
-        <div className="flex justify-center items-center py-4 bg-gray-50 space-x-2">
+        <div className={clsx("flex justify-center items-center py-4 bg-gray-50 space-x-2", theme === "ligth" && "bg-gray-50", theme === "dark" && "bg-slate-700")}>
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               disabled={isTransitioning}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentIndex
-                  ? 'bg-blue-600 scale-125'
-                  : 'bg-gray-300 hover:bg-gray-400'
-              } disabled:cursor-not-allowed`}
+              className={clsx(`w-3 h-3 rounded-full transition-all duration-200 ${index === currentIndex
+                ? 'bg-blue-600 scale-125'
+                : 'bg-gray-300 hover:bg-gray-400'
+                } disabled:cursor-not-allowed`)}
               aria-label={`Ir a la imagen ${index + 1}`}
             />
           ))}
@@ -172,53 +174,3 @@ const InfiniteCarousel = ({
 };
 
 export default InfiniteCarousel;
-
-// // Componente de demostración
-// const App: React.FC = () => {
-//   // Array de imágenes de ejemplo
-//   const sampleImages: string[] = [
-//     'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',
-//     'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=400&fit=crop',
-//     'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=400&fit=crop',
-//     'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=400&fit=crop',
-//     'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&sat=-100'
-//   ];
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-//       <div className="max-w-6xl mx-auto">
-//         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-//           Carrusel Infinito con TypeScript
-//         </h1>
-        
-//         <div className="mb-8">
-//           <InfiniteCarousel 
-//             images={sampleImages}
-//             autoPlayInterval={4000}
-//             showControls={true}
-//             showDots={true}
-//           />
-//         </div>
-
-//         {/* Información sobre las características */}
-//         <div className="bg-white rounded-lg shadow-lg p-6">
-//           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Características:</h2>
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
-//             <div className="space-y-2">
-//               <p>✨ Carrusel infinito automático</p>
-//               <p>⌨️ Navegación con teclado (flechas, espacio)</p>
-//               <p>🎯 Indicadores de posición</p>
-//             </div>
-//             <div className="space-y-2">
-//               <p>🎮 Controles de navegación</p>
-//               <p>⏯️ Control de auto-play</p>
-//               <p>📱 Diseño responsive</p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default App;

@@ -1,4 +1,5 @@
-import type { PaymentOrder, ProcessOrderType } from "./PaymentTypes";
+
+import type { PaymentOrder, ProcessOrderType } from "../orders/OrdersTypes";
 import { createMercadoPagoOrder } from "./services/PaymentServices";
 import type { ShoppingCartType } from "./ShoppingTypes";
 
@@ -11,6 +12,13 @@ export class MercadoPagoPayment implements PaymentMethodStrategy {
         return createMercadoPagoOrder(data);
     };
 };
+
+
+// export class MercadoPagoPaymentGuest implements PaymentMethodStrategy {
+//     async createOrder(data: ProcessOrderType): Promise<PaymentOrder> {
+//         return createMercadoPagoOrder(data);
+//     };
+// };
 
 // export class PaypalPayment implements PaymentMethodStrategy {
 //     async createOrder(items: ShoppingCartType[]): Promise<PaymentOrder> {

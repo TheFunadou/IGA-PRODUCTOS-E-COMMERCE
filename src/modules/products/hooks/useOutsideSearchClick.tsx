@@ -6,11 +6,12 @@ export function useOutsideSearchClick(ref: React.RefObject<HTMLElement | null>, 
       if (ref.current && !ref.current.contains(event.target as Node)) {
         callback();
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // Cambiar de 'mousedown' a 'click' permite que el onClick del botón se ejecute primero
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
 
   }, [ref, callback]);

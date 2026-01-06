@@ -1,0 +1,58 @@
+[
+    {
+        "image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Visa_2021.svg/512px-Visa_2021.svg.png",
+        "description": "Visa"
+    },
+    {
+        "image_url": "https://ikiwi.com.mx/wp-content/uploads/mastercard.png",
+        "description": "Mastercard"
+    },
+    {
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/BBVA_2019.svg/2560px-BBVA_2019.svg.png",
+        "description": "BBVA"
+    },
+    {
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Oxxo_Logo.svg/2560px-Oxxo_Logo.svg.png",
+        "description": "OXXO"
+    },
+    {
+        "image_url": "https://logotipoz.com/wp-content/uploads/2021/10/version-horizontal-large-logo-mercado-pago.webp",
+        "description": "Mercado Pago"
+    },
+    {
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Banco_Santander_Logotipo.svg/2560px-Banco_Santander_Logotipo.svg.png",
+        "description": "Santander"
+    },
+    {
+        "image_url": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Soriana_logo.svg/2560px-Soriana_logo.svg.png",
+        "description": "Soriana"
+    },
+    {
+        "image_url": "https://internet.guruteconecta.com/assets/images/extra-9ba5b36cc986fb03312d7acebb66991c.png",
+        "description": "Extra"
+    },
+    {
+        "image_url": "https://rappicard.mx/wp-content/uploads/2025/05/logo-Farmacia-del-ahorro.webp",
+        "description": "Farmacia del ahorro"
+    },
+    {
+        "image_url": "https://cdn.refunder.se/imgproxy/fmKEKVdvvr_22l5X0vxD7uyHaVlcILnZo7pHKQduqPk/resize:fit:600:240:1:0/gravity:sm/trim:1/sharpen:0.5/czM6Ly9yZWZ1bmRlci1wdWJsaWMvc3RvcmVzL2xvZ29zLzAxSzM1WU1XMUVNRVFNOUVBNUM1QlcxUFRFLnBuZw",
+        "description": "Circle K"
+    },
+    {
+        "image_url": "https://7-eleven.com.mx/wp-content/uploads/2022/02/7eleven-horizontal.png",
+        "description": "7 Eleven"
+    },
+    {
+        "image_url": "https://toshibacommerce.com/wps/wcm/connect/marketing/0f5696a6-93ed-404a-9db7-b310cd792c51/Calimax-logo.png?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_KA0A1A02NGL3D0AVS7NACQ0000-0f5696a6-93ed-404a-9db7-b310cd792c51-nDHNTqM",
+        "description": "Calimax"
+    },
+    {
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/c4/CASALEY.jpg",
+        "description": "Casa Ley"
+    },
+    {
+        "image_url": "https://www.bankaool.com/img/footer/bankaool-SPEI.png",
+        "description": "SPEI"
+    }
+]

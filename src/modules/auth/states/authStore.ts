@@ -11,7 +11,7 @@ type AuthState = {
     favorites: ProductVersionCardType[] | null,
     isAuth: boolean;
     isLoading: boolean;
-    error: string;
+    error: string | null;
     login: (dto: AuthCustomerCredentialsType) => Promise<void>;
     getFavorites: () => Promise<void>;
     logout: () => Promise<string>;
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
             authCustomer: null,
             isAuth: false,
             isLoading: false,
-            error: "",
+            error: null,
             favorites: null,
 
             login: async (data: AuthCustomerCredentialsType) => {
@@ -36,7 +36,6 @@ export const useAuthStore = create<AuthState>()(
                     set({
                         authCustomer: response,
                         isAuth: true,
-                        error: "",
                     });
                 } catch (error) {
                     set({
@@ -53,7 +52,6 @@ export const useAuthStore = create<AuthState>()(
                     set({
                         authCustomer: null,
                         isAuth: false,
-                        error: "",
                     });
                     await localStorage.removeItem(AUTH_CUSTOMER_KEY);
                     return response;
@@ -98,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
                     if (favorites) set({ favorites });
                 } catch (error) {
                     console.error("Error al obtener los favoritos del cliente", error);
+                    set({error: getErrorMessage(error)})
                 } finally {
                     set({ isLoading: false });
                 }

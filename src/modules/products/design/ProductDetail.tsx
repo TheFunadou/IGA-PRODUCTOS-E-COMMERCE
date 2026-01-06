@@ -7,10 +7,15 @@ import { useFetchProductVersionDetail } from "../hooks/useFetchProductVersionCar
 import clsx from "clsx";
 import ImageMagnifier from "../components/ImageMagnifier";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
-import { useShoppingCartActions } from "../../shopping/hooks/useShoppingCart";
 import { useFavorite } from "../hooks/useProductFavorites";
+import Carousel from "../../home/components/Carousel";
+import { useFetchAds } from "../../../layouts/hooks/useAds";
+import ProductVersionCardShop from "../components/ProductVersionCardShop";
+import type { ProductVersionCardType } from "../ProductTypes";
+import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
 
 const ProductDetail = () => {
+    const SHIPPING_COST = 264.00;
     const params = useParams();
     const {
         data,
@@ -19,6 +24,13 @@ const ProductDetail = () => {
         refetch
     } = useFetchProductVersionDetail(params?.sku);
 
+    const {
+        data: ads,
+        isLoading: adsLoading,
+        error: adsError,
+        refetch: refetchAds
+    } = useFetchAds({ limit: 10, entity: "ads" })
+
     const [selectProductQty, setSelectProductQty] = useState<string>("1");
     const [productQty, setProductQty] = useState<number>(1);
     const [stockError, setStockError] = useState<string>("");
@@ -26,11 +38,17 @@ const ProductDetail = () => {
     const [image, setImage] = useState<string | undefined>(NotFoundSVG);
     const [color, setColor] = useState<string>("");
     const [stock, setStock] = useState<number>(1);
-    const { useAddToShoppingCart, useAddToBuyNow } = useShoppingCartActions();
+    const [certifications, setCertifications] = useState<string[]>([]);
+    const [card, setCard] = useState<ProductVersionCardType | undefined>(undefined);
+    const { add, addBuyNow } = useShoppingCart();
+    const [shippingCost, setShippingCost] = useState<number>(SHIPPING_COST);
+    const [boxesQty, setBoxesQty] = useState<number>(1);
+
     const {
         isFavorite,
-        toggleFavorite }
-        = useFavorite({ sku: data?.product_version.sku, initialFavoriteState: data?.isFavorite });
+        toggleFavorite
+    } = useFavorite({ sku: data?.product_version.sku!, initialFavoriteState: data?.isFavorite, item: card! });
+
 
     if (error) {
         return (
@@ -79,10 +97,18 @@ const ProductDetail = () => {
             setUnitPrice(formated);
             setColor(data && data.product_version.color_code);
             setStock(data && data.product_version.stock);
+            setCertifications(data && data.product.certifications_desc.split(","))
+            setCard(ProductDetailToProductCardFormat(data));
         };
     }, [data]);
 
-    const productCardData = data && ProductDetailToProductCardFormat(data);
+    useEffect(() => {
+        const MAX_ITEMS_PER_BOX = 10;
+        const boxes = Math.ceil(productQty / MAX_ITEMS_PER_BOX);
+        setBoxesQty(boxes);
+        const shippingCost = boxes * SHIPPING_COST;
+        setShippingCost(shippingCost);
+    }, [productQty]);
 
     return (
         <div className="w-full">
@@ -91,9 +117,9 @@ const ProductDetail = () => {
             ) : (
                 <div className="w-full px-5 py-10 rounded-xl bg-base-300">
                     <div className="w-full flex border-b border-gray-400 pb-5">
-                        <div className="w-30/100 relative">
+                        <div className="w-35/100 relative">
                             <div className="sticky top-5">
-                                <figure className="w-full h-130">
+                                <figure className="w-full h-150">
                                     {/* <img className="w-full h-full rounded-xl border-2 border-gray-300" src={image} alt={data && data.product.product_name} /> */}
                                     <ImageMagnifier src={image} alt={data && data.product.product_name} />
 
@@ -115,7 +141,7 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="w-50/100 px-10">
+                        <div className="w-45/100 px-10">
                             <h1 className="text-4xl font-bold">{data && data.product.product_name}</h1>
                             <div className="breadcrumbs text-xl">
                                 <ul>
@@ -130,7 +156,7 @@ const ProductDetail = () => {
                                     <div className="flex gap-5">
                                         <div className="flex gap-2 items-center">
                                             <p className="bg-error p-3 rounded-xl text-white font-bold text-3xl">% 20</p>
-                                            <div>
+                                            <div className="text-lg">
                                                 <p>Precio unitario en oferta:</p>
                                                 <p className="text-3xl font-bold text-primary">$</p>
 
@@ -143,7 +169,7 @@ const ProductDetail = () => {
                                     </div>
                                 ) : (
                                     <div>
-                                        <p>Precio de unitario:</p>
+                                        <p className="text-lg">Precio unitario:</p>
                                         <p className="text-3xl font-bold">${unitPrice}</p>
                                     </div>
                                 )}
@@ -174,7 +200,7 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                             {/* Description */}
-                            <div className="pt-5 text-lg/8 text-justify">
+                            <div className="pt-5 text-2xl/10 text-justify">
                                 {(data && data.product.description) ?? "No hay una descripción por mostrar"}
                             </div>
                         </div>
@@ -186,7 +212,7 @@ const ProductDetail = () => {
                                 </div>
                                 <div className="border-b border-gray-400 py-3">
                                     <p>Envio por:</p>
-                                    <h1 className="text-lg">$200.00 MXN</h1>
+                                    <h1 className="text-lg">{`${formatPrice(shippingCost.toString(), "es-MX")} MXN (${boxesQty} caja/s)`}</h1>
                                 </div>
                                 <div className="py-5 flex flex-col gap-10">
                                     <Link to="#" className="underline text-primary">Politica de devolución PNC</Link>
@@ -215,8 +241,10 @@ const ProductDetail = () => {
                                         </div>
                                     }
                                     <div className="flex flex-col gap-5">
-                                        <button type="button" className="w-full btn btn-primary" onClick={() => useAddToShoppingCart(productCardData!, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
-                                        <button type="button" className="w-full btn bg-blue-950 text-white" onClick={() => useAddToBuyNow(productCardData!)}>Comprar ahora</button>
+                                        {/* <button type="button" className="w-full btn btn-primary" onClick={() => card && useAddToShoppingCart(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
+                                        <button type="button" className="w-full btn bg-blue-950 text-white" onClick={() => card && useAddToBuyNow(card)}>Comprar ahora</button> */}
+                                        <button type="button" className="w-full btn btn-primary" onClick={() => card && add(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
+                                        <button type="button" className="w-full btn bg-blue-950 text-white" onClick={() => card && addBuyNow(card)}>Comprar ahora</button>
                                     </div>
                                     <div className="">
                                         <button type="button" className="w-full text-primary font-semibold cursor-pointer" onClick={(e) => toggleFavorite(e)} >
@@ -242,24 +270,23 @@ const ProductDetail = () => {
                             <div className="w-1/2">
                                 <p className="text-2xl font-bold">Información adicional del producto</p>
                                 {/* name of each tab group should be unique */}
-                                <div className="w-full tabs tabs-border [&_div]:rounded-xl [&_div]:text-justify">
+                                <div className="w-full tabs tabs-border [&_div]:rounded-xl [&_div]:text-justify text-lg">
                                     <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Caracteristicas" defaultChecked />
-                                    <div className="tab-content border-base-300 bg-base-100 p-10">{(data && data.product.specs) ?? "No hay especificaciones por mostrar"}</div>
+                                    <div className="tab-content border-base-300 bg-base-100 p-10 text-2xl/10">{(data && data.product.specs) ?? "No hay especificaciones por mostrar"}</div>
 
                                     <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Aplicaciones" />
-                                    <div className="tab-content border-base-300 bg-base-100 p-10">{(data && data.product.applications) ?? "No hay aplicaciones por mostrar"}</div>
+                                    <div className="tab-content border-base-300 bg-base-100 p-10 text-2xl/10">{(data && data.product.applications) ?? "No hay aplicaciones por mostrar"}</div>
 
                                     <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Recomendaciones" />
-                                    <div className="tab-content border-base-300 bg-base-100 p-10">{(data && data.product.recommendations) ?? "No hay recomendaciones por mostrar"}</div>
+                                    <div className="tab-content border-base-300 bg-base-100 p-10 text-2xl/10">{(data && data.product.recommendations) ?? "No hay recomendaciones por mostrar"}</div>
                                 </div>
                             </div>
                             <div className="w-1/2 pl-15">
-                                <p className="text-2xl font-bold">Certificaciones del producto</p>
-                                <ol className="list-disc list-inside mt-2 text-lg flex flex-col gap-2">
-                                    <li>NOM-2ASDAS</li>
-                                    <li>NOM-2ASDAS</li>
-                                    <li>NOM-2ASDAS</li>
-                                    <li>NOM-2ASDAS</li>
+                                <p className="text-2xl font-bold">Certificaciones</p>
+                                <ol className="list-disc list-inside mt-2 text-2xl/10 flex flex-col gap-2">
+                                    {certifications.map((cer, index) => (
+                                        <li key={index}>{cer}</li>
+                                    ))}
                                 </ol>
                             </div>
                         </div>
@@ -281,6 +308,14 @@ const ProductDetail = () => {
                     </div>
                 </div>
             )}
+            <div className="w-full">
+                <p className="text-3xl font-bold">Otros productos</p>
+                <Carousel className="mt-5" >
+                    {ads && ads.map((data, index) => (
+                        <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} versionData={data} className="flex-shrink-0" />
+                    ))}
+                </Carousel>
+            </div>
         </div>
     );
 };

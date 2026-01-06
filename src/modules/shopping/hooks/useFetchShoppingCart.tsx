@@ -1,0 +1,299 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ShoppingCartType } from "../ShoppingTypes";
+import { getShoppingCartService, shoppingCartAddItemService, shoppingCartCheckAllService, shoppingCartClearCartService, shoppingCartRemoveItemService, shoppingCartToggleCheckService, shoppingCartUpdateItemQty } from "../services/ShoppingServices";
+import { useAuthStore } from "../../auth/states/authStore";
+import { buildKey } from "../../../global/GlobalHelpers";
+import { customerQueryKeys } from "../../customers/hooks/useCustomer";
+import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+
+
+export const shoppingCartQueryKeys = {
+    shoppingCart: (customer: string) => buildKey("shopping-cart", { customer })
+};
+
+export const useFetchShoppingCart = () => {
+    const { isAuth, authCustomer } = useAuthStore();
+    return useQuery<ShoppingCartType[] | null>({
+        queryKey: shoppingCartQueryKeys.shoppingCart(authCustomer?.uuid!),
+        enabled: !!isAuth || !!authCustomer,
+        queryFn: async () => await getShoppingCartService(),
+        staleTime: 4 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    })
+};
+
+export function useAddItem() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (item: ShoppingCartType): Promise<boolean> => {
+            return await shoppingCartAddItemService(item);
+        },
+        onMutate: async (item: ShoppingCartType) => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [item];
+                    const exist = old.findIndex(cartItem => cartItem.product_version.sku === item.product_version.sku);
+                    if (exist !== -1) {
+                        return old.map((cartItem, index) =>
+                            index === exist ? { ...cartItem, quantity: cartItem.quantity + item.quantity } : cartItem
+                        );
+                    };
+                    return [...old, item];
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+            showTriggerAlert("Successfull", "Agregado al carrito", { duration: 3500 });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    })
+};
+
+export function useRemoveItem() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (sku: string): Promise<boolean> => {
+            return await shoppingCartRemoveItemService(sku);
+        },
+        onMutate: async (sku: string) => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    const updated = old.filter(item => item.product_version.sku !== sku);
+                    return updated;
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+            showTriggerAlert("Successfull", "Removido del carrito", { duration: 3500 });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};
+
+export function useUpdateItemQty() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (values: { sku: string, newQuantity: number }): Promise<boolean> => {
+            return await shoppingCartUpdateItemQty(values);
+        },
+        onMutate: async (values: { sku: string, newQuantity: number }) => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    return old.map(item => item.product_version.sku === values.sku ? { ...item, quantity: values.newQuantity } : item);
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};
+
+export function useToggleCheckItem() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (sku: string): Promise<boolean> => {
+            return await shoppingCartToggleCheckService(sku);
+        },
+        onMutate: async (sku: string) => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    return old.map(item => item.product_version.sku === sku ? { ...item, isChecked: !item.isChecked } : item);
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};
+
+export function useCheckAllItems() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (): Promise<boolean> => {
+            return await shoppingCartCheckAllService();
+        },
+        onMutate: async () => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    return old.map(item => ({ ...item, isChecked: true }));
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};
+
+export function useUncheckAllItems() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (): Promise<boolean> => {
+            return await shoppingCartCheckAllService();
+        },
+        onMutate: async () => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    return old.map(item => ({ ...item, isChecked: false }));
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};
+
+export function useClearShoppingCart() {
+    const queryClient = useQueryClient();
+    const { authCustomer, isAuth } = useAuthStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    return useMutation({
+        mutationFn: async (): Promise<boolean> => {
+            return await shoppingCartClearCartService();
+        },
+        onMutate: async () => {
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            await queryClient.cancelQueries({ queryKey });
+            const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
+            queryClient.setQueryData<ShoppingCartType[]>(
+                queryKey, (old) => {
+                    if (!old) return [];
+                    return [];
+                }
+            );
+            return { previousShoppingCart };
+        },
+        onSuccess: () => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+        },
+        onError: (error, item, context) => {
+            if (!authCustomer?.uuid) return;
+            const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+            if (context?.previousShoppingCart !== undefined) {
+                queryClient.setQueryData(queryKey, context.previousShoppingCart);
+            }
+            showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
+        }
+
+    });
+};

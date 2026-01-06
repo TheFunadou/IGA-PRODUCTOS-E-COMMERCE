@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CustomerAddressType, NewAddressType, UpdateAddressType } from "../CustomerTypes";
+import type { CustomerAddressType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
 import { BASE_URL } from "../../../global/GlobalTypes";
 import type { ProductVersionCardType } from "../../products/ProductTypes";
 
@@ -26,5 +26,11 @@ export const deleteAddressService = async (address: string): Promise<string> => 
 
 export const getCustomerFavorites = async (): Promise<ProductVersionCardType[] | null> => {
     const response = await axios.get<ProductVersionCardType[]>(`${BASE_URL}/customer/favorites/all`, { withCredentials: true });
+    return response.data;
+};
+
+
+export const toggleFavoriteService = async (sku: string): Promise<onToogleFavoriteType> => {
+    const response = await axios.post<onToogleFavoriteType>(`${BASE_URL}/customer/favorites`, { sku }, { withCredentials: true });
     return response.data;
 };

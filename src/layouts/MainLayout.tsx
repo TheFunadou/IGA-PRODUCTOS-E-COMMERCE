@@ -1,10 +1,9 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../modules/auth/states/authStore";
 import { FaFacebook } from "react-icons/fa6";
 import { FaInstagramSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { useThemeContext } from "../modules/products/states/ThemeContext";
 import { FaSearch } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { useFetchSearchProductVersions } from "../modules/products/hooks/useFetchProductVersionCards";
@@ -13,20 +12,30 @@ import { useRef } from "react";
 import { useOutsideSearchClick } from "../modules/products/hooks/useOutsideSearchClick";
 import { makeSlug } from "../modules/products/Helpers";
 import { useShoppingCartStore } from "../modules/shopping/states/shoppingCartStore";
-import useDebounce from "../global/hooks/useDebounce";
-
+import { IoArrowUp, IoLogOutOutline } from "react-icons/io5";
+import { VscThreeBars } from "react-icons/vsc";
+import DrawerSubMenu from "../modules/home/components/DrawerSubMenu";
+import ShopMenuPreview from "./components/ShopMenuPreview";
+import ThemeController from "../modules/home/components/ThemeController";
+import { useThemeStore } from "./states/themeStore";
+import clsx from "clsx";
+import { useShoppingCart } from "../modules/shopping/hooks/useShoppingCart";
 
 const MainLayout = () => {
-
+    const { theme } = useThemeStore();
     const [loading, setLoading] = useState<boolean>(false);
     const [inputSearch, setInputSearch] = useState<string>("");
     const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
+    const [showMobileSubmenu, setShowMobileSubmenu] = useState<boolean>(false);
     const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 2000);
+    const { shoppingCart: authShoppingCart } = useShoppingCart();
     const searchResultsRef = useRef<HTMLDivElement>(null);
-    const { data: searchedData, isLoading: searchLoading } = useFetchSearchProductVersions(debouncedValue);
-    const { isAuth, logout, getProfile, favorites, getFavorites } = useAuthStore();
-    const { items } = useShoppingCartStore();
-    const { theme } = useThemeContext();
+    const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
+    const { isAuth, logout, getProfile, favorites, getFavorites, authCustomer } = useAuthStore();
+    const { items: localShoppingCart } = useShoppingCartStore();
+    const [showShopMenuPreview, setShowShopMenuPreview] = useState<boolean>(false);
+    const hideTimeoutRef = useRef<number | null>(null);
+    const navigate = useNavigate();
     const location = useLocation();
     useOutsideSearchClick(searchResultsRef, () => setShowSearchResults(false));
     const IGA_LOGO = "https://igaproductos.com.mx/wp-content/themes/igaproductos/images/igaproductos.png";
@@ -43,97 +52,151 @@ const MainLayout = () => {
         }
     };
 
+    const cancelHideTimeout = () => {
+        if (hideTimeoutRef.current !== null) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+        }
+    };
+
+    const scheduleHide = () => {
+        cancelHideTimeout(); // Cancela cualquier timeout pendiente
+        hideTimeoutRef.current = window.setTimeout(() => {
+            setShowShopMenuPreview(false);
+        }, 300); // 1 segundo de delay
+    };
+
+    const handleMouseEnter = () => {
+        cancelHideTimeout(); // Cancela el cierre programado
+        setShowShopMenuPreview(true);
+    };
+
     // load customer profile
     useEffect(() => {
         const loadCustomerData = async () => { await getProfile(); }
         const loadFavorites = async () => await getFavorites();
-        if (!isAuth) loadCustomerData;
-        if (!favorites) loadFavorites();
+        if (isAuth && !authCustomer) loadCustomerData;
+        if (isAuth && !favorites) loadFavorites();
     }, []);
 
     // Close the search container when the location changed
     useEffect(() => { setShowSearchResults(false); setInputSearch(""); }, [location.pathname]);
 
+
     return (
-        <div className="w-full">
-            <nav className="w-full flex px-15 py-5 bg-blue-950 text-white text-base">
-                <div className="w-1/2 flex gap-3">
-                    <figure className="w-1/5">
+        <div className="w-full" id="top">
+            <nav className="w-full flex p-5 lg:px-10 md:py-5 xl:px-10 xl:py-5 bg-blue-950 text-white text-sm lg:text-base">
+                <div className=" w-50/100 md:w-65/100 xl:w-65/100 flex gap-1 md:gap-3 items-center">
+                    <figure className=" md:w-45/100 lg:w-35/100 xl:w-1/5">
                         <img src={IGA_LOGO} alt="IGA Prodcutos Logo" />
                     </figure>
-                    <div className="w-3/4 relative">
+                    <div className="hidden md:block md:w-55/100 lg:w-65/100 xl:w-3/4 relative">
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                className="w-95/100 input text-black rounded-xl focus:outline-white focus:outline-1"
+                                className={clsx("xl:w-95/100 input rounded-xl focus:outline-white focus:outline-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")}
                                 placeholder="Buscar productos"
                                 onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
-                                onKeyDown={(e) => {
-                                    e.stopPropagation();
-                                }}
-
+                                onKeyDown={(e) => e.stopPropagation()}
                             />
                             {debouncedLoading ? <span className="loading loading-dots loading-xs"></span>
                                 : (<FaSearch className="text-xl" />)}
                         </div>
                         {showSearchResults && searchedData && searchedData.length > 0 &&
-                            <div className="w-full flex flex-col absolute top-12 border border-gray-300 py-5 bg-white rounded-xl z-1" ref={searchResultsRef}>
+                            <div className={clsx("w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")} ref={searchResultsRef}>
+                                {/* Este no detecta el click en el button */}
                                 {searchedData && searchedData.map((data, index) => (
-                                    <Link key={index} to={`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.sku.toLowerCase()}`}><p className=" text-black flex items-center hover:bg-base-300 py-1 px-5 text-sm"><FaSearch className="mr-2 text-primary" /><strong>{`${data.product_name} Color ${data.color}`}</strong></p></Link>
+                                    <button
+                                        key={`${index}-${data.sku}`}
+                                        type="button"
+                                        onClick={() => navigate(`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.sku.toLowerCase()}`)}>
+                                        <p className="flex items-center hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><FaSearch className="mr-2 text-primary" /><strong>{`${data.product_name.toUpperCase()} COLOR ${data.color.toUpperCase()}`}</strong></p>
+                                    </button>
                                 ))}
                             </div>
                         }
                     </div>
                 </div>
-                <div className="w-1/2 flex gap-10 items-center justify-end">
-                    {/* Theme controller */}
-
-                    {isAuth &&
-                        <div className="flex gap-10 items-center justify-end"                        >
-                            <div className="dropdown dropdown-end">
-                                <div role="button" className="text-center p-1 bg-blue-950">Español</div>
-                                <ul className="dropdown-content menu bg-blue-900 rounded-box z-1 p-2 shadow-sm">
-                                    <li><a>Español</a></li>
-                                    <li><a>Inglés</a></li>
-                                </ul>
-                            </div>
+                <div className=" w-50/100 md:w-35/100 xl:w-35/100 flex gap-2 md:gap-5 xl:gap-10 items-center justify-end">
+                    <ThemeController />
+                    {isAuth && authCustomer &&
+                        <div className="flex md:gap-5 lg:gap-10 items-center justify-end"                        >
                             <Link to={"/mis-compras"}>Mis compras</Link>
                             <Link to={"/mis-favoritos"}>Mis favoritos</Link>
                             <div className="dropdown dropdown-center cursor-pointer" >
-                                <div tabIndex={0} role="button" className="text-center px-2 rounded-xl focus:animate-heartbeat focus:bg-white focus:px-5 focus:py-2 focus:text-black">Mi cuenta</div>
-                                <ul tabIndex={-1} className="dropdown-content menu bg-white w-65 text-black text-base flex flex-col gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
-                                    <li><Link to={"mi-cuenta-informacion-personal"}>Mi información personal</Link></li>
+                                <div tabIndex={0} role="button" className="border border-white px-5 py-1 text-center rounded-xl focus:bg-white focus:text-black">{`${authCustomer.name.toUpperCase()} ${authCustomer.last_name.toUpperCase()}`}</div>
+                                <ul tabIndex={-1} className=" dropdown-content menu bg-white w-65 text-black text-base flex flex-col items-center gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
+                                    <li><Link to={"/mi-cuenta/informacion-personal"}>Mi información personal</Link></li>
                                     <li><Link to={"/mi-cuenta/direcciones-de-envio"}>Mis direcciones de envio</Link></li>
-                                    <button type="button" className="rounded-xl cursor-pointer bg-blue-950 p-2 text-white" onClick={handleLogout}>{loading ? ("Cargando ...") : ("Cerrar sesión")}</button>
+                                    <button type="button" className="w-full border rounded-xl cursor-pointer bg-blue-950 p-2 text-white" onClick={handleLogout}>{loading ? ("Cargando ...") : (<p className="flex items-center gap-1 justify-center"><IoLogOutOutline className="text-2xl" />Cerrar sesión</p>)}</button>
                                 </ul>
                             </div>
                         </div>
                     }
 
-                    {isAuth === false && <Link to="/iniciar-sesion">Iniciar Sesión</Link>}
-
-                    <Link to={"/carrito-de-compras"}><p className="flex gap-1"><MdOutlineShoppingCart className="text-3xl" /><span className="px-3 flex items-center justify-center rounded-full bg-red-500 font-bold">{items.length}</span></p></Link>
+                    {isAuth === false && <Link to="/iniciar-sesion" className="text-sm border md:text-base lg:text-lg p-1 md:px-2 rounded-xl">Iniciar Sesión</Link>}
+                    <Link to={"/carrito-de-compras"}><p className="flex gap-1"><MdOutlineShoppingCart className="text-2xl md:text-3xl" /><span className="px-2 md:px-3 flex items-center justify-center rounded-full bg-red-500 font-bold">{isAuth ? authShoppingCart.length : localShoppingCart.length}</span></p></Link>
                 </div>
             </nav>
-            <div className="w-full bg-blue-900 px-15 p-2 flex gap-15 text-white font-bold">
-                <div className="w-3/4 flex gap-15">
-                    <Link to={"/"}>Inicio</Link>
-                    <Link to={"/tienda"}>Tienda</Link>
-                    <Link to={"/acerca-de-iga"}>Acerca de IGA</Link>
-                    <Link to={"/certificaciones"}>Certificaciones</Link>
-                    <Link to={"/cobertura"}>Cobertura</Link>
-                    <Link to={"/contacto"}>Contacto</Link>
-                    <Link to={"/distribuidores"}>Distribuidores</Link>
+            <div className="w-full flex bg-blue-950 px-5 lg:px-10 xl:px-10 flex-col lg:flex-row lg:gap-0 xl:gap-15 text-white font-bold lg:text-sm xl:text-lg">
+                <div className="w-full relative">
+                    <div className="hidden md:flex w-full justify-between lg:justify-start md:gap-6 xl:gap-15">
+                        <Link to={"/"}>Inicio</Link>
+                        <div
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={scheduleHide}
+                            className="hidden md:flex"
+                        >
+                            <Link to={"/tienda"}>Tienda</Link>
+                            {showShopMenuPreview && <ShopMenuPreview onScheduleHide={scheduleHide} />}
+                        </div>
+                        <Link to={"/acerca-de-iga"}>Acerca de IGA</Link>
+                        <Link to={"/certificaciones"}>Cumplimientos normativos</Link>
+                        <Link to={"/cobertura"}>Cobertura</Link>
+                        <Link to={"/contacto"}>Contacto</Link>
+                        <Link to={"/distribuidores"}>Distribuidores</Link>
+                        <Link to={"#"}>Nuevos lanzamientos</Link>
+                    </div>
+                    <div className="w-full hidden md:block text-right">
+                        <a href="tel:9222158300" target="_blank">¿Tienes dudas? Llamanos al 921 215 8300| 01</a>
+                    </div>
                 </div>
-                <div className="w-1/4 text-right">
-                    <a href="tel:9222158300" target="_blank">¿Tienes dudas? Llamanos al 921 215 8300| 01</a>
-                </div>
+                <div className="w-full md:hidden relative flex gap-2">
+                    <div className="w-10/100"><VscThreeBars onClick={() => setShowMobileSubmenu(true)} className="text-3xl" /></div>
+                    <div className="w-90/100 flex items-center justify-between">
+                        <input type="text"
+                            className="w-90/100 bg-white rounded-md text-black font-normal p-1"
+                            placeholder="Buscar productos"
+                            onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
+                            onKeyDown={(e) => {
+                                e.stopPropagation();
+                            }}
+                        />
+                        {debouncedLoading ? <span className="loading loading-dots loading-xs"></span>
+                            : (<FaSearch className="text-xl" />)}
+                    </div>
+                    {showSearchResults && searchedData && searchedData.length > 0 &&
+                        <div className="w-full flex flex-col absolute top-10 border border-gray-300 py-5 bg-white rounded-xl z-1" ref={searchResultsRef}>
+                            {/* Este si detecta el clic en el button */}
+                            {searchedData && searchedData.map((data, index) => (
+                                <button
+                                    key={`${index}-${data.sku}`}
+                                    type="button"
+                                    onClick={() => navigate(`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.sku.toLowerCase()}`)}>
+                                    <p className=" text-black flex items-center hover:bg-base-300 py-1 px-5 text-sm"><FaSearch className="mr-2 text-primary" /><strong>{`${data.product_name} Color ${data.color}`}</strong></p>
+                                </button>
+                            ))}
+                        </div>
+                    }
 
+                </div>
             </div>
-            <main className={`w-full px-15 py-5 ${theme}`}>
+
+            <main className={`w-full px-5 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat`}>
                 <Outlet />
             </main>
-            <footer className="w-full bg-blue-950 px-15 py-10 text-white">
+            <div className="w-full bg-blue-900 text-center text-white py-3 flex items-center justify-center"><a href="#top" className="flex gap-2 text-xl items-center">Ir al inicio<IoArrowUp /></a></div>
+            <footer className="w-full bg-blue-950 px-5 py-10 text-white">
                 <div className="w-full items-start justify-center flex gap-30 [&_ul]:mt-2 [&_li]:list-disc [&_li]:ml-2">
                     <div>
                         <p className="text-3xl font-bold">Conocenos</p>
@@ -166,28 +229,29 @@ const MainLayout = () => {
                     </div>
                 </div>
                 <div className="w-full flex items-center justify-between">
-                    <figure className="w-1/6">
+                    <figure className="w-20/100">
                         <img src={PLASTICOS_DEL_GOLFO_LOGO} alt="Logo Plasticos del Golfo Sur" />
                     </figure>
 
-                    <div className="flex flex-col text-center">
+                    <div className="w-60/100 flex flex-col text-center ">
                         <p>Condiciones de uso</p>
                         <p>2025@ Todos los Derechos Reservados</p>
                     </div>
 
-                    <div className="flex flex-col text-center">
+                    <div className="w-20/100 flex flex-col text-center ">
                         <p className="font-bold">Redes sociales</p>
-                        <div className="flex items-center gap-3">
-                            <FaFacebook className="text-5xl" />
-                            <FaInstagramSquare className="text-5xl" />
-                            <FaSquareXTwitter className="text-5xl" />
+                        <div className="w-full flex justify-center items-center gap-3">
+                            <FaFacebook className="text-5xl hover:scale-110 duration-250" />
+                            <FaInstagramSquare className="text-5xl hover:scale-110 duration-250" />
+                            <FaSquareXTwitter className="text-5xl hover:scale-110 duration-250" />
                         </div>
                     </div>
                 </div>
             </footer>
-
+            <DrawerSubMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} />
         </div>
     );
 };
+
 
 export default MainLayout;
