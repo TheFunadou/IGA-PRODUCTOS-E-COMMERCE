@@ -22,6 +22,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/plagosur_beige_AI_03-1.jpg"
                                         alt="Casco 1"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/cascos/iga-casco-de-seguridad-industrial-tipo-coraza-a-dielectrico/cas2-am1-002")}>
@@ -29,6 +30,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/Amarillo_003.jpg"
                                         alt="Casco 1"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>
@@ -38,6 +40,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/IMG_7697-copia-1-e1722380357898.jpg"
                                         alt="Casco 1"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/cascos/iga-casco-de-seguridad-industrial-tipo-plagosur-c-intervalo-clase-e/cas1-ai1-007")}>
@@ -45,6 +48,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/plagosur_verde_AM_02-1.jpg"
                                         alt="Casco 1"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>
@@ -59,6 +63,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2025/10/001-scaled.jpg"
                                         alt="Baboquejo sin mentonera"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/barboquejos/iga-barboquejo-para-cascos-con-mentonera/bar-001-002")}>
@@ -66,6 +71,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2025/10/009-scaled.jpg"
                                         alt="Barboquejo con mentonera"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>
@@ -75,6 +81,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2025/10/010-scaled.jpg"
                                         alt="Barboquejo para casco de cuatro puntos"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/suspensiones/iga-suspension-para-cascos-de-ajuste-de-intervalo-de-cuatro-puntos/sus-ai2-001")}>
@@ -82,6 +89,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2025/10/banda01.jpg"
                                         alt="Barboque banda antisudor"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>
@@ -96,6 +104,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/06/WhatsApp-Image-2024-07-04-at-5.46.15-PM-3.jpeg"
                                         alt="Suspension de ajuste de intervalo de cuatro puntos"
+                                        loading="lazy"
+
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/suspensiones/iga-suspension-para-casco-de-ajuste-de-intervalo-de-seis-puntos/sus-ai1-001")}>
@@ -103,6 +113,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/06/INTER-002.jpg"
                                         alt="Suspension de ajuste de intervalo de seis puntos"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>
@@ -112,6 +123,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/06/WhatsApp-Image-2024-07-04-at-5.46.15-PM-2.jpeg"
                                         alt="Suspension de ajuste de matraca de cuatro puntos"
+                                        loading="lazy"
+
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/suspensiones/iga-suspension-para-cascos-de-ajuste-de-intervalo-de-cuatro-puntos/sus-ai2-001")}>
@@ -119,6 +132,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/06/WhatsApp-Image-2024-07-04-at-5.46.15-PM.jpeg"
                                         alt="Suspension de ajuste de matraca de seis puntos"
+                                        loading="lazy"
+
                                     />
                                 </div>
                             </div>
@@ -133,6 +148,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/MEDICA_P_01-1.jpg"
                                         alt="Lente de seguridad tipo medical de mica polarizada"
+                                        loading="lazy"
+
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/lentes/iga-lente-de-seguridad-tipo-artico-de-mica-polarizada/len3-003-005")}>
@@ -140,6 +157,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/ARTICO_02.jpg"
                                         alt="Lente de seguridad tipo artico de mica polarizada"
+                                        loading="lazy"
+
                                     />
                                 </div>
                             </div>
@@ -149,6 +168,8 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/ARTICO_04.jpg"
                                         alt="Lente de seguridad tipo artico de mica transparente"
+                                        loading="lazy"
+
                                     />
                                 </div>
                                 <div className="w-50/100 border border-gray-100 rounded-xl cursor-pointer" onClick={() => navigate("/tienda/lentes/iga-lente-de-seguridad-tipo-artico-de-mica-transparente/len3-001-002")}>
@@ -156,6 +177,7 @@ const CategoriesCarousel = ({ className }: Props) => {
                                         className="w-full h-full object-cover rounded-xl"
                                         src="https://igaproductos.com.mx/wp-content/uploads/2024/07/ARTICO_06.jpg"
                                         alt="Lente de seguridad tipo artico de mica transparente"
+                                        loading="lazy"
                                     />
                                 </div>
                             </div>

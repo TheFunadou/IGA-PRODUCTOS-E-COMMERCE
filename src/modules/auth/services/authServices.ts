@@ -1,24 +1,26 @@
-import axios from "axios";
-import type { AuthCustomerCredentialsType, AuthCustomerType, NewCustomerType } from "../AuthTypes";
-import { BASE_URL } from "../../../global/GlobalTypes";
+import type { AuthCustomerCredentialsType, AuthenticatedCustomerType, NewCustomerType } from "../AuthTypes";
+import api from "../../../api/api.config";
 
 
-export const loginService = async (dto: AuthCustomerCredentialsType): Promise<AuthCustomerType> => {
-    const response = await axios.post<AuthCustomerType>(`${BASE_URL}/customer/login`, dto, { withCredentials: true });
-    return response.data;
+export const login = async (credentials: AuthCustomerCredentialsType): Promise<AuthenticatedCustomerType> => {
+    const { data } = await api.post<AuthenticatedCustomerType>("/customer-auth/login", credentials);
+    return data;
 };
 
-export const logoutService = async () => {
-    const response = await axios.post<string>(`${BASE_URL}/customer/logout`, {}, { withCredentials: true });
-    return response.data;
+
+export const logout = async () => {
+    const { data } = await api.post<string>("/customer-auth/logout", {});
+    return data;
 };
 
-export const createCustomerService = async (data: NewCustomerType): Promise<string> => {
-    const response = await axios.post<string>(`${BASE_URL}/customer`, data);
-    return response.data;
+
+export const registerCustomer = async (dto: NewCustomerType): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/register", dto);
+    return data;
 };
 
-export const getCustomerProfileService = async (): Promise<AuthCustomerType> => {
-    const response = await axios.get<AuthCustomerType>(`${BASE_URL}/customer`,{withCredentials:true});
-    return response.data;
-}
+
+export const getCustomerProfile = async (): Promise<AuthenticatedCustomerType> => {
+    const { data } = await api.get<AuthenticatedCustomerType>("/customer-auth/profile");
+    return data;
+};

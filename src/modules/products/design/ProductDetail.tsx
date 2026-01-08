@@ -13,6 +13,7 @@ import { useFetchAds } from "../../../layouts/hooks/useAds";
 import ProductVersionCardShop from "../components/ProductVersionCardShop";
 import type { ProductVersionCardType } from "../ProductTypes";
 import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
+import { FaFire } from "react-icons/fa6";
 
 const ProductDetail = () => {
     const SHIPPING_COST = 264.00;
@@ -35,6 +36,7 @@ const ProductDetail = () => {
     const [productQty, setProductQty] = useState<number>(1);
     const [stockError, setStockError] = useState<string>("");
     const [unitPrice, setUnitPrice] = useState<string>("");
+    const [unitPriceWithDiscount, setUnitPriceWithDiscount] = useState<string[]>([]);
     const [image, setImage] = useState<string | undefined>(NotFoundSVG);
     const [color, setColor] = useState<string>("");
     const [stock, setStock] = useState<number>(1);
@@ -91,8 +93,17 @@ const ProductDetail = () => {
 
     useEffect(() => {
         if (data) {
-            const mainImage = data.product_images.find(img => img.main_image === true)?.image_url;
-            setImage(mainImage);
+            if (data.product_images) {
+                const mainImage = data.product_images.find(img => img.main_image === true)?.image_url;
+                setImage(mainImage);
+            };
+            if (data.isOffer && data.discount) {
+                const price = parseFloat(data.product_version.unit_price);
+                const discount = (data.discount * parseFloat(data.product_version.unit_price)) / 100;
+                const priceWithDiscount = price - discount;
+                const priceWithDiscountFormat = formatPrice(priceWithDiscount.toString(), "es-MX");
+                setUnitPriceWithDiscount(priceWithDiscountFormat.split("."));
+            }
             const formated: string = formatPrice(data.product_version.unit_price, "es-MX");
             setUnitPrice(formated);
             setColor(data && data.product_version.color_code);
@@ -110,6 +121,9 @@ const ProductDetail = () => {
         setShippingCost(shippingCost);
     }, [productQty]);
 
+
+
+
     return (
         <div className="w-full">
             {isLoading ? (
@@ -119,13 +133,37 @@ const ProductDetail = () => {
                     <div className="w-full flex border-b border-gray-400 pb-5">
                         <div className="w-35/100 relative">
                             <div className="sticky top-5">
-                                <figure className="w-full h-150">
+                                <figure className="w-full h-150 relative">
                                     {/* <img className="w-full h-full rounded-xl border-2 border-gray-300" src={image} alt={data && data.product.product_name} /> */}
                                     <ImageMagnifier src={image} alt={data && data.product.product_name} />
-
+                                    {data && data.isOffer && (
+                                        <div className={clsx(
+                                            "absolute top-5 left-5 p-2 rounded-xl flex gap-3 items-center border border-white",
+                                            data.discount && data.discount < 50 && "bg-red-200",
+                                            data.discount && data.discount >= 50 && data.discount < 65 && "bg-green-200",
+                                            data.discount && data.discount >= 65 && "bg-primary"
+                                        )}>
+                                            <FaFire className={clsx(
+                                                "text-3xl",
+                                                data.discount && data.discount < 50 && "text-error",
+                                                data.discount && data.discount >= 50 && data.discount < 65 && "text-success",
+                                                data.discount && data.discount >= 65 && "text-primary"
+                                            )} />
+                                            <p className={clsx(
+                                                "text-xl font-bold",
+                                                data.discount && data.discount < 50 && "text-black",
+                                                data.discount && data.discount >= 50 && data.discount < 65 && "text-black",
+                                                data.discount && data.discount >= 65 && "text-white"
+                                            )}>
+                                                {data.discount && data.discount < 50 && "Oferta"}
+                                                {data.discount && data.discount >= 50 && data.discount < 65 && "Oferta Especial"}
+                                                {data.discount && data.discount >= 65 && "Oferta Irresistible"}
+                                            </p>
+                                        </div>
+                                    )}
                                 </figure>
                                 <div className="flex gap-2 items-center justify-start flex-wrap mt-5">
-                                    {data && data.product_images.map((img, index) => (
+                                    {data && data.product_images && data.product_images.map((img, index) => (
                                         <figure key={index}
                                             className="w-30 h-30"
                                             onClick={() => { setImage(img.image_url) }}
@@ -145,8 +183,8 @@ const ProductDetail = () => {
                             <h1 className="text-4xl font-bold">{data && data.product.product_name}</h1>
                             <div className="breadcrumbs text-xl">
                                 <ul>
-                                    {data && data.product_attributes.map((subcategories, index) => (
-                                        <li key={index}>{subcategories.category_attribute.description}</li>
+                                    {data && data.subcategories.map((subcategories, index) => (
+                                        <li key={index}>{subcategories.subcategories.description}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -155,16 +193,35 @@ const ProductDetail = () => {
                                 {data && data.isOffer ? (
                                     <div className="flex gap-5">
                                         <div className="flex gap-2 items-center">
-                                            <p className="bg-error p-3 rounded-xl text-white font-bold text-3xl">% 20</p>
-                                            <div className="text-lg">
+                                            <p className={clsx(
+                                                "p-3 rounded-xl text-white font-bold text-3xl",
+                                                data.discount && data.discount < 50 && "bg-error",
+                                                data.discount && data.discount >= 50 && data.discount < 65 && "bg-success",
+                                                data.discount && data.discount >= 65 && "bg-primary"
+                                            )}>{data && data.discount}%</p>
+                                            <div className={clsx(
+                                                "text-lg",
+                                                data.discount && data.discount < 50 && "text-error",
+                                                data.discount && data.discount >= 50 && data.discount < 65 && "text-black",
+                                                data.discount && data.discount >= 65 && "text-primary"
+                                            )}>
                                                 <p>Precio unitario en oferta:</p>
-                                                <p className="text-3xl font-bold text-primary">$</p>
-
+                                                <p className={clsx(
+                                                    "text-3xl font-bold",
+                                                    data.discount && data.discount < 50 && "text-error",
+                                                    data.discount && data.discount >= 50 && data.discount < 65 && "text-green-800",
+                                                    data.discount && data.discount >= 65 && "text-primary"
+                                                )}>${unitPriceWithDiscount[0]}.{unitPriceWithDiscount[1]}</p>
                                             </div>
                                         </div>
-                                        <div className="text-gray-500 flex flex-col justify-end">
+                                        <div className={clsx(
+                                            "text-gray-500 flex flex-col justify-end",
+                                            data.discount && data.discount < 50 && "text-error",
+                                            data.discount && data.discount >= 50 && data.discount < 65 && "text-black",
+                                            data.discount && data.discount >= 65 && "text-primary"
+                                        )}>
                                             <p>Precio anterior:</p>
-                                            <p className="line-through">340.00</p>
+                                            <p className="line-through">{unitPrice}</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -189,7 +246,7 @@ const ProductDetail = () => {
                                         )}>
                                             <Link to={`/tienda/${data.category.toLocaleLowerCase()}/${makeSlug(data.product.product_name)}/${version.sku.toLowerCase()}`}>
                                                 <figure>
-                                                    <img className="rounded-t-xl border border-gray-300" src={version.product_images[0].image_url} alt="" />
+                                                    <img className="rounded-t-xl border border-gray-300" src={version.product_images && version.product_images[0].image_url} alt="" />
                                                 </figure>
                                                 <div className="py-2 text-center">
                                                     <p className="font-bold">$ {formatPrice(version.unit_price, "es-MX")}</p>

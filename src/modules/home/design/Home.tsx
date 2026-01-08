@@ -27,9 +27,15 @@ import { AiFillProduct } from "react-icons/ai";
 import { InfoMainImgs } from "../json/assets";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
 import clsx from "clsx";
+import HeroImg from "../../../assets/hero/HeroImg.webp"
 import { useThemeStore } from "../../../layouts/states/themeStore";
+import PartnersCarousel from "../components/PartnersCarousel";
+import { ArrowDownCircle, Box, Handbag, Package, Video } from "lucide-react";
+import Marquee from "react-fast-marquee";
 
 const Home = () => {
+
+    document.title = "Iga Productos - Inicio";
 
     const sampleVideos: { videoUrl: string, title: string }[] = [
         {
@@ -48,7 +54,18 @@ const Home = () => {
             videoUrl: "https://www.facebook.com/plugins/video.php?height=515&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1370385861112633%2F&show_text=false&width=560&t=0",
             title: "¿Sabes que tipo de casco es el mas seguro?"
         }
-    ]
+    ];
+
+    const imageGallery: { index: number, url: string, description: string }[] = [
+        { index: 0, url: IMG1, description: "" },
+        { index: 1, url: IMG2, description: "" },
+        { index: 2, url: IMG3, description: "" },
+        { index: 3, url: IMG4, description: "" },
+        { index: 4, url: IMG5, description: "" },
+        { index: 5, url: IMG6, description: "" },
+        { index: 6, url: IMG7, description: "" },
+        { index: 7, url: IMG8, description: "" },
+    ];
 
     const { theme } = useThemeStore();
     const MAX_PRODUCTS: number = 10;
@@ -64,193 +81,304 @@ const Home = () => {
         refetch
     } = useFetchAds({ limit: MAX_PRODUCTS, entity: "ads" });
 
+    const paymentMethodsImgs = PaymentMethodsImgsJSON;
+
 
     return (
-        <div>
-            {/* <div className="w-full animate-fade-in-up">
-                <InfiniteCarousel
-                    images={sampleImages}
-                    autoPlayInterval={4000}
-                    showControls={true}
-                    showDots={true}
-                />
-            </div> */}
-            <div className="mt-10">
-                <div className="w-full animate-fade-in-up">
-                    <p className="text-4xl font-bold">Tu seguridad es nuestra máxima prioridad</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"><MdOutlineHealthAndSafety className="text-primary text-2xl" />Queremos inspirar seguridad para ti!</p>
-                    <div className="w-full mt-5 flex items-center justify-center [&_div]:h-80 [&_div]:flex [&_div]:flex-col [&_div]:items-center [&_div]:justify-start [&_div]:flex-1">
-                        {InfoMainImgs.map((data, index) => (
-                            <div key={index} className="flex-1">
-                                <figure className="w-60/100"><img src={data.image_url} alt={data.description} /></figure>
-                                <p className="text-3xl font-semibold mt-2">{data.description}</p>
-                            </div>
-                        ))}
+        // <div>
+        //     <div className="w-full animate-fade-in-up">
+        //         <InfiniteCarousel
+        //             images={sampleImages}
+        //             autoPlayInterval={4000}
+        //             showControls={true}
+        //             showDots={true}
+        //         />
+        //     </div>
+        //     <div className="mt-10">
+        //         <div className="w-full animate-fade-in-up">
+        //             <p className="text-4xl font-bold">Tu seguridad es nuestra máxima prioridad</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"><MdOutlineHealthAndSafety className="text-primary text-2xl" />Queremos inspirar seguridad para ti!</p>
+        //             <div className="w-full mt-5 flex items-center justify-center [&_div]:h-80 [&_div]:flex [&_div]:flex-col [&_div]:items-center [&_div]:justify-start [&_div]:flex-1">
+        //                 {InfoMainImgs.map((data, index) => (
+        //                     <div key={index} className="flex-1">
+        //                         <figure className="w-60/100"><img src={data.image_url} alt={data.description} /></figure>
+        //                         <p className="text-3xl font-semibold mt-2">{data.description}</p>
+        //                     </div>
+        //                 ))}
 
+        //             </div>
+        //         </div>
+        //         <div className="mt-10">
+        //             <p className="text-4xl font-bold">Categorias de productos</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"><AiFillProduct className="text-primary text-2xl" />Conoce las diversas categorias de productos que tenemos para ti!</p>
+        //             <CategoriesCarousel className="mt-5" />
+        //         </div>
+        //         <div className="w-full mt-10">
+        //             <p className="text-4xl font-bold">Explora las diversas formas y lugares en los que puedes pagar tus pedidos</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"> <IoBagCheckOutline className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
+        //             <Carousel auto>
+        //                 <div className="flex gap-10 mt-3 [&_div]:shadow-lg">
+        //                     {PaymentMethodsImgsJSON && PaymentMethodsImgsJSON.map((img, index) => (
+        //                         <div key={index} className={clsx("w-80 h-50 rounded-xl flex-shrink-0 flex items-center justify-center", theme === "ligth" && "bg-white", theme === "dark" && "bg-gray-300")}>
+        //                             <figure className="w-full p-5">
+        //                                 <img className="w-full " src={img.image_url} alt={img.description} />
+        //                             </figure>
+        //                         </div>
+        //                     ))}
+        //                 </div>
+        //             </Carousel>
+        //         </div>
+        //         <div className="w-full mt-10">
+        //             <p className="text-4xl font-bold">Videos</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"> <IoBagCheckOutline className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
+        //             <Carousel className="flex gap-5 items-center mt-5">
+        //                 {sampleVideos.map((video, index) => (
+        //                     <div key={index}>
+        //                         <p className="text-lg font-medium line-clamp-1">{video.title}</p>
+        //                         <iframe src={video.videoUrl} width="380" height="476" style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className="rounded-xl"></iframe>
+        //                     </div>
+        //                 ))}
+        //             </Carousel>
+        //         </div>
+        //         <div className="w-full pt-10">
+        //             <p className="text-4xl font-bold">Proyección de marca</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"><BiCheckCircle className="text-primary text-2xl" />Participamos en las expoferias mas importantes de México</p>
+        //             {/* <div className="w-full columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 mt-5"> */}
+
+        //             <Carousel auto>
+        //                 <div className="flex gap-5 ">
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 1</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG1} alt="IMG 1" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 2</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG2} alt="IMG 2" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 3</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG4} alt="IMG 3" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 4</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG3} alt="IMG 4" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 5</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG5} alt="IMG 5" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 6</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG6} alt="IMG 6" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 7</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG7} alt="IMG 7" />
+        //                     </div>
+        //                     <div className="w-80 flex-shrink-0">
+        //                         <p>Imagen 8</p>
+        //                         <img className="w-full mb-4 rounded-lg" src={IMG8} alt="IMG 8" />
+        //                     </div>
+        //                 </div>
+        //             </Carousel>
+        //             {/* </div> */}
+        //         </div>
+        //         <div className="w-full mt-10">
+        //             <p className="text-4xl font-bold">¿Sabias qué?</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"><IoMdInformationCircleOutline className="text-primary text-2xl" />Informate sobre nuestros productos mas destacados</p>
+        //             <div className={`w-full flex mt-2 rounded-xl p-5 ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
+        //                 <figure className="w-1/4 rounded-xl">
+        //                     <img className="rounded-xl border border-gray-300" src="https://igaproductos.com.mx/wp-content/uploads/2023/11/Azul_001-1.jpg" alt="" />
+        //                 </figure>
+        //                 <div className="w-1/2 pl-5">
+        //                     <p className="w-fit px-5 rounded-xl py-1 bg-primary text-white text-xl">Casco de seguridad industrial tipo coraza a</p>
+        //                     <div className="mt-2">
+        //                         <p className="w-70/100 text-4xl font-bold">Conoce más sobre nuestros cascos de seguridad industrial.</p>
+        //                         <div className="mt-5 flex flex-col gap-5">
+        //                             <div className="flex items-center text-3xl gap-2"><span className="w-5/100"><figure><img src="https://isopixel.net/wp-content/uploads/2017/02/Logo-Hecho-en-Mexico-trans-350x350.png" alt="Hecho en México" /></figure></span>100% Hechos en México</div>
+        //                             <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><LiaCertificateSolid className="text-3xl" /></span>Calidad certificada</p>
+        //                             <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><GoHeart className="text-3xl" /></span>Vida util de hasta 5 años en concha y 12 meses en suspensión</p>
+        //                             <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><GiMailedFist className="text-3xl" /></span>Resistentes a impactos y peligros de alto votaje</p>
+        //                             <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><IoBuild className="text-3xl" /></span>Fabricado en polietileno de alta densidad</p>
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //                 <div className="w-1/4 border-l border-l-gray-300 flex flex-col items-center gap-3">
+        //                     <p className="text-lg">Certificados por:</p>
+        //                     <figure className="w-1/2">
+        //                         <img className="rounded-xl" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/ISO_9001-2015.svg/1200px-ISO_9001-2015.svg.png" alt="ISO 9001:2015" />
+        //                     </figure>
+        //                     <div>
+        //                         <p className="text-lg">Cumplimientos normativos</p>
+        //                         <div className="mt-2 flex flex-col gap-2 items-center">
+        //                             <p>NOM-115-STPS-2009</p>
+        //                             <p>NMX-S-055-SCFI-2022</p>
+        //                             <p>CFE 8H 341-02</p>
+        //                             <p>PEMEX-EST-SS-058-2018</p>
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //         <div className="w-full mt-10">
+        //             <div className="flex gap-5">
+        //                 <div className={`w-1/2 p-5 rounded-xl ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
+        //                     <div className="w-full px-5 py-2 rounded-xl flex items-start gap-2">
+        //                         <AiOutlineGlobal className="text-8xl text-primary" />
+        //                         <div>
+        //                             <p className="text-2xl font-bold underline text-primary">Conoce a nuestros distribuidores oficiales</p>
+        //                             <p className=" w-60/100">Encuentra a nuestros distribuidores autorizados mas cercanos a ti</p>
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //                 <div className={`w-1/2 p-5 rounded-xl ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
+        //                     <div className="w-full px-5 py-2 rounded-xl flex items-start gap-2">
+        //                         <TiWorld className="text-8xl text-primary" />
+        //                         <div>
+        //                             <p className="text-2xl font-bold underline text-primary">Cada día mas cerca de ti</p>
+        //                             <p className=" w-full">Explora nuestra cobertura nacional e internacional</p>
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //         <div className="w-full mt-10">
+        //             <p className="text-4xl font-bold">Productos que pueden interesarte</p>
+        //             <p className="text-2xl font-medium flex gap-2 items-center"><AiFillProduct className="text-primary text-2xl" />Ve la seleccion de productos que tenemos para ti!</p>
+        //             {isLoading ? (
+        //                 <div className="w-full flex flex-wrap gap-10 mt-5">
+        //                     <ProductVersionCardSkeleton />
+        //                     <ProductVersionCardSkeleton />
+        //                     <ProductVersionCardSkeleton />
+        //                     <ProductVersionCardSkeleton />
+        //                 </div>
+        //             ) : (
+        //                 <div className="w-full">
+        //                     {error ? (
+        //                         <div className="py-5">
+        //                             <p className="text-error py-5 text-lg">{getErrorMessage(error)}</p>
+        //                             <button type="button" className="btn btn-primary mt-5" onClick={() => refetch()}>Reintentar?</button>
+        //                         </div>
+        //                     ) : (
+        //                         <div className="w-full flex flex-wrap gap-10 mt-5 px-10">
+        //                             {data && data.map((data, index) => (
+        //                                 <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-white" : "bg-transparent")} versionData={data} />
+        //                             ))}
+        //                         </div>
+        //                     )}
+        //                 </div>
+        //             )}
+        //         </div>
+        //     </div>
+        // </div>
+        <div>
+            <div>
+                <div className="h-150 flex gap-5 rounded-xl">
+                    <div className="w-50/100 flex flex-col justify-between">
+                        <div className="flex flex-col gap-5">
+                            <h1 className="text-7xl text-white ">Protección que inspira confianza</h1>
+                            <h2 className="text-white text-3xl">Cada jornada merece seguridad total.</h2>
+                            <h3 className="text-slate-900">En IGA Productos ® encontraras articulos 100% Hechos en México que cumplen los estandares y cumplimientos normativos para cuidar tu desempeño sin comprometer tu comodidad.</h3>
+                            <div className="flex gap-5">
+                                <button className="btn btn-primary">Explorar tienda</button>
+                                <button className="btn btn-soft btn-primary">Conocenos</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-gray-500">Inspirando confianza en</h3>
+                            <PartnersCarousel />
+                        </div>
                     </div>
+                    <figure className="w-50/100 p-5 bg-white/20 rounded-xl shadow-lg">
+                        <img src={HeroImg} alt="Hero image" className="w-full h-full object-cover" />
+                    </figure>
                 </div>
-                <div className="mt-10">
-                    <p className="text-4xl font-bold">Categorias de productos</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"><AiFillProduct className="text-primary text-2xl" />Conoce las diversas categorias de productos que tenemos para ti!</p>
+                <div className="w-fit mx-auto mt-5">
+                    <a
+                        href="#home"
+                        className="flex items-center text-2xl gap-2 underline underline-offset-8 font-bold"
+                        aria-label="Explorar inicio">
+                        <ArrowDownCircle size={40} className="text-primary" />Explorar inicio
+                    </a>
+                </div>
+            </div>
+            <div className="mt-20 flex flex-col gap-10">
+                <section>
+                    <h1 id="home" className="text-4xl">Categorias principales</h1>
+                    <p className="text-2xl font-medium flex gap-2 items-center"> <Box className="text-primary text-2xl" /> Conoce las categorias de articulos que tenemos para ti</p>
                     <CategoriesCarousel className="mt-5" />
-                </div>
-                <div className="w-full mt-10">
-                    <p className="text-4xl font-bold">Explora las diversas formas y lugares en los que puedes pagar tus pedidos</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"> <IoBagCheckOutline className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
-                    <Carousel auto>
-                        <div className="flex gap-10 mt-3 [&_div]:shadow-lg">
-                            {PaymentMethodsImgsJSON && PaymentMethodsImgsJSON.map((img, index) => (
-                                <div key={index} className={clsx("w-80 h-50 rounded-xl flex-shrink-0 flex items-center justify-center", theme === "ligth" && "bg-white", theme === "dark" && "bg-gray-300")}>
-                                    <figure className="w-full p-5">
-                                        <img className="w-full " src={img.image_url} alt={img.description} />
-                                    </figure>
-                                </div>
+                </section>
+                <section className="w-full mt-10">
+                    <h1 className="text-4xl">Formas de pago</h1>
+                    <p className="text-2xl font-medium flex gap-2 items-center"> <Handbag className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
+                    <Marquee className="w-full" gradient={true} speed={80}>
+                        <div className="flex gap-10 items-center justify-center">
+                            {[...paymentMethodsImgs, ...paymentMethodsImgs].map((img, index) => (
+                                <figure key={index} className="w-80 p-5 filter">
+                                    <img className="w-full " src={img.image_url} alt={img.description} loading="lazy" />
+                                </figure>
                             ))}
                         </div>
-                    </Carousel>
-                </div>
-                <div className="w-full mt-10">
-                    <p className="text-4xl font-bold">Videos</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"> <IoBagCheckOutline className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
-                    <Carousel className="flex gap-5 items-center mt-5">
-                        {sampleVideos.map((video, index) => (
-                            <div key={index}>
-                                <p className="text-lg font-medium line-clamp-1">{video.title}</p>
-                                <iframe src={video.videoUrl} width="380" height="476" style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className="rounded-xl"></iframe>
-                            </div>
-                        ))}
-                    </Carousel>
-                </div>
-                <div className="w-full pt-10">
-                    <p className="text-4xl font-bold">Proyección de marca</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"><BiCheckCircle className="text-primary text-2xl" />Participamos en las expoferias mas importantes de México</p>
-                    {/* <div className="w-full columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 mt-5"> */}
+                    </Marquee>
+                </section>
+                <section>
+                    <h1 className="text-4xl">Conoce nuestra marca</h1>
+                    <div className="flex flex-col gap-10">
+                        <div>
+                            <p className="text-2xl font-medium flex gap-2 items-center"> <Video className="text-primary text-2xl" /> Videos que quizas te puedan interesar</p>
+                            <Carousel className="flex gap-5 items-center mt-5">
+                                {sampleVideos.map((video, index) => (
+                                    <div key={index}>
+                                        <p className="text-lg font-medium line-clamp-1">{video.title}</p>
+                                        <iframe src={video.videoUrl} width="380" height="476" style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className="rounded-xl"></iframe>
+                                    </div>
+                                ))}
+                            </Carousel>
+                        </div>
+                        <div>
+                            <p className="text-2xl font-medium flex gap-2 items-center"> <Video className="text-primary text-2xl" /> Galeria de imagenes</p>
+                            <Marquee className="w-full" gradient={true} speed={80}>
+                                <div className="flex gap-10 items-center justify-center">
+                                    {[...imageGallery, ...imageGallery].map((img, index) => (
+                                        <figure key={index} className="w-100 p-5 filter">
+                                            <img className="w-full " src={img.url} alt={img.description} loading="lazy" />
+                                        </figure>
+                                    ))}
+                                </div>
+                            </Marquee>
 
-                    <Carousel auto>
-                        <div className="flex gap-5 ">
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 1</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG1} alt="IMG 1" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 2</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG2} alt="IMG 2" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 3</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG4} alt="IMG 3" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 4</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG3} alt="IMG 4" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 5</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG5} alt="IMG 5" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 6</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG6} alt="IMG 6" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 7</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG7} alt="IMG 7" />
-                            </div>
-                            <div className="w-80 flex-shrink-0">
-                                <p>Imagen 8</p>
-                                <img className="w-full mb-4 rounded-lg" src={IMG8} alt="IMG 8" />
-                            </div>
-                        </div>
-                    </Carousel>
-                    {/* </div> */}
-                </div>
-                <div className="w-full mt-10">
-                    <p className="text-4xl font-bold">¿Sabias qué?</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"><IoMdInformationCircleOutline className="text-primary text-2xl" />Informate sobre nuestros productos mas destacados</p>
-                    <div className={`w-full flex mt-2 rounded-xl p-5 ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
-                        <figure className="w-1/4 rounded-xl">
-                            <img className="rounded-xl border border-gray-300" src="https://igaproductos.com.mx/wp-content/uploads/2023/11/Azul_001-1.jpg" alt="" />
-                        </figure>
-                        <div className="w-1/2 pl-5">
-                            <p className="w-fit px-5 rounded-xl py-1 bg-primary text-white text-xl">Casco de seguridad industrial tipo coraza a</p>
-                            <div className="mt-2">
-                                <p className="w-70/100 text-4xl font-bold">Conoce más sobre nuestros cascos de seguridad industrial.</p>
-                                <div className="mt-5 flex flex-col gap-5">
-                                    <div className="flex items-center text-3xl gap-2"><span className="w-5/100"><figure><img src="https://isopixel.net/wp-content/uploads/2017/02/Logo-Hecho-en-Mexico-trans-350x350.png" alt="Hecho en México" /></figure></span>100% Hechos en México</div>
-                                    <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><LiaCertificateSolid className="text-3xl" /></span>Calidad certificada</p>
-                                    <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><GoHeart className="text-3xl" /></span>Vida util de hasta 5 años en concha y 12 meses en suspensión</p>
-                                    <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><GiMailedFist className="text-3xl" /></span>Resistentes a impactos y peligros de alto votaje</p>
-                                    <p className={`w-fit text-2xl rounded-xl px-2 py-1 flex gap-2 ${theme === "ligth" ? "bg-gray-200" : "bg-gray-800"}`}><span><IoBuild className="text-3xl" /></span>Fabricado en polietileno de alta densidad</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="w-1/4 border-l border-l-gray-300 flex flex-col items-center gap-3">
-                            <p className="text-lg">Certificados por:</p>
-                            <figure className="w-1/2">
-                                <img className="rounded-xl" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/ISO_9001-2015.svg/1200px-ISO_9001-2015.svg.png" alt="ISO 9001:2015" />
-                            </figure>
-                            <div>
-                                <p className="text-lg">Cumplimientos normativos</p>
-                                <div className="mt-2 flex flex-col gap-2 items-center">
-                                    <p>NOM-115-STPS-2009</p>
-                                    <p>NMX-S-055-SCFI-2022</p>
-                                    <p>CFE 8H 341-02</p>
-                                    <p>PEMEX-EST-SS-058-2018</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="w-full mt-10">
-                    <div className="flex gap-5">
-                        <div className={`w-1/2 p-5 rounded-xl ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
-                            <div className="w-full px-5 py-2 rounded-xl flex items-start gap-2">
-                                <AiOutlineGlobal className="text-8xl text-primary" />
-                                <div>
-                                    <p className="text-2xl font-bold underline text-primary">Conoce a nuestros distribuidores oficiales</p>
-                                    <p className=" w-60/100">Encuentra a nuestros distribuidores autorizados mas cercanos a ti</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={`w-1/2 p-5 rounded-xl ${theme === "ligth" ? "bg-white" : "bg-gray-950"}`}>
-                            <div className="w-full px-5 py-2 rounded-xl flex items-start gap-2">
-                                <TiWorld className="text-8xl text-primary" />
-                                <div>
-                                    <p className="text-2xl font-bold underline text-primary">Cada día mas cerca de ti</p>
-                                    <p className=" w-full">Explora nuestra cobertura nacional e internacional</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="w-full mt-10">
-                    <p className="text-4xl font-bold">Productos que pueden interesarte</p>
-                    <p className="text-2xl font-medium flex gap-2 items-center"><AiFillProduct className="text-primary text-2xl" />Ve la seleccion de productos que tenemos para ti!</p>
-                    {isLoading ? (
+                </section>
+                <section>
+                    <h1 className="text-4xl">Productos que te pueden interesar</h1>
+                    <p className="text-2xl font-medium flex gap-2 items-center"> <Package className="text-primary text-2xl" />Conoce la selección de productos que tenemos para ti</p>
+
+                    {isLoading && !error && !data && (
                         <div className="w-full flex flex-wrap gap-10 mt-5">
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
                         </div>
-                    ) : (
-                        <div className="w-full">
-                            {error ? (
-                                <div className="py-5">
-                                    <p className="text-error py-5 text-lg">{getErrorMessage(error)}</p>
-                                    <button type="button" className="btn btn-primary mt-5" onClick={() => refetch()}>Reintentar?</button>
-                                </div>
-                            ) : (
-                                <div className="w-full flex flex-wrap gap-10 mt-5 px-10">
-                                    {data && data.map((data, index) => (
-                                        <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-white" : "bg-transparent")} versionData={data} />
-                                    ))}
-                                </div>
-                            )}
+                    )}
+                    {!isLoading && !data && error && (
+                        <div className="py-5">
+                            <p className="text-2xl">Ocurrio un error inesperado</p>
+                            <p className="text-error py-5 text-lg">{getErrorMessage(error)}</p>
+                            <button type="button" className="btn btn-primary mt-5" onClick={() => refetch()}>Reintentar?</button>
                         </div>
                     )}
-                </div>
+                    {!isLoading && !error && data && (
+                        <div className="w-full flex flex-wrap gap-10 mt-5">
+                            {data.map((data, index) => (
+                                <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-white" : "bg-transparent")} versionData={data} imageLoading="lazy" />
+                            ))}
+                        </div>
+                    )}
+                </section>
             </div>
+
         </div>
     );
 };

@@ -15,9 +15,10 @@ import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
 type Props = {
     versionData: ProductVersionCardType;
     className?: string;
+    imageLoading?: "lazy" | "eager";
 };
 
-const ProductVersionCardShop = ({ versionData, className }: Props) => {
+const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props) => {
     const { theme } = useThemeStore();
     // const { addItem,addToBuyNow} = useShoppingCartStore();
     const { add, addBuyNow } = useShoppingCart();
@@ -53,21 +54,21 @@ const ProductVersionCardShop = ({ versionData, className }: Props) => {
     return (
         <div className={`w-75 h-120 ${className}`}>
             <figure role="button" className="w-full h-60/100 relative cursor-pointer" onClick={() => navigate(`/tienda/${category}/${slug}/${sku}`)}>
-                <img className="w-full h-full object-cover object-center rounded-t-xl" src={image} alt={versionData.product_name} />
+                <img className="w-full h-full object-cover object-center rounded-t-xl" src={image} alt={versionData.product_name} loading={imageLoading} />
                 {versionData.isOffer && <FaFire className="text-error text-4xl absolute top-1 left-1 m-2" />}
                 {isFavorite ? (
                     <button
                         type="button"
                         className="absolute bottom-5 right-5"
                         onClick={(e) => toggleFavorite(e)}>
-                        <IoMdHeart className="text-primary text-4xl" title="Marcar como favorito" />
+                        <IoMdHeart className="text-primary text-4xl" title="Marcar como favorito" aria-label="Marcar como favorito" />
                     </button>
                 ) : (
                     <button
                         type="button"
                         className="absolute bottom-5 right-5"
                         onClick={(e) => toggleFavorite(e)}>
-                        <IoIosHeartEmpty className="text-primary text-4xl" title="Desmarcar favorito" />
+                        <IoIosHeartEmpty className="text-primary text-4xl" title="Desmarcar favorito" aria-label="Desmarcar favorito" />
                     </button>
                 )}
             </figure>
@@ -75,7 +76,8 @@ const ProductVersionCardShop = ({ versionData, className }: Props) => {
                 <button
                     type="button"
                     className="font-bold line-clamp-2 text-lg/6 hover:text-primary hover:underline text-left cursor-pointer"
-                    onClick={() => navigate(`/tienda/${category}/${slug}/${sku}`)}>
+                    onClick={() => navigate(`/tienda/${category}/${slug}/${sku}`)}
+                    aria-label="Ver producto">
                     {versionData.product_name.toUpperCase()}
                 </button>
             </div>
@@ -95,8 +97,20 @@ const ProductVersionCardShop = ({ versionData, className }: Props) => {
                 )}
             </div>
             <div className="w-full h-10/100 flex gap-3 items-center ">
-                <button type="button" className={clsx("btn rounded-2xl text-white w-60/100 cursor-pointer", theme === "ligth" ? "bg-blue-950" : "bg-transparent border border-white")} onClick={() => addBuyNow(versionData)}>Comprar ahora</button>
-                <button type="button" className="btn btn-primary rounded-2xl w-30/100 cursor-pointer" onClick={() => add(versionData)}><MdOutlineShoppingCart className="text-xl" /><FaPlus /></button>
+                <button
+                    type="button"
+                    className={clsx("btn rounded-2xl text-white w-60/100 cursor-pointer", theme === "ligth" ? "bg-blue-950" : "bg-transparent border border-white")}
+                    onClick={() => addBuyNow(versionData)}
+                    aria-label="Comprar ahora">
+                    Comprar ahora
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-primary rounded-2xl w-30/100 cursor-pointer"
+                    onClick={() => add(versionData)}
+                    aria-label="Agregar al carrito">
+                    <MdOutlineShoppingCart className="text-xl" /><FaPlus />
+                </button>
             </div>
         </div>
     );

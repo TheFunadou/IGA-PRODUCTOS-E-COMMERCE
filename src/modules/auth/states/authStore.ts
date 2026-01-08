@@ -1,64 +1,51 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { getCustomerProfileService, loginService, logoutService } from "../services/authServices";
-import type { AuthCustomerCredentialsType, AuthCustomerType } from "../AuthTypes";
+import { getCustomerProfile, login, logout } from "../services/authServices";
+import type { AuthCustomerCredentialsType, CustomerPayloadType } from "../AuthTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
-import type { ProductVersionCardType } from "../../products/ProductTypes";
-import { getCustomerFavorites } from "../../customers/services/CustomerService";
 
-type AuthState = {
-    authCustomer: AuthCustomerType | null;
-    favorites: ProductVersionCardType[] | null,
+type AuthenticationState = {
+    authCustomer: CustomerPayloadType | null;
+    csrfToken: string | null;
     isAuth: boolean;
     isLoading: boolean;
     error: string | null;
     login: (dto: AuthCustomerCredentialsType) => Promise<void>;
-    getFavorites: () => Promise<void>;
     logout: () => Promise<string>;
     getProfile: () => Promise<void>;
-
 };
-
 export const AUTH_CUSTOMER_KEY = "auth-customer-storage";
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create<AuthenticationState>()(
     persist(
         (set, get) => ({
             authCustomer: null,
             isAuth: false,
             isLoading: false,
             error: null,
-            favorites: null,
+            csrfToken: null,
 
             login: async (data: AuthCustomerCredentialsType) => {
                 try {
-                    const response: AuthCustomerType = await loginService(data);
-                    set({
-                        authCustomer: response,
-                        isAuth: true,
-                    });
+                    const response = await login(data);
+                    set({ authCustomer: response.payload, isAuth: true, csrfToken: response.csrfToken });
                 } catch (error) {
-                    set({
-                        authCustomer: null,
-                        isAuth: false,
-                        error: getErrorMessage(error),
-                    });
+                    set({ authCustomer: null, isAuth: false, error: getErrorMessage(error), });
                 }
             },
 
             logout: async () => {
                 try {
-                    const response: string = await logoutService();
+                    const response: string = await logout();
                     set({
                         authCustomer: null,
                         isAuth: false,
+                        csrfToken: null,
                     });
                     await localStorage.removeItem(AUTH_CUSTOMER_KEY);
                     return response;
                 } catch (error) {
-                    set({
-                        error: getErrorMessage(error),
-                    });
+                    set({ error: getErrorMessage(error), });
                     return "Cierre de sesión fallido";
                 }
             },
@@ -66,41 +53,26 @@ export const useAuthStore = create<AuthState>()(
             getProfile: async () => {
                 try {
                     if (get().authCustomer === null) {
-                        console.log("La información del usuario es nula")
-                        const customer: AuthCustomerType | null = await getCustomerProfileService();
-                        console.log("información del cliente obtenida: ", customer);
-                        if (customer) {
+                        const response = await getCustomerProfile();
+                        if (response) {
                             set({
-                                authCustomer: customer,
+                                authCustomer: response.payload,
+                                csrfToken: response.csrfToken,
                                 isAuth: true,
                                 error: ""
                             })
                         }
                     };
-
-                    console.log("La información del cliente ya esta cargada")
                 } catch (error) {
-                    console.log("La información del usuario no se pudo recuperar o el cliente no esta autenticado");
                     set({
                         authCustomer: null,
+                        csrfToken: null,
                         isAuth: false,
                         error: ""
                     })
                 }
             },
-            getFavorites: async () => {
-                try {
-                    set({ isLoading: true });
-                    const favorites: ProductVersionCardType[] | null = await getCustomerFavorites();
-                    console.log("Informacion obtenida: ", favorites);
-                    if (favorites) set({ favorites });
-                } catch (error) {
-                    console.error("Error al obtener los favoritos del cliente", error);
-                    set({error: getErrorMessage(error)})
-                } finally {
-                    set({ isLoading: false });
-                }
-            }
+
         }),
         {
             name: AUTH_CUSTOMER_KEY,
@@ -108,8 +80,8 @@ export const useAuthStore = create<AuthState>()(
             // ⭐ CRÍTICO: Solo persiste estos campos
             partialize: (state) => ({
                 authCustomer: state.authCustomer,
+                csrfToken: state.csrfToken,
                 isAuth: state.isAuth,
-                favorites: state.favorites,
             }),
             version: 1,
             migrate: (persistedState: any, version: number) => {
@@ -117,7 +89,7 @@ export const useAuthStore = create<AuthState>()(
                 if (persistedState.authUser) {
                     delete persistedState.authUser;
                 }
-                return persistedState as AuthState;
+                return persistedState as AuthenticationState;
             },
         }
     )

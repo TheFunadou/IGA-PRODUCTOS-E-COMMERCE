@@ -61,7 +61,7 @@ export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType 
     if (!data) { throw new Error("Hubo un error al procesar los datos del detalle de producto"); }
     return {
         product_name: data.product.product_name ?? "N/A",
-        product_attributes: data.product_attributes ?? [],
+        subcategories: data.subcategories ?? [],
         product_version: {
             sku: data.product_version.sku ?? "N/A",
             unit_price: data.product_version.unit_price ?? "0",
@@ -70,7 +70,7 @@ export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType 
             color_name: data.product_version.color_name ?? "N/A",
             stock: data.product_version.stock ?? 0,
         },
-        product_images: data.product_images.filter(img => img.main_image === true) ?? [],
+        product_images: data.product_images ? data.product_images.filter(img => img.main_image === true) : [],
         category: data.category ?? "N/A",
         isOffer: data.isOffer ?? false,
         discount: data.discount ?? 0,
