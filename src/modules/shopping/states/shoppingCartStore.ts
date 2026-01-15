@@ -3,7 +3,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ShoppingCartType } from "../ShoppingTypes";
 import { useAuthStore } from "../../auth/states/authStore";
-import { getShoppingCartService } from "../services/ShoppingServices";
 
 type ShoppingCartState = {
     items: ShoppingCartType[];

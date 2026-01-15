@@ -1,8 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { formatAxiosError } from "./helpers";
 
+const nodeEnv = import.meta.env.VITE_NODE_ENV;
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:3000",
+    baseURL: nodeEnv === "DEV" ? import.meta.env.VITE_BACKEND_URL || "http://localhost:3000" : import.meta.env.VITE_BACKEND_URL,
     timeout: 10000,
     headers: { "Content-Type": "application/json", },
     withCredentials: true
@@ -19,7 +21,6 @@ api.interceptors.response.use(
     },
     (error: AxiosError) => {
         if (error.response) {
-            // Puedes hacer logging aquí
             console.error('Error de respuesta:', {
                 status: error.response.status,
                 data: error.response.data,
@@ -28,7 +29,8 @@ api.interceptors.response.use(
 
             // Manejo especial para 401 (redirigir al login)
             if (error.response.status === 401) {
-                window.location.href = '/login';
+                localStorage.removeItem("auth-customer-storage");
+                window.location.href = '/iniciar-sesion';
             }
         } else if (error.request) {
             console.error('No se recibió respuesta del servidor');

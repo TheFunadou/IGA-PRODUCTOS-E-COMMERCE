@@ -10,17 +10,30 @@ export type CreateOrderType = {
     payment_method: PaymentProvidersType;
     shopping_cart: PaymentShoppingCart[];
     address: string;
+    coupon_code?: string;
 };
 
 export type ProcessOrderType = Omit<CreateOrderType, "payment_method">;
 
-export type PaymentOrder = {
+export type OrderCreatedResume = {
+    shippingCost: number;
+    boxesQty: number;
+    subtotalBeforeIVA: number;
+    subtotalWithDiscount: number;
+    total: number;
+    discount: number;
+    iva: number;
+};
+
+export type OrderCreatedType = {
     folio: string;
     items: ShoppingCartType[];
     order_id: string;
     receiver_address: CustomerAddressType;
     payment_method: Exclude<PaymentProvidersType, null>;
+    resume: OrderCreatedResume;
 };
+
 
 export type ItemsOrderType = ShoppingCartType & {
     subtotal: string

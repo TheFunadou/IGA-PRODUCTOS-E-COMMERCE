@@ -1,4 +1,3 @@
-import type { SubcategoriesType } from "../categories/CategoriesTypes";
 
 export type ProductType = {
     id: number;
@@ -24,6 +23,7 @@ export type ProductVersionType = {
     status: string;
     stock: number;
     unit_price: string;
+    unit_price_with_discount?: string | null;
     technical_sheet_url: string;
     created_at: Date;
     updated_at: Date;
@@ -49,9 +49,11 @@ export type ProductImagesType = {
     main_image: boolean;
 };
 
-export type GetSubcategoriesType = {
-    subcategories: Pick<SubcategoriesType, "description">;
-};
+// export type GetSubcategoriesType = {
+//     subcategories: Pick<SubcategoriesType, "description">;
+// // };
+
+// export type GetSubcategoriesType = Pick<SubcategoriesType, "uuid" | "description">;
 
 export type ParentVersionType = {
     sku: string;
@@ -64,7 +66,7 @@ type ProductImagesSafeType = Omit<ProductImagesType, "product_version_id" | "id"
 
 export type ProductVersionDetailType = {
     product: Pick<ProductType, "product_name" | "applications" | "certifications_desc" | "description" | "recommendations" | "specs">,
-    subcategories: GetSubcategoriesType[];
+    subcategories: string[];
     product_version: Omit<ProductVersionType, "id" | "product_id" | "created_at" | "updated_at" | "main_version">;
     product_images: ProductImagesSafeType
     parent_versions?: ParentVersionType[];
@@ -72,12 +74,13 @@ export type ProductVersionDetailType = {
     isOffer?: boolean;
     discount?: number;
     isFavorite?: boolean;
+    isReviewed?: boolean;
 };
 
 export type ProductVersionCardType = {
     product_name: string;
-    subcategories: GetSubcategoriesType[];
-    product_version: Pick<ProductVersionType, "unit_price" | "sku" | "color_line" | "color_name" | "color_code" | "stock">;
+    subcategories: string[];
+    product_version: Pick<ProductVersionType, "unit_price" | "sku" | "color_line" | "color_name" | "color_code" | "stock" | "unit_price_with_discount">;
     product_images: ProductImagesSafeType
     category: string;
     isOffer?: boolean;
@@ -98,18 +101,6 @@ export type SearchedProductType = {
     color: string;
 };
 
-
-// export type ProductVersionCardFilters = {
-//     page?: number;
-//     limit: number;
-//     random?: boolean; 
-//     onlyFavorites?: boolean;
-//     category?: string;
-//     subcategoryPath?: number[];
-//     onlyOffers?: boolean;
-//     moreExpensive?: boolean;
-// };
-
 export type ProductVersionCardFilters = {
     page?: number;
     limit: number;
@@ -125,4 +116,40 @@ export type ProductVersionCardFilters = {
 export type ProductVersionRandomOptions = {
     limit: number;
     entity?: string;
+};
+
+export type ProductVersionReviews = {
+    uuid: string;
+    rating: number;
+    title: string;
+    comment: string;
+    created_at: Date;
+};
+
+export type ProductVersionReviewsAttributes = Pick<ProductVersionReviews, "rating" | "title" | "comment">;
+
+export type AddPVReviewType = ProductVersionReviewsAttributes & {
+    sku: string;
+};
+
+export type PVCustomerReview = Omit<ProductVersionReviews, "id" | "product_version_id" | "customer_id"> & {
+    customer: string;
+};
+
+export type GetProductVersionReviewsType = {
+    reviews: PVCustomerReview[];
+    totalRecords: number;
+    totalPages: number;
+};
+
+
+export type GetPVReviewRatingType = {
+    rating: number;
+    percentage: number;
+};
+
+export type PVReviewResumeType = {
+    ratingResume: GetPVReviewRatingType[];
+    ratingAverage: number;
+    totalReviews: number;
 };

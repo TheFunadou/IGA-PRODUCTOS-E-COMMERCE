@@ -6,7 +6,7 @@ import { usePaymentStore } from "../states/paymentStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
 import { formatPrice } from "../../products/Helpers";
-import { closeModal, showModal } from "../../../global/GlobalHelpers";
+import { calcShippingCost, closeModal, showModal } from "../../../global/GlobalHelpers";
 import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import GuestAdvertisement from "../components/GuestAdvertisement";
 import AddressesModal from "../components/AddressesModal";
@@ -17,6 +17,7 @@ import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useShoppingCart } from "../hooks/useShoppingCart";
+import { BiMinus, BiPlus } from "react-icons/bi";
 
 /**
  * Shopping Cart Resume Component
@@ -34,13 +35,6 @@ const ShoppingCartResume = () => {
     // Constants
     // ============================================================================
     const IVA = 0.16;
-
-    /** Maximum number of items that fit in one shipping box */
-    const MAX_ITEMS_PER_BOX = 10;
-
-    /** Cost per shipping box in MXN */
-    const BOX_SHIPPING_COST = 264.00;
-
     // ============================================================================
     // Hooks & State Management
     // ============================================================================
@@ -67,8 +61,8 @@ const ShoppingCartResume = () => {
 
     /** Whether to show the guest checkout form */
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
-
     const [guestBillingAddressChecked, setGuestBillingAddressChecked] = useState<boolean>(false);
+    const [couponCode, setCouponCode] = useState<string | null>(null);
 
     // Modal references
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
@@ -80,6 +74,13 @@ const ShoppingCartResume = () => {
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
     const [billingGuestAddress, setBillingGuestAddress] = useState<GuestFormType | null>(null);
 
+    const [discount, setDiscount] = useState<number>(0);
+    const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);
+    const [subtotalBeforeIva, setSubtotalBeforeIva] = useState<number>(0);
+    const [total, setTotal] = useState<number>(0);
+    const [iva, setIva] = useState<number>(0);
+
+
     // ============================================================================
     // Data Fetching
     // ============================================================================
@@ -90,7 +91,7 @@ const ShoppingCartResume = () => {
         isLoading: addressesLoading,
         error: addressesError,
         refetch: addressesRefetch
-    } = useFetchCustomerAddresses();
+    } = useFetchCustomerAddresses({ pagination: { page: 1, limit: 10 } });
 
     // ============================================================================
     // Computed Values
@@ -99,20 +100,20 @@ const ShoppingCartResume = () => {
     /** Products that are checked/selected for purchase */
     const selectedProducts: ShoppingCartType[] = shoppingCart && shoppingCart.filter(item => item.isChecked === true);
 
-    /** Subtotal including IVA (sum of all selected products) */
-    const subtotal: number = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
-        const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
-        return accumulator + itemTotal;
-    }, 0);
+    // /** Subtotal including IVA (sum of all selected products) */
+    // const subtotal: number = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
+    //     const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
+    //     return accumulator + itemTotal;
+    // }, 0);
 
-    /** IVA tax amount (16% of subtotal) */
-    const calcSubtotalIVA: number = subtotal * IVA;
+    // /** IVA tax amount (16% of subtotal) */
+    // const calcSubtotalIVA: number = subtotal * IVA;
 
-    /** Subtotal before IVA tax */
-    const subtotalBeforeIVA: number = subtotal - calcSubtotalIVA;
+    // /** Subtotal before IVA tax */
+    // const subtotalBeforeIVA: number = subtotal - calcSubtotalIVA;
 
-    /** Final total including subtotal and shipping */
-    const total: number = subtotal + shippingCost;
+    // /** Final total including subtotal and shipping */
+    // const total: number = subtotal + shippingCost;
 
     // ============================================================================
     // Navigation Guard
@@ -129,17 +130,6 @@ const ShoppingCartResume = () => {
     // ============================================================================
     // Helper Functions
     // ============================================================================
-
-    /**
-     * Calculates shipping cost based on total item quantity
-     * Determines how many boxes are needed and calculates total shipping cost
-     */
-    const calcShippingCost = () => {
-        const itemsCount = shoppingCart.reduce((acc, current) => { return acc + current.quantity }, 0);
-        const calcBoxes = Math.ceil(itemsCount / MAX_ITEMS_PER_BOX);
-        setBoxQty(calcBoxes);
-        setShippingCost(calcBoxes * BOX_SHIPPING_COST);
-    };
 
     // ============================================================================
     // Event Handlers
@@ -185,31 +175,69 @@ const ShoppingCartResume = () => {
             await createOrder({
                 shopping_cart: products,
                 address: selectedAddress.uuid,
-                payment_method: paymentMethod
+                payment_method: paymentMethod,
+                coupon_code: couponCode || undefined
             });
         }
     };
 
-    const handleGuestAddressForm = (savedAddress: GuestFormType) => {
-        setGuestAddressForm(savedAddress);
+    const handleGuestAddressForm = (savedAddress: GuestFormType) => setGuestAddressForm(savedAddress);
+
+    const calcShipping = (): { boxesQty: number, shippingCost: number } => {
+        const totalItems = shoppingCart.reduce((acc, current) => { return acc + current.quantity }, 0);
+        const { boxesQty, shippingCost } = calcShippingCost({ itemQty: totalItems });
+        setBoxQty(boxesQty);
+        setShippingCost(shippingCost);
+        return { boxesQty, shippingCost };
     };
 
     // ============================================================================
     // Effects
     // ============================================================================
 
-    /** Recalculate shipping cost when items or quantities change */
-    useEffect(() => {
-        calcShippingCost();
-    }, [updateQty, shoppingCart]);
-
     /** Set default address when addresses are loaded */
     useEffect(() => {
         if (!addresses) return;
-        const defaultAddress = addresses.find(data => data.default_address === true);
+        const defaultAddress = addresses.data.find(data => data.default_address === true);
         if (!defaultAddress) return;
         setSelectedAddress(defaultAddress);
     }, [addresses]);
+
+    useEffect(() => {
+        if (shoppingCart) {
+            const { shippingCost } = calcShipping();
+            /** Products that are checked/selected for purchase */
+            const onlyChecked = shoppingCart.filter(item => item.isChecked === true);
+
+            /** Subtotal including IVA (sum of all selected products) */
+            const subtotal = onlyChecked.reduce((acc, item) => {
+                const itemTotal = parseFloat(item.product_version.unit_price) * item.quantity;
+                return acc + itemTotal;
+            }, 0);
+
+            const discount = onlyChecked.reduce((acc, item) => {
+                if (item.isOffer && item.product_version.unit_price_with_discount) {
+                    return acc + (parseFloat(item.product_version.unit_price) - parseFloat(item.product_version.unit_price_with_discount)) * item.quantity;
+                } else {
+                    return acc;
+                }
+            }, 0);
+
+            const calcIva = subtotal * IVA;
+            const calcSubtotalBeforeIVA: number = subtotal - calcIva;
+            const subtotalWithDiscount = subtotal - discount;
+            const total: number = subtotalWithDiscount + shippingCost;
+
+            setSubtotalWithDisc(subtotalWithDiscount);
+            setSubtotalBeforeIva(calcSubtotalBeforeIVA);
+            setDiscount(discount);
+            setIva(calcIva);
+            setTotal(total);
+        }
+    }, [shoppingCart]);
+
+    /** Recalculate shipping cost when items or quantities change */
+    useEffect(() => { calcShipping(); }, [updateQty]);
 
     // ============================================================================
     // Render
@@ -338,34 +366,44 @@ const ShoppingCartResume = () => {
                             />
                         ))}
                         <div className="w-full border-t border-t-gray-300 pt-5">
-                            <p className="text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
+                            <p className="text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotalWithDisc.toString()), "es-MX")}</span> </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column - Price Summary & Payment */}
                 <div className="w-1/4 pl-4">
+                    <h2>Desglose</h2>
                     <div className={clsx(
-                        "w-full p-5 rounded-xl",
+                        "w-full p-5 rounded-xl mt-2",
                         theme === "ligth" ? "bg-white" : "bg-slate-950"
                     )}>
                         {/* Price Breakdown */}
                         <div className="w-full flex flex-col gap-2 border-b border-b-gray-400 pb-5">
                             <div className="text-xl flex">
-                                <p className="w-3/5 ">Subtotal antes de IVA:</p>
-                                <p className="pl-2">${formatPrice((subtotalBeforeIVA.toString()), "es-MX")}</p>
+                                <div className="w-3/5 ">
+                                    <p>Subtotal:</p>
+                                    <p className="text-xs">Antes de impuestos y descuentos</p>
+                                </div>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((subtotalBeforeIva.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5 ">IVA:</p>
-                                <p className="pl-2">${formatPrice((calcSubtotalIVA.toString()), "es-MX")}</p>
+                                <p className="w-3/5 ">IVA (16%):</p>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((iva.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5">Envio({`${boxQty} caja/s`}):</p>
-                                <p className="pl-2">${formatPrice((shippingCost.toString()), "es-MX")}</p>
+                                <p className="w-3/5">Envio({boxQty > 1 ? `${boxQty} cajas` : `${boxQty} caja`}):</p>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((shippingCost.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5">Descuento:</p>
-                                <p className="pl-2">${formatPrice(("0".toString()), "es-MX")}</p>
+                                <p className={clsx(
+                                    "w-3/5",
+                                    discount > 0 && "text-primary font-bold"
+                                )}>Descuento:</p>
+                                <p className={clsx(
+                                    "pl-2 flex items-center",
+                                    discount > 0 && "text-primary font-bold"
+                                )}><BiMinus />${formatPrice((discount.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-2xl font-bold flex">
                                 <p className="w-3/5 ">Total:</p>
@@ -376,8 +414,7 @@ const ShoppingCartResume = () => {
                         {/* Discount Coupon */}
                         <div className="mt-5">
                             <p className="text-xl">Cupón de descuento</p>
-                            <input type="text" className="w-full input text-lg placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
-                            <button type="button" className="w-full btn bg-blue-900 text-white mt-3 text-lg">Aplicar descuento</button>
+                            <input onChange={(e) => setCouponCode(e.target.value)} type="text" className="w-full input text-lg placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
                         </div>
 
                         {/* Payment Method Selection */}
@@ -430,7 +467,7 @@ const ShoppingCartResume = () => {
 
             {/* Modals */}
             <GuestAdvertisement refName={guestAdvertisementModal} onResponse={modalResponse} />
-            {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
+            {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses.data} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
             <GuestAddressFormModal ref={guestAddressFormModal} onClose={() => closeModal(guestAddressFormModal.current)} title={guestAddressForm ? "Editar dirección" : "Agregar dirección"} onSave={handleGuestAddressForm} />
         </div>
     );

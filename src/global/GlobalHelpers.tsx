@@ -6,11 +6,11 @@
  * --Open a modal 
  */
 export const showModal = (modal: HTMLDialogElement | null) => {
-    if (modal) { modal.showModal() };
+  if (modal) { modal.showModal() };
 };
 
 export const closeModal = (modal: HTMLDialogElement | null) => {
-    if (modal) { modal.close(); }
+  if (modal) { modal.close(); }
 };
 
 /**
@@ -37,13 +37,13 @@ export const closeModal = (modal: HTMLDialogElement | null) => {
  * ```
  */
 export const buildKey = <T extends Record<string, any> | string>(
-    entity: string,
-    params?: T
+  entity: string,
+  params?: T
 ) => {
-    if (params === undefined) {
-        return [entity] as const;
-    }
-    return [entity, params] as const;
+  if (params === undefined) {
+    return [entity] as const;
+  }
+  return [entity, params] as const;
 };
 
 
@@ -90,5 +90,13 @@ export function getFormChanges<T extends Record<string, any>>(
   }
 
   return changes;
-}
+};
+
+export const calcShippingCost = (args: { itemQty: number }): { boxesQty: number, shippingCost: number } => {
+  const BOX_COST = 264.00;
+  const MAX_ITEMS_PER_BOX = 10;
+  const boxesQty = Math.ceil(args.itemQty / MAX_ITEMS_PER_BOX);
+  const shippingCost = boxesQty * BOX_COST;
+  return { boxesQty, shippingCost };
+};
 

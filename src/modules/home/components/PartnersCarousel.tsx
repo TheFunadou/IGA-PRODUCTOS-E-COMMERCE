@@ -1,3 +1,4 @@
+import Marquee from "react-fast-marquee";
 import img1 from "../../../assets/hero/1.webp"
 import img2 from "../../../assets/hero/2.webp";
 import img3 from "../../../assets/hero/3.webp";
@@ -24,48 +25,15 @@ const PartnersCarousel = () => {
   const duplicatedPartners = [...partners, ...partners];
 
   return (
-    <div className="w-full">
-      <div className="">
-        <div className="relative">
-          {/* Contenedor del carrusel */}
-          <div className="flex overflow-hidden">
-            <div className="flex animate-scroll">
-              {duplicatedPartners.map((partner, index) => (
-                <div
-                  key={`${partner.id}-${index}`}
-                  className="flex-shrink-0 mx-8 w-50 flex items-center justify-center duration-300"
-                >
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className="max-w-full object-contain transition-all duration-300"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+    <Marquee className="w-full" speed={80}>
+      <div className="flex gap-10 items-center justify-center">
+        {duplicatedPartners.map((partner, index) => (
+          <figure key={index} className="w-50 filter">
+            <img className="w-full " src={partner.logo} alt={partner.name} loading="lazy" />
+          </figure>
+        ))}
       </div>
-
-      <style>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
-        }
-        
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-    </div>
+    </Marquee>
   );
 };
 

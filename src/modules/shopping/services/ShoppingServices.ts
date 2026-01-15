@@ -1,84 +1,41 @@
-import axios from "axios";
 import type { ShoppingCartType } from "../ShoppingTypes";
-import { BASE_URL } from "../../../global/GlobalTypes";
+import api from "../../../api/api.config";
 
 export const getShoppingCartService = async (): Promise<ShoppingCartType[] | null> => {
-    const response = await axios.get<ShoppingCartType[]>(`${BASE_URL}/shopping-cart`, { withCredentials: true });
+    const response = await api.get<ShoppingCartType[]>(`/shopping-cart`, { withCredentials: true });
     return response.data;
 };
 
-export const syncShoppingCartService = async (items: ShoppingCartType[]): Promise<ShoppingCartType[]> => {
-    const response = await axios.put<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/sync`, items, { withCredentials: true });
+export const shoppingCartAddItemService = async (args: { item: ShoppingCartType, csrfToken: string }): Promise<boolean> => {
+    const response = await api.post<boolean>(`/shopping-cart`, args.item, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
 
-export const updateItemQty = async (values: { sku: string, newQuantity: number }): Promise<ShoppingCartType[]> => {
-    const response = await axios.put<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/quantity`, values, { withCredentials: true });
+export const shoppingCartClearCartService = async (args: { csrfToken: string }): Promise<boolean> => {
+    const response = await api.delete<boolean>(`/shopping-cart`, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
 
-export const addItemService = async (product: ShoppingCartType): Promise<ShoppingCartType[]> => {
-    const response = await axios.post<ShoppingCartType[]>(`${BASE_URL}/shopping-cart`, product, { withCredentials: true });
+export const shoppingCartUpdateItemQty = async (args: { sku: string, newQuantity: number, csrfToken: string }): Promise<boolean> => {
+    const response = await api.patch<boolean>(`/shopping-cart/quantity`, { sku: args.sku, newQuantity: args.newQuantity }, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
 
-export const tooggleCheckService = async (sku: string): Promise<ShoppingCartType[]> => {
-    const response = await axios.put<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/check/toggle`, { sku }, { withCredentials: true });
+export const shoppingCartRemoveItemService = async (args: { sku: string, csrfToken: string }): Promise<boolean> => {
+    const response = await api.delete<boolean>(`/shopping-cart/${args.sku}`, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
 
-export const checkAllService = async (): Promise<ShoppingCartType[]> => {
-    const response = await axios.put<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/check/all`, {}, { withCredentials: true });
-    return response.data;
-};
-export const uncheckAllService = async (): Promise<ShoppingCartType[]> => {
-    const response = await axios.put<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/uncheck/all`, {}, { withCredentials: true });
+export const shoppingCartToggleCheckService = async (args: { sku: string, csrfToken: string }): Promise<boolean> => {
+    const response = await api.put<boolean>(`/shopping-cart/check/toggle`, { sku: args.sku }, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
 
-export const removeItemService = async (sku: string): Promise<ShoppingCartType[]> => {
-    const response = await axios.delete<ShoppingCartType[]>(`${BASE_URL}/shopping-cart/${sku}`, { withCredentials: true });
+export const shoppingCartCheckAllService = async (args: { csrfToken: string }): Promise<boolean> => {
+    const response = await api.put<boolean>(`/shopping-cart/check/all`, {}, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };
-
-export const clearCartService = async (): Promise<boolean> => {
-    const response = await axios.delete<boolean>(`${BASE_URL}/shopping-cart`, { withCredentials: true });
-    return response.data;
-};
-
-
-
-
-export const shoppingCartUpdateItemQty = async (values: { sku: string, newQuantity: number }): Promise<boolean> => {
-    const response = await axios.put<boolean>(`${BASE_URL}/shopping-cart/item/quantity`, values, { withCredentials: true });
-    return response.data;
-};
-
-export const shoppingCartAddItemService = async (item: ShoppingCartType): Promise<boolean> => {
-    const response = await axios.post<boolean>(`${BASE_URL}/shopping-cart/item/add`, item, { withCredentials: true });
-    return response.data;
-};
-
-export const shoppingCartToggleCheckService = async (sku: string): Promise<boolean> => {
-    const response = await axios.put<boolean>(`${BASE_URL}/shopping-cart/item/check/toggle`, { sku }, { withCredentials: true });
-    return response.data;
-};
-
-export const shoppingCartCheckAllService = async (): Promise<boolean> => {
-    const response = await axios.put<boolean>(`${BASE_URL}/shopping-cart/item/check/all`, {}, { withCredentials: true });
-    return response.data;
-};
-export const shoppingCartUncheckAllService = async (): Promise<boolean> => {
-    const response = await axios.put<boolean>(`${BASE_URL}/shopping-cart/item/uncheck/all`, {}, { withCredentials: true });
-    return response.data;
-};
-
-export const shoppingCartRemoveItemService = async (sku: string): Promise<boolean> => {
-    const response = await axios.delete<boolean>(`${BASE_URL}/shopping-cart/item/${sku}`, { withCredentials: true });
-    return response.data;
-};
-
-export const shoppingCartClearCartService = async (): Promise<boolean> => {
-    const response = await axios.delete<boolean>(`${BASE_URL}/shopping-cart/clear`, { withCredentials: true });
+export const shoppingCartUncheckAllService = async (args: { csrfToken: string }): Promise<boolean> => {
+    const response = await api.put<boolean>(`/shopping-cart/uncheck/all`, {}, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return response.data;
 };

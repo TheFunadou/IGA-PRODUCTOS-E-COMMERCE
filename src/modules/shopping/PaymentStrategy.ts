@@ -1,15 +1,14 @@
 
-import type { PaymentOrder, ProcessOrderType } from "../orders/OrdersTypes";
-import { createMercadoPagoOrder } from "./services/PaymentServices";
-import type { ShoppingCartType } from "./ShoppingTypes";
+import type { OrderCreatedType, ProcessOrderType } from "../orders/OrdersTypes";
+import { createMercadoPagoOrderAuthCustomer } from "./services/PaymentServices";
 
 export interface PaymentMethodStrategy {
-    createOrder: (data: ProcessOrderType) => Promise<PaymentOrder>;
+    createOrder: (args: { data: ProcessOrderType, csrfToken: string, isAuth: boolean }) => Promise<OrderCreatedType>;
 };
 
-export class MercadoPagoPayment implements PaymentMethodStrategy {
-    async createOrder(data: ProcessOrderType): Promise<PaymentOrder> {
-        return createMercadoPagoOrder(data);
+export class MercadoPagoCreateOrder implements PaymentMethodStrategy {
+    async createOrder(args: { data: ProcessOrderType, csrfToken: string, isAuth: boolean }): Promise<OrderCreatedType> {
+        return args.isAuth ? createMercadoPagoOrderAuthCustomer(args) : createMercadoPagoOrderAuthCustomer(args);
     };
 };
 

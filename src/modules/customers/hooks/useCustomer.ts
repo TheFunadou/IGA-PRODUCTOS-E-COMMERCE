@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CustomerAddressType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
+import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
 import { createAddressService, deleteAddressService, getCustomerAddressesService, getCustomerFavorites, toggleFavoriteService, updateAddressService } from "../services/CustomerService";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
@@ -11,11 +11,11 @@ export const customerQueryKeys = {
     favorites: (customer: string | undefined) => buildKey("customer:favorites", { customer })
 };
 
-export const useFetchCustomerAddresses = () => {
+export const useFetchCustomerAddresses = (args: { pagination: { page: number, limit: number } }) => {
     const { isAuth, authCustomer } = useAuthStore();
-    return useQuery<CustomerAddressType[]>({
+    return useQuery<GetCustomerAddressesType>({
         queryKey: customerQueryKeys.addresses(authCustomer?.uuid!),
-        queryFn: async () => await getCustomerAddressesService(),
+        queryFn: async () => await getCustomerAddressesService({ page: args.pagination.page, limit: args.pagination.limit }),
         enabled: !!isAuth,
         staleTime: 10 * 60000,
         gcTime: 15 * 60000,
@@ -24,18 +24,19 @@ export const useFetchCustomerAddresses = () => {
 };
 
 // useAddAddress - CON LÓGICA DE SERVIDOR
-export function useAddAddress(customer: string | undefined) {
+export function useAddAddress() {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
-
+    const { csrfToken } = useAuthStore();
+    const { authCustomer } = useAuthStore();
     return useMutation({
         mutationFn: async (newAddress: NewAddressType): Promise<CustomerAddressType> => {
-            return await createAddressService(newAddress);
+            return await createAddressService({ data: newAddress, csrfToken: csrfToken! });
         },
 
         onMutate: async (newAddress: NewAddressType) => {
-            if (!customer) return { previousAddresses: undefined, tempUUID: "" };
-            const queryKey = customerQueryKeys.addresses(customer);
+            if (!authCustomer) return { previousAddresses: undefined, tempUUID: "" };
+            const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
             const tempUUID = `temp-${Date.now()}`;
@@ -58,8 +59,8 @@ export function useAddAddress(customer: string | undefined) {
         },
 
         onSuccess: (savedAddress, newAddress, context) => {
-            if (!customer) return;
-            const queryKey = customerQueryKeys.addresses(customer);
+            if (!authCustomer) return;
+            const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey });
             showTriggerAlert("Successfull", "Dirección de envío creada exitosamente", {
                 duration: 3500,
@@ -68,8 +69,8 @@ export function useAddAddress(customer: string | undefined) {
         },
 
         onError: (error, newAddress, context) => {
-            if (!customer || !context) return;
-            const queryKey = customerQueryKeys.addresses(customer);
+            if (!authCustomer || !context) return;
+            const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             queryClient.setQueryData(queryKey, context.previousAddresses);
             showTriggerAlert("Error", "No se pudo crear la dirección", {
                 duration: 3500
@@ -82,10 +83,11 @@ export function useAddAddress(customer: string | undefined) {
 export function useDeleteAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
+    const { csrfToken } = useAuthStore();
 
     return useMutation({
         mutationFn: async (addressUUID: string): Promise<string> => {
-            return await deleteAddressService(addressUUID);
+            return await deleteAddressService({ addressUUID, csrfToken: csrfToken! });
         },
 
         onMutate: async (addressUUID: string) => {
@@ -127,13 +129,13 @@ export function useDeleteAddress(customer: string | undefined) {
 export function useUpdateAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
-
+    const { csrfToken } = useAuthStore();
     return useMutation({
         mutationFn: async ({ addressUUID, data }: {
             addressUUID: string;
             data: UpdateAddressType
         }): Promise<string> => {
-            return await updateAddressService(addressUUID, data);
+            return await updateAddressService({ addressUUID, data, csrfToken: csrfToken! });
         },
         onMutate: async ({ addressUUID, data }) => {
             if (!customer) return { previousAddresses: undefined };
@@ -162,27 +164,16 @@ export function useUpdateAddress(customer: string | undefined) {
 
         onSuccess: (message) => {
             if (!customer) return;
-
             const queryKey = customerQueryKeys.addresses(customer);
-            // ✅ Invalida y refetch automático para sincronizar con el estado real del servidor
-            // Esto garantiza coherencia con la lógica del backend (ej: asignación automática de default_address)
             queryClient.invalidateQueries({ queryKey });
-
-            showTriggerAlert("Successfull", message, {
-                duration: 3500,
-                delay: 1000
-            });
+            showTriggerAlert("Successfull", message, { duration: 3500, delay: 1000 });
         },
 
         onError: (error, data, context) => {
             if (!customer || !context) return;
-
             const queryKey = customerQueryKeys.addresses(customer);
-
-            // ✅ Restaurar estado anterior si falla
             queryClient.setQueryData(queryKey, context.previousAddresses);
-
-            console.error('❌ Error al actualizar la dirección:', error);
+            console.error("Error al actualizar la dirección", error);
             showTriggerAlert("Error", "No se pudo actualizar la dirección", {
                 duration: 3500
             });
@@ -191,11 +182,11 @@ export function useUpdateAddress(customer: string | undefined) {
 };
 
 
-export const useFetchCustomerFavorites = () => {
+export const useFetchCustomerFavorites = (args: { pagination: { page: number, limit: number } }) => {
     const { isAuth, authCustomer } = useAuthStore();
-    return useQuery<ProductVersionCardType[] | null>({
+    return useQuery<PVCardsResponseType | null>({
         queryKey: customerQueryKeys.favorites(authCustomer?.uuid!),
-        queryFn: async () => await getCustomerFavorites(),
+        queryFn: async () => await getCustomerFavorites(args.pagination),
         enabled: !!isAuth,
         staleTime: 10 * 60000,
         gcTime: 15 * 60000,
@@ -207,35 +198,35 @@ export function useToggleFavorite() {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
     const { isAuth, authCustomer } = useAuthStore();
-
+    const { csrfToken } = useAuthStore();
     return useMutation({
         mutationFn: async ({ sku }: { sku: string, product: ProductVersionCardType }): Promise<onToogleFavoriteType> => {
-            return await toggleFavoriteService(sku);
+            return await toggleFavoriteService({ sku, csrfToken: csrfToken! });
         },
         onMutate: async ({ sku, product }) => {
             if (!authCustomer && !isAuth) return { previousFavorites: undefined };
 
             const queryKey = customerQueryKeys.favorites(authCustomer?.uuid!);
             await queryClient.cancelQueries({ queryKey });
-            const previousFavorites = queryClient.getQueryData<ProductVersionCardType[]>(queryKey);
-            const exists = previousFavorites?.some(fav => fav.product_version.sku === sku);
+            const previousFavorites = queryClient.getQueryData<PVCardsResponseType>(queryKey);
+            const exists = previousFavorites?.data?.some(fav => fav.product_version.sku === sku);
             const isAdding = !exists;
 
-            queryClient.setQueryData<ProductVersionCardType[]>(
+            queryClient.setQueryData<PVCardsResponseType>(
                 queryKey, (old) => {
-                    if (!old) return [product];
-                    return exists ? old.filter(fav => fav.product_version.sku !== sku) : [product, ...old];
+                    if (!old) return { data: [product], totalRecords: 1, totalPages: 1 };
+                    return exists ? { ...old, data: old.data.filter(fav => fav.product_version.sku !== sku) } : { ...old, data: [product, ...old.data], totalRecords: old.totalRecords + 1, totalPages: old.totalPages };
                 }
             );
 
             queryClient.setQueriesData<PVCardsResponseType>(
-                { queryKey: ['product:product_version'] }, // Busca todas las queries que empiecen con 'products'
+                { queryKey: ['product:product_version:cards'] }, // Busca todas las queries que empiecen con 'products'
                 (oldData) => {
-                    if (!oldData?.product_version_cards) return oldData;
+                    if (!oldData?.data) return oldData;
 
                     return {
                         ...oldData,
-                        product_version_cards: oldData.product_version_cards.map(card =>
+                        data: oldData.data.map(card =>
                             card.product_version.sku === sku
                                 ? { ...card, isFavorite: isAdding }
                                 : card

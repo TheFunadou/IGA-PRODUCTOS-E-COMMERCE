@@ -1,36 +1,34 @@
-import axios from "axios";
-import type { CustomerAddressType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
-import { BASE_URL } from "../../../global/GlobalTypes";
-import type { ProductVersionCardType } from "../../products/ProductTypes";
+import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
+import type { PVCardsResponseType } from "../../products/ProductTypes";
+import api from "../../../api/api.config";
 
-
-export const getCustomerAddressesService = async (): Promise<CustomerAddressType[]> => {
-    const response = await axios.get<CustomerAddressType[]>(`${BASE_URL}/customer/addresses`, { withCredentials: true });
-    return response.data;
+export const getCustomerAddressesService = async (params: { page: number, limit: number }): Promise<GetCustomerAddressesType> => {
+    const { data } = await api.get<GetCustomerAddressesType>(`/customer-addresses`, { params });
+    return data;
 };
 
-export const createAddressService = async (data: NewAddressType): Promise<CustomerAddressType> => {
-    const response = await axios.post<CustomerAddressType>(`${BASE_URL}/customer/addresses`, data, { withCredentials: true });
-    return response.data;
+export const createAddressService = async (args: { data: NewAddressType, csrfToken: string }): Promise<CustomerAddressType> => {
+    const { data } = await api.post<CustomerAddressType>(`/customer-addresses`, args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    return data;
 };
 
-export const updateAddressService = async (address: string, data: UpdateAddressType): Promise<string> => {
-    const response = await axios.put<string>(`${BASE_URL}/customer/addresses/${address}`, data, { withCredentials: true });
-    return response.data;
+export const updateAddressService = async (args: { addressUUID: string, data: UpdateAddressType, csrfToken: string }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer-addresses`, { ...args.data, uuid: args.addressUUID }, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    return data;
 };
 
-export const deleteAddressService = async (address: string): Promise<string> => {
-    const response = await axios.delete<string>(`${BASE_URL}/customer/addresses/${address}`, { withCredentials: true });
-    return response.data;
+export const deleteAddressService = async (args: { addressUUID: string, csrfToken: string }): Promise<string> => {
+    const { data } = await api.delete<string>(`/customer-addresses/${args.addressUUID}`, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    return data;
 };
 
-export const getCustomerFavorites = async (): Promise<ProductVersionCardType[] | null> => {
-    const response = await axios.get<ProductVersionCardType[]>(`${BASE_URL}/customer/favorites/all`, { withCredentials: true });
-    return response.data;
+export const getCustomerFavorites = async (params: { page: number, limit: number }): Promise<PVCardsResponseType | null> => {
+    const { data } = await api.get<PVCardsResponseType | null>(`/favorites`, { params });
+    return data;
 };
 
 
-export const toggleFavoriteService = async (sku: string): Promise<onToogleFavoriteType> => {
-    const response = await axios.post<onToogleFavoriteType>(`${BASE_URL}/customer/favorites`, { sku }, { withCredentials: true });
-    return response.data;
+export const toggleFavoriteService = async (args: { sku: string, csrfToken: string }): Promise<onToogleFavoriteType> => {
+    const { data } = await api.post<onToogleFavoriteType>(`/favorites`, { sku: args.sku }, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    return data;
 };

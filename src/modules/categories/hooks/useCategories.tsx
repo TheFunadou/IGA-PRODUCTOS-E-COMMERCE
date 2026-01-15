@@ -16,6 +16,8 @@ interface UseCategoriesOptions {
     initCategory?: string;
     /** Initial subcategory path (array of subcategory IDs) to select on mount */
     initSubcategoryPath?: string[];
+    /** Initial page to select on mount */
+    initPage?: number;
 }
 
 /**
@@ -96,7 +98,6 @@ export function useCategories(options?: UseCategoriesOptions) {
                 .sort((a, b) => subcategoriesPath.indexOf(a.uuid) - subcategoriesPath.indexOf(b.uuid))
                 .map(item => item.description);
             setSubcategoriesBreadcrumb(breadcrumb);
-            console.log("init breadcrumb", breadcrumb);
         }
     };
 
@@ -160,7 +161,7 @@ export function useCategories(options?: UseCategoriesOptions) {
         handleSetBreadcrumb(path);
         if (options?.enableQueryParamsNavigate && selectedCategory) {
             const subcategories = path.map((item) => `sub=${item}`).join("&");
-            navigate(`/tienda?category=${selectedCategory.name.toLowerCase()}${subcategories.length > 0 ? `&${subcategories}` : ""}`);
+            navigate(`/tienda?category=${selectedCategory.name.toLowerCase()}${subcategories.length > 0 ? `&${subcategories}` : ""}&page=1`);
         }
     }, 300);
 
@@ -187,7 +188,7 @@ export function useCategories(options?: UseCategoriesOptions) {
             setSubcategoriesPath([]);
             setSubcategoriesBreadcrumb([]);
             if (options?.enableQueryParamsNavigate) {
-                navigate(`/tienda?category=${category.name.toLowerCase()}`);
+                navigate(`/tienda?category=${category.name.toLowerCase()}&page=1`);
             }
         }
     };

@@ -77,3 +77,146 @@ export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType 
         isFavorite: isFavorite ?? false,
     };
 };
+
+export const containsOffensiveLanguage = (text: string): boolean => {
+    if (!text || text.trim().length === 0) return false;
+
+    // ================================
+    // Configuración
+    // ================================
+
+    const highSeverityPatterns = [
+        "eres un p***o",
+        "m***da",
+        "eres un i****a",
+        "pinche p***o",
+        "pinche i****a",
+        "producto de m****a",
+        "empresa de m****a",
+        "marca de m****a",
+        "no sirve p***a",
+        "no vale m****a",
+        "chafa",
+        "puta p***a",
+        "puta m****a",
+        "s**o a**l",
+        "pendejo",
+        "eres un pendejo",
+        "hijo de p***a",
+        "hijos de su p**a madre",
+        "estúpidos",
+        "imbécil",
+        "basura de empresa",
+        "son una basura",
+        "estafadores",
+        "malditos",
+        "vayanse a la m****a",
+        "porquería de servicio",
+        "rateros"
+    ];
+
+    const mediumSeverityPatterns = [
+        "de la v***a",
+        "vale v***a",
+        "una v***a",
+        "pura m****a",
+        "es m****a",
+        "culo",
+        "que m****a",
+        "esta dlv",
+        "es dlv",
+        "todo dlv",
+        "chingadera",
+        "esta chingadera",
+        "me vale madre",
+        "a la chingada",
+        "váyanse al carajo",
+        "me cago en",
+        "qué asco",
+        "mugrero",
+        "no mamen",
+        "pésimo",
+        "alv",
+        "está de la m****a"
+    ];
+
+    const allowedNegativePhrases = [
+        "no me gusto",
+        "no lo recomiendo",
+        "mala calidad",
+        "pesima experiencia",
+        "no cumplio mis expectativas",
+        "no era lo que esperaba",
+        "no funciona como esperaba"
+    ];
+
+    const productContextWords = [
+        "calidad",
+        "material",
+        "precio",
+        "funciona",
+        "durabilidad",
+        "envio",
+        "entrega",
+        "talla",
+        "uso",
+        "servicio"
+    ];
+
+    // ================================
+    // Normalización
+    // ================================
+    const normalized = text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
+    // ================================
+    // Permitir crítica negativa válida
+    // ================================
+    if (
+        allowedNegativePhrases.some(phrase =>
+            normalized.includes(phrase)
+        )
+    ) {
+        return false;
+    }
+
+    // ================================
+    // Utils internas
+    // ================================
+    const patternToRegex = (pattern: string) =>
+        new RegExp(
+            `\\b${pattern.replace(/\*/g, "[a-z0-9]*")}\\b`,
+            "i"
+        );
+
+    // ================================
+    // Scoring de toxicidad
+    // ================================
+    let score = 0;
+
+    highSeverityPatterns.forEach(p => {
+        if (patternToRegex(p).test(normalized)) score += 3;
+    });
+
+    mediumSeverityPatterns.forEach(p => {
+        if (patternToRegex(p).test(normalized)) score += 1;
+    });
+
+    // ================================
+    // Contexto del producto
+    // ================================
+    const hasProductContext = productContextWords.some(word =>
+        normalized.includes(word)
+    );
+
+    // ================================
+    // Regla final
+    // ================================
+    if (score >= 3) return true;              // ofensivo directo
+    if (score >= 1 && !hasProductContext) return true; // grosería sin contexto
+
+    return false;
+};

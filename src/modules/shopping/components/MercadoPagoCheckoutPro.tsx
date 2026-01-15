@@ -9,7 +9,7 @@ const MercadoPagoCheckoutPro = ({ preferenceId }: Props) => {
     if (!preferenceId) throw new Error("Error al construir el boton de pago");
     const [id, setId] = useState<string | null>(null);
     useEffect(() => {
-        const publicKey: string = import.meta.env.VITE_MP_CHECKOUT_PRO_TEST;
+        const publicKey: string = import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY_TEST;
         if (!publicKey) throw new Error("Hubo un error al cargar el botón de pago");
         console.log(publicKey);
         initMercadoPago(publicKey, { locale: "es-MX" });

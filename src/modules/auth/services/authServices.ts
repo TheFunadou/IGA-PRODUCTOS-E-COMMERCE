@@ -15,7 +15,7 @@ export const logout = async () => {
 
 
 export const registerCustomer = async (dto: NewCustomerType): Promise<string> => {
-    const { data } = await api.post<string>("/customer-auth/register", dto);
+    const { data } = await api.post<string>("/customer", dto);
     return data;
 };
 

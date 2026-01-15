@@ -19,7 +19,7 @@ export type CustomerAddressType = {
     default_address: boolean;
 };
 
-export type UpdateAddressType = Partial<Omit<CustomerAddressType, "uuid">>;
+export type UpdateAddressType = Partial<CustomerAddressType>;
 export type NewAddressType = Omit<CustomerAddressType, "uuid">;
 export type GuestFormType = Omit<CustomerAddressType, "uuid" | "default_address">;
 export type GuestBillingFormType = Omit<CustomerAddressType, "uuid" | "default_address" | "recipient_name" | "recipient_last_name"> & {
@@ -30,4 +30,10 @@ export type GuestBillingFormType = Omit<CustomerAddressType, "uuid" | "default_a
 export type onToogleFavoriteType = {
     added: boolean;
     message: string;
+};
+
+export type GetCustomerAddressesType = {
+    data: CustomerAddressType[];
+    totalRecords: number;
+    totalPages: number;
 };

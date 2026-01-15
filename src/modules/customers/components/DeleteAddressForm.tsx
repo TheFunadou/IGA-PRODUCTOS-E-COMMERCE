@@ -3,12 +3,12 @@ import { useDeleteAddress } from "../hooks/useCustomer";
 
 type Props = {
     address: string | undefined;
-    customer:string | undefined;
+    customer: string | undefined;
     ref: RefObject<HTMLDialogElement | null>;
     onDeleted: () => void;
 };
 
-const DeleteAddressForm = ({ ref, onDeleted, address,customer}: Props) => {
+const DeleteAddressForm = ({ ref, onDeleted, address, customer }: Props) => {
 
     const deleteAddress = useDeleteAddress(customer);
 
@@ -26,7 +26,7 @@ const DeleteAddressForm = ({ ref, onDeleted, address,customer}: Props) => {
                     <form method="dialog">
                         {/* if there is a button in form, it will close the modal */}
                         <button type="button" className="btn btn-error mr-3 text-white" onClick={() => handleDelete()}>Eliminar</button>
-                        <button type="submit" className="btn btn-primary">Cancelar</button>
+                        <button type="submit" className="btn btn-ghost">Cancelar</button>
                     </form>
                 </div>
             </div>

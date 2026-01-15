@@ -19,11 +19,11 @@ import { useThemeStore } from "../../../layouts/states/themeStore";
 
 const Shop = () => {
     const { theme } = useThemeStore();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const categoryParam = searchParams.get("category");
-    // const subcategoryPathParam = searchParams.getAll("sub").map(Number);
     const subcategoryPathParam = searchParams.getAll("sub");
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const pageParam = searchParams.get("page");
+    const currentPage = pageParam ? parseInt(pageParam) : 1;
     const [expensive, setExpensive] = useState<boolean | undefined>(undefined);
     const [favoriteCheck, setFavoriteCheck] = useState<boolean>(false);
     const [showFavorites, setShowFavorites] = useState<boolean | undefined>(undefined);
@@ -46,7 +46,8 @@ const Shop = () => {
     } = useCategories({
         enableQueryParamsNavigate: true,
         initCategory: categoryParam ? categoryParam : undefined,
-        initSubcategoryPath: subcategoryPathParam.length > 0 ? subcategoryPathParam : undefined
+        initSubcategoryPath: subcategoryPathParam.length > 0 ? subcategoryPathParam : undefined,
+
     });
     const MAX_PRODUCT_LIMIT_PER_PAGE: number = 8;
 
@@ -64,8 +65,11 @@ const Shop = () => {
         subcategoryPath: subcategoryPathParam.length > 0 ? subcategoryPathParam : undefined,
     });
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
-
+    const handlePageChange = (page: number) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("page", page.toString());
+        setSearchParams(newParams);
+    };
     const handlePrincingFilter = (value: string) => {
         setExpensive(value === "expensive" ? true : undefined);
     };
@@ -78,6 +82,13 @@ const Shop = () => {
         handleSetFavoriteFilter();
     }, [favoriteCheck, handleSetFavoriteFilter]);
 
+    useEffect(() => {
+        if (pageParam && pageParam !== "1") {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.set("page", "1");
+            setSearchParams(newParams);
+        }
+    }, [categoryParam, JSON.stringify(subcategoryPathParam)]);
 
     return (
         <div className={clsx("flex rounded-2xl p-10", theme === "ligth" ? "bg-white" : "bg-slate-950")}>

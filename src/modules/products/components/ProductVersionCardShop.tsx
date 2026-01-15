@@ -2,10 +2,9 @@ import { FaFire, FaPlus } from "react-icons/fa6";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import type { ProductVersionCardType } from "../ProductTypes";
 import { useFavorite } from "../hooks/useProductFavorites";
-import { useEffect, useState, version } from "react";
+import { useEffect, useState } from "react";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { formatPrice, makeSlug } from "../Helpers";
-import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useThemeStore } from "../../../layouts/states/themeStore";
@@ -20,7 +19,6 @@ type Props = {
 
 const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props) => {
     const { theme } = useThemeStore();
-    // const { addItem,addToBuyNow} = useShoppingCartStore();
     const { add, addBuyNow } = useShoppingCart();
     const [image, setImage] = useState<string | undefined>(NotFoundSVG);
     const [unitPrice, setUnitPrice] = useState<string[]>([]);
@@ -28,13 +26,14 @@ const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props)
     const category = versionData.category.toLowerCase();
     const slug = makeSlug(versionData.product_name);
     const sku = versionData.product_version.sku.toLowerCase();
-    // const unitPrice: string[] = formatPrice(versionData.product_version.unit_price, "es-MX").split(".");
     const navigate = useNavigate();
     const {
         isFavorite,
         toggleFavorite
     } = useFavorite({
-        sku: versionData.product_version.sku, initialFavoriteState: versionData.isFavorite, item: versionData
+        sku: versionData.product_version.sku,
+        initialFavoriteState: versionData.isFavorite,
+        item: versionData
     });
 
     useEffect(() => {
@@ -55,7 +54,12 @@ const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props)
         <div className={`w-75 h-120 ${className}`}>
             <figure role="button" className="w-full h-60/100 relative cursor-pointer" onClick={() => navigate(`/tienda/${category}/${slug}/${sku}`)}>
                 <img className="w-full h-full object-cover object-center rounded-t-xl" src={image} alt={versionData.product_name} loading={imageLoading} />
-                {versionData.isOffer && <FaFire className="text-error text-4xl absolute top-1 left-1 m-2" />}
+                {versionData.isOffer && <FaFire className={clsx(
+                    "text-4xl absolute top-1 left-1 m-2",
+                    versionData.discount && versionData.discount < 50 && "text-error",
+                    versionData.discount && versionData.discount >= 50 && versionData.discount < 65 && "text-success",
+                    versionData.discount && versionData.discount >= 65 && "text-primary"
+                )} />}
                 {isFavorite ? (
                     <button
                         type="button"
@@ -82,12 +86,19 @@ const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props)
                 </button>
             </div>
             <div className="w-full h-10/100">
-                <p className={clsx("text-sm line-clamp-2", theme === "ligth" ? "text-gray-700" : "text-white")}>{versionData.subcategories && versionData.subcategories.map(sub => sub.subcategories.description).join(", ")}</p>
+                <p className={clsx("text-sm line-clamp-2", theme === "ligth" ? "text-gray-700" : "text-white")}>{versionData.subcategories && versionData.subcategories.join(", ")}</p>
             </div>
             <div className="w-full h-10/100 flex items-center">
                 {versionData.isOffer ? (
                     <div className="flex items-center gap-2">
-                        <p className="h-full px-2 bg-error text-2xl text-white font-bold rounded-md">{versionData.discount}%</p>
+                        <p className={
+                            clsx(
+                                "h-full px-2 text-2xl text-white font-bold rounded-md",
+                                versionData.discount && versionData.discount < 50 && "bg-error",
+                                versionData.discount && versionData.discount >= 50 && versionData.discount < 65 && "bg-success",
+                                versionData.discount && versionData.discount >= 65 && "bg-primary"
+                            )
+                        }>{versionData.discount}%</p>
                         <div>
                             <p className="font-bold text-2xl  inline-block">${unitPriceWithDiscount[0]}.<span className="align-baseline text-lg">{unitPriceWithDiscount[1]}</span> <span className="line-through text-gray-400 text-lg align-baseline">${unitPrice[0]}.{unitPrice[1]}</span></p>
                         </div>

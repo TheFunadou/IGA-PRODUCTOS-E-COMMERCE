@@ -11,7 +11,6 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import Login from "./modules/auth/design/Login"
-import NewAccount from "./modules/auth/design/NewAccount"
 import { TriggerAlertProvider } from "./modules/alerts/states/TriggerAlert"
 import Shop from "./modules/shop/design/Shop"
 import { ThemeProvider } from "./modules/products/states/ThemeContext"

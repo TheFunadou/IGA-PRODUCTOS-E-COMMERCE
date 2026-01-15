@@ -14,15 +14,22 @@ import clsx from "clsx";
 import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
 import { useEffect, useState } from "react";
 import { useShoppingCart } from "../hooks/useShoppingCart";
+import { useFetchCustomerFavorites } from "../../customers/hooks/useCustomer";
+import PaginationComponent from "../../../global/components/PaginationComponent";
+import { calcShippingCost } from "../../../global/GlobalHelpers";
+import { FaShippingFast } from "react-icons/fa";
 
 
 
 const ShoppingCart = () => {
     const { theme } = useThemeStore();
     const { order } = usePaymentStore();
-    const { isAuth, favorites, isLoading: favLoading } = useAuthStore();
+    const { isAuth } = useAuthStore();
     const navigate = useNavigate();
     const [subtotal, setSubtotal] = useState<number>(0);
+    const [favoritesPage, setFavoritesPage] = useState<number>(1);
+    const [shippingCost, setShippingCost] = useState<number>(0);
+    const [boxesQty, setBoxesQty] = useState<number>(0);
     const {
         shoppingCart,
         checkAll,
@@ -33,19 +40,34 @@ const ShoppingCart = () => {
         updateQty,
     } = useShoppingCart();
 
+    const { data: favorites, isLoading: isLoadingFavorites, error: favoritesError } = useFetchCustomerFavorites({
+        pagination: { page: favoritesPage, limit: 10 }
+    });
+
+
     const {
         data: ads,
         isLoading: adsLoading,
     } = useFetchAds({ limit: 10, entity: "ads" })
-    const customerFavorites: boolean = true;
 
     useEffect(() => {
         if (shoppingCart) {
-            const subtotal = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
-                const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
-                return accumulator + itemTotal;
+            const onlyChecked = shoppingCart.filter(items => items.isChecked);
+            const subtotal = onlyChecked.reduce((acc, item) => {
+                if (item.isOffer && item.product_version.unit_price_with_discount) {
+                    return acc + (parseFloat(item.product_version.unit_price_with_discount) * item.quantity);
+                } else {
+                    return acc + (parseFloat(item.product_version.unit_price) * item.quantity);
+                }
             }, 0);
             setSubtotal(subtotal);
+
+            const totalItems = onlyChecked.reduce((acc, item) => {
+                return acc + item.quantity;
+            }, 0);
+            const { boxesQty, shippingCost } = calcShippingCost({ itemQty: totalItems });
+            setBoxesQty(boxesQty);
+            setShippingCost(shippingCost);
         };
     }, [shoppingCart]);
 
@@ -56,6 +78,8 @@ const ShoppingCart = () => {
             navigate("/resumen-de-carrito");
         };
     };
+
+    const handleFavoritesPageChange = (page: number) => setFavoritesPage(page);
     return (
         <div className={clsx(
             "w-full px-5 py-10 rounded-xl",
@@ -118,8 +142,7 @@ const ShoppingCart = () => {
                             <p className="text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
                         </div>
                     </div>
-
-                    {customerFavorites && isAuth &&
+                    {favorites && isAuth && (
                         <div className="w-full mt-5">
                             {/* Customer Favorites */}
                             <p className="text-3xl font-bold">Mis favoritos</p>
@@ -128,26 +151,32 @@ const ShoppingCart = () => {
                                 "w-full rounded-xl mt-4 p-5",
                                 theme === "ligth" ? "bg-white" : "bg-slate-900"
                             )}>
-                                {favLoading ? (
+
+                                {isLoadingFavorites && !favoritesError && !favorites && (
                                     <div>
                                         <ProductVersionCardSkinnySkeleton />
                                         <ProductVersionCardSkinnySkeleton />
                                         <ProductVersionCardSkinnySkeleton />
                                     </div>
-                                ) : (
+                                )}
+
+                                {!isLoadingFavorites && !favoritesError && favorites && favorites.data.length === 0 && (
+                                    <p className="text-gray-500">No tienes productos agregados en favoritos</p>
+                                )}
+
+                                {!isLoadingFavorites && !favoritesError && favorites && favorites.data.length > 0 && (
                                     <div className="flex flex-wrap gap-5 ">
-                                        {favorites ? (
-                                            favorites.map((data, index) => (
-                                                <ProductVersionCardShop key={index} versionData={data} />
-                                            ))
-                                        ) : (
-                                            <p className="text-gray-500">No tienes productos agregados en favoritos</p>
-                                        )}
+                                        {favorites.data.map((data, index) => (
+                                            <ProductVersionCardShop key={index} versionData={data} />
+                                        ))}
                                     </div>
+                                )}
+                                {favorites.totalPages > 1 && (
+                                    <div className="mt-5"><PaginationComponent currentPage={favoritesPage} onPageChange={handleFavoritesPageChange} totalPages={favorites.totalPages} /></div>
                                 )}
                             </div>
                         </div>
-                    }
+                    )}
 
                     {!isAuth && (
                         <div className={clsx(
@@ -158,32 +187,40 @@ const ShoppingCart = () => {
                             <Link to={"/iniciar-sesion"} className="underline text-primary text-xl">Iniciar sesión</Link>
                         </div>
                     )}
+
+
                 </div>
                 <div className="w-1/4 pl-5 flex flex-col gap-5">
                     {shoppingCart && shoppingCart.length > 0 &&
                         <div className={clsx(
-                            "w-full p-5 rounded-xl",
+                            "w-full p-5 rounded-xl flex flex-col gap-2",
                             theme === "ligth" ? "bg-white" : "bg-slate-950"
                         )}>
                             <p className="text-xl border-b border-b-gray-400 pb-5">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
-                            {order && (
-                                <button
-                                    type="button"
-                                    className="w-full btn bg-blue-500 text-white mt-10"
-                                    onClick={() => navigate("/pagar-productos")}
-                                    disabled={!order}>
-                                    Finalizar pago pendiente
-                                </button>
-                            )}
-                            {!order && (
-                                <button
-                                    type="button"
-                                    className="w-full btn btn-primary mt-10"
-                                    onClick={handleRedirectToCheckout}
-                                    disabled={shoppingCart.filter(item => item.isChecked).length === 0}>
-                                    Proceder al pago
-                                </button>
-                            )}
+
+                            <div className="bg-gray-100 px-2 py-3 rounded-xl flex gap-2">
+                                <p className="text-xl flex items-center gap-2 font-medium"><FaShippingFast className="text-3xl text-primary" />Envio por: ${formatPrice((shippingCost.toString()), "es-MX")} ({boxesQty > 1 ? `${boxesQty} Cajas` : `${boxesQty} Caja`})</p>
+                            </div>
+                            <div>
+                                {order && (
+                                    <button
+                                        type="button"
+                                        className="w-full btn bg-blue-500 text-white mt-10"
+                                        onClick={() => navigate("/pagar-productos")}
+                                        disabled={!order}>
+                                        Finalizar pago pendiente
+                                    </button>
+                                )}
+                                {!order && (
+                                    <button
+                                        type="button"
+                                        className="w-full btn btn-primary mt-5"
+                                        onClick={handleRedirectToCheckout}
+                                        disabled={shoppingCart.filter(item => item.isChecked).length === 0}>
+                                        Proceder al pago
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     }
                     <div className="w-full">

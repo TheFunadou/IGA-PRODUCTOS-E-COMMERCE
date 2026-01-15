@@ -278,7 +278,7 @@ const Home = () => {
                         <div className="flex flex-col gap-5">
                             <h1 className="text-7xl text-white ">Protección que inspira confianza</h1>
                             <h2 className="text-white text-3xl">Cada jornada merece seguridad total.</h2>
-                            <h3 className="text-slate-900">En IGA Productos ® encontraras articulos 100% Hechos en México que cumplen los estandares y cumplimientos normativos para cuidar tu desempeño sin comprometer tu comodidad.</h3>
+                            <h3 className="text-white">En IGA Productos ® encontraras articulos 100% Hechos en México que cumplen los estandares y cumplimientos normativos para cuidar tu desempeño sin comprometer tu comodidad.</h3>
                             <div className="flex gap-5">
                                 <button className="btn btn-primary">Explorar tienda</button>
                                 <button className="btn btn-soft btn-primary">Conocenos</button>

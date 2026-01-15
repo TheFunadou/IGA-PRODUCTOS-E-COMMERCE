@@ -141,7 +141,7 @@ const PaymentExiting = () => {
                                 <div key={index} className="w-full mb-5">
                                     <p className="text-2xl font-bold">{item.product_name}</p>
                                     <p className="text-lg text-gray-500 bg-gray-200 w-fit rounded-xl px-3">
-                                        {item.product_attributes.map(attr => attr.category_attribute.description).join(", ")}
+                                        {item.subcategories.join(", ")}
                                     </p>
                                     <div className="w-full flex mt-2">
                                         <figure className="w-15/100 rounded-xl">

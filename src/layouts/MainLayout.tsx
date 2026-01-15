@@ -20,18 +20,22 @@ import ThemeController from "../modules/home/components/ThemeController";
 import { useThemeStore } from "./states/themeStore";
 import clsx from "clsx";
 import { useShoppingCart } from "../modules/shopping/hooks/useShoppingCart";
+import { useSearchHistoryStore } from "./states/searchCachedStore";
+import { Clock8, Trash } from "lucide-react";
 
 const MainLayout = () => {
     const { theme } = useThemeStore();
+    const { searches: searchHistory, addSearch, clearSearches } = useSearchHistoryStore();
+    const [isInputSearchActive, setIsInputSearchActive] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [inputSearch, setInputSearch] = useState<string>("");
     const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
     const [showMobileSubmenu, setShowMobileSubmenu] = useState<boolean>(false);
-    const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 2000);
+    const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 300);
     const { shoppingCart: authShoppingCart } = useShoppingCart();
     const searchResultsRef = useRef<HTMLDivElement>(null);
     const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
-    const { isAuth, logout, getProfile, favorites, getFavorites, authCustomer } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
     const { items: localShoppingCart } = useShoppingCartStore();
     const [showShopMenuPreview, setShowShopMenuPreview] = useState<boolean>(false);
     const hideTimeoutRef = useRef<number | null>(null);
@@ -71,12 +75,27 @@ const MainLayout = () => {
         setShowShopMenuPreview(true);
     };
 
+
+    const handleSearchNavigate = (args: { category: string, productName: string, color: string, sku: string }) => {
+        addSearch(`${args.productName.toUpperCase()}`);
+        navigate(`/tienda/${args.category.toLowerCase()}/${makeSlug(args.productName)}/${args.sku.toLowerCase()}`)
+    };
+
+    const onMouseDownSearchHistory = (args: { e: React.MouseEvent, search: string }) => {
+        args.e.preventDefault();
+        setInputSearch(args.search);
+        setShowSearchResults(true);
+    };
+
+    const onClearSearchHistory = (args: { e: React.MouseEvent }) => {
+        args.e.preventDefault();
+        clearSearches();
+    };
+
     // load customer profile
     useEffect(() => {
         const loadCustomerData = async () => { await getProfile(); }
-        const loadFavorites = async () => await getFavorites();
         if (isAuth && !authCustomer) loadCustomerData;
-        if (isAuth && !favorites) loadFavorites();
     }, []);
 
     // Close the search container when the location changed
@@ -87,7 +106,7 @@ const MainLayout = () => {
         <div className="w-full" id="top">
             <nav className="w-full flex p-5 lg:px-10 md:py-5 xl:px-10 xl:py-5 bg-blue-950 text-white text-sm lg:text-base">
                 <div className=" w-50/100 md:w-65/100 xl:w-65/100 flex gap-1 md:gap-3 items-center">
-                    <figure className=" md:w-45/100 lg:w-35/100 xl:w-1/5">
+                    <figure className=" md:w-45/100 lg:w-35/100 xl:w-1/5 cursor-pointer" onClick={() => navigate("/")}>
                         <img src={IGA_LOGO} alt="IGA Prodcutos Logo" />
                     </figure>
                     <div className="hidden md:block md:w-55/100 lg:w-65/100 xl:w-3/4 relative">
@@ -97,19 +116,37 @@ const MainLayout = () => {
                                 className={clsx("xl:w-95/100 input rounded-xl focus:outline-white focus:outline-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")}
                                 placeholder="Buscar productos"
                                 onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
+                                onFocus={() => setIsInputSearchActive(true)}
+                                onBlur={() => setIsInputSearchActive(false)}
+                                value={inputSearch}
                                 onKeyDown={(e) => e.stopPropagation()}
                             />
                             {debouncedLoading ? <span className="loading loading-dots loading-xs"></span>
                                 : (<FaSearch className="text-xl" />)}
                         </div>
+                        {searchHistory.length > 0 && isInputSearchActive && inputSearch.length === 0 && (
+                            <div className={clsx("w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")} ref={searchResultsRef}>
+                                <button type="button" onMouseDown={(e) => onClearSearchHistory({ e })} className="cursor-pointer">
+                                    <p className="flex items-center justify-end gap-2 px-5 py-1 text-sm underline text-primary"><Trash size={15} className="text-primary" />Eliminar historial</p>
+                                </button>
+                                {searchHistory.map((data, index) => (
+                                    <button
+                                        key={`${index}-${data}`}
+                                        type="button"
+                                        onMouseDown={(e) => onMouseDownSearchHistory({ e, search: data })}
+                                    >
+                                        <p className="flex items-center gap-2 hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><Clock8 size={20} className="text-gray-500" /><strong>{data}</strong></p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         {showSearchResults && searchedData && searchedData.length > 0 &&
                             <div className={clsx("w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")} ref={searchResultsRef}>
-                                {/* Este no detecta el click en el button */}
                                 {searchedData && searchedData.map((data, index) => (
                                     <button
                                         key={`${index}-${data.sku}`}
                                         type="button"
-                                        onClick={() => navigate(`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.sku.toLowerCase()}`)}>
+                                        onClick={() => handleSearchNavigate({ category: data.category, productName: data.product_name, color: data.color, sku: data.sku })}>
                                         <p className="flex items-center hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><FaSearch className="mr-2 text-primary" /><strong>{`${data.product_name.toUpperCase()} COLOR ${data.color.toUpperCase()}`}</strong></p>
                                     </button>
                                 ))}

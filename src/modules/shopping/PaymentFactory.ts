@@ -1,14 +1,12 @@
-import type { PaymentMethodsType } from "./ShoppingTypes";
-import { MercadoPagoPayment, type PaymentMethodStrategy } from "./PaymentStrategy";
+import { MercadoPagoCreateOrder, type PaymentMethodStrategy } from "./PaymentStrategy";
+import type { PaymentProvidersType } from "./ShoppingTypes";
 
 
 export class PaymentFactory {
-    static create(method: PaymentMethodsType): PaymentMethodStrategy {
+    static create(method: PaymentProvidersType): PaymentMethodStrategy {
         switch (method) {
             case "mercado_pago":
-                return new MercadoPagoPayment();
-            // case "paypal":
-            //     return new PaypalPayment();
+                return new MercadoPagoCreateOrder();
             default:
                 throw new Error("Payment method not supported");
         };

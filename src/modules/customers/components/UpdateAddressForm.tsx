@@ -2,7 +2,7 @@ import { useEffect, useState, type RefObject } from "react";
 import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json"
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import type { CustomerAddressType, NewAddressType } from "../CustomerTypes";
+import type { CustomerAddressType, NewAddressType, UpdateAddressType } from "../CustomerTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { getFormChanges } from "../../../global/GlobalHelpers";
 import { useUpdateAddress } from "../hooks/useCustomer";
@@ -28,12 +28,11 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
     const [currentCountry, setCurrentCountry] = useState<string>("https://flagsapi.com/MX/flat/64.png");
     const [addressType, setAddressType] = useState<string>("Casa");
     const [error, setError] = useState<string>("");
-    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<Partial<NewAddressType>>({});
+    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<UpdateAddressType>({});
     const updateAddress = useUpdateAddress(customer);
 
     const restoreForm = () => {
         if (!versionData) return;
-        reset({});
         reset({
             recipient_name: versionData.recipient_name,
             recipient_last_name: versionData.recipient_last_name!,
@@ -63,12 +62,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
     const onSubmit: SubmitHandler<Partial<NewAddressType>> = async (data: Partial<NewAddressType>) => {
         try {
             setError("");
-            // await addAddress.mutateAsync(data);
-            // onUpdated();
             if (!versionData) return;
-            // Crear objeto solo con campos modificados
             const updatedFields: Partial<NewAddressType> = getFormChanges(versionData, data);
-                        console.log(updatedFields);
             if (Object.keys(updatedFields).length === 0) { setError("Se necesita al menos actualizar un campo para actualizar la información"); return; }
             updateAddress.mutate({
                 addressUUID: address!,

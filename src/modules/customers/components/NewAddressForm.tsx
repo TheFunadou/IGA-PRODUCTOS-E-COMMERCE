@@ -8,11 +8,10 @@ import { useAddAddress } from "../hooks/useCustomer";
 
 type Props = {
     ref: RefObject<HTMLDialogElement | null>;
-    customer: string | undefined;
     onCreated: () => void;
 };
 
-const NewAddressForm = ({ ref, onCreated, customer }: Props) => {
+const NewAddressForm = ({ ref, onCreated }: Props) => {
     const defualtCountry: CountriesPhoneCodeType = {
         "nameES": "México",
         "nameEN": "Mexico",
@@ -25,7 +24,7 @@ const NewAddressForm = ({ ref, onCreated, customer }: Props) => {
     const [addressType, setAddressType] = useState<string>("Casa");
     const [error, setError] = useState<string>("");
     const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<NewAddressType>({ defaultValues: { default_address: false, floor: undefined } });
-    const addAddress = useAddAddress(customer);
+    const addAddress = useAddAddress();
 
     const onSubmit: SubmitHandler<NewAddressType> = async (data: NewAddressType) => {
         try {
