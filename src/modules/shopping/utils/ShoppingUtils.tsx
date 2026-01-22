@@ -1,41 +1,39 @@
-import { SiMercadopago } from "react-icons/si";
-import type { OrderStatusType, PaymentClassType, PaymentMethodDetails, PaymentMethodType, PaymentProvidersType } from "../ShoppingTypes";
-import { FaCcMastercard, FaCcPaypal, FaCcVisa } from "react-icons/fa6";
+import type { OrderStatusType, PaymentClassType, PaymentMethodDetails, PaymentMethodType, PaymentProviderDetails, PaymentProvidersType } from "../ShoppingTypes";
 
 export const paymentProvider: Record<Exclude<PaymentProvidersType, null>, PaymentMethodDetails> = {
     paypal: {
-        icon: <FaCcPaypal />,
+        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png",
         description: "PayPal"
     },
     mercado_pago: {
-        icon: <SiMercadopago />,
+        image_url: "https://web.telmov.mx/images/Logo-mercadopago.svg",
         description: "Mercado Pago"
     }
 };
 
 export const paymentMethod: Record<PaymentMethodType, PaymentMethodDetails> = {
     visa: {
-        icon: <FaCcVisa className="text-5xl text-primary" />,
+        image_url: "https://cdn.worldvectorlogo.com/logos/visa-10.svg",
         description: "Visa"
     },
     mastercard: {
-        icon: <FaCcMastercard className="text-5xl text-warning" />,
+        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png",
         description: "Mastercard"
     },
     oxxo: {
-        icon: <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Oxxo_Logo.svg/2560px-Oxxo_Logo.svg.png" alt="Oxxo" />,
+        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Oxxo_Logo.svg/2560px-Oxxo_Logo.svg.png",
         description: "OXXO"
     },
     paycash: {
-        icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYnm51TwY4R0HrCNAZB4Isk0JgrEKdBYvp-qEf-YP4OGfGgkHOgZbNybMxEpaY4kx0tg&usqp=CAU" alt="Santander" />,
+        image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYnm51TwY4R0HrCNAZB4Isk0JgrEKdBYvp-qEf-YP4OGfGgkHOgZbNybMxEpaY4kx0tg&usqp=CAU",
         description: "Santander"
     },
     bancomer: {
-        icon: <img src="https://bmv.com.mx/docs-pub/GESTOR/IMAGENES_EMISORAS/5114.png" alt="BBVA" />,
+        image_url: "https://bmv.com.mx/docs-pub/GESTOR/IMAGENES_EMISORAS/5114.png",
         description: "BBVA"
     },
     clabe: {
-        icon: <img src="https://cdn2.downdetector.com/static/uploads/logo/spei.png" alt="SPEI" />,
+        image_url: "https://cdn2.downdetector.com/static/uploads/logo/spei.png",
         description: "Transferencia SPEI"
     }
 };
@@ -44,15 +42,16 @@ export const formatPaymentClass: Record<PaymentClassType, string> = {
     credit_card: "Tarjeta de credito",
     debit_card: "Tarjeta de debito",
     ticket: "Efectivo",
-    transfer: "Transferencia"
+    transfer: "Transferencia interbancaria"
 };
 
 export const formatOrderStatus: Record<OrderStatusType, string> = {
-    approved: "Aprobada",
-    in_process: "En proceso",
-    pending: "Pendiente",
-    rejected: "Rechazada",
-    canceled: "Cancelada",
-    refounded: "Rembolsada"
+    APPROVED: "Aprobada",
+    IN_PROCESS: "En proceso",
+    PENDING: "Pendiente",
+    REJECTED: "Rechazada",
+    CANCELLED: "Cancelada",
+    AUTHORIZED: "Autorizada",
+    REFUNDED: "Rembolsada"
 };
 

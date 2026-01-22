@@ -27,8 +27,6 @@ import Distributors from "./modules/home/design/Distributors"
 import Contact from "./modules/home/design/Contact"
 import ShoppingCartResume from "./modules/shopping/design/ShoppingCartResume"
 import Checkout from "./modules/shopping/design/Checkout"
-import PaymentExiting from "./modules/shopping/design/PaymentExiting"
-import PaymentPending from "./modules/shopping/design/PaymentPending"
 import PaymentError from "./modules/shopping/design/PaymentError"
 import NotFoundPage from "./global/design/NotFoundPage"
 import PoliticaPrivacidad from "./modules/policies/PoliticaPrivacidad"
@@ -39,6 +37,8 @@ import CustomerPersonalInfo from "./modules/customers/design/CustomerPersonalInf
 import Ticket from "./modules/orders/design/Ticket"
 import { useThemeStore } from "./layouts/states/themeStore"
 import { useEffect } from "react"
+import PaymentExiting from "./modules/payments/design/PaymentExiting"
+import PaymentPending from "./modules/payments/design/PaymentPending"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({

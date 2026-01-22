@@ -1,0 +1,96 @@
+{
+    "status": "APPROVED",
+    "order": {
+        "address": {
+            "uuid": "cmk7b34uk0001mkxt795r1yom",
+            "recipient_name": "Joel",
+            "recipient_last_name": "Baez",
+            "country": "Mexico",
+            "state": "Veracruz",
+            "city": "Coatzacoalcos",
+            "locality": "Coatzacoalcos",
+            "street_name": "7 de Noviembre",
+            "neighborhood": "Esfuerzos de los hermanos del trabajo",
+            "zip_code": "96430",
+            "address_type": "Casa",
+            "floor": "N/A",
+            "number": "102",
+            "aditional_number": "N/A",
+            "references_or_comments": "Casa blanca 3 pisos portón cafe",
+            "country_phone_code": "+52",
+            "contact_number": "9211443695",
+            "default_address": true
+        },
+        "items": [
+            {
+                "category": "Cascos",
+                "subcategories": [
+                    "Cascos de Seguridad Industrial",
+                    "Cachucha Hit",
+                    "Ajuste de Intervalo",
+                    "Clase G"
+                ],
+                "isChecked": true,
+                "product_images": [
+                    {
+                        "main_image": true,
+                        "image_url": "https://igaproductos.com.mx/wp-content/uploads/2024/07/HIT_ROJO_000.jpg"
+                    }
+                ],
+                "product_name": "IGA CASCO DE SEGURIDAD INDUSTRIAL TIPO CACHUCHA HIT G INTERVALO",
+                "product_version": {
+                    "color_code": "#f52a26",
+                    "color_name": "Rojo",
+                    "color_line": "Linea Basica",
+                    "sku": "CAS3-AI2-004",
+                    "unit_price": "141.11",
+                    "stock": 14,
+                    "unit_price_with_discount": "141.11"
+                },
+                "quantity": 1,
+                "discount": 0,
+                "subtotal": "141.11",
+                "isFavorite": false,
+                "isOffer": false
+            }
+        ],
+        "details": {
+            "order": {
+                "uuid": "7258c2b6-17bc-49ff-9cf4-02ff15c1937a",
+                "total_amount": "405.11",
+                "aditional_resource_url": null,
+                "coupon_code": null,
+                "created_at": "2026-01-19T19:03:40.027Z",
+                "updated_at": "2026-01-19T19:04:26.354Z",
+                "exchange": "MXN",
+                "is_guest_order": false,
+                "payment_provider": "mercado_pago",
+                "status": "APPROVED"
+            },
+            "payments_details": [
+                {
+                    "last_four_digits": "3764",
+                    "payment_class": "credit_card",
+                    "payment_method": "visa",
+                    "customer_paid_amount": "49.57",
+                    "customer_installment_amount": "5.51",
+                    "installments": 9,
+                    "payment_status": "APPROVED",
+                    "created_at": "2026-01-19T19:04:26.096Z",
+                    "updated_at": "2026-01-19T19:04:26.096Z"
+                },
+                {
+                    "last_four_digits": "0553",
+                    "payment_class": "credit_card",
+                    "payment_method": "master",
+                    "customer_paid_amount": "392.79",
+                    "customer_installment_amount": "130.93",
+                    "installments": 3,
+                    "payment_status": "APPROVED",
+                    "created_at": "2026-01-19T19:04:25.626Z",
+                    "updated_at": "2026-01-19T19:04:26.348Z"
+                }
+            ]
+        }
+    }
+}

@@ -1,10 +1,45 @@
 import type { CustomerAddressType } from "../customers/CustomerTypes";
+import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
 
 export type PaymentShoppingCart = {
     product: string;
     quantity: number;
 };
+
+export type Order = {
+    uuid: string;
+    is_guest_order: boolean;
+    payment_provider: PaymentProviders;
+    status: OrderStatusType;
+    total_amount: string;
+    exchange: string;
+    aditional_resource_url?: string | null;
+    coupon_code?: string | null;
+    created_at: Date;
+    updated_at: Date;
+};
+
+export type OrderItemsDetails = {
+    quantity: number;
+    unit_price: string;
+    discount: string;
+    subtotal: string;
+};
+
+
+export type OrderPaymentDetails = {
+    last_four_digits: string;
+    payment_class: PaymentClassType;
+    payment_method: PaymentMethodType;
+    customer_paid_amount: string;
+    customer_installment_amount: string;
+    installments: number;
+    payment_status: OrderStatusType;
+    created_at: Date;
+    updated_at: Date;
+};
+
 
 export type CreateOrderType = {
     payment_method: PaymentProvidersType;
@@ -28,7 +63,7 @@ export type OrderCreatedResume = {
 export type OrderCreatedType = {
     folio: string;
     items: ShoppingCartType[];
-    order_id: string;
+    external_id: string;
     receiver_address: CustomerAddressType;
     payment_method: Exclude<PaymentProvidersType, null>;
     resume: OrderCreatedResume;

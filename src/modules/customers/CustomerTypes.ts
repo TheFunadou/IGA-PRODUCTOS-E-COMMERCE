@@ -1,3 +1,5 @@
+import type { CustomerType } from "../auth/AuthTypes";
+
 export type CustomerAddressType = {
     uuid: string;
     recipient_name: string;
@@ -22,6 +24,8 @@ export type CustomerAddressType = {
 export type UpdateAddressType = Partial<CustomerAddressType>;
 export type NewAddressType = Omit<CustomerAddressType, "uuid">;
 export type GuestFormType = Omit<CustomerAddressType, "uuid" | "default_address">;
+export type GetCustomerAddressPaymentType = NewAddressType & { uuid?: string; };
+export type CustomerAttributes = Pick<CustomerType, "name" | "last_name" | "email">;
 export type GuestBillingFormType = Omit<CustomerAddressType, "uuid" | "default_address" | "recipient_name" | "recipient_last_name"> & {
     moral_or_fisical: "moral" | "física";
     rfc: string;

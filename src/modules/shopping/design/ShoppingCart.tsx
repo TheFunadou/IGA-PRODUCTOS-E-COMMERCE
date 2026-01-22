@@ -30,6 +30,7 @@ const ShoppingCart = () => {
     const [favoritesPage, setFavoritesPage] = useState<number>(1);
     const [shippingCost, setShippingCost] = useState<number>(0);
     const [boxesQty, setBoxesQty] = useState<number>(0);
+    const [pendingOrder, setPendingOrder] = useState<boolean>(false);
     const {
         shoppingCart,
         checkAll,
@@ -70,6 +71,8 @@ const ShoppingCart = () => {
             setShippingCost(shippingCost);
         };
     }, [shoppingCart]);
+
+    useEffect(() => { if (order) setPendingOrder(true) }, [order]);
 
 
 
@@ -202,16 +205,16 @@ const ShoppingCart = () => {
                                 <p className="text-xl flex items-center gap-2 font-medium"><FaShippingFast className="text-3xl text-primary" />Envio por: ${formatPrice((shippingCost.toString()), "es-MX")} ({boxesQty > 1 ? `${boxesQty} Cajas` : `${boxesQty} Caja`})</p>
                             </div>
                             <div>
-                                {order && (
+                                {pendingOrder && (
                                     <button
                                         type="button"
-                                        className="w-full btn bg-blue-500 text-white mt-10"
+                                        className="w-full btn bg-warning text-white"
                                         onClick={() => navigate("/pagar-productos")}
                                         disabled={!order}>
                                         Finalizar pago pendiente
                                     </button>
                                 )}
-                                {!order && (
+                                {!pendingOrder && (
                                     <button
                                         type="button"
                                         className="w-full btn btn-primary mt-5"

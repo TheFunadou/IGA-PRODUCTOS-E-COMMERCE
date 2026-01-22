@@ -311,7 +311,7 @@ const Home = () => {
                 <section className="w-full mt-10">
                     <h1 className="text-4xl">Formas de pago</h1>
                     <p className="text-2xl font-medium flex gap-2 items-center"> <Handbag className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
-                    <Marquee className="w-full" gradient={true} speed={80}>
+                    <Marquee className="w-full" gradient={false} speed={80}>
                         <div className="flex gap-10 items-center justify-center">
                             {[...paymentMethodsImgs, ...paymentMethodsImgs].map((img, index) => (
                                 <figure key={index} className="w-80 p-5 filter">
@@ -337,11 +337,11 @@ const Home = () => {
                         </div>
                         <div>
                             <p className="text-2xl font-medium flex gap-2 items-center"> <Video className="text-primary text-2xl" /> Galeria de imagenes</p>
-                            <Marquee className="w-full" gradient={true} speed={80}>
+                            <Marquee className="w-full" gradient={false} speed={80}>
                                 <div className="flex gap-10 items-center justify-center">
                                     {[...imageGallery, ...imageGallery].map((img, index) => (
-                                        <figure key={index} className="w-100 p-5 filter">
-                                            <img className="w-full " src={img.url} alt={img.description} loading="lazy" />
+                                        <figure key={index} className="w-100 h-100 p-5 filter">
+                                            <img className="w-full h-full object-cover object-center rounded-xl " src={img.url} alt={img.description} loading="lazy" />
                                         </figure>
                                     ))}
                                 </div>

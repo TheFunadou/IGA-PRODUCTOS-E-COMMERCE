@@ -2,68 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../auth/states/authStore";
 import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import { formatPrice } from "../../products/Helpers";
-import { useEffect, useState } from "react";
-import type { PaymentMethodDetails, PaymentProvidersType, ShoppingCartType } from "../ShoppingTypes";
-import { LiaPlusSolid } from "react-icons/lia";
-import { LiaMinusSolid } from "react-icons/lia";
-import { SiMercadopago } from "react-icons/si";
-import { FaCcPaypal } from "react-icons/fa";
+import { useState } from "react";
 import MercadoPagoCheckoutPro from "../components/MercadoPagoCheckoutPro";
 import { usePaymentStore } from "../states/paymentStore";
 import { BiMinus, BiPlus } from "react-icons/bi";
 import clsx from "clsx";
+import { paymentProvider } from "../utils/ShoppingUtils";
 
 const Checkout = () => {
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const { isAuth } = useAuthStore();
     const { order } = usePaymentStore();
     const navigate = useNavigate();
-    // const [subtotal, setSubtotal] = useState<number>(0);
-    // const [discount, setDiscount] = useState<number>(0);
-    const payment_method = "mercado_pago";
     if (!order || order.items.filter(item => item.isChecked === true).length === 0) {
         navigate("/carrito-de-compras");
     };
 
     if (!order) { throw new Error("No se encontro la orden de pago") };
-
-    const paymentMethods: Record<Exclude<PaymentProvidersType, null>, PaymentMethodDetails> = {
-        paypal: {
-            icon: <FaCcPaypal />,
-            description: "PayPal"
-        },
-        mercado_pago: {
-            icon: <SiMercadopago />,
-            description: "Mercado Pago"
-        }
-    };
-
-    // useEffect(() => {
-    //     const orderItemsChecked = order.items.filter(items => items.isChecked === true);
-    //     const subtotal: number = orderItemsChecked.reduce((accumulator: number, item: ShoppingCartType) => {
-    //         const itemSubtotal = parseFloat(item.product_version.unit_price) * item.quantity;
-    //         return accumulator + itemSubtotal;
-    //     }, 0);
-
-    //     const discount: number = orderItemsChecked.reduce((acc: number, item: ShoppingCartType) => {
-    //         if (item.isOffer && item.discount) {
-    //             const discountAmount = parseFloat(item.product_version.unit_price) * item.discount / 100;
-    //             return acc + discountAmount;
-    //         };
-    //         return acc + 0;
-    //     }, 0);
-
-    //     setSubtotal(subtotal);
-    //     setDiscount(discount);
-    // }, [order]);
-
-
-
-
-    // const IVA: number = subtotal * 0.16;
-    // const subtotalBeforeIVA: number = subtotal - IVA;
-    // const shipping: number = 0;
-    // const total: number = subtotal + shipping - discount;
 
     return (
         <div className="w-full bg-base-300 px-5 py-10 rounded-xl">
@@ -202,7 +157,9 @@ const Checkout = () => {
                 </div>
                 <div className="w-1/4 pl-4">
                     <div className="w-full bg-white rounded-xl p-5">
-                        <p className="flex items-center gap-2 text-primary font-bold text-2xl"><span className="text-6xl">{paymentMethods[order.payment_method].icon}</span> {paymentMethods[payment_method].description}</p>
+                        <figure className="w-50 py-5">
+                            <img className="w-full object-cover" src={paymentProvider[order.payment_method].image_url} alt={paymentProvider[order.payment_method].description} />
+                        </figure>
                     </div>
 
                     <div className="mt-4">
@@ -242,7 +199,7 @@ const Checkout = () => {
                             <div className="mt-5 pt-5 border-t border-t-gray-300">
                                 {order.payment_method === "mercado_pago" &&
                                     <div>
-                                        <MercadoPagoCheckoutPro preferenceId={order.order_id} />
+                                        <MercadoPagoCheckoutPro preferenceId={order.external_id} />
                                     </div>
                                 }
                             </div>
