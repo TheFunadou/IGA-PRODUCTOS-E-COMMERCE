@@ -66,7 +66,7 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                                 </div>
                             )}
                         </div>
-                        <div className="breadcrumbs bg-gray-100 w-fit rounded-xl px-5">
+                        <div className="breadcrumbs bg-base-200 w-fit rounded-xl px-5">
                             <ul>
                                 <li className={clsx(
                                     "text-lg font-light",
@@ -96,7 +96,7 @@ const ShoppingCartProductResume = ({ data, onRemoveItem, onToggleCheck, onUpdate
                     </figure>
                     <div className=" w-65/100 flex px-5 mt-2">
                         <div className="w-1/2  text-xl flex flex-col gap-4">
-                            <p className="w-fit px-2 py-1 rounded-xl bg-gray-100">{data.product_version.color_line}</p>
+                            <p className="w-fit px-2 py-1 rounded-xl bg-base-200">{data.product_version.color_line}</p>
                             <p><span className={clsx("mr-2 px-4 py-1 rounded-full", theme === "dark" && "border border-slate-500")} style={{ backgroundColor: data.product_version.color_code }}></span>{data.product_version.color_name}</p>
                             {lock === true && <p className="w-35 p-1 rounded-3xl text-center text-white bg-primary ">x {data.quantity} pz</p>}
                             <div className={lock ? "hidden" : "block"}>

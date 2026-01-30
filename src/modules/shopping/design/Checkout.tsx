@@ -171,7 +171,7 @@ const Checkout = () => {
                         </div>
                     )}
 
-                    <div className="w-full bg-white rounded-xl p-5 flex flex-col gap-2 mt-5">
+                    <div className="w-full bg-base-100 rounded-xl p-5 flex flex-col gap-2 mt-5">
                         <h2 className="text-2xl font-bold">Resumen de pedido</h2>
                         {data && data.items.length > 0 && data.items.map((item, index) => (
                             <ShoppingCartProductResume
@@ -187,7 +187,7 @@ const Checkout = () => {
                     </div>
                 </div>
                 <div className="w-1/4 pl-4">
-                    <div className="w-full px-5 py-2 bg-white rounded-xl flex justify-center">
+                    <div className="w-full px-5 py-2 bg-base-100 rounded-xl flex justify-center">
                         <figure className="w-50 py-5">
                             <img className="w-full object-cover" src={paymentProvider[order.payment_method].image_url} alt={paymentProvider[order.payment_method].description} />
                         </figure>
@@ -195,7 +195,7 @@ const Checkout = () => {
 
                     <div className="mt-4">
                         <h2>Resumen de pago</h2>
-                        <div className="w-full bg-white p-5 rounded-xl mt-2">
+                        <div className="w-full bg-base-100 p-5 rounded-xl mt-2">
                             <div className="w-full flex flex-col gap-2  pb-5">
                                 <div className="text-xl flex">
                                     <div className="w-3/5 ">

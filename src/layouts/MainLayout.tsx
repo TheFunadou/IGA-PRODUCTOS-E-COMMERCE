@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../modules/auth/states/authStore";
-import { FaFacebook } from "react-icons/fa6";
+import { FaFacebook, FaWhatsapp } from "react-icons/fa6";
 import { FaInstagramSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useEffect, useState } from "react";
@@ -103,7 +103,7 @@ const MainLayout = () => {
 
 
     return (
-        <div className="w-full" id="top">
+        <div className="w-full relative" id="top">
             <nav className="w-full flex p-5 lg:px-10 md:py-5 xl:px-10 xl:py-5 bg-blue-950 text-white text-sm lg:text-base">
                 <div className=" w-50/100 md:w-65/100 xl:w-65/100 flex gap-1 md:gap-3 items-center">
                     <figure className=" md:w-45/100 lg:w-35/100 xl:w-1/5 cursor-pointer" onClick={() => navigate("/")}>
@@ -162,7 +162,7 @@ const MainLayout = () => {
                             <Link to={"/mis-favoritos"}>Mis favoritos</Link>
                             <div className="dropdown dropdown-center cursor-pointer" >
                                 <div tabIndex={0} role="button" className="border border-white px-5 py-1 text-center rounded-xl focus:bg-white focus:text-black">{`${authCustomer.name.toUpperCase()} ${authCustomer.last_name.toUpperCase()}`}</div>
-                                <ul tabIndex={-1} className=" dropdown-content menu bg-white w-65 text-black text-base flex flex-col items-center gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
+                                <ul tabIndex={-1} className=" dropdown-content menu bg-base-100 w-65 text-black text-base flex flex-col items-center gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
                                     <li><Link to={"/mi-cuenta/informacion-personal"}>Mi información personal</Link></li>
                                     <li><Link to={"/mi-cuenta/direcciones-de-envio"}>Mis direcciones de envio</Link></li>
                                     <button type="button" className="w-full border rounded-xl cursor-pointer bg-blue-950 p-2 text-white" onClick={handleLogout}>{loading ? ("Cargando ...") : (<p className="flex items-center gap-1 justify-center"><IoLogOutOutline className="text-2xl" />Cerrar sesión</p>)}</button>
@@ -202,7 +202,7 @@ const MainLayout = () => {
                     <div className="w-10/100"><VscThreeBars onClick={() => setShowMobileSubmenu(true)} className="text-3xl" /></div>
                     <div className="w-90/100 flex items-center justify-between">
                         <input type="text"
-                            className="w-90/100 bg-white rounded-md text-black font-normal p-1"
+                            className="w-90/100 bg-base-100 rounded-md text-black font-normal p-1"
                             placeholder="Buscar productos"
                             onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
                             onKeyDown={(e) => {
@@ -276,14 +276,15 @@ const MainLayout = () => {
                     <div className="w-20/100 flex flex-col text-center ">
                         <p className="font-bold">Redes sociales</p>
                         <div className="w-full flex justify-center items-center gap-3">
-                            <FaFacebook className="text-5xl hover:scale-110 duration-250" />
-                            <FaInstagramSquare className="text-5xl hover:scale-110 duration-250" />
-                            <FaSquareXTwitter className="text-5xl hover:scale-110 duration-250" />
+                            <a href="https://www.facebook.com/Cascos.Iga" target="_blank"><FaFacebook className="text-5xl hover:scale-110 duration-250" /></a>
+                            <a href="https://www.instagram.com/iga_cascos/" target="_blank"><FaInstagramSquare className="text-5xl hover:scale-110 duration-250" /></a>
+                            <a href="https://x.com/iga_productos?s=20" target="_blank"><FaSquareXTwitter className="text-5xl hover:scale-110 duration-250" /></a>
                         </div>
                     </div>
                 </div>
             </footer>
             <DrawerSubMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} />
+            <div className="fixed bottom-5 right-5 text-5xl hover:scale-110 duration-250 bg-success rounded-full p-3 z-1000 tooltip tooltip-left" data-tip="Contactanos por whatsapp"><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp /></a></div>
         </div>
     );
 };

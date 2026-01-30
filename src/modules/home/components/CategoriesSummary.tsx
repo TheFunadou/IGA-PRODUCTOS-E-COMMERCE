@@ -27,13 +27,13 @@ const CategoriesSummary = () => {
     };
 
     return (
-        <OverflowXComponent className="gap-10 ">
-            {data && data.map((category => (
-                <div className="w-100 h-110 flex-shrink-0 p-5 rounded-xl shadow-lg bg-white flex flex-col justify-center">
+        <OverflowXComponent className="gap-10 mt-2">
+            {data && data.map(((category, index) => (
+                <div key={`${category.categoryName}-${index}`} className="w-100 h-110 flex-shrink-0 p-5 rounded-xl border border-gray-300 bg-base-100 hover:border-primary duration-150 flex flex-col justify-center">
                     <div className="w-full h-100 grid grid-cols-2 gap-5 items-center justify-center">
-                        {category.productVersion.map((pv => (
-                            <figure className="w-40 h-40 cursor-pointer" onClick={() => handleRedirectToDetails({ productName: pv.productName, sku: pv.sku, category: category.categoryName })}>
-                                <img className="w-full h-full object-cover rounded-xl border border-gray-300 hover:border-primary duration-150" src={pv.imageUrl} alt={`${category.categoryName}-${pv.sku}`} aria-label={`${category.categoryName}-${pv.sku}`} loading="lazy" />
+                        {category.productVersion.map(((pv, index) => (
+                            <figure key={`${category.categoryName}-${pv.sku}-${index}`} className="w-40 h-40 cursor-pointer" onClick={() => handleRedirectToDetails({ productName: pv.productName, sku: pv.sku, category: category.categoryName })}>
+                                <img className="w-full h-full object-cover rounded-xl border border-gray-300 hover:border-secondary duration-150" src={pv.imageUrl} alt={`${category.categoryName}-${pv.sku}`} aria-label={`${category.categoryName}-${pv.sku}`} loading="lazy" />
                             </figure>
                         )))}
                     </div>

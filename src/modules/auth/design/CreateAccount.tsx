@@ -61,7 +61,7 @@ const CreateAccount = () => {
 
     return (
         <div className="animate-fade-in-up flex item-center justify-center">
-            <div className="w-60/100 bg-white rounded-xl shadow-lg py-10 px-5 items-start flex gap-10">
+            <div className="w-60/100 bg-base-100 rounded-xl shadow-lg py-10 px-5 items-start flex gap-10">
                 <div className="w-65/100 h-full border-r border-r-gray-300 px-5 flex flex-col gap-10">
                     <h1 className="text-4xl/12 font-bold">Crea tu cuenta ahora y haz mas comoda tu experiencia de compra. </h1>
                     <div className="flex gap-15 mt-5">

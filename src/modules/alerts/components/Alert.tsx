@@ -1,18 +1,18 @@
 import clsx from "clsx";
 
 type Props = {
-    message:string;
+    message: string;
     type: "Succesfull" | "Message" | "Error";
 };
 
 
-const Alert = ({type,message}:Props) => {
-    return(
+const Alert = ({ type, message }: Props) => {
+    return (
         <div role="alert" className={
             clsx(
                 "alert toast shadow-lg toast-bottom toast-center duration-130 ease-in-out text-white mb-20",
                 type === "Succesfull" && "bg-blue-900",
-                type === "Message" && "bg-info",
+                type === "Message" && "bg-neutral",
                 type === "Error" && "bg-error"
             )
         }>

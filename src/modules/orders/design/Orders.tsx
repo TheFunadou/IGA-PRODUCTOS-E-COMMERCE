@@ -66,7 +66,7 @@ const Orders = () => {
                     )}
 
                     {!isLoading && !error && data && data.data.length === 0 && (
-                        <div className="bg-white rounded-xl p-5">
+                        <div className="bg-base-100 rounded-xl p-5">
                             <h1>📦 No tienes ordenes de compra registradas</h1>
                             <Link to={"/tienda"} className="underline text-primary text-lg">Realiza tu primera compra ahora</Link>
                         </div>
@@ -74,7 +74,7 @@ const Orders = () => {
                     {!isLoading && !error && data && data.data.length > 0 && (
                         <div className="flex flex-col gap-5">
                             {data.data.map((order, index) => (
-                                <div key={`order-${index}`} className="bg-white rounded-xl p-5">
+                                <div key={`order-${index}`} className="bg-base-100 rounded-xl p-5">
                                     <div className="flex items-center justify-between">
                                         <h3>Folio #{order.order.uuid}</h3>
                                         {order.order.aditional_resource_url && (
@@ -84,19 +84,19 @@ const Orders = () => {
                                     <div className="flex items-center justify-between gap-5 mt-1">
                                         <div className="flex-1 text-center ">
                                             Pedido
-                                            <div className="bg-gray-200 rounded-xl py-1">
+                                            <div className="bg-base-300 rounded-xl py-1">
                                                 <h3>{formatDate(order.order.created_at, "es-MX")}</h3>
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center ">
                                             Ultima actualización
-                                            <div className="bg-gray-200 rounded-xl py-1">
+                                            <div className="bg-base-300 rounded-xl py-1">
                                                 <h5>{formatDate(order.order.updated_at, "es-MX")}</h5>
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center ">
                                             Estatus de envio
-                                            <div className="bg-gray-200 rounded-xl py-1">
+                                            <div className="bg-base-300 rounded-xl py-1">
                                                 <h5>{order.shippingStatus ? formatShippingStatus(order.shippingStatus) : "En espera de pago"}</h5>
                                             </div>
                                         </div>
@@ -114,7 +114,7 @@ const Orders = () => {
                                         </div>
                                         <div className="flex-1 text-center ">
                                             <p>Acciones</p>
-                                            <div className="border border-gray-300 rounded-xl bg-primary py-1">
+                                            <div className=" rounded-xl bg-primary py-1">
                                                 <button type="button" className="w-full text-white flex items-center gap-2 justify-center cursor-pointer" onClick={() => navigate(`/mis-compras/detalle?folio=${order.order.uuid}`)}>Mas detalles<FaPlus /></button>
                                             </div>
                                         </div>

@@ -1,5 +1,6 @@
 import Header2 from "../../../assets/headers/HEADER2.webp"
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp"
+import PartnersCarousel from "../components/PartnersCarousel";
 
 
 const Distributors = () => {
@@ -23,9 +24,9 @@ const Distributors = () => {
                         </figure>
                     </div>
                 </div>
-                <div className="mt-5">
-
-                </div>
+            </div>
+            <div className="mt-5">
+                <PartnersCarousel />
             </div>
         </div>
     );

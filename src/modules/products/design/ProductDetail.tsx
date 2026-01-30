@@ -278,7 +278,7 @@ const ProductDetail = () => {
                             <div className="w-full py-5 border-b border-b-gray-400 flex items-center justify-between">
                                 <p className="text-2xl font-bold">{data && data.product_version.color_line}: <span className="ml-2 px-6 py-2  rounded-full" style={{ backgroundColor: color }}></span><span className="ml-2">{data && data.product_version.color_name}</span></p>
                                 <div className="flex gap-2">
-                                    <button className="btn btn-ghost underline">Copiar en formato CSV</button>
+                                    {/* <button className="btn btn-ghost underline">Copiar en formato CSV</button> */}
                                     <a href={(data && data.product_version.technical_sheet_url) ?? "#"} className="btn btn-primary" target="_blank">Ver ficha tecnica</a>
                                 </div>
                             </div>

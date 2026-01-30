@@ -60,16 +60,16 @@ const OrderDetail = () => {
                             {data.order && (
                                 <div className="w-full flex flex-col gap-5 p-5" ref={printContent}>
                                     <h2>Orden #{data.order.details.order.uuid}</h2>
-                                    <div className="bg-white rounded-xl p-5 flex items-center justify-between gap-5 mt-1">
+                                    <div className="bg-base-100 rounded-xl p-5 flex items-center justify-between gap-5 mt-1">
                                         <div className="flex-1 text-center ">
                                             Pedido
-                                            <div className="bg-gray-200 rounded-xl py-1">
+                                            <div className="bg-base-300 rounded-xl py-1">
                                                 <h5>{formatDate(data.order.details.order.created_at, "es-MX")}</h5>
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center ">
                                             Ultima actualización
-                                            <div className="bg-gray-200 rounded-xl py-1">
+                                            <div className="bg-base-300 rounded-xl py-1">
                                                 <h5>{formatDate(data.order.details.order.updated_at, "es-MX")}</h5>
                                             </div>
                                         </div>
@@ -86,7 +86,7 @@ const OrderDetail = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-xl p-5">
+                                    <div className="bg-base-100 rounded-xl p-5">
                                         <h2>Dirección de envio</h2>
                                         <div className="w-85/100">
                                             <p className="text-2xl font-bold">{`${data.order.address.recipient_name} ${data.order.address.recipient_last_name}`}</p>
@@ -104,7 +104,7 @@ const OrderDetail = () => {
                                         </div>
                                     </div>
                                     {data.order.details.shipping && (
-                                        <div className="bg-white rounded-xl p-5">
+                                        <div className="bg-base-100 rounded-xl p-5">
                                             <h2>Detalles del envio</h2>
                                             {data.order.details.shipping.tracking_number && <h3 className="underline text-primary">Guia de envio: {data.order.details.shipping.tracking_number}</h3>}
                                             <div className="flex items-center justify-between gap-5 mt-1">
@@ -141,7 +141,7 @@ const OrderDetail = () => {
                                             </div>
                                         </div>
                                     )}
-                                    <div className="bg-white rounded-xl p-5">
+                                    <div className="bg-base-100 rounded-xl p-5">
                                         <h2 className="text-2xl font-bold">Resumen de pedido</h2>
                                         {data.order.items && data.order.items.length > 0 && data.order.items.map((item, index) => (
                                             <ShoppingCartProductResume
@@ -155,7 +155,7 @@ const OrderDetail = () => {
                                             <p className="text-xl text-right">{`Subtotal (${data.order.items.length}) productos: `}<span className="font-bold">${formatPrice((data.order.details.resume.subtotalWithDiscount.toString()!), "es-MX")}</span> </p>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-xl p-5 gap-5">
+                                    <div className="bg-base-100 rounded-xl p-5 gap-5">
                                         <h2>Resumen de pago</h2>
                                         <figure className="w-50 py-5">
                                             <img className="w-full object-cover" src={paymentProvider[data.order.details.order.payment_provider].image_url} alt={paymentProvider[data.order.details.order.payment_provider].image_url} />
@@ -166,16 +166,16 @@ const OrderDetail = () => {
                                                     <div className="w-50/100 flex flex-col gap-4">
                                                         {(det.payment_class === "credit_card" || det.payment_class === "debit_card") && (
                                                             <div>
-                                                                <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Terminación</h4>
+                                                                <h4 className="px-2 py-1 bg-base-300 rounded-xl">Terminación</h4>
                                                                 <p className="px-2">{det.last_four_digits}</p>
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Clase de tarjeta</h4>
+                                                            <h4 className="px-2 py-1 bg-base-300 rounded-xl">Clase de tarjeta</h4>
                                                             <p className="px-2">{formatPaymentClass[det.payment_class]}</p>
                                                         </div>
                                                         <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Tipo de tarjeta</h4>
+                                                            <h4 className="px-2 py-1 bg-base-300 rounded-xl">Tipo de tarjeta</h4>
                                                             <figure className="w-25 py-2">
                                                                 <img className="w-full object-cover" src={paymentMethod[det.payment_method].image_url} alt={paymentMethod[det.payment_method].description} />
                                                             </figure>

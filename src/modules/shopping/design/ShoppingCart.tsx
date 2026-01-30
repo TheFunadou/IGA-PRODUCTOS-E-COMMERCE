@@ -201,7 +201,7 @@ const ShoppingCart = () => {
                         )}>
                             <p className="text-xl border-b border-b-gray-400 pb-5">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
 
-                            <div className="bg-gray-100 px-2 py-3 rounded-xl flex gap-2">
+                            <div className="bg-base-200 px-2 py-3 rounded-xl flex gap-2">
                                 <p className="text-xl flex items-center gap-2 font-medium"><FaShippingFast className="text-3xl text-primary" />Envio por: ${formatPrice((shippingCost.toString()), "es-MX")} ({boxesQty > 1 ? `${boxesQty} Cajas` : `${boxesQty} Caja`})</p>
                             </div>
                             <div>

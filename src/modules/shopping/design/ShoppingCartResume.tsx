@@ -100,21 +100,6 @@ const ShoppingCartResume = () => {
     /** Products that are checked/selected for purchase */
     const selectedProducts: ShoppingCartType[] = shoppingCart && shoppingCart.filter(item => item.isChecked === true);
 
-    // /** Subtotal including IVA (sum of all selected products) */
-    // const subtotal: number = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
-    //     const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
-    //     return accumulator + itemTotal;
-    // }, 0);
-
-    // /** IVA tax amount (16% of subtotal) */
-    // const calcSubtotalIVA: number = subtotal * IVA;
-
-    // /** Subtotal before IVA tax */
-    // const subtotalBeforeIVA: number = subtotal - calcSubtotalIVA;
-
-    // /** Final total including subtotal and shipping */
-    // const total: number = subtotal + shippingCost;
-
     // ============================================================================
     // Navigation Guard
     // ============================================================================
@@ -159,6 +144,10 @@ const ShoppingCartResume = () => {
      * Validates that an address is selected before proceeding
      */
     const handleCreateOrder = async () => {
+        if (!isAuth) {
+            showTriggerAlert("Message", "Registrate para poder continuar con tu compra ✨");
+            return;
+        }
         if (!selectedAddress) {
             showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
             return;
@@ -298,62 +287,66 @@ const ShoppingCartResume = () => {
                             }
                         </div>
                     ) : (
-                        <div className="w-full bg-white rounded-xl px-5 py-10">
-                            {/* Guest Checkout Form */}
-                            {showGuestForm ? (
-                                <div className="w-full flex flex-col gap-5">
-                                    <div className="flex flex-col gap-2">
-                                        {!guestAddressForm && "No has agregado una dirección de envio aun"}
-                                        {guestAddressForm && (
-                                            <div>
-                                                <p className="text-xl font-bold">Enviar a</p>
-                                                <p className="text-2xl font-bold">{`${guestAddressForm.recipient_name} ${guestAddressForm.recipient_last_name}`}</p>
-                                                <p className="text-lg">{guestAddressForm.country_phone_code} {guestAddressForm.contact_number}</p>
-                                                <p className="text-lg">{`${guestAddressForm.street_name}, #${guestAddressForm.number} EXT.${!guestAddressForm.aditional_number ? "" : `${guestAddressForm.aditional_number} INT.`} ${guestAddressForm.neighborhood}, ${guestAddressForm.zip_code}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}</p>
-                                                {guestAddressForm.references_or_comments && <p>{guestAddressForm.references_or_comments}</p>}
-                                            </div>
-                                        )}
-                                        <button type="button" className="btn btn-primary w-fit px-2" onClick={() => showModal(guestAddressFormModal.current)}>{guestAddressForm ? "Editar dirección" : "Agregar dirección"}</button>
-                                    </div>
-                                    {guestBillingAddressChecked && (
-                                        <div className="flex flex-col gap-2">
-                                            {!billingGuestAddress && ("No has agregado una dirección de facturación aun")}
-                                            {billingGuestAddress && (
-                                                <div>
-                                                    <p className="text-xl font-bold">Facturar a</p>
-                                                    <p className="text-2xl font-bold">{`${billingGuestAddress.recipient_name} ${billingGuestAddress.recipient_last_name}`}</p>
-                                                    <p className="text-lg">{billingGuestAddress.country_phone_code} {billingGuestAddress.contact_number}</p>
-                                                    <p className="text-lg">{`${billingGuestAddress.street_name}, #${billingGuestAddress.number} EXT.${!billingGuestAddress.aditional_number ? "" : `${billingGuestAddress.aditional_number} INT.`} ${billingGuestAddress.neighborhood}, ${billingGuestAddress.zip_code}, ${billingGuestAddress.city}, ${billingGuestAddress.state}, ${billingGuestAddress.country}`}</p>
-                                                </div>
-                                            )}
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <input type="checkbox" className="checkbox checkbox-primary" />
-                                                <p>Utilizar la misma dirección para facturación</p>
-                                            </div>
-                                            <button type="button" className="btn btn-primary w-fit px-2 mt-2" onClick={() => showModal(guestFormBillingModal.current)}>Agregar dirección de facturación</button>
-                                        </div>
-                                    )}
-                                    {guestAddressForm && (
-                                        <div>
-                                            <input type="checkbox" className="checkbox checkbox-primary mr-3" onChange={(e) => setGuestBillingAddressChecked(e.target.checked)} />
-                                            <span className="text-lg">Necesito facturar este pedido.</span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-3 text-lg">
-                                        <input type="checkbox" className="checkbox checkbox-primary" />
-                                        <Link to={"/politica-de-privacidad"} className="underline text-primary">He leido y estoy de acuerdo con los terminos y condiciones y politica de privacidad de la web .</Link>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="w-full">
-                                    <button type="button" className="text-xl font-bold">¿Deseas finalizar la compra como invitado?</button>
-                                    <p className=" text-gray-500">Al obtener una cuenta accedes a varios benificios y funciones que pueden mejorar tu experiencia de compra.</p>
-                                    <div className="w-1/4 mt-3 flex gap-5 items-center">
-                                        <Link to={"/iniciar-sesion"} className="btn btn-primary">Iniciar sesión</Link>
-                                        <button type="button" className="btn bg-blue-950 text-white" onClick={() => showModal(guestAdvertisementModal.current)}>Continuar como invitado</button>
-                                    </div>
-                                </div>
-                            )}
+                        // <div className="w-full bg-white rounded-xl px-5 py-10">
+                        //     {/* Guest Checkout Form */}
+                        //     {showGuestForm ? (
+                        //         <div className="w-full flex flex-col gap-5">
+                        //             <div className="flex flex-col gap-2">
+                        //                 {!guestAddressForm && "No has agregado una dirección de envio aun"}
+                        //                 {guestAddressForm && (
+                        //                     <div>
+                        //                         <p className="text-xl font-bold">Enviar a</p>
+                        //                         <p className="text-2xl font-bold">{`${guestAddressForm.recipient_name} ${guestAddressForm.recipient_last_name}`}</p>
+                        //                         <p className="text-lg">{guestAddressForm.country_phone_code} {guestAddressForm.contact_number}</p>
+                        //                         <p className="text-lg">{`${guestAddressForm.street_name}, #${guestAddressForm.number} EXT.${!guestAddressForm.aditional_number ? "" : `${guestAddressForm.aditional_number} INT.`} ${guestAddressForm.neighborhood}, ${guestAddressForm.zip_code}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}</p>
+                        //                         {guestAddressForm.references_or_comments && <p>{guestAddressForm.references_or_comments}</p>}
+                        //                     </div>
+                        //                 )}
+                        //                 <button type="button" className="btn btn-primary w-fit px-2" onClick={() => showModal(guestAddressFormModal.current)}>{guestAddressForm ? "Editar dirección" : "Agregar dirección"}</button>
+                        //             </div>
+                        //             {guestBillingAddressChecked && (
+                        //                 <div className="flex flex-col gap-2">
+                        //                     {!billingGuestAddress && ("No has agregado una dirección de facturación aun")}
+                        //                     {billingGuestAddress && (
+                        //                         <div>
+                        //                             <p className="text-xl font-bold">Facturar a</p>
+                        //                             <p className="text-2xl font-bold">{`${billingGuestAddress.recipient_name} ${billingGuestAddress.recipient_last_name}`}</p>
+                        //                             <p className="text-lg">{billingGuestAddress.country_phone_code} {billingGuestAddress.contact_number}</p>
+                        //                             <p className="text-lg">{`${billingGuestAddress.street_name}, #${billingGuestAddress.number} EXT.${!billingGuestAddress.aditional_number ? "" : `${billingGuestAddress.aditional_number} INT.`} ${billingGuestAddress.neighborhood}, ${billingGuestAddress.zip_code}, ${billingGuestAddress.city}, ${billingGuestAddress.state}, ${billingGuestAddress.country}`}</p>
+                        //                         </div>
+                        //                     )}
+                        //                     <div className="flex items-center gap-2 mt-2">
+                        //                         <input type="checkbox" className="checkbox checkbox-primary" />
+                        //                         <p>Utilizar la misma dirección para facturación</p>
+                        //                     </div>
+                        //                     <button type="button" className="btn btn-primary w-fit px-2 mt-2" onClick={() => showModal(guestFormBillingModal.current)}>Agregar dirección de facturación</button>
+                        //                 </div>
+                        //             )}
+                        //             {guestAddressForm && (
+                        //                 <div>
+                        //                     <input type="checkbox" className="checkbox checkbox-primary mr-3" onChange={(e) => setGuestBillingAddressChecked(e.target.checked)} />
+                        //                     <span className="text-lg">Necesito facturar este pedido.</span>
+                        //                 </div>
+                        //             )}
+                        //             <div className="flex items-center gap-3 text-lg">
+                        //                 <input type="checkbox" className="checkbox checkbox-primary" />
+                        //                 <Link to={"/politica-de-privacidad"} className="underline text-primary">He leido y estoy de acuerdo con los terminos y condiciones y politica de privacidad de la web .</Link>
+                        //             </div>
+                        //         </div>
+                        //     ) : (
+                        //         <div className="w-full">
+                        //             <button type="button" className="text-xl font-bold">¿Deseas finalizar la compra como invitado?</button>
+                        //             <p className=" text-gray-500">Al obtener una cuenta accedes a varios benificios y funciones que pueden mejorar tu experiencia de compra.</p>
+                        //             <div className="w-1/4 mt-3 flex gap-5 items-center">
+                        //                 <Link to={"/iniciar-sesion"} className="btn btn-primary">Iniciar sesión</Link>
+                        //                 <button type="button" className="btn bg-blue-950 text-white" onClick={() => showModal(guestAdvertisementModal.current)}>Continuar como invitado</button>
+                        //             </div>
+                        //         </div>
+                        //     )}
+                        // </div>
+                        <div className="bg-base-100 rounded-xl px-5 py-10">
+                            <h3>Inicia sesión para poder continuar con tu compra y añade mas comodidad y seguridad a tus compras 📦</h3>
+                            <Link to={"/iniciar-sesion"} className="btn btn-primary">Iniciar sesión</Link>
                         </div>
                     )}
 

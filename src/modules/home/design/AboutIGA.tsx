@@ -67,7 +67,7 @@ const AboutIGA = () => {
                 <div className="w-full mt-5">
                     <h3 className="text-4xl font-bold">Nuestros principios</h3>
                     <div className="mt-5 flex">
-                        <div className="w-1/2 p-5 mr-5 bg-white rounded-xl">
+                        <div className="w-1/2 p-5 mr-5 bg-base-100 rounded-xl">
                             <p className="text-lg">Da clic en cada uno de los principios para obtener más información</p>
                             <div className="flex flex-col gap-5 mt-3 [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:cursor-pointer [&_button]:text-2xl [&_button]:font-medium">
                                 <button
@@ -124,7 +124,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
                                 <time className="text-xl font-bold">1999</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-5 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
                                     PLÁSTICOS DEL GOLFO SUR S.A. DE CV. como Asociación Civil se involucra en la transformación y comercialización de productos mediante el proceso de inyección de plásticos.
                                 </div>
                             </div>
@@ -148,7 +148,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-end md:mb-10">
                                 <time className="text-xl font-bold">2003</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-5 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
                                     Incursionamos en el área de seguridad personal, fabricando dos líneas específicas; cascos y lentes de seguridad en varios modelos. Producidos bajo los más altos estándares de calidad en cumplimiento con las Normas: NOM-115-STPS-1994, NMX-S-055-SCF1-2002 y ANSI/ISEA Z891-199.
                                 </div>
                             </div>
@@ -172,7 +172,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
                                 <time className="text-xl font-bold">2009</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-5 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
                                     Implementamos una serie de equipos de producción de primera calidad para lograr ahorros energéticos substanciales y una mejor operación de inyección.
                                 </div>
                             </div>
@@ -196,7 +196,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-end md:mb-10">
                                 <time className="text-xl font-bold">2014-2020</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-5 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
                                     Certificación al proceso Normativos de nuestros cascos de seguridad industrial en las siguientes Normas: NOM-115-STPS-2009, NMX-S-055-SCFI-2002, ANSI/ISEA Z89.1-2014 (R2019), PEMEX-EST-SS-058-2018 y CFE: 8H 341-02.
                                 </div>
                             </div>
@@ -220,7 +220,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
                                 <time className="text-xl font-bold">2017</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-2 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
                                     Plásticos obtiene la presidencia del subcomité de equipos de protección a la cabeza del comité técnico de normalización nacional para productos de protección y seguridad. Su participación se destaca en el análisis normativo de NMX-S-055 y la norma internacional ISO para equipos de protección a la cabeza.
                                 </div>
                             </div>
@@ -244,7 +244,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-end md:mb-10">
                                 <time className="text-xl font-bold">2018</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-2 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
                                     Se obtiene la certificación ISO 9001-2015, alcance que comprende las actividades de: fabricación de cascos de protección personal, lentes de cascos de protección personal, lentes de seguridad y barbiquejos, actividades de ensamble e inyección.
                                 </div>
                             </div>
@@ -268,7 +268,7 @@ const AboutIGA = () => {
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
                                 <time className="text-xl font-bold">2021</time>
-                                <div className="text-lg mt-2 bg-white rounded-xl px-10 py-2 text-justify">
+                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
                                     Plásticos del Golfo Sur obtiene el certificado ANSI/ISEA Z89.1 2014 (R2019) para el casco Plagosur C en ajuste de matraca tipo I, Forma II en clase "E".
                                 </div>
                             </div>
