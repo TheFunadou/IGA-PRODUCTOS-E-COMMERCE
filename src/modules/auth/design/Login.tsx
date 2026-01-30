@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { AuthCustomerCredentialsType } from "../AuthTypes";
-import { Link, useNavigate } from "react-router-dom";
-import { getErrorMessage } from "../../../global/GlobalUtils";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // import { FaGoogle } from "react-icons/fa";
 import { useAuthStore } from "../states/authStore";
 import { useThemeStore } from "../../../layouts/states/themeStore";
@@ -12,17 +11,18 @@ import clsx from "clsx";
 const Login = () => {
     const { theme } = useThemeStore();
     const [loading, setLoading] = useState<boolean>(false);
-
     const { register, handleSubmit, formState: { errors } } = useForm<AuthCustomerCredentialsType>();
-    const { login, error, isAuth } = useAuthStore();
+    const { login, error, isAuth, clearError } = useAuthStore();
+    const location = useLocation();
     const navigate = useNavigate();
 
     const onSubmit: SubmitHandler<AuthCustomerCredentialsType> = async (data: AuthCustomerCredentialsType): Promise<void> => {
         try {
+            console.log(error)
             setLoading(true);
             await login(data);
         } catch (error) {
-            console.log(getErrorMessage(error));
+            console.error("Inicio de sesión fallido")
         } finally {
             setLoading(false);
         }
@@ -32,6 +32,7 @@ const Login = () => {
         if (isAuth) navigate("/");
     }, [isAuth, navigate]);
 
+    useEffect(() => { clearError(); }, [location.pathname])
 
     return (
         <div className="w-full py-10 flex items-center justify-center">
@@ -68,18 +69,17 @@ const Login = () => {
                     <button type="submit" className="w-full mt-5 btn btn-primary cursor-pointer">
                         {loading ?
                             (
-                                <p>Cargando <span className="loading loading-spinner loading-lg"></span></p>
+                                <p>Cargando <span className="loading loading-dots loading-base"></span></p>
                             ) : (
                                 "Iniciar Sesión"
                             )}
                     </button>
-                    {/* <button type="button" className="w-full btn btn-gray-500"><FaGoogle className="text-xl mr-2 text-blue-500" />Iniciar sesión con Google</button> */}
-                    {!error && <p className="text-sm text-error mt-2">{error}</p>}
+                    {error && <p className="text-error">{error}</p>}
                 </div>
                 <div>
                     <Link to="/restaurar-contraseña"><p className="mt-3 underline text-blue-500 cursor-pointer">¿Olvidaste tu constraseña?</p></Link>
                     <Link to="/nueva-cuenta"><p className="mt-1 underline text-blue-500">¿Aun no tienes una cuenta? Crea una ahora mismo</p></Link>
-                    <p className="mt-10">Al continuar aceptas los <Link to="/politica-de-privacidad" className="underline text-blue-500 font-bold">terminos y condiciones</Link> y la politica de <Link to="/politica-de-privacidad" className="underline text-blue-500 font-bold">privacidad</Link> de la web.</p>
+                    <p className="mt-10 text-sm">Al continuar aceptas los <Link to="/politica-de-privacidad" className="underline text-blue-500 font-bold">terminos y condiciones</Link> y la politica de <Link to="/politica-de-privacidad" className="underline text-blue-500 font-bold">privacidad</Link> de la web.</p>
                 </div>
 
             </form>

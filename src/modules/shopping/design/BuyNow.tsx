@@ -1,291 +1,3 @@
-// import { Link, useNavigate } from "react-router-dom";
-// import { useAuthStore } from "../../auth/states/authStore";
-// import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
-// import { useShoppingCartStore } from "../states/shoppingCartStore";
-// import { formatPrice } from "../../products/Helpers";
-// import { useEffect, useRef, useState } from "react";
-// import GuestAdvertisement from "../components/GuestAdvertisement";
-// import type { ShoppingCartType } from "../ShoppingTypes";
-// import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
-// import AddressesModal from "../components/AddressesModal";
-// import type { CustomerAddressType } from "../../customers/CustomerTypes";
-// import { closeModal, showModal } from "../../../global/GlobalHelpers";
-// import { SiMercadopago } from "react-icons/si";
-// import { FaCcPaypal } from "react-icons/fa";
-// import { usePaymentStore } from "../states/paymentStore";
-// import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
-// import type { PaymentShoppingCart } from "../../orders/OrdersTypes";
-
-// const ShoppingCartResume = () => {
-//     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
-//     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
-//     const { isAuth, authCustomer } = useAuthStore();
-//     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
-//     const { itemBuyNow, toogleCheckItem, updateItemQty, removeItem } = useShoppingCartStore();
-//     const addressesModal = useRef<HTMLDialogElement>(null);
-//     const { showTriggerAlert } = useTriggerAlert();
-//     // const [paymentMethod, setPaymentMethod] = useState<PaymentMethodsType>(null);
-//     const { order, createOrder, isLoading: orderLoading } = usePaymentStore();
-//     const navigate = useNavigate();
-//     const {
-//         data: addresses,
-//         isLoading,
-//         error,
-//         refetch
-//     } = useFetchCustomerAddresses();
-//     if (!itemBuyNow) {
-//         navigate("/carrito-de-compras");
-//         throw new Error("Ocurrio un error inesperado")
-//     };
-//     const handleSetSelectedAddress = (selected: CustomerAddressType) => setSelectedAddress(selected);
-//     const modalResponse = (response: boolean) => {
-//         if (response) {
-//             const modal = guestAdvertisementModal.current;
-//             if (modal) { modal.close(); };
-//             setShowGuestForm(true);
-//         };
-//     };
-
-//     const subtotal: number = itemBuyNow.quantity * parseFloat(itemBuyNow.product_version.unit_price);
-//     const IVA: number = subtotal * 0.16;
-//     const subtotalBeforeIVA: number = subtotal - IVA;
-//     const shipping: number = 0;
-//     const total: number = subtotal + shipping;
-
-//     useEffect(() => {
-//         if (!addresses) return;
-//         const defaultAddress = addresses.find(data => data.default_address === true);
-//         if (!defaultAddress) return;
-//         setSelectedAddress(defaultAddress);
-//     }, [addresses]);
-
-//     const handleCreateOrder = async () => {
-//         if (!selectedAddress) showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
-//         if (selectedAddress) {
-//             const product: PaymentShoppingCart = {
-//                 product: itemBuyNow.product_version.sku,
-//                 quantity: itemBuyNow.quantity
-//             };
-
-//             await createOrder({
-//                 shopping_cart: [product],
-//                 address: selectedAddress.uuid,
-//                 payment_method: paymentMethod
-//             });
-//         };
-//     };
-
-//     // If the order exists
-//     if (order) navigate("/pagar-productos");
-
-//     return (
-//         <div className="w-full bg-base-300 px-5 py-10 rounded-xl">
-//             <p className="text-3xl font-bold">Resumen del carrito</p>
-//             <section className="w-full flex mt-5">
-//                 <div className="w-3/4">
-//                     {isAuth ? (
-//                         <div className="w-full bg-white rounded-xl px-5 py-7">
-//                             {selectedAddress &&
-//                                 <div className="w-full flex">
-//                                     <div className="w-90/100">
-//                                         <p className="text-xl font-bold">Enviar a</p>
-//                                         <p className="text-2xl font-bold">{`${selectedAddress.recipient_name} ${selectedAddress.recipient_last_name}`}</p>
-//                                         <p className="text-lg">{selectedAddress.country_phone_code} {selectedAddress.contact_number}</p>
-//                                         <p className="text-lg">{`${selectedAddress.street_name}, #${selectedAddress.number} EXT.${selectedAddress.aditional_number === "N/A" ? "" : `${selectedAddress.aditional_number} INT.`} ${selectedAddress.neighborhood}, ${selectedAddress.zip_code}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}</p>
-//                                         {selectedAddress.default_address === true && <p className="text-xl font-bold">Dirección predeterminada</p>}
-//                                     </div>
-//                                     <div className="w-10/100">
-//                                         <button
-//                                             type="button"
-//                                             className="underline text-primary cursor-pointer text-lg text-right"
-//                                             onClick={() => showModal(addressesModal.current)}
-//                                         >
-//                                             Escoger otra
-//                                         </button>
-//                                         <p className="mt-2 text-lg font-bold">{selectedAddress.address_type}</p>
-//                                     </div>
-//                                 </div>
-//                             }
-//                         </div>
-//                     ) : (
-//                         <div className="w-full bg-white rounded-xl px-5 py-10">
-//                             {showGuestForm ? (
-//                                 <div className="w-full">
-//                                     <p className="text-2xl font-bold">Formulario de compra</p>
-//                                     <p className="text-base">Sus datos personales se utilizarán para procesar su pedido, respaldar su experiencia en este sitio web y para otros fines descritos en nuestra política de privacidad.</p>
-//                                     <p className="mb-2 text-lg mt-2 font-semibold">Información del comprador</p>
-//                                     <div className="flex gap-5 items-center">
-//                                         <div>
-//                                             <label className="mr-2">Correo Electronico:</label>
-//                                             <input type="email" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <label className="mr-2">Nombre:</label>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <label className="mr-2">Apellidos:</label>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <label className="mr-2">Número telefonico:</label>
-//                                             <input type="tel" className="input" />
-//                                         </div>
-//                                     </div>
-//                                     <p className="mt-5 mb-1 text-lg font-semibold">Domicilio de envio</p>
-//                                     <div className="w-full flex gap-5">
-//                                         <div className="w-1/4">
-//                                             <p>Calle:</p>
-//                                             <input type="email" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <p>Numero Ext.:</p>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <p>Numero Int.:</p>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                         <div className="w-1/4">
-//                                             <p>Colonia/Fraccionamiento:</p>
-//                                             <input type="tel" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <p>Código Postal:</p>
-//                                             <input type="tel" className="input" />
-//                                         </div>
-//                                     </div>
-//                                     <div className="w-full flex gap-5 mt-5">
-//                                         <div className="w-1/5">
-//                                             <p>Ciudad:</p>
-//                                             <input type="email" className="input" />
-//                                         </div>
-//                                         <div className="w-1/5">
-//                                             <p>Estado/Entidad Federativa:</p>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                         <div>
-//                                             <p>País:</p>
-//                                             <input type="text" className="input" />
-//                                         </div>
-//                                     </div>
-//                                     <div className="w-full mt-5 flex flex-col gap-3">
-//                                         <div>
-//                                             <p>Referencias del domicilio:</p>
-//                                             <textarea className="textarea w-1/2" placeholder="Entre calles, referencias,etc... Maximo 100 caracteres"></textarea>
-//                                         </div>
-//                                         <div>
-//                                             <input type="checkbox" className="checkbox checkbox-primary mr-3" />
-//                                             <span className="text-lg">Quiero utilizar la misma dirección para facturar el pedido.</span>
-//                                         </div>
-//                                         <div className="flex items-center gap-3 text-lg">
-//                                             <input type="checkbox" className="checkbox checkbox-primary" />
-//                                             <Link to={"/politica-de-privacidad"} className="underline text-primary">He leido y estoy de acuerdo con los terminos y condiciones y politica de privacidad de la web .</Link>
-//                                         </div>
-//                                     </div>
-
-
-//                                 </div>
-//                             ) : (
-//                                 <div className="w-full">
-//                                     <button type="button" className="text-xl font-bold">¿Deseas finalizar la compra como invitado?</button>
-//                                     <p className=" text-gray-500">Al obtener una cuenta accedes a varios benificios y funciones que pueden mejorar tu experiencia de compra.</p>
-//                                     <div className="w-1/4 mt-3 flex gap-5 items-center">
-//                                         <Link to={"/iniciar-sesion"} className="btn btn-primary">Iniciar sesión</Link>
-//                                         <button type="button" className="btn bg-blue-950 text-white" onClick={() => showModal(guestAdvertisementModal.current)}>Continuar como invitado</button>
-//                                     </div>
-//                                 </div>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     <div className="w-full bg-white rounded-xl p-5 flex flex-col gap-2 mt-5">
-//                         {/* Product */}
-//                         <ShoppingCartProductResume
-//                             data={itemBuyNow}
-//                             onToggleCheck={toogleCheckItem}
-//                             onUpdateQty={updateItemQty}
-//                             onRemoveItem={removeItem}
-//                             isAuth={isAuth ?? false}
-//                             lock={true}
-//                         />
-//                         <div className="w-full border-t border-t-gray-300 pt-5">
-//                             <p className="text-xl text-right">{`Subtotal (1) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
-//                         </div>
-//                     </div>
-//                 </div>
-//                 <div className="w-1/4 pl-4">
-//                     <div className="w-full bg-white p-5 rounded-xl">
-//                         <div className="w-full flex flex-col gap-2 border-b border-b-gray-400 pb-5">
-//                             <div className="text-xl flex">
-//                                 <p className="w-3/5 ">Subtotal antes de IVA:</p>
-//                                 <p className="pl-2">${formatPrice((subtotalBeforeIVA.toString()), "es-MX")}</p>
-//                             </div>
-//                             <div className="text-xl flex">
-//                                 <p className="w-3/5 ">IVA:</p>
-//                                 <p className="pl-2">${formatPrice((IVA.toString()), "es-MX")}</p>
-//                             </div>
-//                             <div className="text-xl flex">
-//                                 <p className="w-3/5">Envio:</p>
-//                                 <p className="pl-2">${formatPrice((shipping.toString()), "es-MX")}</p>
-//                             </div>
-//                             <div className="text-xl flex">
-//                                 <p className="w-3/5">Descuento:</p>
-//                                 <p className="pl-2">${formatPrice(("0".toString()), "es-MX")}</p>
-//                             </div>
-//                             <div className="text-2xl font-bold flex">
-//                                 <p className="w-3/5 ">Total:</p>
-//                                 <p className="pl-2">${formatPrice((total.toString()), "es-MX")}</p>
-//                             </div>
-//                         </div>
-
-//                         <div className="mt-5">
-//                             <p className="text-xl">Cupón de descuento</p>
-//                             <input type="text" className="w-full input text-lg placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
-//                             <button type="button" className="w-full btn bg-blue-900 text-white mt-3 text-lg">Aplicar descuento</button>
-//                         </div>
-//                         <div className="mt-5">
-//                             <p className="text-xl font-bold">Selecciona un metodo de pago</p>
-//                             <div className="flex flex-col gap-4 pt-2">
-//                                 <div className="w-full flex items-center gap-5">
-//                                     {/* <input type="radio" name="payment_method" id="" className="radio radio-primary" onClick={() => setPaymentMethod("mercado_pago")} /> */}
-//                                     <div className="relative w-full">
-//                                         <button className="cursor-pointer mb-10">
-//                                             <p className="flex items-center gap-2 text-blue-500 font-bold text-xl"><SiMercadopago className="text-5xl" />Mercado pago</p>
-//                                         </button>
-//                                         <p className="text-sm text-blue-500 absolute bottom-0">Pagos con tarjetas de crédito, debito, OXXO, MSI y mas...</p>
-//                                     </div>
-//                                 </div>
-//                                 {/* <div className="w-full flex items-center gap-5">
-//                                     <input type="radio" name="payment_method" id="" className="radio radio-primary" onClick={() => setPaymentMethod("paypal")} />
-//                                     <div className="relative w-full">
-//                                         <button className="cursor-pointer mb-6">
-//                                             <p className="flex items-center gap-2 text-blue-500 font-bold text-xl"><FaCcPaypal className="text-5xl" />Paypal</p>
-//                                         </button>
-//                                         <p className="text-sm text-primary absolute bottom-0">Pagos con tarjetas de crédito y debito</p>
-//                                     </div>
-//                                 </div> */}
-//                             </div>
-//                             <button
-//                                 className="mt-10 btn btn-primary w-full text-lg cursor-pointer"
-//                                 disabled={paymentMethod === null || orderLoading === true}
-//                                 onClick={handleCreateOrder}
-//                             >
-//                                 {orderLoading ? ("Cargando...") : ("Proceder al pago")}
-//                             </button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </section>
-//             <GuestAdvertisement refName={guestAdvertisementModal} onResponse={modalResponse} />
-//             {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
-//         </div>
-//     );
-// };
-
-// export default ShoppingCartResume;
-
-
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { SiMercadopago } from "react-icons/si";
@@ -293,8 +5,8 @@ import { useAuthStore } from "../../auth/states/authStore";
 import { usePaymentStore } from "../states/paymentStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
-import { formatPrice, makeSlug } from "../../products/Helpers";
-import { closeModal, showModal } from "../../../global/GlobalHelpers";
+import { formatPrice } from "../../products/Helpers";
+import { calcShippingCost, closeModal, showModal } from "../../../global/GlobalHelpers";
 import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import GuestAdvertisement from "../components/GuestAdvertisement";
 import AddressesModal from "../components/AddressesModal";
@@ -305,7 +17,7 @@ import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useShoppingCart } from "../hooks/useShoppingCart";
-import ButtonQtyCounter from "../components/ButtonQtyCounter";
+import { BiMinus, BiPlus } from "react-icons/bi";
 
 /**
  * Shopping Cart Resume Component
@@ -318,17 +30,11 @@ import ButtonQtyCounter from "../components/ButtonQtyCounter";
  * - Payment method selection
  * - Order creation and payment processing
  */
-const BuyNow = () => {
-    const IVA: number = 0.16;
+const ShoppingCartResume = () => {
     // ============================================================================
     // Constants
     // ============================================================================
-    /** Maximum number of items that fit in one shipping box */
-    const MAX_ITEMS_PER_BOX = 10;
-
-    /** Cost per shipping box in MXN */
-    const BOX_SHIPPING_COST = 264.00;
-
+    const IVA = 0.16;
     // ============================================================================
     // Hooks & State Management
     // ============================================================================
@@ -336,7 +42,8 @@ const BuyNow = () => {
     const { theme } = useThemeStore();
     const navigate = useNavigate();
     const { isAuth } = useAuthStore();
-    const { itemBuyNow } = useShoppingCart();
+    // const { items, toogleCheckItem, updateItemQty, removeItem } = useShoppingCartStore();
+    const { shoppingCart, toogleCheck, updateQty, remove } = useShoppingCart();
     const { order, createOrder, isLoading: orderLoading } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
 
@@ -354,10 +61,8 @@ const BuyNow = () => {
 
     /** Whether to show the guest checkout form */
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
-
     const [guestBillingAddressChecked, setGuestBillingAddressChecked] = useState<boolean>(false);
-    const [subtotal, setSubtotal] = useState<number>(0);
-    const [total, setTotal] = useState<number>(0);
+    const [couponCode, setCouponCode] = useState<string | null>(null);
 
     // Modal references
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
@@ -369,6 +74,13 @@ const BuyNow = () => {
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
     const [billingGuestAddress, setBillingGuestAddress] = useState<GuestFormType | null>(null);
 
+    const [discount, setDiscount] = useState<number>(0);
+    const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);
+    const [subtotalBeforeIva, setSubtotalBeforeIva] = useState<number>(0);
+    const [total, setTotal] = useState<number>(0);
+    const [iva, setIva] = useState<number>(0);
+
+
     // ============================================================================
     // Data Fetching
     // ============================================================================
@@ -379,28 +91,38 @@ const BuyNow = () => {
         isLoading: addressesLoading,
         error: addressesError,
         refetch: addressesRefetch
-    } = useFetchCustomerAddresses();
+    } = useFetchCustomerAddresses({ pagination: { page: 1, limit: 10 } });
 
     // ============================================================================
     // Computed Values
     // ============================================================================
-    if (!itemBuyNow) { navigate("/carrito-de-compras"); return; };
 
     /** Products that are checked/selected for purchase */
-    useEffect(() => {
-        const calcSubtotal = itemBuyNow.quantity * parseFloat(itemBuyNow.product_version.unit_price);
-        const calcIVA = calcSubtotal * IVA;
-        const calcTotal = calcSubtotal + calcIVA + shippingCost;
-        setSubtotal(calcSubtotal);
-        setTotal(calcTotal);
+    const selectedProducts: ShoppingCartType[] = shoppingCart && shoppingCart.filter(item => item.isChecked === true);
 
-    }, [itemBuyNow]);
+    // /** Subtotal including IVA (sum of all selected products) */
+    // const subtotal: number = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
+    //     const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
+    //     return accumulator + itemTotal;
+    // }, 0);
+
+    // /** IVA tax amount (16% of subtotal) */
+    // const calcSubtotalIVA: number = subtotal * IVA;
+
+    // /** Subtotal before IVA tax */
+    // const subtotalBeforeIVA: number = subtotal - calcSubtotalIVA;
+
+    // /** Final total including subtotal and shipping */
+    // const total: number = subtotal + shippingCost;
 
     // ============================================================================
     // Navigation Guard
     // ============================================================================
 
     /** Redirect to cart if no items are selected */
+    if (!shoppingCart || shoppingCart.length === 0 || shoppingCart.filter(item => item.isChecked === true).length < 1) {
+        navigate("/carrito-de-compras");
+    }
 
     /** Redirect to payment page if order was successfully created */
     if (order) navigate("/pagar-productos");
@@ -408,17 +130,6 @@ const BuyNow = () => {
     // ============================================================================
     // Helper Functions
     // ============================================================================
-
-    /**
-     * Calculates shipping cost based on total item quantity
-     * Determines how many boxes are needed and calculates total shipping cost
-     */
-    const calcShippingCost = () => {
-        const itemsCount = itemBuyNow.quantity;
-        const calcBoxes = Math.ceil(itemsCount / MAX_ITEMS_PER_BOX);
-        setBoxQty(calcBoxes);
-        setShippingCost(calcBoxes * BOX_SHIPPING_COST);
-    };
 
     // ============================================================================
     // Event Handlers
@@ -454,51 +165,83 @@ const BuyNow = () => {
         }
 
         if (selectedAddress) {
-            const products: PaymentShoppingCart[] = [
-                {
-                    product: itemBuyNow.product_version.sku,
-                    quantity: itemBuyNow.quantity
+            const products: PaymentShoppingCart[] = selectedProducts.map(item => {
+                return {
+                    product: item.product_version.sku,
+                    quantity: item.quantity
                 }
-            ];
+            });
 
             await createOrder({
                 shopping_cart: products,
                 address: selectedAddress.uuid,
-                payment_method: paymentMethod
+                payment_method: paymentMethod,
+                coupon_code: couponCode || undefined
             });
         }
     };
 
-    const handleGuestAddressForm = (savedAddress: GuestFormType) => {
-        setGuestAddressForm(savedAddress);
-    };
+    const handleGuestAddressForm = (savedAddress: GuestFormType) => setGuestAddressForm(savedAddress);
 
-    const handleUpdateQty = (values: { sku: string, newQuantity: number }) => {
-        if (itemBuyNow.product_version.sku !== values.sku) return;
-        itemBuyNow.quantity = values.newQuantity;
-        const calcSubtotal = itemBuyNow.quantity * parseFloat(itemBuyNow.product_version.unit_price);
-        const calcIVA = calcSubtotal * IVA;
-        const calcTotal = calcSubtotal + calcIVA + shippingCost;
-        setSubtotal(calcSubtotal);
-        setTotal(calcTotal);
+    const calcShipping = (): { boxesQty: number, shippingCost: number } => {
+        const totalItems = shoppingCart.reduce((acc, current) => { return acc + current.quantity }, 0);
+        const { boxesQty, shippingCost } = calcShippingCost({ itemQty: totalItems });
+        setBoxQty(boxesQty);
+        setShippingCost(shippingCost);
+        return { boxesQty, shippingCost };
     };
-
 
     // ============================================================================
     // Effects
     // ============================================================================
 
-    /** Recalculate shipping cost when items or quantities change */
-    useEffect(() => { calcShippingCost(); }, [handleUpdateQty]);
-
     /** Set default address when addresses are loaded */
     useEffect(() => {
         if (!addresses) return;
-        const defaultAddress = addresses.find(data => data.default_address === true);
+        const defaultAddress = addresses.data.find(data => data.default_address === true);
         if (!defaultAddress) return;
         setSelectedAddress(defaultAddress);
     }, [addresses]);
 
+    useEffect(() => {
+        if (shoppingCart) {
+            const { shippingCost } = calcShipping();
+            /** Products that are checked/selected for purchase */
+            const onlyChecked = shoppingCart.filter(item => item.isChecked === true);
+
+            /** Subtotal including IVA (sum of all selected products) */
+            const subtotal = onlyChecked.reduce((acc, item) => {
+                const itemTotal = parseFloat(item.product_version.unit_price) * item.quantity;
+                return acc + itemTotal;
+            }, 0);
+
+            const discount = onlyChecked.reduce((acc, item) => {
+                if (item.isOffer && item.product_version.unit_price_with_discount) {
+                    return acc + (parseFloat(item.product_version.unit_price) - parseFloat(item.product_version.unit_price_with_discount)) * item.quantity;
+                } else {
+                    return acc;
+                }
+            }, 0);
+
+            const calcIva = subtotal * IVA;
+            const calcSubtotalBeforeIVA: number = subtotal - calcIva;
+            const subtotalWithDiscount = subtotal - discount;
+            const total: number = subtotalWithDiscount + shippingCost;
+
+            setSubtotalWithDisc(subtotalWithDiscount);
+            setSubtotalBeforeIva(calcSubtotalBeforeIVA);
+            setDiscount(discount);
+            setIva(calcIva);
+            setTotal(total);
+        }
+    }, [shoppingCart]);
+
+    /** Recalculate shipping cost when items or quantities change */
+    useEffect(() => { calcShipping(); }, [updateQty]);
+
+    // ============================================================================
+    // Render
+    // ============================================================================
 
     return (
         <div className={clsx(
@@ -544,6 +287,13 @@ const BuyNow = () => {
                                 <div>
                                     <p>Error al cargar las direcciones de envio</p>
                                     <button type="button" className="btn btn-primary" onClick={() => addressesRefetch()}>Cargar otra vez</button>
+                                </div>
+                            }
+
+                            {!addressesLoading && addresses && addresses.data.length === 0 &&
+                                <div>
+                                    <h2>No tienes direcciones de envio registradas</h2>
+                                    <Link to={"/mi-cuenta/direcciones-de-envio"} type="button" className="underline text-primary" >Crea una nueva dirección de envio ahora</Link>
                                 </div>
                             }
                         </div>
@@ -612,105 +362,55 @@ const BuyNow = () => {
                         "w-full flex flex-col gap-2 rounded-xl pt-5 pb-6 px-5 mt-5",
                         theme === "ligth" ? "bg-white" : "bg-slate-950"
                     )}>
-                        {itemBuyNow ? (
-                            <div className="w-full flex py-2">
-                                <div className="w-95/100">
-                                    <div className="w-full flex">
-                                        <div className="w-95/100">
-                                            <Link
-                                                to={`/tienda/${itemBuyNow.category.toLowerCase()}/${makeSlug(itemBuyNow.product_name)}/${itemBuyNow.product_version.sku.toLowerCase()}`}
-                                                className="text-2xl font-bold hover:underline hover:text-primary">
-                                                {itemBuyNow.product_name}
-                                            </Link>
-                                            <div className="breadcrumbs">
-                                                <ul>
-                                                    <li className={clsx(
-                                                        "text-lg",
-                                                        theme === "ligth" ? "text-gray-500" : "text-gray-200"
-                                                    )}>{itemBuyNow.category}</li>
-                                                    {itemBuyNow.product_attributes.map((breadcrumb, index) => (
-                                                        <li
-                                                            className={clsx(
-                                                                "text-lg",
-                                                                theme === "ligth" ? "text-gray-500" : "text-gray-200"
-                                                            )}
-                                                            key={index}>{breadcrumb.category_attribute.description}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <div className="w-full flex mt-1">
-                                        <figure className="w-50 h-50">
-                                            <Link to={`/tienda/${itemBuyNow.category.toLowerCase()}/${makeSlug(itemBuyNow.product_name)}/${itemBuyNow.product_version.sku.toLowerCase()}`}>
-                                                <img className="w-full h-full object-cover rounded-xl border border-gray-300" src={itemBuyNow.product_images.find(img => img.main_image === true)?.image_url} alt={itemBuyNow.product_name} />
-                                            </Link>
-                                        </figure>
-                                        <div className=" w-65/100 flex px-5">
-                                            <div className="w-1/2  text-xl flex flex-col gap-4">
-                                                <p>{itemBuyNow.product_version.color_line}</p>
-                                                <p><span className={clsx("mr-2 px-4 py-1 rounded-full", theme === "dark" && "border border-slate-500")} style={{ backgroundColor: itemBuyNow.product_version.color_code }}></span>{itemBuyNow.product_version.color_name}</p>
-                                                <div>
-                                                    <p>Cantidad</p>
-                                                    <ButtonQtyCounter
-                                                        initQty={itemBuyNow.quantity}
-                                                        limit={itemBuyNow.product_version.stock}
-                                                        sku={itemBuyNow.product_version.sku}
-                                                        onUpdateQty={handleUpdateQty}
-                                                        isAuth
-                                                        disabled={false}
-                                                        className="w-1/2 bg-primary flex items-center justify-center text-white p-1 rounded-lg mt-1"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className=" w-20/100">
-                                            <div className="mb-2">
-                                                <p className="text-xl">Precio unitario</p>
-                                                <p className="text-2xl">${formatPrice(itemBuyNow.product_version.unit_price, "es-MX")}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-xl">Subtotal producto</p>
-                                                <p className="font-bold text-2xl underline">${formatPrice(subtotal.toString(), "es-MX")}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-center">No hay productos seleccionados</p>
-                        )}
+                        {selectedProducts.map((item, index) => (
+                            <ShoppingCartProductResume
+                                key={index}
+                                data={item}
+                                onToggleCheck={toogleCheck}
+                                onUpdateQty={updateQty}
+                                onRemoveItem={remove}
+                                isAuth={isAuth ?? false}
+                            />
+                        ))}
                         <div className="w-full border-t border-t-gray-300 pt-5">
-                            <p className="text-xl text-right">{`Subtotal (1) productos: `}<span className="font-bold">${formatPrice((subtotal.toString()), "es-MX")}</span> </p>
+                            <p className="text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotalWithDisc.toString()), "es-MX")}</span> </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column - Price Summary & Payment */}
                 <div className="w-1/4 pl-4">
+                    <h2>Desglose</h2>
                     <div className={clsx(
-                        "w-full p-5 rounded-xl",
+                        "w-full p-5 rounded-xl mt-2",
                         theme === "ligth" ? "bg-white" : "bg-slate-950"
                     )}>
                         {/* Price Breakdown */}
                         <div className="w-full flex flex-col gap-2 border-b border-b-gray-400 pb-5">
                             <div className="text-xl flex">
-                                <p className="w-3/5 ">Subtotal antes de IVA:</p>
-                                <p className="pl-2">${formatPrice(((subtotal - (subtotal * IVA)).toString()), "es-MX")}</p>
+                                <div className="w-3/5 ">
+                                    <p>Subtotal:</p>
+                                    <p className="text-xs">Antes de impuestos y descuentos</p>
+                                </div>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((subtotalBeforeIva.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5 ">IVA:</p>
-                                <p className="pl-2">${formatPrice(((subtotal * IVA).toString()), "es-MX")}</p>
+                                <p className="w-3/5 ">IVA (16%):</p>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((iva.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5">Envio({`${boxQty} caja/s`}):</p>
-                                <p className="pl-2">${formatPrice((shippingCost.toString()), "es-MX")}</p>
+                                <p className="w-3/5">Envio({boxQty > 1 ? `${boxQty} cajas` : `${boxQty} caja`}):</p>
+                                <p className="pl-2 flex items-center "><BiPlus />${formatPrice((shippingCost.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-xl flex">
-                                <p className="w-3/5">Descuento:</p>
-                                <p className="pl-2">${formatPrice(("0".toString()), "es-MX")}</p>
+                                <p className={clsx(
+                                    "w-3/5",
+                                    discount > 0 && "text-primary font-bold"
+                                )}>Descuento:</p>
+                                <p className={clsx(
+                                    "pl-2 flex items-center",
+                                    discount > 0 && "text-primary font-bold"
+                                )}><BiMinus />${formatPrice((discount.toString()), "es-MX")}</p>
                             </div>
                             <div className="text-2xl font-bold flex">
                                 <p className="w-3/5 ">Total:</p>
@@ -721,8 +421,7 @@ const BuyNow = () => {
                         {/* Discount Coupon */}
                         <div className="mt-5">
                             <p className="text-xl">Cupón de descuento</p>
-                            <input type="text" className="w-full input text-lg placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
-                            <button type="button" className="w-full btn bg-blue-900 text-white mt-3 text-lg">Aplicar descuento</button>
+                            <input onChange={(e) => setCouponCode(e.target.value)} type="text" className="w-full input text-lg placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
                         </div>
 
                         {/* Payment Method Selection */}
@@ -775,10 +474,10 @@ const BuyNow = () => {
 
             {/* Modals */}
             <GuestAdvertisement refName={guestAdvertisementModal} onResponse={modalResponse} />
-            {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
+            {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses.data} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
             <GuestAddressFormModal ref={guestAddressFormModal} onClose={() => closeModal(guestAddressFormModal.current)} title={guestAddressForm ? "Editar dirección" : "Agregar dirección"} onSave={handleGuestAddressForm} />
         </div>
     );
 };
 
-export default BuyNow;
+export default ShoppingCartResume;

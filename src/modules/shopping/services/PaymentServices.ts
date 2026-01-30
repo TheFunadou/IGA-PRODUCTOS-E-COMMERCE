@@ -1,10 +1,9 @@
 // import type { ShoppingCartType } from "../ShoppingTypes";
 import api from "../../../api/api.config";
-import type { OrderCreated } from "../PaymentTypes";
-import type { ProcessOrderType } from "../../orders/OrdersTypes";
+import type { OrderCreatedType, ProcessOrderType } from "../../orders/OrdersTypes";
 
-export const createMercadoPagoOrderAuthCustomer = async (args: { data: ProcessOrderType, csrfToken: string }): Promise<OrderCreated> => {
-    const { data } = await api.post<OrderCreated>("/orders/mercadopago/authenticated", args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const createMercadoPagoOrderAuthCustomer = async (args: { data: ProcessOrderType, csrfToken: string }): Promise<OrderCreatedType> => {
+    const { data } = await api.post<OrderCreatedType>("/orders/mercadopago/authenticated", args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return data;
 };
 // export const createMercadoPagoOrder = async (data: ProcessOrderType): Promise<PaymentOrder> => {

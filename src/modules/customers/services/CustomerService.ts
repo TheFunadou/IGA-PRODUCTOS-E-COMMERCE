@@ -7,6 +7,7 @@ export const getCustomerAddressesService = async (params: { page: number, limit:
     return data;
 };
 
+
 export const createAddressService = async (args: { data: NewAddressType, csrfToken: string }): Promise<CustomerAddressType> => {
     const { data } = await api.post<CustomerAddressType>(`/customer-addresses`, args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return data;

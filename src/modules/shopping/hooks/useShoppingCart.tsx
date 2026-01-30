@@ -52,7 +52,7 @@ export const useShoppingCart = () => {
     const add = useDebounceCallback(async (data: ProductVersionCardType, quantity = 1) => {
         if (isAuth) {
             setIsLoading(true);
-            await addAuth.mutateAsync({ ...data, isChecked: true, quantity });
+            await addAuth.mutateAsync({ sku: data.product_version.sku, quantity });
             setIsLoading(false);
             return;
         };

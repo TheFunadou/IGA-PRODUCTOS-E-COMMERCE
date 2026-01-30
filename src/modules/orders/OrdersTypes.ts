@@ -1,4 +1,5 @@
-import type { CustomerAddressType } from "../customers/CustomerTypes";
+import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressPaymentType } from "../customers/CustomerTypes";
+import type { OrderItems, OrderPaidShipping } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
 
@@ -6,6 +7,8 @@ export type PaymentShoppingCart = {
     product: string;
     quantity: number;
 };
+
+export type ShippingStatus = "PENDING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "IN_PROCESS" | "IN_TRANSIT" | "RETURNED" | "RETURNED_IN_PROCESS" | "RETURNED_DELIVERED" | "IN_PREPARATION" | "STAND_BY";
 
 export type Order = {
     uuid: string;
@@ -48,6 +51,16 @@ export type CreateOrderType = {
     coupon_code?: string;
 };
 
+export type Shipping = {
+    shipping_status: ShippingStatus;
+    tracking_number?: string | null;
+    carrier?: string | null;
+    shipping_amount: string;
+    boxes_count: number;
+    created_at: Date;
+    updated_at: Date
+};
+
 export type ProcessOrderType = Omit<CreateOrderType, "payment_method">;
 
 export type OrderCreatedResume = {
@@ -62,13 +75,11 @@ export type OrderCreatedResume = {
 
 export type OrderCreatedType = {
     folio: string;
-    items: ShoppingCartType[];
-    external_id: string;
-    receiver_address: CustomerAddressType;
     payment_method: Exclude<PaymentProvidersType, null>;
-    resume: OrderCreatedResume;
 };
 
+export type LightGetOrders = Omit<Order, "is_guest_order" | "exchange" | "payment_provider" | "coupon_code">;
+export type SafeOrder = Omit<Order, "id" | "external_order_id" | "customer_id" | "customer_address_id">;
 
 export type ItemsOrderType = ShoppingCartType & {
     subtotal: string
@@ -90,6 +101,8 @@ export type OrderDetailResponse = {
     date: Date;
 };
 
+
+
 export type OrdersType = {
     id: string;
     created_at: Date;
@@ -106,4 +119,46 @@ export type OrdersType = {
             }[];
         };
     }[];
+};
+
+export type OrderCheckoutType = {
+    uuid: string;
+    items: OrderItems[];
+    resume: OrderCreatedResume;
+    external_id: string;
+    address: GetCustomerAddressPaymentType;
+};
+
+export type GetLightOrderExtended = {
+    order: LightGetOrders;
+    shippingStatus?: ShippingStatus;
+    orderItemImages: string[];
+    totalOrderItems: number;
+};
+
+
+export type GetOrdersType = {
+    data: GetLightOrderExtended[];
+    totalPages: number;
+    totalRecords: number;
+};
+
+
+export type OrderMoreDetails = {
+    order: SafeOrder;
+    payments_details: OrderPaymentDetails[];
+    shipping?: Shipping | null;
+    resume: OrderCreatedResume;
+};
+
+export type OrderDetails = {
+    address: GetCustomerAddressPaymentType;
+    items: OrderItems[];
+    customer?: CustomerAttributes;
+    details: OrderMoreDetails;
+};
+
+export type GetOrderDetails = {
+    status: OrderStatusType;
+    order?: OrderDetails;
 };

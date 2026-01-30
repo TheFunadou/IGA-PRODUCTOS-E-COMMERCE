@@ -13,8 +13,12 @@ const DeleteAddressForm = ({ ref, onDeleted, address, customer }: Props) => {
     const deleteAddress = useDeleteAddress(customer);
 
     const handleDelete = async () => {
-        await deleteAddress.mutateAsync(address!);
-        onDeleted();
+        try {
+            await deleteAddress.mutateAsync(address!);
+            onDeleted();
+        } catch (error) {
+            console.log("Error", error);
+        }
     };
 
     return (

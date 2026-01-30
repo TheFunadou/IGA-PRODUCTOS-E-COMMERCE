@@ -73,15 +73,6 @@ const CustomerAddresses = () => {
                 </div>
             )}
 
-            {!isLoading && !error && addresses && addresses.data.length === 0 && (
-                <div className="w-full">
-                    <p className="mt-2 text-xl">No tienes direcciones de envio.</p>
-                    <div>
-                        <button type="button" className="btn btn-primary cursor-pointer" onClick={() => showModal(newAddressModal.current)}>Agregar nueva dirección de envio</button>
-                    </div>
-                </div>
-            )}
-
             {!isLoading && !error && addresses && addresses.data.length > 0 && (
                 <div className="w-full">
                     {addresses && addresses.data.map((data, index) => (
@@ -107,8 +98,9 @@ const CustomerAddresses = () => {
                         </div>
                     ))}
                     {addresses.totalPages > 1 && (
-                        <div className="mt-5">
+                        <div className="mt-5 w-fit">
                             <PaginationComponent currentPage={Number(pageParam) || 1} onPageChange={handlePageChange} totalPages={addresses.totalPages} />
+                            <p className="text-center mt-2">Página {Number(pageParam) || 1} de {addresses.totalPages}</p>
                         </div>
                     )}
                 </div>

@@ -12,3 +12,12 @@ export type SubcategoriesType = {
 };
 
 
+export type CategorySummaryType = {
+  categoryName: string;
+  productVersion: {
+    sku: string;
+    productName: string;
+    imageUrl: string;
+  }[];
+};
+

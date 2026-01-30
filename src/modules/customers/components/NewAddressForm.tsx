@@ -28,11 +28,13 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
 
     const onSubmit: SubmitHandler<NewAddressType> = async (data: NewAddressType) => {
         try {
+            console.log("Data", JSON.stringify(data, null, 2))
             await addAddress.mutateAsync(data);
             reset();
             setCountry(defualtCountry);
             onCreated();
         } catch (error) {
+            console.log("Error", error);
             setError(getErrorMessage(error));
         };
     };

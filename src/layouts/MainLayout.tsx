@@ -192,7 +192,7 @@ const MainLayout = () => {
                         <Link to={"/cobertura"}>Cobertura</Link>
                         <Link to={"/contacto"}>Contacto</Link>
                         <Link to={"/distribuidores"}>Distribuidores</Link>
-                        <Link to={"#"}>Nuevos lanzamientos</Link>
+                        {/* <Link to={"#"}>Nuevos lanzamientos</Link> */}
                     </div>
                     <div className="w-full hidden md:block text-right">
                         <a href="tel:9222158300" target="_blank">¿Tienes dudas? Llamanos al 921 215 8300| 01</a>
@@ -238,16 +238,14 @@ const MainLayout = () => {
                     <div>
                         <p className="text-3xl font-bold">Conocenos</p>
                         <ul className="flex flex-col gap-5">
-                            <li><Link to={"acerca-de-nosotros"}>Acerca de Nosotros</Link></li>
-                            <li><Link to={"contacto"}>Contacto</Link></li>
-                            <li><Link to={"bolsa-de-trabajo"}>Bolsa de trabajo</Link></li>
+                            <li><Link to={"/acerca-de-iga"}>Acerca de Nosotros</Link></li>
+                            <li><Link to={"/contacto"}>Contacto</Link></li>
                         </ul>
                     </div>
                     <div>
                         <p className="text-3xl font-bold">FAQ´s</p>
                         <ul className="flex flex-col gap-5">
-                            <li><Link to={"#"}>Preguntas frecuentes</Link></li>
-                            <li><a href="atencionacliente@igaproductos.com.mx" target="_blank">Soporte a compras</a></li>
+                            <li><a href="mailto:atencionacliente@igaproductos.com.mx" type="email" target="_blank">Soporte a compras</a></li>
                         </ul>
                     </div>
                     <div>

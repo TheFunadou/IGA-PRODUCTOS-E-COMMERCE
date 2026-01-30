@@ -289,6 +289,13 @@ const ShoppingCartResume = () => {
                                     <button type="button" className="btn btn-primary" onClick={() => addressesRefetch()}>Cargar otra vez</button>
                                 </div>
                             }
+
+                            {!addressesLoading && addresses && addresses.data.length === 0 &&
+                                <div>
+                                    <h2>No tienes direcciones de envio registradas</h2>
+                                    <Link to={"/mi-cuenta/direcciones-de-envio"} type="button" className="underline text-primary" >Crea una nueva dirección de envio ahora</Link>
+                                </div>
+                            }
                         </div>
                     ) : (
                         <div className="w-full bg-white rounded-xl px-5 py-10">

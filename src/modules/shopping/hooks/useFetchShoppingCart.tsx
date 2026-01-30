@@ -27,36 +27,45 @@ export function useAddItem() {
     const { authCustomer, isAuth, csrfToken } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
-        mutationFn: async (item: ShoppingCartType): Promise<boolean> => {
-            console.log(JSON.stringify(item, null, 2));
-            return await shoppingCartAddItemService({ item, csrfToken: csrfToken! });
+        mutationFn: async (args: { sku: string, quantity: number }): Promise<ShoppingCartType[]> => {
+            return await shoppingCartAddItemService({ sku: args.sku, quantity: args.quantity, csrfToken: csrfToken! });
         },
-        onMutate: async (item: ShoppingCartType) => {
+        onMutate: async (args: { sku: string, quantity: number }) => {
             if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
             queryClient.setQueryData<ShoppingCartType[]>(
                 queryKey, (old) => {
-                    if (!old) return [item];
-                    const exist = old.findIndex(cartItem => cartItem.product_version.sku === item.product_version.sku);
+                    if (!old) return []; // El backend construirá el item completo
+                    const exist = old.findIndex(cartItem => cartItem.product_version.sku === args.sku);
                     if (exist !== -1) {
                         return old.map((cartItem, index) =>
-                            index === exist ? { ...cartItem, quantity: cartItem.quantity + item.quantity } : cartItem
+                            index === exist ? { ...cartItem, quantity: cartItem.quantity + args.quantity } : cartItem
                         );
                     };
-                    return [...old, item];
+                    // No podemos agregar el item optimistamente porque no tenemos todos los datos
+                    // El backend lo construirá y lo devolverá
+                    return old;
                 }
             );
             return { previousShoppingCart };
         },
-        onSuccess: (response, item, context) => {
+        onSuccess: (updatedCart, _args, _context) => {
+            console.log("🔍 Frontend received:", updatedCart.length, "items");
+
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
+
+            // Actualizar el cache directamente con la respuesta del backend
+            queryClient.setQueryData<ShoppingCartType[]>(queryKey, updatedCart);
+
+            // Invalidar para forzar re-render (sin refetch porque ya tenemos los datos)
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+
             showTriggerAlert("Successfull", "Agregado al carrito", { duration: 3500 });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _args, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -64,7 +73,6 @@ export function useAddItem() {
             }
             showTriggerAlert("Error", "Ocurrio un error inesperado", { duration: 3500 });
         }
-
     })
 };
 

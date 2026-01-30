@@ -7,7 +7,6 @@ import clsx from "clsx";
 import ImageMagnifier from "../components/ImageMagnifier";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import { useFavorite } from "../hooks/useProductFavorites";
-import Carousel from "../../home/components/Carousel";
 import { useFetchAds } from "../../../layouts/hooks/useAds";
 import ProductVersionCardShop from "../components/ProductVersionCardShop";
 import type { AddPVReviewType, ProductVersionCardType } from "../ProductTypes";
@@ -22,6 +21,7 @@ import { useAddPVReview, useFetchProductVersionDetail, useFetchProductVersionRev
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useForm } from "react-hook-form";
 import PaginationComponent from "../../../global/components/PaginationComponent";
+import { OverflowXComponent } from "../../home/components/OverflowXComponent";
 
 const ProductDetail = () => {
     const SHIPPING_COST = 264.00;
@@ -322,7 +322,7 @@ const ProductDetail = () => {
                                     <h1 className="text-lg">{`${formatPrice(shippingCost.toString(), "es-MX")} MXN (${boxesQty} caja/s)`}</h1>
                                 </div>
                                 <div className="py-5 flex flex-col gap-10">
-                                    <Link to="#" className="underline text-primary">Politica de devolución PNC</Link>
+                                    <Link to="/politica-de-devolucion" className="underline text-primary">Politica de devolución PNC</Link>
                                     <div>
                                         <p>Selecciona una cantidad:</p>
                                         <select className="select w-full mt-2" onChange={(e) => { handleSelectProductQty(e.target.value); handleSetProductQty(e.target.value) }}>
@@ -402,7 +402,7 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                             <div className="w-1/2 pl-15">
-                                <h2 className="text-2xl font-bold">Certificaciones</h2>
+                                <h2 className="text-2xl font-bold">Cumplimientos normativos</h2>
                                 <ol className="list-disc list-inside mt-2 text-2xl/10 flex flex-col gap-2">
                                     {certifications.map((cer, index) => (
                                         <li key={index}>{cer}</li>
@@ -609,11 +609,11 @@ const ProductDetail = () => {
                 )}
 
                 {!adsLoading && !adsError && ads && (
-                    <Carousel className="mt-5" >
+                    <OverflowXComponent className="mt-5 gap-20" >
                         {ads && ads.map((data, index) => (
                             <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} versionData={data} className="flex-shrink-0" />
                         ))}
-                    </Carousel>
+                    </OverflowXComponent>
                 )}
 
             </div>

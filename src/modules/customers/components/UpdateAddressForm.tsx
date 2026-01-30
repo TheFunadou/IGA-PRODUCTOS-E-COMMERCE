@@ -64,6 +64,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
             setError("");
             if (!versionData) return;
             const updatedFields: Partial<NewAddressType> = getFormChanges(versionData, data);
+            // const { references_or_comments, ...validFields } = updatedFields;
             if (Object.keys(updatedFields).length === 0) { setError("Se necesita al menos actualizar un campo para actualizar la información"); return; }
             updateAddress.mutate({
                 addressUUID: address!,
@@ -71,7 +72,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
             });
             onUpdated();
         } catch (error) {
-            setError(getErrorMessage(error));
+            console.error(error);
         };
     };
 

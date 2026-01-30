@@ -161,12 +161,12 @@ const CreateAccount = () => {
                                         passwordStrength >= 60 && passwordStrength < 80 && "text-primary",
                                         passwordStrength >= 80 && "text-success"
                                     )}>
-                                        {passwordStrength < 10 && "Muy Débil"}
-                                        {passwordStrength >= 10 && passwordStrength < 20 && "Débil"}
-                                        {passwordStrength >= 20 && passwordStrength < 40 && "Media"}
-                                        {passwordStrength >= 40 && passwordStrength < 60 && "Buena"}
-                                        {passwordStrength >= 60 && passwordStrength < 80 && "Muy Buena"}
-                                        {passwordStrength >= 80 && "Excelente"}
+                                        {passwordStrength < 10 && "Demasiado débil"}
+                                        {passwordStrength >= 10 && passwordStrength < 20 && "Muy Débil"}
+                                        {passwordStrength >= 20 && passwordStrength < 40 && "Débil"}
+                                        {passwordStrength >= 40 && passwordStrength < 60 && "Regular"}
+                                        {passwordStrength >= 60 && passwordStrength < 80 && "Fuerte"}
+                                        {passwordStrength >= 80 && "Muy fuerte"}
                                     </p>
                                 </div>
                             )}

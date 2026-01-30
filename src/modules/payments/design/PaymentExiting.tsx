@@ -61,11 +61,7 @@ const PaymentExiting = () => {
         const iva = subtotal * IVA;
         const subtotalBeforeIVA = subtotal - iva;
         const subtotalWithDiscount = subtotal - discount;
-        const total = subtotalWithDiscount + parseFloat(data.order.details.shipping.shippingCost);
-        console.log(iva)
-        console.log(subtotalBeforeIVA)
-        console.log(subtotalWithDiscount)
-        console.log(total)
+        const total = subtotalWithDiscount + parseFloat(data.order.details.shipping?.shippingCost || "0");
         setSubtotalProducts(formatPrice(subtotalProducts.toString(), "es-MX"));
         setSubtotalBeforeIVA(formatPrice(subtotalBeforeIVA.toString(), "es-MX"));
         setIva(formatPrice(iva.toString(), "es-MX"));
@@ -84,7 +80,7 @@ const PaymentExiting = () => {
     }, [data?.order]);
 
 
-    if (isLoading || !data || data.status !== "APPROVED" || !data.order) {
+    if (isLoading || !data || !data.order) {
         return (
             <div className="bg-white rounded-xl p-10">
                 <div className="flex items-center gap-2">
@@ -93,7 +89,9 @@ const PaymentExiting = () => {
                 </div>
             </div>
         );
-    }
+    };
+
+    if (data.status !== "APPROVED") throw new Error("Error al obtener el estatus de la orden de compra");
 
 
     if (error) {
@@ -322,8 +320,12 @@ const PaymentExiting = () => {
                                                     <p className="pl-2 flex items-center "><BiPlus />${iva}</p>
                                                 </div>
                                                 <div className="text-xl flex">
-                                                    <p className="w-3/5">Envio({order.details.shipping.boxesQty > 1 ? `${order.details.shipping.boxesQty} cajas` : `${order.details.shipping.boxesQty} caja`}):</p>
-                                                    <p className="pl-2 flex items-center "><BiPlus />${formatPrice(details.shipping.shippingCost, "es-MX")}</p>
+                                                    <div className="w-3/5">{order.details.shipping && order.details.shipping.boxesQty && (
+                                                        <p>Envio({order.details.shipping.boxesQty > 1 ? `${order.details.shipping.boxesQty} cajas` : `${order.details.shipping.boxesQty} caja`}):</p>
+                                                    )}</div>
+                                                    {order.details.shipping && order.details.shipping.shippingCost && (
+                                                        <p className="pl-2 flex items-center "><BiPlus />${formatPrice(order.details.shipping.shippingCost, "es-MX")}</p>
+                                                    )}
                                                 </div>
                                                 <div className="text-xl flex">
                                                     <p className={clsx(

@@ -25,5 +25,9 @@
     h6{
         @apply text-sm font-bold;
     };
+
+    link-hover{
+        @apply hover:underline hover:text-primary
+    };
     
 }

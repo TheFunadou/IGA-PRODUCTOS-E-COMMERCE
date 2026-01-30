@@ -1,10 +1,9 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { formatAxiosError } from "./helpers";
 
-const nodeEnv = import.meta.env.VITE_NODE_ENV;
 
 const api = axios.create({
-    baseURL: nodeEnv === "DEV" ? import.meta.env.VITE_BACKEND_URL || "http://localhost:3000" : import.meta.env.VITE_BACKEND_URL,
+    baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:3000",
     timeout: 10000,
     headers: { "Content-Type": "application/json", },
     withCredentials: true

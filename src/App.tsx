@@ -27,10 +27,8 @@ import Distributors from "./modules/home/design/Distributors"
 import Contact from "./modules/home/design/Contact"
 import ShoppingCartResume from "./modules/shopping/design/ShoppingCartResume"
 import Checkout from "./modules/shopping/design/Checkout"
-import PaymentError from "./modules/shopping/design/PaymentError"
 import NotFoundPage from "./global/design/NotFoundPage"
 import PoliticaPrivacidad from "./modules/policies/PoliticaPrivacidad"
-import Orders from "./modules/orders/design/Orders"
 import CustomerFavorites from "./modules/customers/design/CustomerFavorites"
 import CreateAccount from "./modules/auth/design/CreateAccount"
 import CustomerPersonalInfo from "./modules/customers/design/CustomerPersonalInfo"
@@ -39,6 +37,10 @@ import { useThemeStore } from "./layouts/states/themeStore"
 import { useEffect } from "react"
 import PaymentExiting from "./modules/payments/design/PaymentExiting"
 import PaymentPending from "./modules/payments/design/PaymentPending"
+import PNCPolicy from "./modules/policies/PNCPolicy"
+import Orders from "./modules/orders/design/Orders"
+import OrderDetail from "./modules/orders/design/OrderDetail"
+import PaymentError from "./modules/payments/design/PaymentError"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -100,6 +102,7 @@ const router = createBrowserRouter([
 
           // Orders
           { path: "/mis-compras", element: <Orders /> },
+          { path: "/mis-compras/detalle", element: <OrderDetail /> },
           { path: "/mis-favoritos", element: <CustomerFavorites /> },
           { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 
@@ -120,6 +123,7 @@ const router = createBrowserRouter([
 
           // Policies
           { path: "/politica-de-privacidad", element: <PoliticaPrivacidad /> },
+          { path: "/politica-de-devolucion", element: <PNCPolicy /> },
 
           // Test routes
           { path: "/test", element: <ProductDetailSkeleton /> },

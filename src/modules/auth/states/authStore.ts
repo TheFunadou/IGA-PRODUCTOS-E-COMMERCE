@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { getCustomerProfile, login, logout } from "../services/authServices";
 import type { AuthCustomerCredentialsType, CustomerPayloadType } from "../AuthTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
+import { formatAxiosError } from "../../../api/helpers";
 
 type AuthenticationState = {
     authCustomer: CustomerPayloadType | null;
@@ -13,6 +14,7 @@ type AuthenticationState = {
     login: (dto: AuthCustomerCredentialsType) => Promise<void>;
     logout: () => Promise<string>;
     getProfile: () => Promise<void>;
+    clearError: () => void;
 };
 export const AUTH_CUSTOMER_KEY = "auth-customer-storage";
 
@@ -30,7 +32,7 @@ export const useAuthStore = create<AuthenticationState>()(
                     const response = await login(data);
                     set({ authCustomer: response.payload, isAuth: true, csrfToken: response.csrfToken });
                 } catch (error) {
-                    set({ authCustomer: null, isAuth: false, error: getErrorMessage(error), });
+                    set({ authCustomer: null, isAuth: false, error: formatAxiosError(error), });
                 }
             },
 
@@ -72,6 +74,9 @@ export const useAuthStore = create<AuthenticationState>()(
                     })
                 }
             },
+            clearError: async () => {
+                set({ error: null })
+            }
 
         }),
         {

@@ -1,26 +1,18 @@
-import { formatDate, formatPrice } from "../../products/Helpers";
-import { useLocation } from "react-router-dom";
+import { formatPrice } from "../../products/Helpers";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { FaCircleDollarToSlot, FaFire, FaList, FaTruckFast } from "react-icons/fa6";
-import { usePollingPaymentPendingDetail } from "../usePayment";
-import { formatOrderStatus, formatPaymentClass, paymentMethod, paymentProvider } from "../../shopping/utils/ShoppingUtils";
+import { FaFire, FaList, FaTruckFast } from "react-icons/fa6";
+import { usePollingPaymentRejected } from "../usePayment";
 import { formatAxiosError } from "../../../api/helpers";
 import { useNavigate } from "react-router-dom";
-import { usePaymentStore } from "../../shopping/states/paymentStore";
 import clsx from "clsx";
-import { BiMinus, BiPlus } from "react-icons/bi";
 import { MdOutlinePending } from "react-icons/md";
-import { useAuthStore } from "../../auth/states/authStore";
-import { useQueryClient } from "@tanstack/react-query";
-import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
+import type { OrderStatusType } from "../../shopping/ShoppingTypes";
 
-const PaymentPending = () => {
-    const IVA = 0.16;
+const PaymentError = () => {
+    const requiredStatus: OrderStatusType[] = ["IN_PROCESS", "REJECTED"];
     const navigate = useNavigate();
     const { search } = useLocation();
-    const queryClient = useQueryClient();
-    const { order: orderStore } = usePaymentStore();
-    const { authCustomer } = useAuthStore();
     const query = new URLSearchParams(search);
     const orderUUID = query.get("external_reference");
 
@@ -36,12 +28,8 @@ const PaymentPending = () => {
         );
     }
 
-    const { data, error, isLoading } = usePollingPaymentPendingDetail({ orderUUID });
+    const { data, error, isLoading } = usePollingPaymentRejected({ orderUUID });
     const [subtotalProducts, setSubtotalProducts] = useState<string>("");
-    const [subtotalBeforeIVA, setSubtotalBeforeIVA] = useState<string>("");
-    const [iva, setIva] = useState<string>("");
-    const [discount, setDiscount] = useState<string>("");
-    const [total, setTotal] = useState<string>("");
 
 
     useEffect(() => {
@@ -52,36 +40,8 @@ const PaymentPending = () => {
             };
             return acc + parseFloat(item.product_version.unit_price) * item.quantity;
         }, 0);
-        const subtotal = data.order.items.reduce((acc, item) => {
-            return acc + parseFloat(item.product_version.unit_price) * item.quantity;
-        }, 0);
 
-        const discount = data.order.items.reduce((acc, item) => {
-            if (item.isOffer && item.discount && item.discount > 0 && item.product_version.unit_price_with_discount) {
-                return acc + parseFloat(item.product_version.unit_price_with_discount) * item.quantity;
-            };
-            return acc;
-        }, 0);
-
-        const iva = subtotal * IVA;
-        const subtotalBeforeIVA = subtotal - iva;
-        const subtotalWithDiscount = subtotal - discount;
-        const total = subtotalWithDiscount + parseFloat(data.order.details.shipping?.shippingCost || "0");
         setSubtotalProducts(formatPrice(subtotalProducts.toString(), "es-MX"));
-        setSubtotalBeforeIVA(formatPrice(subtotalBeforeIVA.toString(), "es-MX"));
-        setIva(formatPrice(iva.toString(), "es-MX"));
-        setDiscount(formatPrice(discount.toString(), "es-MX"));
-        setTotal(formatPrice(total.toString(), "es-MX"))
-        if (data.status === "PENDING" && data.order.details.order.uuid === orderStore?.folio) {
-            console.log("Pago aprobado");
-            localStorage.removeItem("order");
-            if (authCustomer?.uuid) {
-                queryClient.invalidateQueries({
-                    queryKey: shoppingCartQueryKeys.shoppingCart(authCustomer.uuid)
-                });
-            }
-        }
-
     }, [data?.order]);
 
 
@@ -96,7 +56,8 @@ const PaymentPending = () => {
         );
     };
 
-    if (data.status !== "PENDING") throw new Error("Error al obtener el estatus de la orden de compra");
+    if (!requiredStatus.includes(data.status)) throw new Error("Error al obtener el estatus de la orden de compra");
+
 
     if (error) {
         return (
@@ -105,17 +66,17 @@ const PaymentPending = () => {
                 <p className="text-sm text-red-500">{formatAxiosError(error)}</p>
             </div>
         );
-    };
+    }
 
     const { order } = data;
-    const { address, items, details } = order;
+    const { address, items } = order;
 
     return (
         <div className="w-full animate-fade-in-up">
             <div className="w-full bg-base-300 px-5 py-10 rounded-xl">
-                <div className="bg-warning p-3 rounded-xl">
-                    <p className="text-3xl font-bold flex items-center gap-2"><MdOutlinePending />Orden pendiente de pago</p>
-                    <p className="text-sm px-10">Acercate a tu establecimiento mas cercano para realizar el pago</p>
+                <div className="bg-error p-3 rounded-xl">
+                    <p className="text-3xl font-bold flex items-center gap-2"><MdOutlinePending />Ocurrio un error al procesar tu pago</p>
+                    <p className="text-sm px-10">Intenta realizar tu pago nuevamente</p>
                 </div>
                 <p className="mt-1 text-lg">Folio de operación: {orderUUID}</p>
                 <section className="w-full flex gap-5 mt-5">
@@ -266,101 +227,10 @@ const PaymentPending = () => {
                                 </div>
                             </section>
                         </div>
-                        <div className="p-5 bg-white rounded-xl">
-                            {/* Desglose de pago */}
-                            <h2 className="text-2xl font-bold flex items-center gap-2"><FaCircleDollarToSlot />Desglose de pago</h2>
-                            <div className="mt-5">
-                                <h3 className="text-xl bg-gray-100 px-2 py-1 rounded-xl">Proveedor</h3>
-                                <figure className="w-50 py-5">
-                                    <img className="w-full object-cover" src={paymentProvider[details.order.payment_provider].image_url} alt={paymentProvider[details.order.payment_provider].image_url} />
-                                </figure>
-                                <div className="w-full flex gap-10">
-                                    <div className="flex-1">
-                                        <h3 className="text-xl bg-gray-100 px-2 py-1 rounded-xl">Información del pago</h3>
-                                        <div className="w-full mt-3 flex flex-col gap-5">
-                                            {details.payments_details.map((det, index) => (
-                                                <div key={`payment-${index}`} className="w-full flex justify-between gap-2 border border-gray-300 rounded-xl p-2">
-                                                    <div className="w-50/100 flex flex-col gap-4">
-                                                        <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Tipo de transacción</h4>
-                                                            <p className="px-2">{formatPaymentClass[det.payment_class]}</p>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Entidad</h4>
-                                                            <figure className="w-25 py-2">
-                                                                <img className="w-full object-cover" src={paymentMethod[det.payment_method].image_url} alt={paymentMethod[det.payment_method].description} />
-                                                            </figure>
-                                                        </div>
-                                                    </div>
-                                                    <div className="w-50/100 flex flex-col gap-4">
-                                                        <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Fecha de orden</h4>
-                                                            <p className="px-2 text-xl">{formatDate(det.updated_at, "es-MX")}</p>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="px-2 py-1 bg-gray-100 rounded-xl">Estatus de pago</h4>
-                                                            <p className="px-2 text-xl">{formatOrderStatus[det.payment_status]}</p>
-                                                        </div>
-                                                        <div>
-                                                            <h2>Total a pagar</h2>
-                                                            <p className="text-2xl font-medium">${det.customer_paid_amount}</p>
-                                                            {det.installments > 1 && (
-                                                                <div>
-                                                                    <p>${det.customer_installment_amount} x {det.installments} Meses Sin Intereses.</p>
-                                                                    <p className="text-xs">*Todas las aclaraciones e indicencias con los MSI se hacen a través de los canales oficiales de su banco.</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-
-                                        </div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className=" bg-gray-100 px-2 py-1 rounded-xl">Resumen</h3>
-                                        <div className="w-full bg-white rounded-xl mt-3 p-2">
-                                            <div className="w-full flex flex-col gap-2  pb-5">
-                                                <div className="text-xl flex">
-                                                    <div className="w-3/5 ">
-                                                        <p>Subtotal:</p>
-                                                        <p className="text-xs">Antes de impuestos y descuentos</p>
-                                                    </div>
-                                                    <p className="pl-2 flex items-center "><BiPlus />${subtotalBeforeIVA}</p>
-                                                </div>
-                                                <div className="text-xl flex">
-                                                    <p className="w-3/5 ">IVA (16%):</p>
-                                                    <p className="pl-2 flex items-center "><BiPlus />${iva}</p>
-                                                </div>
-                                                <div className="text-xl flex">
-                                                    <div className="w-3/5">{order.details.shipping && order.details.shipping.boxesQty && (
-                                                        <p>Envio({order.details.shipping.boxesQty > 1 ? `${order.details.shipping.boxesQty} cajas` : `${order.details.shipping.boxesQty} caja`}):</p>
-                                                    )}</div>
-                                                    {order.details.shipping && order.details.shipping.shippingCost && (
-                                                        <p className="pl-2 flex items-center "><BiPlus />${formatPrice(order.details.shipping.shippingCost, "es-MX")}</p>
-                                                    )}
-                                                </div>
-                                                <div className="text-xl flex">
-                                                    <p className={clsx(
-                                                        "w-3/5",
-                                                        parseFloat(discount) > 0 && "text-primary font-bold"
-                                                    )}>Descuento:</p>
-                                                    <p className={clsx(
-                                                        "pl-2 flex items-center",
-                                                        parseFloat(discount) > 0 && "text-primary font-bold"
-                                                    )}><BiMinus />${discount}</p>
-                                                </div>
-                                                <div className="text-2xl font-bold flex border-t border-t-gray-400 pt-3">
-                                                    <p className="w-3/5 ">Total a Pagar:</p>
-                                                    <p className="pl-2">${total}</p>
-                                                </div>
-                                            </div>
-                                            <button className="btn btn-primary mt-3 cursor-pointer"><a href={order.details.order.aditional_resource_url!} target="_blank" rel="noopener noreferrer">Descargar ticket de compra</a></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <section className="p-5 bg-white">
+                            <h2>Al parecer tu pago no se pudo completar</h2>
+                            <Link to={"/pagar-productos"} className="btn btn-primary">Intentar pagar nuevamente</Link>
+                        </section>
                     </div>
                 </section>
             </div>
@@ -368,4 +238,4 @@ const PaymentPending = () => {
     );
 };
 
-export default PaymentPending;
+export default PaymentError;

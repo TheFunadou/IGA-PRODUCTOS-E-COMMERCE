@@ -38,20 +38,28 @@ export function useAddAddress() {
             if (!authCustomer) return { previousAddresses: undefined, tempUUID: "" };
             const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
-            const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
+            const previousAddresses = queryClient.getQueryData<GetCustomerAddressesType>(queryKey);
             const tempUUID = `temp-${Date.now()}`;
-            queryClient.setQueryData<CustomerAddressType[]>(
+            queryClient.setQueryData<GetCustomerAddressesType>(
                 queryKey,
                 (old) => {
-                    if (!old) return [{ ...newAddress, uuid: tempUUID } as CustomerAddressType];
-                    let updatedAddresses = old;
-                    if (newAddress.default_address) {
-                        updatedAddresses = old.map(addr => ({ ...addr, default_address: false }));
+                    if (!old) return {
+                        data: [{ ...newAddress, uuid: tempUUID } as CustomerAddressType],
+                        totalRecords: 1,
+                        totalPages: 1
                     };
-                    return [
-                        { ...newAddress, uuid: tempUUID } as CustomerAddressType,
-                        ...updatedAddresses
-                    ];
+                    let updatedAddresses = old.data;
+                    if (newAddress.default_address) {
+                        updatedAddresses = old.data.map(addr => ({ ...addr, default_address: false }));
+                    };
+                    return {
+                        ...old,
+                        data: [
+                            { ...newAddress, uuid: tempUUID } as CustomerAddressType,
+                            ...updatedAddresses
+                        ],
+                        totalRecords: old.totalRecords + 1
+                    };
                 }
             );
 
@@ -77,7 +85,7 @@ export function useAddAddress() {
             });
         },
     });
-}
+};
 
 // useDeleteAddress - CON LÓGICA DE SERVIDOR
 export function useDeleteAddress(customer: string | undefined) {
@@ -94,12 +102,20 @@ export function useDeleteAddress(customer: string | undefined) {
             if (!customer) return { previousAddresses: undefined };
             const queryKey = customerQueryKeys.addresses(customer);
             await queryClient.cancelQueries({ queryKey });
-            const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
-            queryClient.setQueryData<CustomerAddressType[]>(
+            const previousAddresses = queryClient.getQueryData<GetCustomerAddressesType>(queryKey);
+            queryClient.setQueryData<GetCustomerAddressesType>(
                 queryKey,
                 (old) => {
-                    if (!old) return [];
-                    return old.filter(addr => addr.uuid !== addressUUID);
+                    if (!old) return {
+                        data: [],
+                        totalRecords: 0,
+                        totalPages: 0
+                    };
+                    return {
+                        ...old,
+                        data: old.data.filter(addr => addr.uuid !== addressUUID),
+                        totalRecords: old.totalRecords - 1
+                    };
                 }
             );
 
@@ -126,6 +142,7 @@ export function useDeleteAddress(customer: string | undefined) {
 
 
 // useUpdateAddress - CON LÓGICA DE SERVIDOR
+// useUpdateAddress - CON LÓGICA DE SERVIDOR
 export function useUpdateAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
@@ -141,21 +158,28 @@ export function useUpdateAddress(customer: string | undefined) {
             if (!customer) return { previousAddresses: undefined };
             const queryKey = customerQueryKeys.addresses(customer);
             await queryClient.cancelQueries({ queryKey });
-            const previousAddresses = queryClient.getQueryData<CustomerAddressType[]>(queryKey);
-            queryClient.setQueryData<CustomerAddressType[]>(
+            const previousAddresses = queryClient.getQueryData<GetCustomerAddressesType>(queryKey);
+            queryClient.setQueryData<GetCustomerAddressesType>(
                 queryKey,
                 (old) => {
-                    if (!old) return [];
+                    if (!old) return {
+                        data: [],
+                        totalRecords: 0,
+                        totalPages: 0
+                    };
 
-                    return old.map(addr => {
-                        if (addr.uuid === addressUUID) {
-                            return { ...addr, ...data };
-                        };
-                        if (data.default_address === true) {
-                            return { ...addr, default_address: false };
-                        };
-                        return addr;
-                    });
+                    return {
+                        ...old,
+                        data: old.data.map(addr => {
+                            if (addr.uuid === addressUUID) {
+                                return { ...addr, ...data };
+                            };
+                            if (data.default_address === true) {
+                                return { ...addr, default_address: false };
+                            };
+                            return addr;
+                        })
+                    };
                 }
             );
 
@@ -180,7 +204,6 @@ export function useUpdateAddress(customer: string | undefined) {
         },
     });
 };
-
 
 export const useFetchCustomerFavorites = (args: { pagination: { page: number, limit: number } }) => {
     const { isAuth, authCustomer } = useAuthStore();

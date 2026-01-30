@@ -1,8 +1,8 @@
 
 
 import { useQuery } from "@tanstack/react-query"
-import type { CategoryType, SubcategoriesType } from "../CategoriesTypes";
-import { getMainCategoriesService } from "../services/CategoriesServices";
+import type { CategorySummaryType, CategoryType, SubcategoriesType } from "../CategoriesTypes";
+import { getCategoriesSummary, getMainCategoriesService } from "../services/CategoriesServices";
 import { getCategoryDescendantsService } from "../services/SubcategoriesServices";
 
 /**
@@ -24,17 +24,6 @@ export const useFetchMainCategories = () => {
  * @param categoryID --ID of father category to search desecendants
  * @returns --An array of
  */
-// export const useFetchSubcategories = (categoryID: number | undefined) => {
-//     return useQuery<SubcategoriesType[]>({
-//         queryKey: ["subcategories", categoryID],
-//         // Enable when categoryID isnt provided
-//         queryFn: async () => getCategoryDescendantsService(categoryID!),
-//         enabled: !!categoryID,
-//         staleTime: 5 * 60 * 1000,
-//         gcTime: 10 * 60 * 1000,
-//         refetchOnWindowFocus: false,
-//     });
-// };
 
 export const useFetchSubcategories = (categoryUUID: string | undefined) => {
     return useQuery<SubcategoriesType[]>({
@@ -44,6 +33,17 @@ export const useFetchSubcategories = (categoryUUID: string | undefined) => {
         enabled: !!categoryUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+};
+
+
+export const useFetchCategoriesSummary = () => {
+    return useQuery<CategorySummaryType[]>({
+        queryKey: ["categories:summary"],
+        queryFn: async () => await getCategoriesSummary(),
+        staleTime: 60 * 60 * 1000,
+        gcTime: 65 * 60 * 1000,
         refetchOnWindowFocus: false,
     });
 };
