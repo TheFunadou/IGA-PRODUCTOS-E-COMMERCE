@@ -25,10 +25,10 @@ const PartnersCarousel = () => {
   const duplicatedPartners = [...partners, ...partners];
 
   return (
-    <Marquee className="w-full" speed={80}>
-      <div className="flex gap-10 items-center justify-center">
+    <Marquee className="w-full " speed={80}>
+      <div className="flex gap-5 md:gap-10 items-center justify-center">
         {duplicatedPartners.map((partner, index) => (
-          <figure key={index} className="w-50 filter">
+          <figure key={index} className="w-25 md:w-50 filter">
             <img className="w-full " src={partner.logo} alt={partner.name} loading="lazy" />
           </figure>
         ))}

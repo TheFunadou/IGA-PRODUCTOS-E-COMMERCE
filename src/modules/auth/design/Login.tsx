@@ -36,7 +36,7 @@ const Login = () => {
 
     return (
         <div className="w-full py-10 flex items-center justify-center">
-            <form onSubmit={handleSubmit(onSubmit)} className={clsx("w-1/5 shadow-lg px-5 pt-15 pb-30 rounded-xl", theme === "ligth" && "bg-white", theme === "dark" && "bg-slate-950")}>
+            <form onSubmit={handleSubmit(onSubmit)} className={clsx("md:w-1/5 shadow-lg px-5 pt-15 pb-30 rounded-xl", theme === "ligth" && "bg-white", theme === "dark" && "bg-slate-950")}>
                 <p className="font-bold text-3xl border-b border-b-gray-400 pb-5">Inicio de Sesión</p>
 
                 <div className="mt-5 flex flex-col gap-5">

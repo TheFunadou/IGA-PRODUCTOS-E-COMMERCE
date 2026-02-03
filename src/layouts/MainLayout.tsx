@@ -154,7 +154,7 @@ const MainLayout = () => {
                         }
                     </div>
                 </div>
-                <div className=" w-50/100 md:w-35/100 xl:w-35/100 flex gap-2 md:gap-5 xl:gap-10 items-center justify-end">
+                <div className=" w-50/100 md:w-35/100 xl:w-35/100 flex gap-5 xl:gap-10 items-center justify-end">
                     <ThemeController />
                     {isAuth && authCustomer &&
                         <div className="flex md:gap-5 lg:gap-10 items-center justify-end"                        >
@@ -171,7 +171,7 @@ const MainLayout = () => {
                         </div>
                     }
 
-                    {isAuth === false && <Link to="/iniciar-sesion" className="text-sm border md:text-base lg:text-lg p-1 md:px-2 rounded-xl">Iniciar Sesión</Link>}
+                    {isAuth === false && <Link to="/iniciar-sesion" className="hidden md:block text-sm border md:text-base lg:text-lg p-1 md:px-2 rounded-xl">Iniciar Sesión</Link>}
                     <Link to={"/carrito-de-compras"}><p className="flex gap-1"><MdOutlineShoppingCart className="text-2xl md:text-3xl" /><span className="px-2 md:px-3 flex items-center justify-center rounded-full bg-red-500 font-bold">{isAuth ? authShoppingCart.length : localShoppingCart.length}</span></p></Link>
                 </div>
             </nav>
@@ -192,17 +192,16 @@ const MainLayout = () => {
                         <Link to={"/cobertura"}>Cobertura</Link>
                         <Link to={"/contacto"}>Contacto</Link>
                         <Link to={"/distribuidores"}>Distribuidores</Link>
-                        {/* <Link to={"#"}>Nuevos lanzamientos</Link> */}
                     </div>
                     <div className="w-full hidden md:block text-right">
                         <a href="tel:9222158300" target="_blank">¿Tienes dudas? Llamanos al 921 215 8300| 01</a>
                     </div>
                 </div>
                 <div className="w-full md:hidden relative flex gap-2">
-                    <div className="w-10/100"><VscThreeBars onClick={() => setShowMobileSubmenu(true)} className="text-3xl" /></div>
+                    <button type="button" onClick={() => setShowMobileSubmenu(true)} className="w-10/100"><VscThreeBars className="text-3xl" /></button>
                     <div className="w-90/100 flex items-center justify-between">
                         <input type="text"
-                            className="w-90/100 bg-base-100 rounded-md text-black font-normal p-1"
+                            className="w-90/100 bg-base-100 rounded-md text-black font-normal p-1 text-xs md:text-base"
                             placeholder="Buscar productos"
                             onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
                             onKeyDown={(e) => {
@@ -229,12 +228,12 @@ const MainLayout = () => {
                 </div>
             </div>
 
-            <main className={`w-full px-5 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat`}>
+            <main className={`w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat`}>
                 <Outlet />
             </main>
             <div className="w-full bg-blue-900 text-center text-white py-3 flex items-center justify-center"><a href="#top" className="flex gap-2 text-xl items-center">Ir al inicio<IoArrowUp /></a></div>
             <footer className="w-full bg-blue-950 px-5 py-10 text-white">
-                <div className="w-full items-start justify-center flex gap-30 [&_ul]:mt-2 [&_li]:list-disc [&_li]:ml-2">
+                <div className="hidden md:flex w-full items-start justify-center gap-10 xl:gap-20 [&_ul]:mt-2 [&_li]:list-disc [&_li]:ml-2">
                     <div>
                         <p className="text-3xl font-bold">Conocenos</p>
                         <ul className="flex flex-col gap-5">
@@ -264,16 +263,16 @@ const MainLayout = () => {
                     </div>
                 </div>
                 <div className="w-full flex items-center justify-between">
-                    <figure className="w-20/100">
+                    <figure className="w-50/100 md:w-20/100">
                         <img src={PLASTICOS_DEL_GOLFO_LOGO} alt="Logo Plasticos del Golfo Sur" />
                     </figure>
 
-                    <div className="w-60/100 flex flex-col text-center ">
+                    <div className="w-50/100 md:w-60/100 text-sm md:text-base flex flex-col text-center ">
                         <p>Condiciones de uso</p>
                         <p>2025@ Todos los Derechos Reservados</p>
                     </div>
 
-                    <div className="w-20/100 flex flex-col text-center ">
+                    <div className="hidden base:flex w-20/100 flex-col text-center ">
                         <p className="font-bold">Redes sociales</p>
                         <div className="w-full flex justify-center items-center gap-3">
                             <a href="https://www.facebook.com/Cascos.Iga" target="_blank"><FaFacebook className="text-5xl hover:scale-110 duration-250" /></a>
@@ -284,7 +283,7 @@ const MainLayout = () => {
                 </div>
             </footer>
             <DrawerSubMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} />
-            <div className="fixed bottom-5 right-5 text-5xl hover:scale-110 duration-250 bg-success rounded-full p-3 z-1000 tooltip tooltip-left" data-tip="Contactanos por whatsapp"><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp /></a></div>
+            <div className="hidden md:block fixed bottom-5 right-5 text-5xl hover:scale-110 duration-250 bg-success rounded-full p-3 z-1000 tooltip tooltip-left" data-tip="Contactanos por whatsapp"><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp /></a></div>
         </div>
     );
 };

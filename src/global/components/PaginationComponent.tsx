@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
     currentPage: number;
@@ -40,28 +40,28 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
     };
 
     return (
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página anterior"
             >
-                <ChevronLeft size={20} />
+                <ArrowRight size={18} className="sm:w-5 sm:h-5" />
             </button>
 
             {getPageNumbers().map((page, idx) => (
                 page === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-3 py-2 text-gray-500">
+                    <span key={`ellipsis-${idx}`} className="hidden sm:inline-block px-3 py-2 text-gray-500">
                         ...
                     </span>
                 ) : (
                     <button
                         key={page}
                         onClick={() => onPageChange(page as number)}
-                        className= {clsx(
-                            "px-4 py-2 rounded-xl border transition-colors",
-                            currentPage === page ? "bg-primary text-white border-blue-600": "border-gray-300 hover:bg-gray-100"
+                        className={clsx(
+                            "px-2 py-1.5 sm:px-4 sm:py-2 rounded-xl border transition-colors text-sm sm:text-base",
+                            currentPage === page ? "bg-primary text-white border-blue-600" : "border-gray-300 hover:bg-gray-100"
                         )}
                         aria-label={`Página ${page}`}
                         aria-current={currentPage === page ? 'page' : undefined}
@@ -74,10 +74,10 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página siguiente"
             >
-                <ChevronRight size={20} />
+                <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
             </button>
         </div>
     );

@@ -1,5 +1,6 @@
-import { X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../auth/states/authStore";
+import { FaX } from "react-icons/fa6";
 
 type Props = {
     isOpen: boolean;
@@ -8,6 +9,7 @@ type Props = {
 
 const DrawerSubMenu = ({ isOpen, onClose }: Props) => {
     const navigate = useNavigate();
+    const { isAuth } = useAuthStore();
 
     const handleNav = (route: string) => {
         navigate(route);
@@ -34,10 +36,11 @@ const DrawerSubMenu = ({ isOpen, onClose }: Props) => {
                 ></label>
                 <div className="menu bg-blue-950 min-h-full w-80 p-4">
                     <div className="flex justify-between">
-                        <p className="text-2xl text-white font-medium">Submenu</p>
-                        <button type="button" onClick={onClose}><X className="text-white border rounded-xl" /></button>
+                        <p className="text-xl text-white font-medium">Menu</p>
+                        <button type="button" onClick={onClose}><FaX className="text-white border rounded-xl text-xl" /></button>
                     </div>
                     <div className="mt-5 flex flex-col gap-5 text-lg text-white">
+                        {!isAuth && <button type="button" className="w-fit btn border " onClick={() => handleNav("/iniciar-sesion")}>Iniciar Sesión</button>}
                         <button type="button" className="w-fit" onClick={() => handleNav("/")}>Inicio</button>
                         <button type="button" className="w-fit" onClick={() => handleNav("/tienda")}>Tienda</button>
                         <button type="button" className="w-fit" onClick={() => handleNav("/acerca-de-iga")}>Acerca de IGA</button>
