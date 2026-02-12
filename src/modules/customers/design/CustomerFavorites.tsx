@@ -1,7 +1,4 @@
-// import { useAuthStore } from "../../auth/states/authStore";
 import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
-import { useThemeStore } from "../../../layouts/states/themeStore";
-import clsx from "clsx";
 import { useFetchCustomerFavorites } from "../hooks/useCustomer";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { Link, useSearchParams } from "react-router-dom";
@@ -12,7 +9,6 @@ const CustomerFavorites = () => {
     const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");
-    const { theme } = useThemeStore();
     const { data: favorites, isLoading, error } = useFetchCustomerFavorites({
         pagination: { page: Number(pageParam) || 1, limit: MAX_LIMIT_ROWS }
     });
@@ -23,7 +19,7 @@ const CustomerFavorites = () => {
 
     return (
         <div className="animate-fade-in-up">
-            <div className={clsx("w-full rounded-xl p-10", theme === "ligth" && "bg-white", theme === "dark" && "bg-slate-900")}>
+            <div className="w-full rounded-xl p-10 bg-base-300">
                 <p className="text-3xl font-bold">Mis favoritos</p>
                 <select defaultValue={"recent"} className="select mt-2">
                     <option value="recent">Mas recientes</option>

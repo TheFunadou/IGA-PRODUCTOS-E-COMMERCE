@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addProductVersionReview, getProductVersionDetailService, getProductVersionReviewsResumeBySKU, showProductVersionReviewsBySKU } from "../services/ProductServices"
+import { addProductVersionReview, getProductVersionDetailService, getProductVersionReviewsResumeByUUID, showProductVersionReviewsByUUID } from "../services/ProductServices"
 import type { AddPVReviewType, GetProductVersionReviewsType, ProductVersionDetailType, PVCustomerReview, PVReviewResumeType } from "../ProductTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { buildKey } from "../../../global/GlobalHelpers";
@@ -8,8 +8,8 @@ import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 
 export const PVDetailQueryKeys = {
     detail: (sku: string | undefined) => buildKey("product:product-version:detail", { sku }),
-    reviews: (sku: string | undefined) => buildKey("product:product-version:reviews", { sku }),
-    reviewsResume: (sku: string | undefined) => buildKey("product:product-version:reviews:resume", { sku })
+    reviews: (uuid: string | undefined) => buildKey("product:product-version:reviews", { uuid }),
+    reviewsResume: (uuid: string | undefined) => buildKey("product:product-version:reviews:resume", { uuid })
 };
 
 
@@ -25,22 +25,22 @@ export const useFetchProductVersionDetail = (sku: string | undefined) => {
 };
 
 
-export const useFetchProductVersionReviews = (args: { sku: string }) => {
+export const useFetchProductVersionReviews = (args: { uuid?: string }) => {
     return useQuery<GetProductVersionReviewsType>({
-        queryKey: PVDetailQueryKeys.reviews(args.sku),
-        queryFn: async () => await showProductVersionReviewsBySKU({ sku: args.sku, pagination: { page: 1, limit: 10 } }),
-        enabled: !!args.sku,
+        queryKey: PVDetailQueryKeys.reviews(args.uuid),
+        queryFn: async () => await showProductVersionReviewsByUUID({ uuid: args.uuid!, pagination: { page: 1, limit: 10 } }),
+        enabled: !!args.uuid,
         staleTime: 15 * 60 * 1000,
         gcTime: 25 * 60 * 1000,
         refetchOnWindowFocus: false,
     })
 };
 
-export const useFetchProductVersionReviewsResumeBySKU = (args: { sku: string }) => {
+export const useFetchProductVersionReviewsResumeByUUID = (args: { uuid?: string }) => {
     return useQuery<PVReviewResumeType>({
-        queryKey: PVDetailQueryKeys.reviewsResume(args.sku),
-        queryFn: async () => await getProductVersionReviewsResumeBySKU({ sku: args.sku }),
-        enabled: !!args.sku,
+        queryKey: PVDetailQueryKeys.reviewsResume(args.uuid),
+        queryFn: async () => await getProductVersionReviewsResumeByUUID({ uuid: args.uuid! }),
+        enabled: !!args.uuid,
         staleTime: 15 * 60 * 1000,
         gcTime: 20 * 60 * 1000,
         refetchOnWindowFocus: false,

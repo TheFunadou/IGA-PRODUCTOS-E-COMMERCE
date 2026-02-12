@@ -30,8 +30,8 @@ const ShopMenuPreview = ({ onScheduleHide }: Props) => {
     return (
         <div
             onMouseLeave={onScheduleHide}
-            className={clsx("w-40/100 p-5 absolute top-8 rounded-xl z-1 text-black shadow-lg", theme === "ligth" ? "bg-white" : "bg-slate-950")}>
-            <p className={clsx("text-lg font-medium", theme === "ligth" ? "text-blue-950" : "text-white")}>Categorias de productos</p>
+            className="w-40/100 p-5 absolute top-8 rounded-xl z-1 text-black shadow-lg bg-base-100">
+            <p className="text-lg font-medium text-primary">Categorias de productos</p>
             <div className="w-full flex mt-2">
                 <div className="w-23/100 flex flex-col gap-5 items-start justify-start">
                     {categoriesLoading && !categoriesError && !categories && "Cargando categorias..."}

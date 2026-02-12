@@ -112,14 +112,14 @@ const ProductVersionCardShop = ({ versionData, className, imageLoading }: Props)
                 <button
                     type="button"
                     className={clsx("btn rounded-xl block sm:hidden text-white w-fit cursor-pointer text-xs md:text-base", theme === "ligth" ? "bg-blue-950" : "bg-transparent border border-white")}
-                    onClick={() => addBuyNow(versionData)}
+                    onClick={() => addBuyNow({ sku, quantity: 1 })}
                     aria-label="Comprar ahora">
                     <TbShoppingCartDown />
                 </button>
                 <button
                     type="button"
                     className={clsx("hidden sm:block btn rounded-xl text-white w-fit cursor-pointer text-xs md:text-base", theme === "ligth" ? "bg-blue-950" : "bg-transparent border border-white")}
-                    onClick={() => addBuyNow(versionData)}
+                    onClick={() => addBuyNow({ sku, quantity: 1 })}
                     aria-label="Comprar ahora">
                     Comprar ahora
                 </button>

@@ -16,11 +16,13 @@ import clsx from "clsx";
 import HeroImg from "../../../assets/hero/HeroImg.webp"
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import PartnersCarousel from "../components/PartnersCarousel";
-import { Box, Handbag, Package, Video } from "lucide-react";
 import Marquee from "react-fast-marquee";
 import { Link } from "react-router-dom";
 import CategoriesSummary from "../components/CategoriesSummary";
 import { FaArrowCircleDown } from "react-icons/fa";
+import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
+import { PiHandbag } from "react-icons/pi";
+import { BiPackage } from "react-icons/bi";
 
 const Home = () => {
 
@@ -73,7 +75,7 @@ const Home = () => {
         <div>
             <div>
                 <div className="md:h-150 md:flex md:gap-5 rounded-xl">
-                    <figure className="w-full flex items-center justify-center md:hidden bg-white/20 rounded-xl shadow-lg">
+                    <figure className="w-full flex items-center justify-center md:hidden bg-base-100/20 rounded-xl shadow-lg">
                         <img src={HeroImg} alt="Hero image" className="w-70/100 h-full object-cover" />
                     </figure>
                     <div className="w-full mt-2 md:mt-0 md:w-50/100 flex flex-col justify-between">
@@ -91,7 +93,7 @@ const Home = () => {
                             <PartnersCarousel />
                         </div>
                     </div>
-                    <figure className="hidden md:block w-50/100 p-5 bg-white/20 rounded-xl shadow-lg">
+                    <figure className="hidden md:block w-50/100 p-5 bg-base-100/20 rounded-xl shadow-lg">
                         <img src={HeroImg} alt="Hero image" className="w-full h-full object-cover" />
                     </figure>
                 </div>
@@ -107,12 +109,12 @@ const Home = () => {
             <div className="p-1 md:p-5 md:mt-20 flex flex-col gap-5 md:gap-10">
                 <section id="home" className="home-section">
                     <h1>Categorias principales</h1>
-                    <p className="home-section-subtitle"> <Box className="text-primary text-2xl" /> Conoce las categorias de articulos que tenemos para ti</p>
+                    <p className="home-section-subtitle"> <FaBox className="text-primary text-2xl" /> Desliza para conocer las categorias de articulos que tenemos para ti</p>
                     <CategoriesSummary />
                 </section>
                 <section className="home-section">
                     <h1>Formas de pago</h1>
-                    <p className="home-section-subtitle"> <Handbag className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
+                    <p className="home-section-subtitle"> <PiHandbag className="text-primary text-2xl" /> Nos ajustamos a tu comodidad</p>
                     <Marquee className="w-full" gradient={false} speed={80} direction="left">
                         <div className="flex gap-5 md:gap-15 items-center justify-center">
                             {[...paymentMethodsImgs, ...paymentMethodsImgs].map((img, index) => (
@@ -136,18 +138,26 @@ const Home = () => {
                     <h1>Conoce nuestra marca</h1>
                     <div className="flex flex-col gap-5 md:gap-10">
                         <div>
-                            <p className="home-section-subtitle"> <Video className="text-primary text-2xl" /> Videos que quizas te puedan interesar</p>
-                            <Carousel className="flex gap-5 items-center mt-2 md:mt-5">
+                            <p className="home-section-subtitle"> <FaVideo className="text-primary text-2xl" /> Desliza para ver videos que quizas te puedan interesar</p>
+                            <Carousel className="hidden lg:flex gap-5 items-center mt-2 md:mt-5">
                                 {sampleVideos.map((video, index) => (
                                     <div key={index}>
                                         <p className="text-base md:text-lg font-medium line-clamp-1">{video.title}</p>
-                                        <iframe src={video.videoUrl} style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className="rounded-xl w-40 h-50 md:w-80 md:h-100"></iframe>
+                                        <iframe src={video.videoUrl} style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className=" w-60 h-80 md:w-80 md:h-100"></iframe>
                                     </div>
                                 ))}
                             </Carousel>
+                            <div className="lg:hidden flex gap-5 overflow-x-scroll">
+                                {sampleVideos.map((video, index) => (
+                                    <div key={index} className="flex-shrink-0">
+                                        <p className="text-sm md:text-lg font-medium line-clamp-1">{video.title}</p>
+                                        <iframe src={video.videoUrl} style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className=" w-60 h-80 md:w-80 md:h-100"></iframe>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                         <div>
-                            <p className="home-section-subtitle"> <Video className="text-primary text-2xl" />Participaciones en exposiciones nacionales e internacionales</p>
+                            <p className="home-section-subtitle"> <FaImage className="text-primary text-2xl" />Participaciones en exposiciones nacionales e internacionales</p>
                             <Marquee className="w-full mt-2 md:mt-0" gradient={false} speed={80}>
                                 <div className="flex gap-5 md:gap-10 items-center justify-center">
                                     {[...imageGallery, ...imageGallery].map((img, index) => (
@@ -163,7 +173,7 @@ const Home = () => {
                 </section>
                 <section className="home-section">
                     <h1>Productos que te pueden interesar</h1>
-                    <p className="home-section-subtitle"> <Package className="text-primary text-2xl" />Conoce la selección de productos que tenemos para ti</p>
+                    <p className="home-section-subtitle"> <BiPackage className="text-primary text-2xl" />Conoce la selección de productos que tenemos para ti</p>
 
                     {isLoading && !error && !data && (
                         <div className="w-full flex flex-wrap gap-10 mt-5">
@@ -183,7 +193,7 @@ const Home = () => {
                     {!isLoading && !error && data && (
                         <div className="w-full grid grid-cols-2 md:flex md:flex-wrap md:gap-10 mt-5">
                             {data.map((data, index) => (
-                                <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-white" : "bg-transparent")} versionData={data} imageLoading="lazy" />
+                                <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
                             ))}
                         </div>
                     )}

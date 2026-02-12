@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useThemeStore } from '../../../layouts/states/themeStore';
 import clsx from 'clsx';
+import { FaChevronLeft, FaChevronRight, FaPause, FaPlay } from 'react-icons/fa6';
 
 interface CarouselProps {
   images: string[];
@@ -117,7 +117,7 @@ const InfiniteCarousel = ({
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Imagen anterior"
             >
-              <ChevronLeft size={24} />
+              <FaChevronLeft size={24} />
             </button>
             <button
               onClick={goToNext}
@@ -125,7 +125,7 @@ const InfiniteCarousel = ({
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Imagen siguiente"
             >
-              <ChevronRight size={24} />
+              <FaChevronRight size={24} />
             </button>
           </>
         )}
@@ -137,7 +137,7 @@ const InfiniteCarousel = ({
             className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
             aria-label={isAutoPlaying ? 'Pausar auto-play' : 'Iniciar auto-play'}
           >
-            {isAutoPlaying ? <Pause size={20} /> : <Play size={20} />}
+            {isAutoPlaying ? <FaPause size={20} /> : <FaPlay size={20} />}
           </button>
         )}
       </div>

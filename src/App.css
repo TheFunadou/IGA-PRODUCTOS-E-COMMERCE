@@ -41,5 +41,9 @@
     .home-section-subtitle{
          @apply text-sm md:text-2xl font-medium flex gap-2 md:items-center;
     }
+
+    .icon-button{
+        @apply flex items-center gap-2;
+    }
     
 }

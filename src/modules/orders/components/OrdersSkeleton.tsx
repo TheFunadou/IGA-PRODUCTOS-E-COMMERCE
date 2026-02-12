@@ -2,7 +2,7 @@
 
 const OrderSkeleton = () => {
     return (
-        <div className="bg-white rounded-xl p-5">
+        <div className="bg-base-100 rounded-xl p-5">
             <div className="w-1/2 skeleton p-3 " />
             <div className="w-1/4 skeleton p-2 mt-2" />
             <div className="flex items-center justify-between gap-5 mt-2">

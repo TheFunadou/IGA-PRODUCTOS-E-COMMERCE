@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa6';
 
 interface Props {
     currentPage: number;
@@ -47,7 +47,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página anterior"
             >
-                <ArrowRight size={18} className="sm:w-5 sm:h-5" />
+                <FaArrowRight size={18} className="sm:w-5 sm:h-5" />
             </button>
 
             {getPageNumbers().map((page, idx) => (
@@ -77,7 +77,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página siguiente"
             >
-                <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
+                <FaArrowLeft size={18} className="sm:w-5 sm:h-5" />
             </button>
         </div>
     );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { containsOffensiveLanguage, formatDate, formatPrice, makeSlug, ProductDetailToProductCardFormat } from "../Helpers";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
@@ -11,13 +11,12 @@ import { useFetchAds } from "../../../layouts/hooks/useAds";
 import ProductVersionCardShop from "../components/ProductVersionCardShop";
 import type { AddPVReviewType, ProductVersionCardType } from "../ProductTypes";
 import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
-import { FaFire } from "react-icons/fa6";
+import { FaCircleUser, FaFire } from "react-icons/fa6";
 import { useThemeStore } from "../../../layouts/states/themeStore";
-import { CircleUser } from "lucide-react";
 import { useAuthStore } from "../../auth/states/authStore";
 import { IoShareSocialOutline } from "react-icons/io5";
 import ProductVersionCardSkeleton from "../components/ProductVersionCardSkeleton";
-import { useAddPVReview, useFetchProductVersionDetail, useFetchProductVersionReviews, useFetchProductVersionReviewsResumeBySKU } from "../hooks/useProductDetail";
+import { useAddPVReview, useFetchProductVersionDetail, useFetchProductVersionReviews, useFetchProductVersionReviewsResumeByUUID } from "../hooks/useProductDetail";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useForm } from "react-hook-form";
 import PaginationComponent from "../../../global/components/PaginationComponent";
@@ -33,27 +32,31 @@ const ProductDetail = () => {
         refetch
     } = useFetchProductVersionDetail(params?.sku);
 
-
-    const {
-        data: reviews,
-        isLoading: reviewsLoading,
-        error: reviewsError,
-    } = useFetchProductVersionReviews({ sku: params?.sku! });
-
-    const {
-        data: reviewsResume,
-        isLoading: reviewsResumeLoading,
-        error: reviewsResumeError,
-    } = useFetchProductVersionReviewsResumeBySKU({ sku: params?.sku! });
-
     const {
         data: ads,
         isLoading: adsLoading,
         error: adsError,
     } = useFetchAds({ limit: 10, entity: "ads" });
 
+    const {
+        data: reviews,
+        isLoading: reviewsLoading,
+        error: reviewsError,
+    } = useFetchProductVersionReviews(
+        { uuid: data?.product.uuid! }
+    );
+
+    const {
+        data: reviewsResume,
+        isLoading: reviewsResumeLoading,
+        error: reviewsResumeError,
+    } = useFetchProductVersionReviewsResumeByUUID(
+        { uuid: data?.product.uuid! }
+    );
     const { theme } = useThemeStore();
     const { isAuth } = useAuthStore();
+    const { add, addBuyNow } = useShoppingCart();
+    const { showTriggerAlert } = useTriggerAlert();
     const [selectProductQty, setSelectProductQty] = useState<string>("1");
     const [productQty, setProductQty] = useState<number>(1);
     const [stockError, setStockError] = useState<string>("");
@@ -64,34 +67,80 @@ const ProductDetail = () => {
     const [stock, setStock] = useState<number>(1);
     const [certifications, setCertifications] = useState<string[]>([]);
     const [card, setCard] = useState<ProductVersionCardType | undefined>(undefined);
-    const { add, addBuyNow } = useShoppingCart();
     const [shippingCost, setShippingCost] = useState<number>(SHIPPING_COST);
     const [boxesQty, setBoxesQty] = useState<number>(1);
     const [selectedRating, setSelectedRating] = useState<number>(1);
     const [reviewPage, setReviewPage] = useState<number>(1);
-    const { showTriggerAlert } = useTriggerAlert();
-    const { register, handleSubmit, formState: { errors }, watch, setValue, setError, reset } = useForm<AddPVReviewType>({ defaultValues: { rating: 1, title: "", comment: "" } });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        setValue,
+        setError,
+        reset
+    } = useForm<AddPVReviewType>({
+        defaultValues: { rating: 1, title: "", comment: "" }
+    });
 
     const reviewTitle = watch("title");
     const reviewComment = watch("comment");
-
-
     const addReview = useAddPVReview();
-
     const {
         isFavorite,
         toggleFavorite
-    } = useFavorite({ sku: data?.product_version.sku!, initialFavoriteState: data?.isFavorite, item: card! });
+    } = useFavorite({
+        sku: data?.product_version.sku ?? "",
+        initialFavoriteState: data?.isFavorite ?? false,
+        item: card,
+    });
 
+    useEffect(() => {
+        if (!data) return;
 
-    if (error) {
-        return (
-            <div>
-                <p className="mt-5 text-3xl font-bold text-error">Error al cargar el producto, intentelo mas tarde.</p>
-                <button type="button" className="btn btn-primary" onClick={() => refetch}>Reintentar</button>
-            </div>
+        if (data.product_images) {
+            const mainImage = data.product_images.find(
+                img => img.main_image === true
+            )?.image_url;
+
+            setImage(mainImage);
+        }
+
+        if (data.isOffer && data.discount) {
+            const price = parseFloat(data.product_version.unit_price);
+            const discount = (data.discount * price) / 100;
+            const priceWithDiscount = price - discount;
+
+            const priceWithDiscountFormat = formatPrice(
+                priceWithDiscount.toString(),
+                "es-MX"
+            );
+
+            setUnitPriceWithDiscount(priceWithDiscountFormat.split("."));
+        }
+
+        const formatted: string = formatPrice(
+            data.product_version.unit_price,
+            "es-MX"
         );
-    };
+
+        setUnitPrice(formatted);
+        setColor(data.product_version.color_code);
+        setStock(data.product_version.stock);
+        setCertifications(data.product.certifications_desc.split(","));
+        setCard(ProductDetailToProductCardFormat(data));
+        setValue("sku", data.product_version.sku);
+
+    }, [data, setValue]);
+
+    useEffect(() => {
+        const MAX_ITEMS_PER_BOX = 10;
+        const boxes = Math.ceil(productQty / MAX_ITEMS_PER_BOX);
+
+        setBoxesQty(boxes);
+        setShippingCost(boxes * SHIPPING_COST);
+
+    }, [productQty]);
 
     const handleSelectProductQty = (input: string) => {
         setSelectProductQty(input);
@@ -99,7 +148,8 @@ const ProductDetail = () => {
     };
 
     const handleQtyLimit = (input: string) => {
-        const quantity: number = parseInt(input);
+        const quantity = parseInt(input);
+
         if (quantity > stock) {
             setStockError(`La cantidad ingresada no puede ser mayor a ${stock} piezas`);
         } else {
@@ -109,97 +159,104 @@ const ProductDetail = () => {
 
     const handleSetProductQty = (input: string) => {
         if (input.length === 0) setStockError("");
+
         if (input !== "more") {
             if (input.match(/^[0-9]+$/) && parseInt(input) > 0) {
                 setProductQty(parseInt(input));
             } else {
                 setStockError("El valor ingresado debe ser un numero entero positivo");
-            };
-        };
+            }
+        }
     };
 
     const handleShareProduct = () => {
-        if (data) {
-            navigator.clipboard.writeText(window.location.href);
-            showTriggerAlert("Successfull", "Copiado al portapapeles");
-        };
+        if (!data) return;
+
+        navigator.clipboard.writeText(window.location.href);
+        showTriggerAlert("Successfull", "Copiado al portapapeles");
     };
 
     const handleSelectRating = (input: number) => {
         if (input > 5) return;
+
         setSelectedRating(input);
         setValue("rating", input);
     };
 
-    const onSubmit = async (data: AddPVReviewType) => {
-        if (containsOffensiveLanguage(data.title)) {
-            setError("title", { type: "manual", message: "No se permite lenguaje ofensivo" });
-            return;
-        };
+    const onSubmit = async (formData: AddPVReviewType) => {
 
-        if (containsOffensiveLanguage(data.comment)) {
-            setError("comment", { type: "manual", message: "No se permite lenguaje ofensivo" });
+        if (containsOffensiveLanguage(formData.title)) {
+            setError("title", {
+                type: "manual",
+                message: "No se permite lenguaje ofensivo"
+            });
             return;
-        };
-        const response = await addReview.mutateAsync({ data });
-        if (response) { showTriggerAlert("Successfull", response); reset(); };
+        }
 
+        if (containsOffensiveLanguage(formData.comment)) {
+            setError("comment", {
+                type: "manual",
+                message: "No se permite lenguaje ofensivo"
+            });
+            return;
+        }
+
+        const response = await addReview.mutateAsync({ data: formData });
+
+        if (response) {
+            showTriggerAlert("Successfull", response);
+            reset();
+        }
     };
 
-    const handleReviewPageChange = (page: number) => setReviewPage(page);
+    const handleReviewPageChange = (page: number) => {
+        setReviewPage(page);
+    };
 
-    useEffect(() => {
-        if (data) {
-            if (data.product_images) {
-                const mainImage = data.product_images.find(img => img.main_image === true)?.image_url;
-                setImage(mainImage);
-            };
-            if (data.isOffer && data.discount) {
-                const price = parseFloat(data.product_version.unit_price);
-                const discount = (data.discount * parseFloat(data.product_version.unit_price)) / 100;
-                const priceWithDiscount = price - discount;
-                const priceWithDiscountFormat = formatPrice(priceWithDiscount.toString(), "es-MX");
-                setUnitPriceWithDiscount(priceWithDiscountFormat.split("."));
-            }
-            const formated: string = formatPrice(data.product_version.unit_price, "es-MX");
-            setUnitPrice(formated);
-            setColor(data && data.product_version.color_code);
-            setStock(data && data.product_version.stock);
-            setCertifications(data && data.product.certifications_desc.split(","))
-            setCard(ProductDetailToProductCardFormat(data));
-            setValue("sku", data.product_version.sku);
-        };
-    }, [data]);
+    if (isLoading) return <ProductDetailSkeleton />;
 
-    useEffect(() => {
-        const MAX_ITEMS_PER_BOX = 10;
-        const boxes = Math.ceil(productQty / MAX_ITEMS_PER_BOX);
-        setBoxesQty(boxes);
-        const shippingCost = boxes * SHIPPING_COST;
-        setShippingCost(shippingCost);
-    }, [productQty]);
+    if (error) {
+        return (
+            <div>
+                <p className="mt-5 text-3xl font-bold text-error">
+                    Error al cargar el producto, intentelo mas tarde.
+                </p>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => refetch()}
+                >
+                    Reintentar
+                </button>
+            </div>
+        );
+    }
+
+    if (!data) return <Navigate to="/tienda" />;
+
 
     return (
         <div className="w-full">
             {isLoading ? (
                 <ProductDetailSkeleton />
             ) : (
-                <div className="w-full px-5 py-10 rounded-xl bg-base-300">
-                    <div className="w-full flex border-b border-gray-400 pb-5">
-                        <div className="w-35/100 relative">
-                            <div className="sticky top-5">
-                                <figure className="w-full h-150 relative">
-                                    {/* <img className="w-full h-full rounded-xl border-2 border-gray-300" src={image} alt={data && data.product.product_name} /> */}
+                <div className="w-full px-3 sm:px-5 py-5 sm:py-10 rounded-xl bg-base-300">
+                    {/* Main Product Section - Responsive Layout */}
+                    <div className="w-full flex flex-col lg:flex-row border-b border-gray-400 pb-5 gap-5">
+                        {/* Image Gallery - Full width on mobile, 35% on desktop */}
+                        <div className="w-full lg:w-35/100 relative">
+                            <div className="lg:sticky lg:top-5">
+                                <figure className="w-full h-80 sm:h-150 relative">
                                     <ImageMagnifier src={image} alt={data && data.product.product_name} />
                                     {data && data.isOffer && (
                                         <div className={clsx(
-                                            "absolute top-5 left-5 px-3 py-2 rounded-xl flex gap-3 items-center border border-white",
+                                            "absolute top-3 sm:top-5 left-3 sm:left-5 px-2 sm:px-3 py-1 sm:py-2 rounded-xl flex gap-2 sm:gap-3 items-center border border-white",
                                             data.discount && data.discount < 50 && "bg-error",
                                             data.discount && data.discount >= 50 && data.discount < 65 && "bg-success",
                                             data.discount && data.discount >= 65 && "bg-primary"
                                         )}>
-                                            <FaFire className="text-3xl text-white" />
-                                            <p className="text-xl font-bold text-white">
+                                            <FaFire className="text-xl sm:text-3xl text-white" />
+                                            <p className="text-sm sm:text-xl font-bold text-white">
                                                 {data.discount && data.discount < 50 && "Oferta"}
                                                 {data.discount && data.discount >= 50 && data.discount < 65 && "Oferta Especial"}
                                                 {data.discount && data.discount >= 65 && "Oferta Irresistible"}
@@ -207,15 +264,15 @@ const ProductDetail = () => {
                                         </div>
                                     )}
                                 </figure>
-                                <div className="flex gap-2 items-center justify-start flex-wrap mt-5">
+                                <div className="flex gap-2 items-center justify-start flex-wrap mt-3 sm:mt-5">
                                     {data && data.product_images && data.product_images.map((img, index) => (
                                         <figure key={index}
-                                            className="w-30 h-30"
+                                            className="w-16 h-16 sm:w-20 sm:h-20 lg:w-30 lg:h-30"
                                             onClick={() => { setImage(img.image_url) }}
                                         >
                                             <img className={clsx(
                                                 "w-full h-full border-2 rounded-lg hover:border-primary duration-200 ease-in cursor-pointer",
-                                                img.image_url === image ? "border-primary" : "border-gray-300"
+                                                img.image_url === image ? "border-neutral" : "border-gray-100"
                                             )}
                                                 src={img.image_url}
                                                 alt={`${data && data.product.product_name} imagen ${index}`} />
@@ -224,39 +281,41 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="w-45/100 px-10">
-                            <h1 className="text-4xl font-bold">{data && data.product.product_name}</h1>
-                            <div className="breadcrumbs text-xl">
+
+                        {/* Product Info - Full width on mobile, 45% on desktop */}
+                        <div className="w-full lg:w-45/100 lg:px-10">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">{data && data.product.product_name}</h1>
+                            <div className="breadcrumbs text-base sm:text-lg lg:text-xl">
                                 <ul>
                                     {data && data.subcategories.map((sub, index) => (
                                         <li key={`${index}-${sub}`}>{sub}</li>
                                     ))}
                                 </ul>
                             </div>
-                            <p className="text-2xl font-bold text-primary">{data && data.product_version.status}</p>
-                            <div className="py-5 border-y border-y-gray-400 mt-5">
+                            <p className="text-xl sm:text-2xl font-bold text-primary">{data && data.product_version.status}</p>
+                            <div className="py-3 sm:py-5 border-y border-y-gray-400 mt-3 sm:mt-5">
                                 {data && data.isOffer ? (
-                                    <div className="flex gap-5">
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-5">
                                         <div className="flex gap-2 items-center">
                                             <p className={clsx(
-                                                "p-3 rounded-xl text-white font-bold text-3xl",
+                                                "p-2 sm:p-3 rounded-xl text-white font-bold text-2xl sm:text-3xl",
                                                 data.discount && data.discount < 50 && "bg-error",
                                                 data.discount && data.discount >= 50 && data.discount < 65 && "bg-success",
                                                 data.discount && data.discount >= 65 && "bg-primary"
                                             )}>{data && data.discount}%</p>
                                             <div className={clsx(
-                                                "text-lg",
+                                                "text-base sm:text-lg",
                                                 data.discount && data.discount < 50 && "text-error",
                                                 data.discount && data.discount >= 50 && data.discount < 65 && "text-black",
                                                 data.discount && data.discount >= 65 && "text-primary"
                                             )}>
                                                 <h3 className={clsx(
-                                                    "text-lg",
+                                                    "text-sm sm:text-lg",
                                                     theme === "dark" && "text-white",
                                                     theme === "ligth" && "text-black"
                                                 )}>Precio unitario en oferta:</h3>
                                                 <p className={clsx(
-                                                    "text-3xl font-bold",
+                                                    "text-2xl sm:text-3xl font-bold",
                                                     data.discount && data.discount < 50 && "text-error",
                                                     data.discount && data.discount >= 50 && data.discount < 65 && "text-green-800",
                                                     data.discount && data.discount >= 65 && "text-primary"
@@ -264,68 +323,138 @@ const ProductDetail = () => {
                                             </div>
                                         </div>
                                         <div className="text-gray-500 flex flex-col justify-end">
-                                            <h3>Precio anterior:</h3>
-                                            <p className="line-through">{unitPrice}</p>
+                                            <h3 className="text-sm sm:text-base">Precio anterior:</h3>
+                                            <p className="line-through text-base sm:text-lg">{unitPrice}</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <div>
-                                        <h3 className="text-lg">Precio unitario:</h3>
-                                        <p className="text-3xl font-bold">${unitPrice}</p>
+                                        <h3 className="text-base sm:text-lg">Precio unitario:</h3>
+                                        <p className="text-2xl sm:text-3xl font-bold">${unitPrice}</p>
                                     </div>
                                 )}
                             </div>
-                            <div className="w-full py-5 border-b border-b-gray-400 flex items-center justify-between">
-                                <p className="text-2xl font-bold">{data && data.product_version.color_line}: <span className="ml-2 px-6 py-2  rounded-full" style={{ backgroundColor: color }}></span><span className="ml-2">{data && data.product_version.color_name}</span></p>
+                            <div className="w-full py-3 sm:py-5 border-b border-b-gray-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <p className="text-lg sm:text-xl lg:text-2xl font-bold flex flex-wrap items-center gap-2">
+                                    {data && data.product_version.color_line}:
+                                    <span className="ml-2 w-5 h-5 md:w-10 md:h-10 rounded-full" style={{ backgroundColor: color }}></span>
+                                    <span className="ml-2">{data && data.product_version.color_name}</span>
+                                </p>
                                 <div className="flex gap-2">
-                                    {/* <button className="btn btn-ghost underline">Copiar en formato CSV</button> */}
-                                    <a href={(data && data.product_version.technical_sheet_url) ?? "#"} className="btn btn-primary" target="_blank">Ver ficha tecnica</a>
+                                    <a href={(data && data.product_version.technical_sheet_url) ?? "#"} className="btn btn-primary btn-sm sm:btn-md" target="_blank">Ver ficha tecnica</a>
                                 </div>
                             </div>
-                            <div className="py-5 border-b border-b-gray-400">
-                                <h2 className="text-2xl">Versiones del producto:</h2>
+                            <div className="py-3 sm:py-5 border-b border-b-gray-400">
+                                <h2 className="text-xl sm:text-2xl">Otras presentaciones:</h2>
 
-                                <div className="w-full flex flex-wrap gap-5 py-2">
+                                <div className="w-full flex flex-wrap gap-3 sm:gap-5 py-2">
                                     {data && data.parent_versions && data.parent_versions.map((version, index) => (
                                         <div key={index} className={clsx(
-                                            "w-1/7 bg-white border-2 hover:border-primary duration-350 ease-in rounded-xl",
-                                            version.sku.toLocaleLowerCase() === params.sku ? "border-primary" : "border-gray-400"
+                                            "w-20 sm:w-25 lg:w-1/7 bg-base-100 border-2 hover:border-primary duration-350 ease-in rounded-xl",
+                                            version.sku.toLocaleLowerCase() === params.sku ? "border-neutral" : "border-gray-100"
                                         )}>
                                             <Link to={`/tienda/${data.category.toLocaleLowerCase()}/${makeSlug(data.product.product_name)}/${version.sku.toLowerCase()}`}>
                                                 <figure>
                                                     <img className="rounded-t-xl border border-gray-300" src={version.product_images && version.product_images[0].image_url} alt="" />
                                                 </figure>
                                                 <div className="py-2 text-center">
-                                                    <p className="font-bold">$ {formatPrice(version.unit_price, "es-MX")}</p>
+                                                    <p className="font-bold text-sm sm:text-base">$ {formatPrice(version.unit_price, "es-MX")}</p>
                                                 </div>
                                             </Link>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+                            <div className="lg:hidden w-full mt-5 lg:w-20/100">
+                                <div className={clsx(
+                                    "w-full shadow-2xl rounded-xl p-4 sm:p-5",
+                                    theme === "ligth" ? "bg-base-200" : "bg-gray-800"
+                                )}>
+                                    <div className="border-b border-gray-400 pb-2">
+                                        <p className="text-sm sm:text-base">Precio unitario:</p>
+                                        <h1 className="text-2xl sm:text-3xl font-bold">${unitPrice}</h1>
+                                    </div>
+                                    <div className="border-b border-gray-400 py-3 tooltip" data-tip="Cada caja tiene una capacidad para 10 unidades de articulos">
+                                        <p className="text-sm sm:text-base">Envio por:</p>
+                                        <h1 className="text-base sm:text-lg">{`${formatPrice(shippingCost.toString(), "es-MX")} MXN (${boxesQty} caja/s)`}</h1>
+                                    </div>
+                                    <div className="py-3 sm:py-5 flex flex-col gap-5 sm:gap-10">
+                                        <Link to="/politica-de-devolucion" className="underline text-primary text-sm sm:text-base">Politica de devolución PNC</Link>
+                                        <div>
+                                            <p className="text-sm sm:text-base">Selecciona una cantidad:</p>
+                                            <select className="select w-full mt-2 select-sm sm:select-md" onChange={(e) => { handleSelectProductQty(e.target.value); handleSetProductQty(e.target.value) }}>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="more">Mas de 5</option>
+                                            </select>
+                                        </div>
+                                        {selectProductQty === "more" &&
+                                            <div>
+                                                <p className="text-sm sm:text-base">Especifique una cantidad</p>
+                                                <input
+                                                    type="number"
+                                                    pattern="0-9"
+                                                    placeholder={`Limite ${data && data.product_version.stock} piezas`}
+                                                    className="w-full input input-sm sm:input-md"
+                                                    onChange={(e) => { handleQtyLimit(e.target.value); handleSetProductQty(e.target.value) }}
+                                                />
+                                                {stockError.length > 0 && <p className="mt-2 text-error text-sm">{stockError}</p>}
+                                            </div>
+                                        }
+                                        <div className="flex flex-col gap-3 sm:gap-5">
+                                            <button type="button" className="w-full btn btn-primary btn-sm sm:btn-md" onClick={() => card && add(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
+                                            <button type="button" className="w-full btn bg-blue-950 text-white btn-sm sm:btn-md" onClick={() => card && addBuyNow({ sku: data?.product_version.sku!, quantity: productQty })}>Comprar ahora</button>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+                                            <button type="button" className="w-fit text-primary font-semibold cursor-pointer text-sm sm:text-base" onClick={(e) => toggleFavorite(e)} >
+                                                {isFavorite ? (
+                                                    <p className="flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 gap-1">
+                                                        Favorito
+                                                        <IoMdHeart className="text-xl sm:text-2xl" />
+                                                    </p>
+                                                ) : (
+                                                    <p className="flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 gap-1">
+                                                        Agregar a favoritos
+                                                        <IoIosHeartEmpty className="text-xl sm:text-2xl" />
+                                                    </p>
+                                                )}
+                                            </button>
+                                            <button className="w-fit flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 text-sm sm:text-base" onClick={handleShareProduct}>
+                                                <p>Compartir</p>
+                                                <IoShareSocialOutline className="text-xl sm:text-2xl" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             {/* Description */}
-                            <div className="pt-5 text-2xl/10 text-justify">
+                            <div className="pt-3 sm:pt-5 text-lg sm:text-xl lg:text-2xl/10 text-justify">
                                 {(data && data.product.description) ?? "No hay una descripción por mostrar"}
                             </div>
                         </div>
-                        <div className="w-20/100">
+
+                        {/* Purchase Card - Full width on mobile, 20% on desktop */}
+                        <div className="hidden lg:block w-full lg:w-20/100">
                             <div className={clsx(
-                                "w-full shadow-2xl rounded-xl p-5",
+                                "w-full shadow-2xl rounded-xl p-4 sm:p-5",
                                 theme === "ligth" ? "bg-base-200" : "bg-gray-800"
                             )}>
                                 <div className="border-b border-gray-400 pb-2">
-                                    <p>Precio unitario:</p>
-                                    <h1 className="text-3xl font-bold">${unitPrice}</h1>
+                                    <p className="text-sm sm:text-base">Precio unitario:</p>
+                                    <h1 className="text-2xl sm:text-3xl font-bold">${unitPrice}</h1>
                                 </div>
                                 <div className="border-b border-gray-400 py-3 tooltip" data-tip="Cada caja tiene una capacidad para 10 unidades de articulos">
-                                    <p>Envio por:</p>
-                                    <h1 className="text-lg">{`${formatPrice(shippingCost.toString(), "es-MX")} MXN (${boxesQty} caja/s)`}</h1>
+                                    <p className="text-sm sm:text-base">Envio por:</p>
+                                    <h1 className="text-base sm:text-lg">{`${formatPrice(shippingCost.toString(), "es-MX")} MXN (${boxesQty} caja/s)`}</h1>
                                 </div>
-                                <div className="py-5 flex flex-col gap-10">
-                                    <Link to="/politica-de-devolucion" className="underline text-primary">Politica de devolución PNC</Link>
+                                <div className="py-3 sm:py-5 flex flex-col gap-5 sm:gap-10">
+                                    <Link to="/politica-de-devolucion" className="underline text-primary text-sm sm:text-base">Politica de devolución PNC</Link>
                                     <div>
-                                        <p>Selecciona una cantidad:</p>
-                                        <select className="select w-full mt-2" onChange={(e) => { handleSelectProductQty(e.target.value); handleSetProductQty(e.target.value) }}>
+                                        <p className="text-sm sm:text-base">Selecciona una cantidad:</p>
+                                        <select className="select w-full mt-2 select-sm sm:select-md" onChange={(e) => { handleSelectProductQty(e.target.value); handleSetProductQty(e.target.value) }}>
                                             <option value="1">1</option>
                                             <option value="2">2</option>
                                             <option value="3">3</option>
@@ -336,94 +465,92 @@ const ProductDetail = () => {
                                     </div>
                                     {selectProductQty === "more" &&
                                         <div>
-                                            <p>Especifique una cantidad</p>
+                                            <p className="text-sm sm:text-base">Especifique una cantidad</p>
                                             <input
                                                 type="number"
                                                 pattern="0-9"
                                                 placeholder={`Limite ${data && data.product_version.stock} piezas`}
-                                                className="w-full input"
+                                                className="w-full input input-sm sm:input-md"
                                                 onChange={(e) => { handleQtyLimit(e.target.value); handleSetProductQty(e.target.value) }}
                                             />
-                                            {stockError.length > 0 && <p className="mt-2 text-error">{stockError}</p>}
+                                            {stockError.length > 0 && <p className="mt-2 text-error text-sm">{stockError}</p>}
                                         </div>
                                     }
-                                    <div className="flex flex-col gap-5">
-                                        {/* <button type="button" className="w-full btn btn-primary" onClick={() => card && useAddToShoppingCart(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
-                                        <button type="button" className="w-full btn bg-blue-950 text-white" onClick={() => card && useAddToBuyNow(card)}>Comprar ahora</button> */}
-                                        <button type="button" className="w-full btn btn-primary" onClick={() => card && add(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
-                                        <button type="button" className="w-full btn bg-blue-950 text-white" onClick={() => card && addBuyNow(card)}>Comprar ahora</button>
+                                    <div className="flex flex-col gap-3 sm:gap-5">
+                                        <button type="button" className="w-full btn btn-primary btn-sm sm:btn-md" onClick={() => card && add(card, productQty)} disabled={productQty > data?.product_version.stock!}>{`Agregar al carrito (${stock} disponibles)`}</button>
+                                        <button type="button" className="w-full btn bg-blue-950 text-white btn-sm sm:btn-md" onClick={() => card && addBuyNow({ sku: data?.product_version.sku!, quantity: productQty })}>Comprar ahora</button>
                                     </div>
-                                    <div className="flex items-center justify-center gap-5">
-                                        <button type="button" className="w-fit text-primary font-semibold cursor-pointer" onClick={(e) => toggleFavorite(e)} >
+                                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+                                        <button type="button" className="w-fit text-primary font-semibold cursor-pointer text-sm sm:text-base" onClick={(e) => toggleFavorite(e)} >
                                             {isFavorite ? (
                                                 <p className="flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 gap-1">
                                                     Favorito
-                                                    <IoMdHeart className="text-2xl" />
+                                                    <IoMdHeart className="text-xl sm:text-2xl" />
                                                 </p>
                                             ) : (
                                                 <p className="flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 gap-1">
                                                     Agregar a favoritos
-                                                    <IoIosHeartEmpty className="text-2xl" />
+                                                    <IoIosHeartEmpty className="text-xl sm:text-2xl" />
                                                 </p>
                                             )}
                                         </button>
-                                        <button className="w-fit flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150" onClick={handleShareProduct}>
+                                        <button className="w-fit flex items-center justify-center text-center cursor-pointer active:scale-125  duration-150 text-sm sm:text-base" onClick={handleShareProduct}>
                                             <p>Compartir</p>
-                                            <IoShareSocialOutline className="text-2xl" />
+                                            <IoShareSocialOutline className="text-xl sm:text-2xl" />
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Additional Information Section */}
                     <div className="w-full py-5">
-                        <div className="w-full flex">
-                            <div className="w-1/2">
-                                <h2 className="text-2xl font-bold">Información adicional del producto</h2>
-                                {/* name of each tab group should be unique */}
-                                <div className="w-full tabs tabs-border [&_div]:rounded-xl [&_div]:text-justify text-lg">
-                                    <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Caracteristicas" defaultChecked />
+                        <div className="w-full flex flex-col lg:flex-row gap-5">
+                            <div className="w-full lg:w-1/2">
+                                <h2 className="text-xl sm:text-2xl font-bold">Información adicional del producto</h2>
+                                <div className="w-full tabs tabs-border [&_div]:rounded-xl [&_div]:text-justify text-base sm:text-lg">
+                                    <input type="radio" name="my_tabs_2" className="tab text-sm sm:text-lg" aria-label="Caracteristicas" defaultChecked />
                                     <div className={clsx(
-                                        "tab-content border-base-300 p-10 text-2xl/10",
+                                        "tab-content border-base-300 p-5 sm:p-10 text-lg sm:text-xl lg:text-2xl/10",
                                         theme === "ligth" ? "bg-base-200" : "bg-gray-800"
                                     )}>{(data && data.product.specs) ?? "No hay especificaciones por mostrar"}</div>
 
-                                    <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Aplicaciones" />
+                                    <input type="radio" name="my_tabs_2" className="tab text-sm sm:text-lg" aria-label="Aplicaciones" />
                                     <div className={clsx(
-                                        "tab-content border-base-300 p-10 text-2xl/10",
+                                        "tab-content border-base-300 p-5 sm:p-10 text-lg sm:text-xl lg:text-2xl/10",
                                         theme === "ligth" ? "bg-base-200" : "bg-gray-800"
                                     )}>{(data && data.product.applications) ?? "No hay aplicaciones por mostrar"}</div>
 
-                                    <input type="radio" name="my_tabs_2" className="tab text-lg" aria-label="Recomendaciones" />
+                                    <input type="radio" name="my_tabs_2" className="tab text-sm sm:text-lg" aria-label="Recomendaciones" />
                                     <div className={clsx(
-                                        "tab-content border-base-300 p-10 text-2xl/10",
+                                        "tab-content border-base-300 p-5 sm:p-10 text-lg sm:text-xl lg:text-2xl/10",
                                         theme === "ligth" ? "bg-base-200" : "bg-gray-800"
                                     )}>{(data && data.product.recommendations) ?? "No hay recomendaciones por mostrar"}</div>
                                 </div>
                             </div>
-                            <div className="w-1/2 pl-15">
-                                <h2 className="text-2xl font-bold">Cumplimientos normativos</h2>
-                                <ol className="list-disc list-inside mt-2 text-2xl/10 flex flex-col gap-2">
+                            <div className="w-full lg:w-1/2 lg:pl-15">
+                                <h2 className="text-xl sm:text-2xl font-bold">Cumplimientos normativos</h2>
+                                <ol className="list-disc list-inside mt-2 text-lg sm:text-xl lg:text-2xl/10 flex flex-col gap-2">
                                     {certifications.map((cer, index) => (
                                         <li key={index}>{cer}</li>
                                     ))}
                                 </ol>
                             </div>
                         </div>
-                        <div className="mt-5 flex gap-5">
-                            <div className="w-25/100">
-                                <h2>Reseñas</h2>
-                                <div className={clsx(
-                                    "rounded-xl mt-5 p-5",
-                                    theme === "ligth" ? "bg-white" : "bg-gray-800"
-                                )}>
+
+                        {/* Reviews Section */}
+                        <div className="mt-5 flex flex-col lg:flex-row gap-5">
+                            <div className="w-full lg:w-25/100">
+                                <h2 className="text-xl sm:text-2xl">Reseñas</h2>
+                                <div className="rounded-xl mt-5 p-4 sm:p-5 bg-base-100">
                                     {reviewsResumeLoading && !reviewsResumeError && !reviewsResume && (
-                                        <div className="flex items-center gap-2">Cargando reseñas <span className="loading loading-dots loading-xs text-primary"></span></div>
+                                        <div className="flex items-center gap-2 text-sm sm:text-base">Cargando reseñas <span className="loading loading-dots loading-xs text-primary"></span></div>
                                     )}
 
                                     {!reviewsResumeLoading && !reviewsResumeError && reviewsResume && (
                                         <div>
-                                            <div className="rating rating-lg rating-half pointer-events-none">
+                                            <div className="rating rating-md sm:rating-lg rating-half pointer-events-none">
                                                 <input type="radio" name="rating-11" className="rating-hidden" defaultChecked={false} />
                                                 <input type="radio" name="rating-11" className="mask mask-star-2 mask-half-1 bg-primary" aria-label="0.5 star" defaultChecked={reviewsResume.ratingAverage > 1 && reviewsResume.ratingAverage < 11} />
                                                 <input type="radio" name="rating-11" className="mask mask-star-2 mask-half-2 bg-primary" aria-label="1 star" defaultChecked={reviewsResume.ratingAverage > 10 && reviewsResume.ratingAverage < 21} />
@@ -437,16 +564,16 @@ const ProductDetail = () => {
                                                 <input type="radio" name="rating-11" className="mask mask-star-2 mask-half-2 bg-primary" aria-label="5 star" defaultChecked={reviewsResume.ratingAverage > 90 && reviewsResume.ratingAverage < 101} />
                                             </div>
                                             <p className={clsx(
-                                                "text-gray-500 text-sm mt-2",
+                                                "text-gray-500 text-xs sm:text-sm mt-2",
                                                 theme === "ligth" ? "text-gray-500" : "text-white"
                                             )}>Basado en {reviewsResume.totalReviews} {reviewsResume.totalReviews === 1 ? "opinión de un cliente" : "opiniones de clientes"}</p>
-                                            <div className="flex flex-col gap-5 mt-5">
+                                            <div className="flex flex-col gap-3 sm:gap-5 mt-5">
                                                 {reviewsResume.ratingResume.map((star, index) => (
-                                                    <div key={index} className="flex gap-5 items-center">
-                                                        {star.rating > 1 && (<h4 className="text-base">{star.rating} Estrellas</h4>)}
-                                                        {star.rating === 1 && (<h4 className="text-base"><span className="text-transparent">0</span>{star.rating} Estrella</h4>)}
-                                                        <progress className="progress progress-primary w-60 h-5" value={star.percentage} max="100"></progress>
-                                                        <p>{star.percentage}%</p>
+                                                    <div key={index} className="flex gap-2 sm:gap-5 items-center">
+                                                        {star.rating > 1 && (<h4 className="text-sm sm:text-base">{star.rating} Estrellas</h4>)}
+                                                        {star.rating === 1 && (<h4 className="text-sm sm:text-base"><span className="text-transparent">0</span>{star.rating} Estrella</h4>)}
+                                                        <progress className="progress progress-primary w-40 sm:w-60 h-4 sm:h-5" value={star.percentage} max="100"></progress>
+                                                        <p className="text-sm sm:text-base">{star.percentage}%</p>
                                                     </div>
 
                                                 ))}
@@ -456,37 +583,34 @@ const ProductDetail = () => {
 
                                 </div>
                             </div>
-                            <div className="w-50/100">
-                                <h2>Opiniones de los clientes</h2>
-                                <div className={clsx(
-                                    "rounded-xl p-5 mt-5",
-                                    theme === "ligth" ? "bg-white" : "bg-gray-800"
-                                )}>
+                            <div className="w-full lg:w-50/100">
+                                <h2 className="text-xl sm:text-2xl">Opiniones de los clientes</h2>
+                                <div className="rounded-xl p-4 sm:p-5 mt-5 bg-base-100">
                                     <div className="flex flex-col gap-5">
                                         {reviewsLoading && !reviewsError && !reviews && (
                                             <div>
-                                                <h2>Cargando opiniones...</h2>
+                                                <h2 className="text-base sm:text-lg">Cargando opiniones...</h2>
                                             </div>
                                         )}
                                         <div>
                                             {!reviewsLoading && !reviewsError && reviews && reviews.reviews.length > 0 && reviews.reviews.map((review, index) => (
-                                                <div key={index} className="flex flex-col gap-2 border rounded-xl px-4 py-3 border-gray-200">
+                                                <div key={index} className="flex flex-col gap-2 border rounded-xl px-3 sm:px-4 py-2 sm:py-3 border-gray-200 mb-3">
                                                     <div className="flex gap-3">
-                                                        <CircleUser size={30} />
-                                                        <h2>{review.customer}</h2>
+                                                        <FaCircleUser size={24} className="sm:w-[30px] sm:h-[30px]" />
+                                                        <h2 className="text-sm sm:text-base">{review.customer}</h2>
                                                     </div>
-                                                    <div className="flex gap-5">
-                                                        <div className="rating">
+                                                    <div className="flex gap-3 sm:gap-5">
+                                                        <div className="rating rating-sm sm:rating-md">
                                                             <div className="mask mask-star-2 bg-primary" aria-label="1 star" aria-current={review.rating === 1} />
                                                             <div className="mask mask-star-2 bg-primary" aria-label="2 star" aria-current={review.rating === 2} />
                                                             <div className="mask mask-star-2 bg-primary" aria-label="3 star" aria-current={review.rating === 3} />
                                                             <div className="mask mask-star-2 bg-primary" aria-label="4 star" aria-current={review.rating === 4} />
                                                             <div className="mask mask-star-2 bg-primary" aria-label="5 star" aria-current={review.rating === 5} />
                                                         </div>
-                                                        <h3>{review.title}</h3>
+                                                        <h3 className="text-sm sm:text-base">{review.title}</h3>
                                                     </div>
-                                                    <p className="text-justify text-lg">{review.comment}</p>
-                                                    <p className="text-gray-500">Publicado el {formatDate(review.created_at, "es-MX")}</p>
+                                                    <p className="text-justify text-sm sm:text-base lg:text-lg">{review.comment}</p>
+                                                    <p className="text-gray-500 text-xs sm:text-sm">Publicado el {formatDate(review.created_at, "es-MX")}</p>
                                                 </div>
                                             ))}
                                             {reviews && reviews.totalPages > 1 && (
@@ -497,9 +621,9 @@ const ProductDetail = () => {
                                         </div>
 
                                         {!reviewsLoading && !reviewsError && reviews && reviews.reviews.length === 0 && (
-                                            <div className="border rounded-xl px-4 py-3 border-gray-200">
-                                                <h2>No hay reseñas para este producto</h2>
-                                                <h4 className="font-normal underline">Se el primero en dejar tu opinión 😊</h4>
+                                            <div className="border rounded-xl px-3 sm:px-4 py-2 sm:py-3 border-gray-200">
+                                                <h2 className="text-base sm:text-lg">No hay reseñas para este producto</h2>
+                                                <h4 className="font-normal underline text-sm sm:text-base">Se el primero en dejar tu opinión 😊</h4>
                                             </div>
                                         )}
 
@@ -508,14 +632,14 @@ const ProductDetail = () => {
                                     </div>
                                     {isAuth && !data?.isReviewed && (
                                         <div className={clsx(
-                                            "mt-5 rounded-xl p-5",
+                                            "mt-5 rounded-xl p-4 sm:p-5",
                                             theme === "ligth" ? "bg-gray-100" : "bg-gray-700"
-                                        )}><h2>Agrega tu reseña</h2>
-                                            <h4>Nos gustaria saber tu opinión sobre este producto⭐</h4>
-                                            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-5">
+                                        )}><h2 className="text-base sm:text-lg">Agrega tu reseña</h2>
+                                            <h4 className="text-sm sm:text-base">Nos gustaria saber tu opinión sobre este producto⭐</h4>
+                                            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 sm:gap-5 mt-5">
                                                 <div className="flex flex-col">
-                                                    <label htmlFor="review-rating">Calificación</label>
-                                                    <div className="rating" >
+                                                    <label htmlFor="review-rating" className="text-sm sm:text-base">Calificación</label>
+                                                    <div className="rating rating-md sm:rating-lg" >
                                                         <input type="radio" name="rating-2" className="mask mask-star-2 bg-primary" aria-label="1 star" onChange={() => handleSelectRating(1)} checked={selectedRating === 1} />
                                                         <input type="radio" name="rating-2" className="mask mask-star-2 bg-primary" aria-label="2 star" onChange={() => handleSelectRating(2)} checked={selectedRating === 2} />
                                                         <input type="radio" name="rating-2" className="mask mask-star-2 bg-primary" aria-label="3 star" onChange={() => handleSelectRating(3)} checked={selectedRating === 3} />
@@ -525,7 +649,7 @@ const ProductDetail = () => {
                                                 </div>
                                                 <div>
                                                     <div className="flex flex-col">
-                                                        <label htmlFor="review-title">Titulo</label>
+                                                        <label htmlFor="review-title" className="text-sm sm:text-base">Titulo</label>
                                                         <input
                                                             {...register("title", {
                                                                 required: "El titulo es requerido",
@@ -537,11 +661,11 @@ const ProductDetail = () => {
                                                             name="title"
                                                             id="title"
                                                             type="text"
-                                                            className="input input-bordered w-full"
+                                                            className="input input-bordered w-full input-sm sm:input-md"
                                                             placeholder="Agrega un titulo a la reseña"
                                                         />
                                                         <div className={clsx(
-                                                            "w-full flex items-center gap-2",
+                                                            "w-full flex items-center gap-2 text-sm",
                                                             errors.title ? "justify-between" : "justify-end",
                                                         )}>
                                                             {errors.title && <p className="text-error">{errors.title.message}</p>}
@@ -553,7 +677,7 @@ const ProductDetail = () => {
 
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <label htmlFor="review-comment">Comentario</label>
+                                                        <label htmlFor="review-comment" className="text-sm sm:text-base">Comentario</label>
                                                         <textarea
                                                             {...register("comment", {
                                                                 required: "El comentario es requerido",
@@ -564,11 +688,11 @@ const ProductDetail = () => {
                                                             })}
                                                             name="comment"
                                                             id="comment"
-                                                            className="textarea textarea-bordered w-full"
+                                                            className="textarea textarea-bordered w-full textarea-sm sm:textarea-md"
                                                             placeholder="Agrega un comentario"
                                                         />
                                                         <div className={clsx(
-                                                            "w-full flex items-center gap-2",
+                                                            "w-full flex items-center gap-2 text-sm",
                                                             errors.comment ? "justify-between" : "justify-end",
                                                         )}>
                                                             {errors.comment && <p className="text-error">{errors.comment.message}</p>}
@@ -579,15 +703,15 @@ const ProductDetail = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button type="submit" className="w-fit btn btn-primary">Agregar reseña</button>
+                                                <button type="submit" className="w-fit btn btn-primary btn-sm sm:btn-md">Agregar reseña</button>
                                             </form>
                                         </div>
                                     )}
                                     {!isAuth && (
                                         <div className={clsx(
-                                            "mt-5 rounded-xl p-5", theme === "ligth" ? "bg-gray-100" : "bg-gray-500")}>
-                                            <h2>Inicia sesión para agregar tu reseña ⭐</h2>
-                                            <p>No tienes cuenta? <Link to="/nueva-cuenta" className="underline text-primary">Registrate para agregar tu reseña</Link></p>
+                                            "mt-5 rounded-xl p-4 sm:p-5", theme === "ligth" ? "bg-gray-100" : "bg-gray-500")}>
+                                            <h2 className="text-base sm:text-lg">Inicia sesión para agregar tu reseña ⭐</h2>
+                                            <p className="text-sm sm:text-base">No tienes cuenta? <Link to="/nueva-cuenta" className="underline text-primary">Registrate para agregar tu reseña</Link></p>
                                         </div>
                                     )}
                                 </div>
@@ -596,8 +720,8 @@ const ProductDetail = () => {
                     </div>
                 </div>
             )}
-            <div className="w-full">
-                <p className="text-3xl font-bold">Productos que quiza te puedan interesar</p>
+            <div className="w-full mt-5">
+                <p className="text-2xl sm:text-3xl font-bold">Productos que quiza te puedan interesar</p>
                 {adsLoading && !adsError && !ads && (
                     <div className="flex gap-5">
                         <ProductVersionCardSkeleton />

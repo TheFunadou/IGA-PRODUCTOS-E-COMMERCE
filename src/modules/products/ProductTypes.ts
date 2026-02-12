@@ -65,7 +65,7 @@ export type ParentVersionType = {
 type ProductImagesSafeType = Omit<ProductImagesType, "product_version_id" | "id">[];
 
 export type ProductVersionDetailType = {
-    product: Pick<ProductType, "product_name" | "applications" | "certifications_desc" | "description" | "recommendations" | "specs">,
+    product: Pick<ProductType, "product_name" | "applications" | "certifications_desc" | "description" | "recommendations" | "specs"> & { uuid: string },
     subcategories: string[];
     product_version: Omit<ProductVersionType, "id" | "product_id" | "created_at" | "updated_at" | "main_version">;
     product_images: ProductImagesSafeType

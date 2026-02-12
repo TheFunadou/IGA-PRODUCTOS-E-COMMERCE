@@ -2,7 +2,7 @@
 
 const ProductVersionCardSkeleton = () => {
     return (
-        <div className={`w-100 h-160 bg-white p-5 shadow-xl rounded-xl`}>
+        <div className={`w-100 h-160 bg-base-100 p-5 shadow-xl rounded-xl`}>
             <div className="w-full h-full">
                 <div className=" h-1/5 py-4 flex flex-col gap-2 justify-center">
                     <div className="skeleton w-full p-8"></div>

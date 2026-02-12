@@ -27,7 +27,7 @@ const CategoriesSummary = () => {
     };
 
     return (
-        <OverflowXComponent className="gap-10 mt-2">
+        <OverflowXComponent className="flex gap-10 mt-2">
             {data && data.map(((category, index) => (
                 <div key={`${category.categoryName}-${index}`} className="w-60 md:w-100 h-auto md:h-110 flex-shrink-0 p-2 md:p-5 rounded-xl border border-gray-300 bg-base-100 hover:border-primary duration-150 flex flex-col justify-center">
                     <div className="w-full h-auto md:h-100 grid grid-cols-2 gap-1 md:gap-5 items-center justify-center">

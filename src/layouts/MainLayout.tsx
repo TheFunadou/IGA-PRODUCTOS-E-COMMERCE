@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../modules/auth/states/authStore";
-import { FaFacebook, FaWhatsapp } from "react-icons/fa6";
+import { FaClock, FaFacebook, FaTrash, FaWhatsapp } from "react-icons/fa6";
 import { FaInstagramSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useEffect, useState } from "react";
@@ -17,14 +17,10 @@ import { VscThreeBars } from "react-icons/vsc";
 import DrawerSubMenu from "../modules/home/components/DrawerSubMenu";
 import ShopMenuPreview from "./components/ShopMenuPreview";
 import ThemeController from "../modules/home/components/ThemeController";
-import { useThemeStore } from "./states/themeStore";
-import clsx from "clsx";
 import { useShoppingCart } from "../modules/shopping/hooks/useShoppingCart";
 import { useSearchHistoryStore } from "./states/searchCachedStore";
-import { Clock8, Trash } from "lucide-react";
 
 const MainLayout = () => {
-    const { theme } = useThemeStore();
     const { searches: searchHistory, addSearch, clearSearches } = useSearchHistoryStore();
     const [isInputSearchActive, setIsInputSearchActive] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -104,7 +100,7 @@ const MainLayout = () => {
 
     return (
         <div className="w-full relative" id="top">
-            <nav className="w-full flex p-5 lg:px-10 md:py-5 xl:px-10 xl:py-5 bg-blue-950 text-white text-sm lg:text-base">
+            <nav className="w-full flex p-5 lg:px-10 md:py-5 xl:px-10 xl:py-5 bg-blue-950 text-sm lg:text-base">
                 <div className=" w-50/100 md:w-65/100 xl:w-65/100 flex gap-1 md:gap-3 items-center">
                     <figure className=" md:w-45/100 lg:w-35/100 xl:w-1/5 cursor-pointer" onClick={() => navigate("/")}>
                         <img src={IGA_LOGO} alt="IGA Prodcutos Logo" />
@@ -113,7 +109,7 @@ const MainLayout = () => {
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                className={clsx("xl:w-95/100 input rounded-xl focus:outline-white focus:outline-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")}
+                                className="xl:w-95/100 input rounded-xl focus:outline-white focus:outline-1"
                                 placeholder="Buscar productos"
                                 onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
                                 onFocus={() => setIsInputSearchActive(true)}
@@ -122,12 +118,12 @@ const MainLayout = () => {
                                 onKeyDown={(e) => e.stopPropagation()}
                             />
                             {debouncedLoading ? <span className="loading loading-dots loading-xs"></span>
-                                : (<FaSearch className="text-xl" />)}
+                                : (<FaSearch className="text-xl text-white" />)}
                         </div>
                         {searchHistory.length > 0 && isInputSearchActive && inputSearch.length === 0 && (
-                            <div className={clsx("w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")} ref={searchResultsRef}>
+                            <div className="w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1 bg-base-100" ref={searchResultsRef}>
                                 <button type="button" onMouseDown={(e) => onClearSearchHistory({ e })} className="cursor-pointer">
-                                    <p className="flex items-center justify-end gap-2 px-5 py-1 text-sm underline text-primary"><Trash size={15} className="text-primary" />Eliminar historial</p>
+                                    <p className="flex items-center justify-end gap-2 px-5 py-1 text-sm underline text-primary"><FaTrash size={15} className="text-primary" />Eliminar historial</p>
                                 </button>
                                 {searchHistory.map((data, index) => (
                                     <button
@@ -135,41 +131,43 @@ const MainLayout = () => {
                                         type="button"
                                         onMouseDown={(e) => onMouseDownSearchHistory({ e, search: data })}
                                     >
-                                        <p className="flex items-center gap-2 hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><Clock8 size={20} className="text-gray-500" /><strong>{data}</strong></p>
+                                        <p className="flex items-center gap-2 hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><FaClock size={20} className="text-gray-500" /><strong>{data}</strong></p>
                                     </button>
                                 ))}
                             </div>
                         )}
                         {showSearchResults && searchedData && searchedData.length > 0 &&
-                            <div className={clsx("w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 rounded-xl z-1", theme === "ligth" ? "bg-white text-black" : "bg-slate-950 border border-white text-white")} ref={searchResultsRef}>
+                            <div className="w-95/100 flex flex-col absolute top-12 border border-gray-300 py-5 px-2 rounded-xl z-1 bg-base-100" ref={searchResultsRef}>
                                 {searchedData && searchedData.map((data, index) => (
                                     <button
                                         key={`${index}-${data.sku}`}
                                         type="button"
                                         onClick={() => handleSearchNavigate({ category: data.category, productName: data.product_name, color: data.color, sku: data.sku })}>
-                                        <p className="flex items-center hover:bg-base-300 py-2 px-5 text-sm cursor-pointer"><FaSearch className="mr-2 text-primary" /><strong>{`${data.product_name.toUpperCase()} COLOR ${data.color.toUpperCase()}`}</strong></p>
+                                        <p className="flex gap-2 items-start hover:bg-base-300 py-2 px-5 text-sm cursor-pointer text-left"><FaSearch className="w-4 h-4 text-primary" /><strong>{`${data.product_name.toUpperCase()} COLOR ${data.color.toUpperCase()}`}</strong></p>
                                     </button>
                                 ))}
                             </div>
                         }
                     </div>
                 </div>
-                <div className=" w-50/100 md:w-35/100 xl:w-35/100 flex gap-5 xl:gap-10 items-center justify-end">
+                <div className=" w-50/100 md:w-35/100 xl:w-35/100 flex gap-5 xl:gap-10 items-center justify-end text-white">
                     <ThemeController />
-                    {isAuth && authCustomer &&
-                        <div className="flex md:gap-5 lg:gap-10 items-center justify-end"                        >
-                            <Link to={"/mis-compras"}>Mis compras</Link>
-                            <Link to={"/mis-favoritos"}>Mis favoritos</Link>
-                            <div className="dropdown dropdown-center cursor-pointer" >
-                                <div tabIndex={0} role="button" className="border border-white px-5 py-1 text-center rounded-xl focus:bg-white focus:text-black">{`${authCustomer.name.toUpperCase()} ${authCustomer.last_name.toUpperCase()}`}</div>
-                                <ul tabIndex={-1} className=" dropdown-content menu bg-base-100 w-65 text-black text-base flex flex-col items-center gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
-                                    <li><Link to={"/mi-cuenta/informacion-personal"}>Mi información personal</Link></li>
-                                    <li><Link to={"/mi-cuenta/direcciones-de-envio"}>Mis direcciones de envio</Link></li>
-                                    <button type="button" className="w-full border rounded-xl cursor-pointer bg-blue-950 p-2 text-white" onClick={handleLogout}>{loading ? ("Cargando ...") : (<p className="flex items-center gap-1 justify-center"><IoLogOutOutline className="text-2xl" />Cerrar sesión</p>)}</button>
-                                </ul>
+                    <div className="hidden md:block">
+                        {isAuth && authCustomer &&
+                            <div className="flex md:gap-5 lg:gap-10 items-center justify-end"                        >
+                                <Link to={"/mis-ordenes"}>Mis ordenes</Link>
+                                <Link to={"/mis-favoritos"}>Mis favoritos</Link>
+                                <div className="dropdown dropdown-center cursor-pointer" >
+                                    <div tabIndex={0} role="button" className="border border-white px-5 py-1 text-center rounded-xl focus:bg-white focus:text-black">{`${authCustomer.name.toUpperCase()} ${authCustomer.last_name.toUpperCase()}`}</div>
+                                    <ul tabIndex={-1} className=" dropdown-content menu bg-base-100 w-65 text-black text-base flex flex-col items-center gap-5 rounded-box z-1 mt-7 px-2 py-5 shadow-xl">
+                                        <li><Link to={"/mi-cuenta/informacion-personal"}>Mi información personal</Link></li>
+                                        <li><Link to={"/mi-cuenta/direcciones-de-envio"}>Mis direcciones de envio</Link></li>
+                                        <button type="button" className="w-full border rounded-xl cursor-pointer bg-blue-950 p-2 text-white" onClick={handleLogout}>{loading ? ("Cargando ...") : (<p className="flex items-center gap-1 justify-center"><IoLogOutOutline className="text-2xl" />Cerrar sesión</p>)}</button>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
 
                     {isAuth === false && <Link to="/iniciar-sesion" className="hidden md:block text-sm border md:text-base lg:text-lg p-1 md:px-2 rounded-xl">Iniciar Sesión</Link>}
                     <Link to={"/carrito-de-compras"}><p className="flex gap-1"><MdOutlineShoppingCart className="text-2xl md:text-3xl" /><span className="px-2 md:px-3 flex items-center justify-center rounded-full bg-red-500 font-bold">{isAuth ? authShoppingCart.length : localShoppingCart.length}</span></p></Link>
@@ -272,7 +270,7 @@ const MainLayout = () => {
                         <p>2025@ Todos los Derechos Reservados</p>
                     </div>
 
-                    <div className="hidden base:flex w-20/100 flex-col text-center ">
+                    <div className="hidden md:flex w-20/100 flex-col text-center ">
                         <p className="font-bold">Redes sociales</p>
                         <div className="w-full flex justify-center items-center gap-3">
                             <a href="https://www.facebook.com/Cascos.Iga" target="_blank"><FaFacebook className="text-5xl hover:scale-110 duration-250" /></a>
@@ -282,7 +280,7 @@ const MainLayout = () => {
                     </div>
                 </div>
             </footer>
-            <DrawerSubMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} />
+            <DrawerSubMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} onLogout={handleLogout} />
             <div className="hidden md:block fixed bottom-5 right-5 text-5xl hover:scale-110 duration-250 bg-success rounded-full p-3 z-1000 tooltip tooltip-left" data-tip="Contactanos por whatsapp"><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp /></a></div>
         </div>
     );

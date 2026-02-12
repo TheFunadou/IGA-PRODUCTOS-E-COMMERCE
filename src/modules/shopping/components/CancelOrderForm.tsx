@@ -2,7 +2,7 @@ import type { RefObject } from "react";
 
 type Props = {
     ref: RefObject<HTMLDialogElement | null>;
-    onCanceled: () => void;
+    onCanceled: () => Promise<void>;
 };
 
 const CancelOrderForm = ({ ref, onCanceled }: Props) => {
@@ -12,10 +12,9 @@ const CancelOrderForm = ({ ref, onCanceled }: Props) => {
                 <h3 className="font-bold text-lg">Deseas cancelar esta orden de compra? 😥</h3>
                 <p>Una vez cancelada la orden no podra ser reactivada</p>
                 <div className="modal-action">
-                    <form method="dialog">
-                        <button type="button" className="btn btn-ghost mr-3" onClick={() => onCanceled()}>Cancelar orden</button>
-                        <button type="submit" className="btn btn-primary">Continuar con la compra</button>
-
+                    <form method="dialog" className="flex gap-1 md:gap-3">
+                        <button type="button" className="w-fit btn btn-ghost" onClick={() => onCanceled()}>Cancelar orden</button>
+                        <button type="submit" className="w-fit btn btn-primary">Continuar</button>
                     </form>
                 </div>
             </div>

@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { ProductVersionCardType } from "../../products/ProductTypes";
 import { useShoppingCartStore } from "../states/shoppingCartStore";
 import { useAddItem, useCheckAllItems, useClearShoppingCart, useFetchShoppingCart, useRemoveItem, useToggleCheckItem, useUncheckAllItems, useUpdateItemQty } from "./useFetchShoppingCart";
@@ -8,13 +7,13 @@ import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import { useEffect, useState } from "react";
 import type { ShoppingCartType } from "../ShoppingTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
+import { usePaymentStore } from "../states/paymentStore";
 
 export const useShoppingCart = () => {
     const [shoppingCart, setShoppingCart] = useState<ShoppingCartType[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const { items, addItem, addToBuyNow, removeItem, updateItemQty, checkAllItems, uncheckAllItems, clearShoppingCart, toogleCheckItem, error: cartError, itemBuyNow } = useShoppingCartStore();
-    const { showTriggerAlert } = useTriggerAlert();
+    const { items, addItem, removeItem, updateItemQty, checkAllItems, uncheckAllItems, clearShoppingCart, toogleCheckItem, error: cartError } = useShoppingCartStore();
     const navigate = useNavigate();
     const { isAuth, authCustomer } = useAuthStore();
     const addAuth = useAddItem();
@@ -24,6 +23,7 @@ export const useShoppingCart = () => {
     const checkAllAuth = useCheckAllItems();
     const uncheckAllAuth = useUncheckAllItems();
     const clearAuth = useClearShoppingCart();
+    const { setBuyNow } = usePaymentStore();
 
     const {
         data: authCart,
@@ -126,12 +126,11 @@ export const useShoppingCart = () => {
         return;
     }, 100);
 
-    const addBuyNow = useDebounceCallback(async (data: ProductVersionCardType, quantity = 1) => {
-        const setBuyNow: boolean = await addToBuyNow({ ...data, isChecked: true, quantity });
-        if (!setBuyNow) { showTriggerAlert("Message", "Ocurrio un error inesperado", { duration: 3500 }) };
+    const addBuyNow = useDebounceCallback(async ({ sku, quantity }: { sku: string, quantity: number }) => {
+        setBuyNow({ sku, quantity });
         navigate("/pagar-ahora");
         return;
     }, 250);
 
-    return { shoppingCart, itemBuyNow, authCartLoading, error, authRefetchCart, add, remove, updateQty, addBuyNow, toogleCheck, checkAll, uncheckAll, clear, isLoading };
+    return { shoppingCart, authCartLoading, error, authRefetchCart, add, remove, updateQty, addBuyNow, toogleCheck, checkAll, uncheckAll, clear, isLoading };
 }

@@ -2,7 +2,7 @@
 
 const PNCPolicy = () => {
     return (
-        <div className="bg-white py-10 px-50 rounded-xl">
+        <div className="bg-base-100 py-10 px-50 rounded-xl">
             <h1>Política de devolución PNC</h1>
 
             <section className="mt-5 text-justify text-lg flex flex-col gap-5">

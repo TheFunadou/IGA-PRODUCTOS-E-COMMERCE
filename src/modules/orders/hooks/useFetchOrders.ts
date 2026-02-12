@@ -1,10 +1,11 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelOrder, getCheckoutOrder, getOrderDetails, getOrders } from "../../orders/OrdersServices";
+import { cancelOrder, getBuyNowItem, getCheckoutOrder, getOrderDetails, getOrders } from "../../orders/OrdersServices";
 import type { GetOrderDetails, GetOrdersType, OrderCheckoutType } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+import type { ShoppingCartType } from "../../shopping/ShoppingTypes";
 
 
 export const useFetchOrders = (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => {
@@ -63,3 +64,15 @@ export const useCancelOrder = ({ orderUUID }: { orderUUID: string }) => {
         }
     });
 };
+
+
+export const useFetchBuyNowItem = ({ sku }: { sku?: string }) => {
+    return useQuery<ShoppingCartType>({
+        queryKey: ["buy-now:item", { sku }],
+        queryFn: async () => await getBuyNowItem({ sku: sku! }),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: !!sku,
+    });
+}

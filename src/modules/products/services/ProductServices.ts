@@ -22,16 +22,16 @@ export const listProductVersionsByName = async (input: string): Promise<Searched
 };
 
 export const addProductVersionReview = async (args: { data: AddPVReviewType, csrfToken: string }): Promise<string> => {
-    const { data } = await api.post<string>("product-version/review", args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    const { data } = await api.post<string>("product/review", args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
     return data;
 }
 
-export const showProductVersionReviewsBySKU = async (args: { sku: string, pagination: { page: number, limit: number } }): Promise<GetProductVersionReviewsType> => {
-    const { data } = await api.get<GetProductVersionReviewsType>("product-version/review/" + args.sku, { params: args.pagination });
+export const showProductVersionReviewsByUUID = async (args: { uuid: string, pagination: { page: number, limit: number } }): Promise<GetProductVersionReviewsType> => {
+    const { data } = await api.get<GetProductVersionReviewsType>("product/review/" + args.uuid, { params: args.pagination });
     return data;
 };
 
-export const getProductVersionReviewsResumeBySKU = async (args: { sku: string }): Promise<PVReviewResumeType> => {
-    const { data } = await api.get<PVReviewResumeType>("product-version/review/resume/" + args.sku);
+export const getProductVersionReviewsResumeByUUID = async (args: { uuid: string }): Promise<PVReviewResumeType> => {
+    const { data } = await api.get<PVReviewResumeType>("product/review/resume/" + args.uuid);
     return data;
 };

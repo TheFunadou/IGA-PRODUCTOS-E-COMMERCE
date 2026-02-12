@@ -6,13 +6,14 @@ import type { CreateOrderType, OrderCreatedType } from "../../orders/OrdersTypes
 import { formatAxiosError } from "../../../api/helpers";
 
 interface PaymentStoreState {
+    buyNow: { sku: string, quantity: number } | null;
     order: OrderCreatedType | null;
     isLoading: boolean;
     error: string | null;
     createOrder: (data: CreateOrderType) => Promise<void>;
     cancelOrder: () => Promise<void>;
-    refoundOrder: () => Promise<void>;
     success: () => void;
+    setBuyNow: (args: { sku: string, quantity: number }) => void;
 };
 
 export const usePaymentStore = create<PaymentStoreState>()(
@@ -21,6 +22,7 @@ export const usePaymentStore = create<PaymentStoreState>()(
             order: null,
             isLoading: false,
             error: null,
+            buyNow: null,
 
             createOrder: async (data: CreateOrderType): Promise<void> => {
                 if (!data.payment_method) throw new Error("Selecciona un método de pago");
@@ -44,13 +46,13 @@ export const usePaymentStore = create<PaymentStoreState>()(
             cancelOrder: async () => {
                 set({ order: null, isLoading: false });
             },
-            refoundOrder: async () => {
-
-            },
             success() {
                 usePaymentStore.persist.clearStorage();
-                usePaymentStore.setState({ order: null, isLoading: false })
+                usePaymentStore.setState({ order: null, isLoading: false, buyNow: null })
             },
+            setBuyNow(args: { sku: string, quantity: number }) {
+                set({ buyNow: args });
+            }
         }),
         {
             name: "order",

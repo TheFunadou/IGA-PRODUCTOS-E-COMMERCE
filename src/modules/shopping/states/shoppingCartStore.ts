@@ -7,10 +7,8 @@ import { useAuthStore } from "../../auth/states/authStore";
 type ShoppingCartState = {
     items: ShoppingCartType[];
     isLoading: boolean;
-    itemBuyNow: ShoppingCartType | null;
     error: string | null;
     addItem: (data: ShoppingCartType) => Promise<boolean>;
-    addToBuyNow: (data: ShoppingCartType) => Promise<boolean>;
     removeItem: (sku: string) => Promise<void>;
     clearShoppingCart: () => Promise<void>;
     updateItemQty: (sku: string, quantity: number) => Promise<void>;
@@ -25,7 +23,6 @@ export const useShoppingCartStore = create<ShoppingCartState>()(
         (set, get) => ({
             items: [],
             isLoading: false,
-            itemBuyNow: null,
             error: null,
 
             addItem: async (data) => {
@@ -48,12 +45,6 @@ export const useShoppingCartStore = create<ShoppingCartState>()(
                         return true;
                     }
                 };
-                return true;
-            },
-
-
-            addToBuyNow: async (data) => {
-                set({ itemBuyNow: { ...data } });
                 return true;
             },
 
@@ -113,7 +104,6 @@ export const useShoppingCartStore = create<ShoppingCartState>()(
             name: "shopping-cart",
             partialize: (state) => ({
                 items: state.items,
-                itemBuyNow: state.itemBuyNow,
             }),
         }
     )

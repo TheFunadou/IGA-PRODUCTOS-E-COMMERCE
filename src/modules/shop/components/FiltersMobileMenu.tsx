@@ -1,9 +1,9 @@
-import { FaX } from "react-icons/fa6";
 import type { CategoryType, SubcategoriesType } from "../../categories/CategoriesTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import clsx from "clsx";
 import { IoIosArrowDown } from "react-icons/io";
 import SubcategoryMenu from "../../categories/components/SubcategoryMenu";
+import { FaX } from "react-icons/fa6";
 
 type Props = {
     isOpen: boolean;
@@ -65,10 +65,13 @@ const FiltersMobileMenu = ({
                 ></label>
                 <div className="menu bg-blue-950 min-h-full w-80 p-4">
                     <div className="flex justify-between">
-                        <p className="text-xl text-white font-medium">Filtros</p>
+                        <h2 className="text-white font-medium py-2">Filtros</h2>
                         <button type="button" onClick={onClose}><FaX className="text-white border rounded-xl text-xl" /></button>
                     </div>
                     <div className="mt-5">
+                        <div className="py-2 border-b border-white mb-5">
+                            <h3 className="text-white font-medium">Categorias</h3>
+                        </div>
                         {categoriesLoading && !categoriesError && (!categories || categories.length === 0) && (
                             <div className="w-full flex flex-col gap-5">
                                 <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
@@ -87,7 +90,7 @@ const FiltersMobileMenu = ({
                         {!categoriesLoading && !categoriesError && categories && categories.length > 0 && (
                             <div className="w-full flex flex-col gap-5">
                                 <button className={clsx(
-                                    "w-fit rounded-xl px-2 py-1 text-xl text-white",
+                                    "w-fit rounded-xl px-2 py-1 text-lg text-white",
                                     !selectedCategory && theme === "ligth" ? "bg-blue-900" : "",
                                     !selectedCategory && theme === "dark" ? "border" : "",
 

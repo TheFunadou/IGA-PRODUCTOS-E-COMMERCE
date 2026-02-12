@@ -17,7 +17,6 @@ import { ThemeProvider } from "./modules/products/states/ThemeContext"
 import ProductDetail from "./modules/products/design/ProductDetail"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ShoppingCart from "./modules/shopping/design/ShoppingCart"
-import ProductDetailSkeleton from "./modules/products/components/ProductDetailSkeleton"
 import BuyNow from "./modules/shopping/design/BuyNow"
 import CustomerAddresses from "./modules/customers/design/CustomerAddresses"
 import AboutIGA from "./modules/home/design/AboutIGA"
@@ -101,8 +100,8 @@ const router = createBrowserRouter([
           { path: "/carrito-de-compras", element: <ShoppingCart /> },
 
           // Orders
-          { path: "/mis-compras", element: <Orders /> },
-          { path: "/mis-compras/detalle", element: <OrderDetail /> },
+          { path: "/mis-ordenes", element: <Orders /> },
+          { path: "/mis-ordenes/detalle", element: <OrderDetail /> },
           { path: "/mis-favoritos", element: <CustomerFavorites /> },
           { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 
@@ -125,8 +124,6 @@ const router = createBrowserRouter([
           { path: "/politica-de-privacidad", element: <PoliticaPrivacidad /> },
           { path: "/politica-de-devolucion", element: <PNCPolicy /> },
 
-          // Test routes
-          { path: "/test", element: <ProductDetailSkeleton /> },
         ]
       },
       { path: "/pagar-productos/ticket/:order_id", element: <Ticket /> }

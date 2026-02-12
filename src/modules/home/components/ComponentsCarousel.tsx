@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 
 interface ComponentCarouselProps {
   children: React.ReactNode;
@@ -44,7 +44,7 @@ const ComponentCarousel: React.FC<ComponentCarouselProps> = ({
           className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-100 rounded-full p-2 shadow-lg transition-all"
           aria-label="Anterior"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-700" />
+          <FaChevronLeft className="w-6 h-6 text-gray-700" />
         </button>
       )}
       
@@ -62,7 +62,7 @@ const ComponentCarousel: React.FC<ComponentCarouselProps> = ({
           className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-100 rounded-full p-2 shadow-lg transition-all"
           aria-label="Siguiente"
         >
-          <ChevronRight className="w-6 h-6 text-gray-700" />
+          <FaChevronRight className="w-6 h-6 text-gray-700" />
         </button>
       )}
     </div>

@@ -46,16 +46,26 @@ export function getFormChanges<T extends Record<string, any>>(data: T, defaults:
 
 
 /**
- * 
- * @param input --The input string example -- Safety Helmet
- * @returns -- A string in lowerCase formated  -> safety-helmet
+ * Converts any string to kebab-case format, handling special characters, accents, and symbols
+ * @param input - The input string example: "Safety Helmet (Blue) - 'Premium' 100%"
+ * @returns A string in kebab-case format -> "safety-helmet-blue-premium-100"
+ * @example
+ * makeSlug("Casco de Seguridad (Azul)") => "casco-de-seguridad-azul"
+ * makeSlug("Product's Name - 50% Off!") => "products-name-50-off"
+ * makeSlug("Café 'Especial' (México)") => "cafe-especial-mexico"
  */
 export const makeSlug = (input: string): string => {
-    const slug: string = input.toLowerCase().replace(/\s/g, "-");
-    return slug;
+    return input
+        .toLowerCase()                           // Convert to lowercase
+        .normalize("NFD")                        // Normalize Unicode (separate accents)
+        .replace(/[\u0300-\u036f]/g, "")        // Remove accent marks
+        .replace(/[()[\]{}'"`,;:!?¿¡]/g, "")    // Remove parentheses, brackets, quotes, punctuation
+        .replace(/[%&$#@*+=<>|\\\/~^]/g, "")    // Remove special symbols
+        .replace(/\s+/g, "-")                    // Replace spaces with hyphens
+        .replace(/[^a-z0-9-]/g, "")             // Remove any remaining non-alphanumeric characters (except hyphens)
+        .replace(/-+/g, "-")                     // Replace multiple consecutive hyphens with single hyphen
+        .replace(/^-+|-+$/g, "");               // Remove leading/trailing hyphens
 };
-
-
 
 export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType | undefined, isFavorite: boolean = false): ProductVersionCardType => {
     if (!data) { throw new Error("Hubo un error al procesar los datos del detalle de producto"); }

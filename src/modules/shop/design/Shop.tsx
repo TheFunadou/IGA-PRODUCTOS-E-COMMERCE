@@ -97,10 +97,10 @@ const Shop = () => {
 
 
     return (
-        <div className={clsx("flex flex-wrap md:flex-nowrap rounded-xl md:rounded-2xl p-3 md:p-10", theme === "ligth" ? "bg-white" : "bg-slate-950")}>
+        <div className="flex flex-wrap md:flex-nowrap rounded-xl md:rounded-2xl p-3 md:p-10 bg-base-100">
             <div className="hidden md:block md:w-20/100 md:flex-shrink-0 relative ">
                 <div className="w-full border-r border-gray-300 sticky top-5 pr-5">
-                    <p className={clsx("hidden md:blocktext-2xl font-bold border-b pb-5", theme === "ligth" ? "text-blue-950" : "text-white")}>Categorias de productos</p>
+                    <h2>Categorias de productos</h2>
                     <div className="hidden md:block w-full font-bold text-xl mt-5">
                         {categoriesLoading && !categoriesError && (!categories || categories.length === 0) && (
                             <div className="w-full flex flex-col gap-5">
@@ -180,86 +180,6 @@ const Shop = () => {
                                 <span>Mostrar solo ofertas</span>
                             </div>
                         </div>
-                        {/* {categoriesLoading ? (
-                            <div className="w-full flex flex-col gap-5">
-                                <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
-                                <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
-                                <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
-                                <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
-                                <div className="w-full p-4 skeleton bg-gray-500 opacity-25" />
-                            </div>
-                        ) : (
-                            <div className="w-full">
-                                {categoriesError ? (
-                                    <div>
-                                        <p className="text-error mt-2 text-lg font-normal">{getErrorMessage(categoriesError)}</p>
-                                        <button type="button" className="btn btn-primary mt-2" onClick={() => refetchCategories()}>Reintentar</button>
-                                    </div>
-                                ) : (
-                                    <div className="w-full flex flex-col gap-5">
-                                        <button className={clsx(
-                                            "w-fit rounded-xl px-2 py-1",
-                                            !selectedCategory && theme === "ligth" ? "bg-gray-200" : "",
-                                            !selectedCategory && theme === "dark" ? "border" : "",
-
-                                        )} onClick={handleSetClear}>Tienda</button>
-                                        {categories && categories.length > 0 && categories.map((category, index) => (
-                                            <div key={index} className="w-full">
-                                                <button
-                                                    className={clsx(
-                                                        "w-60/100 px-2 py-1 text-left flex items-center justify-between font-normal text-lg",
-                                                        selectedCategory && category.uuid === selectedCategory.uuid && theme === "ligth" ? "bg-gray-200 rounded-xl" : "",
-                                                        selectedCategory && category.uuid === selectedCategory.uuid && theme === "dark" ? "border  rounded-xl" : ""
-
-                                                    )}
-                                                    type="button"
-                                                    onClick={() => handleChangeCategory(category)}
-                                                >
-                                                    {category.name}
-                                                    <IoIosArrowDown className={clsx(theme === "ligth" ? "text-blue-950" : "text-white")} />
-                                                </button>
-                                                <div className={clsx(
-                                                    "w-full",
-                                                    subcategories.length > 0 && selectedCategory && category.uuid === selectedCategory.uuid ? "block" : "hidden"
-                                                )}>
-                                                    {subcategoriesLoading ? (
-                                                        "Cargando subcategorias..."
-                                                    ) : (
-                                                        <div className="w-full">
-                                                            {subcategoriesError ? (
-                                                                <div>
-                                                                    <p className="text-error mt-2 text-lg font-normal">{getErrorMessage(subcategoriesError)}</p>
-                                                                    <button className="mt-2 btn btn-primary" onClick={() => refetchSubcategories()}>Reintentar</button>
-                                                                </div>
-                                                            ) : (
-                                                                <SubcategoryMenu data={subcategories} onFindAncestors={handleSubcategoryNavigate} />
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="w-full border-t mt-5 py-5 flex flex-col gap-4 text-lg [&_button]:text-start font-normal">
-                                    {isAuth &&
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox"
-                                                checked={favoriteCheck}
-                                                onChange={(e) => setFavoriteCheck(e.target.checked)}
-                                            />
-                                            <span>Mostrar solo favoritos</span>
-                                        </div>
-                                    }
-                                    <div className="flex items-center gap-3">
-                                        <input type="checkbox" className="checkbox" />
-                                        <span>Mostrar solo ofertas</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )} */}
                     </div>
                 </div>
             </div>

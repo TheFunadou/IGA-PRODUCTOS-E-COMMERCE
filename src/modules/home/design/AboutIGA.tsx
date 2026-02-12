@@ -39,12 +39,13 @@ const AboutIGA = () => {
     };
 
     return (
-        <div className="w-full bg-base-300 px-5 pt-10 pb-25 rounded-xl">
+        <div className="w-full bg-base-300 px-3 sm:px-5 lg:px-5 pt-6 sm:pt-10 pb-16 sm:pb-25 rounded-xl">
             <div className="w-full animate-fade-in-up">
-                <div className="px-60 py-15 flex text-white rounded-xl bg-right" style={{ backgroundImage: `url(${Header1})` }}>
-                    <div className="w-1/2">
-                        <p className="text-3xl font-bold">Acerca de IGA</p>
-                        <section className="text-lg/8 text-justify mt-5">
+                {/* Header Section - Responsive */}
+                <div className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-60 py-6 sm:py-10 md:py-15 flex flex-col lg:flex-row text-white rounded-xl bg-cover bg-center lg:bg-right" style={{ backgroundImage: `url(${Header1})` }}>
+                    <div className="w-full lg:w-1/2 mb-6 lg:mb-0">
+                        <p className="text-2xl sm:text-3xl font-bold">Acerca de IGA</p>
+                        <section className="text-base sm:text-lg leading-6 sm:leading-8 text-justify mt-3 sm:mt-5">
                             <p>
                                 <strong>Plásticos del Golfo-Sur, S.A. de C.V.</strong> Es una empresa 100% mexicana, certificada bajo la norma ISO 9001:2015; especializada en la producción, comercialización y distribución de lentes, barboquejos y cascos de seguridad industrial.
                             </p>
@@ -58,18 +59,20 @@ const AboutIGA = () => {
                             </p>
                         </section>
                     </div>
-                    <div className="w-1/2  flex items-end">
-                        <figure className="ml-10 w-3/4">
-                            <img src={IGALogo} alt="IGA productos Logo" />
+                    <div className="w-full lg:w-1/2 flex items-center justify-center lg:items-end">
+                        <figure className="lg:ml-10 w-full sm:w-3/4 max-w-sm">
+                            <img src={IGALogo} alt="IGA productos Logo" className="w-full h-auto" />
                         </figure>
                     </div>
                 </div>
-                <div className="w-full mt-5">
-                    <h3 className="text-4xl font-bold">Nuestros principios</h3>
-                    <div className="mt-5 flex">
-                        <div className="w-1/2 p-5 mr-5 bg-base-100 rounded-xl">
-                            <p className="text-lg">Da clic en cada uno de los principios para obtener más información</p>
-                            <div className="flex flex-col gap-5 mt-3 [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:cursor-pointer [&_button]:text-2xl [&_button]:font-medium">
+
+                {/* Principios Section - Responsive */}
+                <div className="w-full mt-5 sm:mt-5">
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Nuestros principios</h3>
+                    <div className="mt-5 flex flex-col lg:flex-row gap-5">
+                        <div className="w-full lg:w-1/2 p-4 sm:p-5 bg-base-100 rounded-xl">
+                            <p className="text-base sm:text-lg">Da clic en cada uno de los principios para obtener más información</p>
+                            <div className="flex flex-col gap-3 sm:gap-5 mt-3 [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:cursor-pointer [&_button]:text-lg sm:[&_button]:text-2xl [&_button]:font-medium">
                                 <button
                                     className={clsx(select === "mision" && "text-primary")}
                                     onClick={() => setSelect("mision")}>
@@ -92,16 +95,22 @@ const AboutIGA = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="w-1/2 ml-5 bg-slate-900 rounded-xl px-20 py-5">
-                            <p className="text-3xl font-bold text-white flex items-center gap-2">{principles[select].title}{principles[select].icon}</p>
-                            <p className="text-xl/7 text-white text-justify mt-3">{principles[select].description}</p>
+                        <div className="w-full lg:w-1/2 bg-slate-900 rounded-xl px-6 sm:px-10 lg:px-20 py-5">
+                            <p className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                                {principles[select].title}
+                                {principles[select].icon}
+                            </p>
+                            <p className="text-base sm:text-lg lg:text-xl leading-6 sm:leading-7 text-white text-justify mt-3">
+                                {principles[select].description}
+                            </p>
                         </div>
                     </div>
-
                 </div>
-                <div className="w-full mt-5">
-                    <h3 className="text-4xl font-bold">Historia</h3>
-                    <p className="text-base font-light">
+
+                {/* Historia Section - Responsive */}
+                <div className="w-full mt-5 sm:mt-5">
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Historia</h3>
+                    <p className="text-sm sm:text-base font-light mt-2">
                         FABRICAMOS UNA VARIEDAD DE PRODUCTOS DE SEGURIDAD INDUSTRIAL
                         APLICANDO ANÁLISIS, INNOVACIÓN, NORMALIZACIÓN Y CERTIFICACIÓN EN
                         PROCESOS DE INYECCIÓN DE PLÁSTICOS
@@ -123,8 +132,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-xl font-bold">1999</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">1999</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
                                     PLÁSTICOS DEL GOLFO SUR S.A. DE CV. como Asociación Civil se involucra en la transformación y comercialización de productos mediante el proceso de inyección de plásticos.
                                 </div>
                             </div>
@@ -147,8 +156,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-end md:mb-10">
-                                <time className="text-xl font-bold">2003</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2003</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
                                     Incursionamos en el área de seguridad personal, fabricando dos líneas específicas; cascos y lentes de seguridad en varios modelos. Producidos bajo los más altos estándares de calidad en cumplimiento con las Normas: NOM-115-STPS-1994, NMX-S-055-SCF1-2002 y ANSI/ISEA Z891-199.
                                 </div>
                             </div>
@@ -171,8 +180,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-xl font-bold">2009</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2009</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
                                     Implementamos una serie de equipos de producción de primera calidad para lograr ahorros energéticos substanciales y una mejor operación de inyección.
                                 </div>
                             </div>
@@ -195,8 +204,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-end md:mb-10">
-                                <time className="text-xl font-bold">2014-2020</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-5 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2014-2020</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
                                     Certificación al proceso Normativos de nuestros cascos de seguridad industrial en las siguientes Normas: NOM-115-STPS-2009, NMX-S-055-SCFI-2002, ANSI/ISEA Z89.1-2014 (R2019), PEMEX-EST-SS-058-2018 y CFE: 8H 341-02.
                                 </div>
                             </div>
@@ -219,8 +228,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-xl font-bold">2017</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2017</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
                                     Plásticos obtiene la presidencia del subcomité de equipos de protección a la cabeza del comité técnico de normalización nacional para productos de protección y seguridad. Su participación se destaca en el análisis normativo de NMX-S-055 y la norma internacional ISO para equipos de protección a la cabeza.
                                 </div>
                             </div>
@@ -243,8 +252,8 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-end md:mb-10">
-                                <time className="text-xl font-bold">2018</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2018</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
                                     Se obtiene la certificación ISO 9001-2015, alcance que comprende las actividades de: fabricación de cascos de protección personal, lentes de cascos de protección personal, lentes de seguridad y barbiquejos, actividades de ensamble e inyección.
                                 </div>
                             </div>
@@ -267,19 +276,24 @@ const AboutIGA = () => {
                                 </svg>
                             </div>
                             <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-xl font-bold">2021</time>
-                                <div className="text-lg mt-2 bg-base-100 rounded-xl px-10 py-2 text-justify">
+                                <time className="text-lg sm:text-xl font-bold">2021</time>
+                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
                                     Plásticos del Golfo Sur obtiene el certificado ANSI/ISEA Z89.1 2014 (R2019) para el casco Plagosur C en ajuste de matraca tipo I, Forma II en clase "E".
                                 </div>
                             </div>
                         </li>
                     </ul>
                 </div>
-                <div className="flex">
-                    <div className="w-1/2">
-                        <p className="text-3xl font-bold">Servicios al Cliente</p>
-                        <p className="text-xl text-medium flex items-center gap-2"><TiWorld className="text-primary" />Nacional e internacional</p>
-                        <ul className="w-90/100 text-justify list-disc list-inside text-xl flex flex-col gap-5 mt-5">
+
+                {/* Servicios y Licitaciones Section - Responsive */}
+                <div className="flex flex-col lg:flex-row gap-5 lg:gap-0 mt-8">
+                    <div className="w-full lg:w-1/2 lg:pr-5">
+                        <p className="text-2xl sm:text-3xl font-bold">Servicios al Cliente</p>
+                        <p className="text-lg sm:text-xl text-medium flex items-center gap-2 mt-2">
+                            <TiWorld className="text-primary flex-shrink-0" />
+                            Nacional e internacional
+                        </p>
+                        <ul className="w-full text-justify list-disc list-inside text-base sm:text-lg lg:text-xl flex flex-col gap-3 sm:gap-5 mt-3 sm:mt-5">
                             <li>Ofrecemos a nuestros clientes servicio de maquila de inyección en plásticos, contando con la experiencia, equipo y maquinaria para el proceso de materiales termoplásticos y resinas de ingeniería.</li>
                             <li>Capacidad instalada en maquinas de inyección de 35 a 320 toneladas de cierre.</li>
                             <li>Contamos con equipo periférico para un proceso y control del producto en moldeo, como deshidratadores y cargadores de material, así como termorreguladores y equipo de enfriamiento para el proceso, línea de ensamble y empaque de producto final.</li>
@@ -293,23 +307,23 @@ const AboutIGA = () => {
                             <li>Equipo de ventas corporativa</li>
                         </ul>
                     </div>
-                    <div className="w-1/2">
-                        <p className="text-3xl font-bold">Licitaciones</p>
-                        <p className="text-xl text-medium flex items-start gap-2 "><SiGooglecolab className="text-primary" />Colaboramos con empresas/instuciones gubernamentales que requieren de productos de calidad.</p>
-                        <div className="mt-3 flex flex-wrap gap-5 items-center">
-                            <figure className="w-1/3">
-                                <img src={cfeLogo} alt="CFE Logo" />
+                    <div className="w-full lg:w-1/2 lg:pl-5">
+                        <p className="text-2xl sm:text-3xl font-bold">Licitaciones</p>
+                        <p className="text-lg sm:text-xl text-medium flex items-start gap-2 mt-2">
+                            <SiGooglecolab className="text-primary flex-shrink-0 mt-1" />
+                            Colaboramos con empresas/instituciones gubernamentales que requieren de productos de calidad.
+                        </p>
+                        <div className="mt-3 sm:mt-3 flex flex-wrap gap-3 sm:gap-5 items-center justify-center lg:justify-start">
+                            <figure className="w-2/5 sm:w-1/3 lg:w-1/3">
+                                <img src={cfeLogo} alt="CFE Logo" className="w-full h-auto" />
                             </figure>
-                            <figure className="w-1/5">
-                                <img src={pemexLogo} alt="Pemex Logo" />
+                            <figure className="w-1/4 sm:w-1/5 lg:w-1/5">
+                                <img src={pemexLogo} alt="Pemex Logo" className="w-full h-auto" />
                             </figure>
-                            <figure className="w-1/3">
-                                <img src={asaLogo} alt="ASA Logo" />
+                            <figure className="w-2/5 sm:w-1/3 lg:w-1/3">
+                                <img src={asaLogo} alt="ASA Logo" className="w-full h-auto" />
                             </figure>
                         </div>
-                        {/* <figure className="mt-5 bg-slate-950 p-5 rounded-xl mt-10">
-                            <img src={IGALogo} alt="IGA Logo" />
-                        </figure> */}
                     </div>
                 </div>
             </div>

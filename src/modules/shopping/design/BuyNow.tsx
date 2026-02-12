@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { SiMercadopago } from "react-icons/si";
 import { useAuthStore } from "../../auth/states/authStore";
@@ -10,14 +10,13 @@ import { calcShippingCost, closeModal, showModal } from "../../../global/GlobalH
 import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import GuestAdvertisement from "../components/GuestAdvertisement";
 import AddressesModal from "../components/AddressesModal";
-import type { PaymentProvidersType, ShoppingCartType } from "../ShoppingTypes";
+import type { PaymentProvidersType } from "../ShoppingTypes";
 import type { CustomerAddressType, GuestFormType } from "../../customers/CustomerTypes";
-import type { PaymentShoppingCart } from "../../orders/OrdersTypes";
 import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
-import { useShoppingCart } from "../hooks/useShoppingCart";
 import { BiMinus, BiPlus } from "react-icons/bi";
+import { useFetchBuyNowItem } from "../../orders/hooks/useFetchOrders";
 
 /**
  * Shopping Cart Resume Component
@@ -30,47 +29,36 @@ import { BiMinus, BiPlus } from "react-icons/bi";
  * - Payment method selection
  * - Order creation and payment processing
  */
-const ShoppingCartResume = () => {
+const BuyNow = () => {
     // ============================================================================
     // Constants
     // ============================================================================
     const IVA = 0.16;
-    // ============================================================================
-    // Hooks & State Management
-    // ============================================================================
 
+    // ============================================================================
+    // Global Stores / Router
+    // ============================================================================
     const { theme } = useThemeStore();
-    const navigate = useNavigate();
     const { isAuth } = useAuthStore();
-    // const { items, toogleCheckItem, updateItemQty, removeItem } = useShoppingCartStore();
-    const { shoppingCart, toogleCheck, updateQty, remove } = useShoppingCart();
-    const { order, createOrder, isLoading: orderLoading } = usePaymentStore();
+    const { order, createOrder, isLoading: orderLoading, buyNow } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
 
-    /** Selected shipping address for the order */
+    // ============================================================================
+    // Data Fetching 
+    // ============================================================================
+    const { data, isLoading, error, refetch } = useFetchBuyNowItem({ sku: buyNow?.sku });
+
+    // ============================================================================
+    // State
+    // ============================================================================
+    const [quantity, setQuantity] = useState<number>(buyNow?.quantity ?? 1);
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
-
-    /** Calculated shipping cost based on number of boxes needed */
     const [shippingCost, setShippingCost] = useState<number>(0);
-
-    /** Number of boxes required for shipping */
     const [boxQty, setBoxQty] = useState<number>(1);
-
-    /** Selected payment provider (mercado_pago, paypal, etc.) */
     const [paymentMethod, setPaymentMethod] = useState<PaymentProvidersType>(null);
-
-    /** Whether to show the guest checkout form */
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const [guestBillingAddressChecked, setGuestBillingAddressChecked] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
-
-    // Modal references
-    const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
-    const addressesModal = useRef<HTMLDialogElement>(null);
-    const guestAddressFormModal = useRef<HTMLDialogElement>(null);
-    const guestFormBillingModal = useRef<HTMLDialogElement>(null);
-
-    // Guest address form
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
     const [billingGuestAddress, setBillingGuestAddress] = useState<GuestFormType | null>(null);
 
@@ -80,12 +68,17 @@ const ShoppingCartResume = () => {
     const [total, setTotal] = useState<number>(0);
     const [iva, setIva] = useState<number>(0);
 
+    // ============================================================================
+    // Refs (modals)
+    // ============================================================================
+    const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
+    const addressesModal = useRef<HTMLDialogElement>(null);
+    const guestAddressFormModal = useRef<HTMLDialogElement>(null);
+    const guestFormBillingModal = useRef<HTMLDialogElement>(null);
 
     // ============================================================================
-    // Data Fetching
+    // Fetch customer addresses
     // ============================================================================
-
-    /** Fetch customer addresses if authenticated */
     const {
         data: addresses,
         isLoading: addressesLoading,
@@ -94,171 +87,130 @@ const ShoppingCartResume = () => {
     } = useFetchCustomerAddresses({ pagination: { page: 1, limit: 10 } });
 
     // ============================================================================
-    // Computed Values
+    // Effects
     // ============================================================================
 
-    /** Products that are checked/selected for purchase */
-    const selectedProducts: ShoppingCartType[] = shoppingCart && shoppingCart.filter(item => item.isChecked === true);
+    useEffect(() => {
+        if (!addresses) return;
+        const defaultAddress = addresses.data.find(a => a.default_address);
+        if (defaultAddress) setSelectedAddress(defaultAddress);
+    }, [addresses]);
 
-    // /** Subtotal including IVA (sum of all selected products) */
-    // const subtotal: number = shoppingCart.filter(items => items.isChecked === true).reduce((accumulator: number, product: ShoppingCartType) => {
-    //     const itemTotal = parseFloat(product.product_version.unit_price) * product.quantity;
-    //     return accumulator + itemTotal;
-    // }, 0);
-
-    // /** IVA tax amount (16% of subtotal) */
-    // const calcSubtotalIVA: number = subtotal * IVA;
-
-    // /** Subtotal before IVA tax */
-    // const subtotalBeforeIVA: number = subtotal - calcSubtotalIVA;
-
-    // /** Final total including subtotal and shipping */
-    // const total: number = subtotal + shippingCost;
-
-    // ============================================================================
-    // Navigation Guard
-    // ============================================================================
-
-    /** Redirect to cart if no items are selected */
-    if (!shoppingCart || shoppingCart.length === 0 || shoppingCart.filter(item => item.isChecked === true).length < 1) {
-        navigate("/carrito-de-compras");
-    }
-
-    /** Redirect to payment page if order was successfully created */
-    if (order) navigate("/pagar-productos");
-
-    // ============================================================================
-    // Helper Functions
-    // ============================================================================
-
-    // ============================================================================
-    // Event Handlers
-    // ============================================================================
-
-    /**
-     * Sets the selected shipping address
-     * @param selected - The address selected by the user
-     */
-    const handleSetSelectedAddress = (selected: CustomerAddressType) => setSelectedAddress(selected);
-
-    /**
-     * Handles the response from the guest advertisement modal
-     * If user confirms, shows the guest checkout form
-     * @param response - Whether user wants to continue as guest
-     */
-    const modalResponse = (response: boolean) => {
-        if (response) {
-            const modal = guestAdvertisementModal.current;
-            if (modal) { modal.close(); }
-            setShowGuestForm(true);
-        }
+    const calcShipping = () => {
+        const { boxesQty, shippingCost } = calcShippingCost({ itemQty: quantity });
+        setBoxQty(boxesQty);
+        setShippingCost(shippingCost);
+        return shippingCost;
     };
 
-    /**
-     * Creates an order and initiates payment process
-     * Validates that an address is selected before proceeding
-     */
+    useEffect(() => {
+        if (!data) return;
+
+        const shipping = calcShipping();
+        const subtotal = parseFloat(data.product_version.unit_price) * quantity;
+        const discountValue = data.isOffer && data.product_version.unit_price_with_discount
+            ? parseFloat(data.product_version.unit_price_with_discount) * quantity
+            : 0;
+
+        const ivaCalc = subtotal * IVA;
+        const subtotalBefore = subtotal - ivaCalc;
+        const subtotalWithDiscount = subtotal - discountValue;
+        const totalCalc = subtotalWithDiscount + shipping;
+
+        setSubtotalWithDisc(subtotalWithDiscount);
+        setSubtotalBeforeIva(subtotalBefore);
+        setDiscount(discountValue);
+        setIva(ivaCalc);
+        setTotal(totalCalc);
+    }, [data, quantity]);
+
+    useEffect(() => {
+        calcShipping();
+    }, [quantity]);
+
+
+    // ============================================================================
+    // Guards (DESPUÉS de todos los hooks)
+    // ============================================================================
+
+    if (!buyNow) return <Navigate to="/" />;
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen">
+                <h1 className="text-2xl font-bold">
+                    Cargando<span className="loading loading-dots"></span>
+                </h1>
+                <h3 className="text-lg">
+                    Estamos cargando el item para realizar tu compra
+                </h3>
+            </div>
+        );
+    }
+
+    if (!data) throw new Error("No se pudo obtener la información del producto");
+    if (order) return <Navigate to="/pagar-productos" />;
+    if (error) {
+        return (
+            <div className="h-screen">
+                <h1>Ocurrio un error inesperado</h1>
+                <h3>No pudimos obtener la información del producto</h3>
+                <button onClick={() => refetch()} className="btn btn-primary w-fit">Intentar de nuevo</button>
+            </div>
+        )
+    }
+
+    // ============================================================================
+    // Handlers
+    // ============================================================================
+
+    const handleSetSelectedAddress = (selected: CustomerAddressType) => {
+        setSelectedAddress(selected);
+    };
+
+    const modalResponse = (response: boolean) => {
+        if (!response) return;
+        guestAdvertisementModal.current?.close();
+        setShowGuestForm(true);
+    };
+
     const handleCreateOrder = async () => {
         if (!selectedAddress) {
             showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
             return;
         }
 
-        if (selectedAddress) {
-            const products: PaymentShoppingCart[] = selectedProducts.map(item => {
-                return {
-                    product: item.product_version.sku,
-                    quantity: item.quantity
-                }
-            });
-
-            await createOrder({
-                shopping_cart: products,
-                address: selectedAddress.uuid,
-                payment_method: paymentMethod,
-                coupon_code: couponCode || undefined
-            });
-        }
+        await createOrder({
+            shopping_cart: [{
+                product: data.product_version.sku,
+                quantity
+            }],
+            address: selectedAddress.uuid,
+            payment_method: paymentMethod,
+            coupon_code: couponCode || undefined
+        });
     };
 
-    const handleGuestAddressForm = (savedAddress: GuestFormType) => setGuestAddressForm(savedAddress);
-
-    const calcShipping = (): { boxesQty: number, shippingCost: number } => {
-        const totalItems = shoppingCart.reduce((acc, current) => { return acc + current.quantity }, 0);
-        const { boxesQty, shippingCost } = calcShippingCost({ itemQty: totalItems });
-        setBoxQty(boxesQty);
-        setShippingCost(shippingCost);
-        return { boxesQty, shippingCost };
+    const handleGuestAddressForm = (savedAddress: GuestFormType) => {
+        setGuestAddressForm(savedAddress);
     };
 
-    // ============================================================================
-    // Effects
-    // ============================================================================
+    const handleUpdateQuantity = (values: { sku: string, newQuantity: number }) => {
+        const newQuantity = values.newQuantity > data.product_version.stock ? data.product_version.stock : values.newQuantity;
+        setQuantity(newQuantity);
+    };
 
-    /** Set default address when addresses are loaded */
-    useEffect(() => {
-        if (!addresses) return;
-        const defaultAddress = addresses.data.find(data => data.default_address === true);
-        if (!defaultAddress) return;
-        setSelectedAddress(defaultAddress);
-    }, [addresses]);
-
-    useEffect(() => {
-        if (shoppingCart) {
-            const { shippingCost } = calcShipping();
-            /** Products that are checked/selected for purchase */
-            const onlyChecked = shoppingCart.filter(item => item.isChecked === true);
-
-            /** Subtotal including IVA (sum of all selected products) */
-            const subtotal = onlyChecked.reduce((acc, item) => {
-                const itemTotal = parseFloat(item.product_version.unit_price) * item.quantity;
-                return acc + itemTotal;
-            }, 0);
-
-            const discount = onlyChecked.reduce((acc, item) => {
-                if (item.isOffer && item.product_version.unit_price_with_discount) {
-                    return acc + (parseFloat(item.product_version.unit_price) - parseFloat(item.product_version.unit_price_with_discount)) * item.quantity;
-                } else {
-                    return acc;
-                }
-            }, 0);
-
-            const calcIva = subtotal * IVA;
-            const calcSubtotalBeforeIVA: number = subtotal - calcIva;
-            const subtotalWithDiscount = subtotal - discount;
-            const total: number = subtotalWithDiscount + shippingCost;
-
-            setSubtotalWithDisc(subtotalWithDiscount);
-            setSubtotalBeforeIva(calcSubtotalBeforeIVA);
-            setDiscount(discount);
-            setIva(calcIva);
-            setTotal(total);
-        }
-    }, [shoppingCart]);
-
-    /** Recalculate shipping cost when items or quantities change */
-    useEffect(() => { calcShipping(); }, [updateQty]);
-
-    // ============================================================================
-    // Render
-    // ============================================================================
 
     return (
-        <div className={clsx(
-            "w-full px-5 py-10 rounded-xl",
-            theme === "ligth" ? "bg-base-300" : "bg-slate-900"
-        )}>
-            <p className="text-3xl font-bold">Resumen del carrito</p>
+        <div className="w-full px-5 py-10 rounded-xl bg-base-300">
+            <p className="text-3xl font-bold">Comprar ahora</p>
 
             <section className="w-full flex mt-5">
                 {/* Left Column - Address & Products */}
                 <div className="w-3/4">
                     {/* Address Selection / Guest Form */}
                     {isAuth ? (
-                        <div className={clsx(
-                            "w-full px-5 py-7 rounded-xl",
-                            theme === "ligth" ? "bg-white" : "bg-slate-950"
-                        )}>
+                        <div className="w-full px-5 py-7 rounded-xl bg-base-100">
                             {/* Loading State */}
                             {addressesLoading && !addresses && !addressesError && "Cargando direcciones de envio..."}
 
@@ -298,7 +250,7 @@ const ShoppingCartResume = () => {
                             }
                         </div>
                     ) : (
-                        <div className="w-full bg-white rounded-xl px-5 py-10">
+                        <div className="w-full bg-base-100 rounded-xl px-5 py-10">
                             {/* Guest Checkout Form */}
                             {showGuestForm ? (
                                 <div className="w-full flex flex-col gap-5">
@@ -358,33 +310,23 @@ const ShoppingCartResume = () => {
                     )}
 
                     {/* Selected Products List */}
-                    <div className={clsx(
-                        "w-full flex flex-col gap-2 rounded-xl pt-5 pb-6 px-5 mt-5",
-                        theme === "ligth" ? "bg-white" : "bg-slate-950"
-                    )}>
-                        {selectedProducts.map((item, index) => (
-                            <ShoppingCartProductResume
-                                key={index}
-                                data={item}
-                                onToggleCheck={toogleCheck}
-                                onUpdateQty={updateQty}
-                                onRemoveItem={remove}
-                                isAuth={isAuth ?? false}
-                            />
-                        ))}
+                    <div className="w-full flex flex-col gap-2 rounded-xl pt-5 pb-6 px-5 mt-5 bg-base-100">
+                        <ShoppingCartProductResume
+                            data={data}
+                            isAuth={isAuth ?? false}
+                            onUpdateQty={handleUpdateQuantity}
+                        />
                         <div className="w-full border-t border-t-gray-300 pt-5">
-                            <p className="text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotalWithDisc.toString()), "es-MX")}</span> </p>
+                            <p className="text-xl text-right">{`Subtotal (1) producto: `}<span className="font-bold">${formatPrice((subtotalWithDisc.toString()), "es-MX")}</span> </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column - Price Summary & Payment */}
                 <div className="w-1/4 pl-4">
-                    <h2>Desglose</h2>
-                    <div className={clsx(
-                        "w-full p-5 rounded-xl mt-2",
-                        theme === "ligth" ? "bg-white" : "bg-slate-950"
-                    )}>
+                    <div className="w-full p-5 rounded-xl bg-base-100">
+                        <h2 className="pb-2">Desglose</h2>
+
                         {/* Price Breakdown */}
                         <div className="w-full flex flex-col gap-2 border-b border-b-gray-400 pb-5">
                             <div className="text-xl flex">
@@ -447,16 +389,6 @@ const ShoppingCartResume = () => {
                                         )}>Pagos con tarjetas de crédito, debito, OXXO, MSI y mas...</p>
                                     </div>
                                 </div>
-                                {/* PayPal - Commented out */}
-                                {/* <div className="w-full flex items-center gap-5">
-                                    <input type="radio" name="payment_method" id="" className="radio radio-primary" onClick={() => setPaymentMethod("paypal")} />
-                                    <div className="relative w-full">
-                                        <button className="cursor-pointer mb-6">
-                                            <p className="flex items-center gap-2 text-blue-500 font-bold text-xl"><FaCcPaypal className="text-5xl" />Paypal</p>
-                                        </button>
-                                        <p className="text-sm text-primary absolute bottom-0">Pagos con tarjetas de crédito y debito</p>
-                                    </div>
-                                </div> */}
                             </div>
 
                             {/* Proceed to Payment Button */}
@@ -480,4 +412,4 @@ const ShoppingCartResume = () => {
     );
 };
 
-export default ShoppingCartResume;
+export default BuyNow;
