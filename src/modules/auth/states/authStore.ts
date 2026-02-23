@@ -1,20 +1,23 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { getCustomerProfile, login, logout } from "../services/authServices";
+import { getCustomerProfile, login, logout, loginWithGoogle } from "../services/authServices";
 import type { AuthCustomerCredentialsType, CustomerPayloadType } from "../AuthTypes";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { formatAxiosError } from "../../../api/helpers";
 
 type AuthenticationState = {
+    sessionId: string | null;
     authCustomer: CustomerPayloadType | null;
     csrfToken: string | null;
     isAuth: boolean;
     isLoading: boolean;
     error: string | null;
     login: (dto: AuthCustomerCredentialsType) => Promise<void>;
+    loginWithGoogle: (id_token: string) => Promise<void>;
     logout: () => Promise<string>;
     getProfile: () => Promise<void>;
     clearError: () => void;
+    generateSesionId: () => string;
 };
 export const AUTH_CUSTOMER_KEY = "auth-customer-storage";
 
@@ -26,11 +29,21 @@ export const useAuthStore = create<AuthenticationState>()(
             isLoading: false,
             error: null,
             csrfToken: null,
+            sessionId: null,
 
             login: async (data: AuthCustomerCredentialsType) => {
                 try {
                     const response = await login(data);
                     set({ authCustomer: response.payload, isAuth: true, csrfToken: response.csrfToken });
+                } catch (error) {
+                    set({ authCustomer: null, isAuth: false, error: formatAxiosError(error), });
+                }
+            },
+
+            loginWithGoogle: async (id_token: string) => {
+                try {
+                    const response = await loginWithGoogle({ id_token });
+                    set({ authCustomer: response.payload, isAuth: true, csrfToken: response.csrfToken, error: null });
                 } catch (error) {
                     set({ authCustomer: null, isAuth: false, error: formatAxiosError(error), });
                 }
@@ -43,6 +56,7 @@ export const useAuthStore = create<AuthenticationState>()(
                         authCustomer: null,
                         isAuth: false,
                         csrfToken: null,
+                        sessionId: null
                     });
                     await localStorage.removeItem(AUTH_CUSTOMER_KEY);
                     return response;
@@ -76,17 +90,23 @@ export const useAuthStore = create<AuthenticationState>()(
             },
             clearError: async () => {
                 set({ error: null })
+            },
+
+            generateSesionId: () => {
+                const sessionId = crypto.randomUUID();
+                set({ sessionId: sessionId })
+                return sessionId;
             }
 
         }),
         {
             name: AUTH_CUSTOMER_KEY,
             storage: createJSONStorage(() => localStorage),
-            // ⭐ CRÍTICO: Solo persiste estos campos
             partialize: (state) => ({
                 authCustomer: state.authCustomer,
                 csrfToken: state.csrfToken,
                 isAuth: state.isAuth,
+                sessionId: state.sessionId
             }),
             version: 1,
             migrate: (persistedState: any, version: number) => {

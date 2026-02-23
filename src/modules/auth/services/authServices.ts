@@ -1,9 +1,15 @@
-import type { AuthCustomerCredentialsType, AuthenticatedCustomerType, NewCustomerType } from "../AuthTypes";
+import type { AuthCustomerCredentialsType, AuthenticatedCustomerType, NewCustomerWithToken, RestorePasswordPublicDTO } from "../AuthTypes";
 import api from "../../../api/api.config";
 
 
 export const login = async (credentials: AuthCustomerCredentialsType): Promise<AuthenticatedCustomerType> => {
     const { data } = await api.post<AuthenticatedCustomerType>("/customer-auth/login", credentials);
+    return data;
+};
+
+
+export const loginWithGoogle = async ({ id_token }: { id_token: string }): Promise<AuthenticatedCustomerType> => {
+    const { data } = await api.post<AuthenticatedCustomerType>("/customer-auth/login/google", { id_token });
     return data;
 };
 
@@ -14,13 +20,43 @@ export const logout = async () => {
 };
 
 
-export const registerCustomer = async (dto: NewCustomerType): Promise<string> => {
+export const registerCustomer = async (dto: NewCustomerWithToken): Promise<string> => {
     const { data } = await api.post<string>("/customer", dto);
     return data;
 };
-
 
 export const getCustomerProfile = async (): Promise<AuthenticatedCustomerType> => {
     const { data } = await api.get<AuthenticatedCustomerType>("/customer-auth/profile");
     return data;
 };
+
+export const sendVerificationToken = async ({ sessionId, email }: { sessionId: string, email: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/send/verification-token", { sessionId, email });
+    return data;
+};
+
+export const resendVerificationToken = async ({ sessionId, email }: { sessionId: string, email: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/resend/verification-token", { sessionId, email });
+    return data;
+};
+
+export const sendRestorePasswordToken = async ({ sessionId, email }: { sessionId: string, email: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/send/restore-password-token", { sessionId, email });
+    return data;
+};
+
+export const validateRestorePasswordToken = async ({ sessionId, restorePasswordToken, email }: { sessionId: string, restorePasswordToken: string, email: string }): Promise<boolean> => {
+    const { data } = await api.post<boolean>("/customer-auth/validate/restore-password-token", { sessionId, restorePasswordToken, email });
+    return data;
+};
+
+export const resendRestorePasswordToken = async ({ sessionId, email }: { sessionId: string, email: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/resend/restore-password-token", { sessionId, email });
+    return data;
+};
+
+export const restorePasswordPublic = async (dto: RestorePasswordPublicDTO): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/restore-password/public", dto);
+    return data;
+};
+

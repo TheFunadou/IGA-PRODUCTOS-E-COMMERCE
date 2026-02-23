@@ -8,7 +8,7 @@ import ProductVersionCardSkinnySkeleton from "../../products/components/ProductV
 import { useAuthStore } from "../../auth/states/authStore";
 import PaginationComponent from "../../../global/components/PaginationComponent";
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
-import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
+import ProductVersionCard from "../../products/components/ProductVersionCard";
 import { useCategories } from "../../categories/hooks/useCategories";
 import { useSearchParams } from "react-router-dom";
 import { useThemeStore } from "../../../layouts/states/themeStore";
@@ -228,7 +228,7 @@ const Shop = () => {
                             <div className="w-full grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-1 md:gap-5 mt-5">
                                 {pvCards && pvCards.data && pvCards.data.length > 0 ? (
                                     pvCards.data.map((data, index) => (
-                                        <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} className="w-75 md:h-135" versionData={data} />
+                                        <ProductVersionCard key={`${index}-${data.product_version.sku}`} className="w-75 md:h-135" versionData={data} />
                                     ))
                                 ) : (
                                     <p className="text-gray-500 py-5 text-center w-full">No hay productos disponibles.</p>

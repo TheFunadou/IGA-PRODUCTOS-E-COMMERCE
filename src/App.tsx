@@ -41,6 +41,11 @@ import Orders from "./modules/orders/design/Orders"
 import OrderDetail from "./modules/orders/design/OrderDetail"
 import PaymentError from "./modules/payments/design/PaymentError"
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import RestorePassword from "./modules/auth/design/RestorePassword"
+
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,14 +59,18 @@ const queryClient = new QueryClient({
 // Wrapper para los providers
 function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-      <ThemeProvider>
-        <TriggerAlertProvider>
-          <Outlet />
-        </TriggerAlertProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "TU_CLAVE_DE_SITIO_RECAPTCHA"}>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "TU_CLIENT_ID_DE_GOOGLE"}>
+        <QueryClientProvider client={queryClient}>
+          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+          <ThemeProvider>
+            <TriggerAlertProvider>
+              <Outlet />
+            </TriggerAlertProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </GoogleOAuthProvider>
+    </GoogleReCaptchaProvider>
   )
 }
 
@@ -88,6 +97,7 @@ const router = createBrowserRouter([
           // Auth
           { path: "/iniciar-sesion", element: <Login /> },
           { path: "/nueva-cuenta", element: <CreateAccount /> },
+          { path: "/restablecer-contraseña", element: <RestorePassword /> },
 
           // Home
           { path: "/", element: <Home /> },

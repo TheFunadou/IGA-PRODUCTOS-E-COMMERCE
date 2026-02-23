@@ -8,7 +8,7 @@ import ImageMagnifier from "../components/ImageMagnifier";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import { useFavorite } from "../hooks/useProductFavorites";
 import { useFetchAds } from "../../../layouts/hooks/useAds";
-import ProductVersionCardShop from "../components/ProductVersionCardShop";
+import ProductVersionCard from "../components/ProductVersionCard";
 import type { AddPVReviewType, ProductVersionCardType } from "../ProductTypes";
 import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
 import { FaCircleUser, FaFire } from "react-icons/fa6";
@@ -735,7 +735,7 @@ const ProductDetail = () => {
                 {!adsLoading && !adsError && ads && (
                     <OverflowXComponent className="mt-5 gap-20" >
                         {ads && ads.map((data, index) => (
-                            <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} versionData={data} className="flex-shrink-0" />
+                            <ProductVersionCard key={`${index}-${data.product_version.sku}`} versionData={data} className="flex-shrink-0" />
                         ))}
                     </OverflowXComponent>
                 )}

@@ -10,7 +10,7 @@ import ProductVersionCardSkinnySkeleton from "../../products/components/ProductV
 import { useFetchAds } from "../../../layouts/hooks/useAds";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import clsx from "clsx";
-import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
+import ProductVersionCard from "../../products/components/ProductVersionCard";
 import { useEffect, useState } from "react";
 import { useShoppingCart } from "../hooks/useShoppingCart";
 import { useFetchCustomerFavorites } from "../../customers/hooks/useCustomer";
@@ -191,7 +191,7 @@ const ShoppingCart = () => {
                                 {!isLoadingFavorites && !favoritesError && favorites && favorites.data.length > 0 && (
                                     <div className="flex flex-wrap gap-3 md:gap-5">
                                         {favorites.data.map((data, index) => (
-                                            <ProductVersionCardShop key={index} versionData={data} />
+                                            <ProductVersionCard key={index} versionData={data} />
                                         ))}
                                     </div>
                                 )}

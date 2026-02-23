@@ -31,7 +31,7 @@ const MainLayout = () => {
     const { shoppingCart: authShoppingCart } = useShoppingCart();
     const searchResultsRef = useRef<HTMLDivElement>(null);
     const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
-    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer, generateSesionId, sessionId } = useAuthStore();
     const { items: localShoppingCart } = useShoppingCartStore();
     const [showShopMenuPreview, setShowShopMenuPreview] = useState<boolean>(false);
     const hideTimeoutRef = useRef<number | null>(null);
@@ -44,7 +44,7 @@ const MainLayout = () => {
     const handleLogout = async () => {
         try {
             setLoading(true);
-            await logout();
+            await logout().then(() => navigate("/"));
         } catch (error) {
             console.error(error);
         } finally {
@@ -71,6 +71,8 @@ const MainLayout = () => {
         setShowShopMenuPreview(true);
     };
 
+    const handleLoadCustomerData = async () => await getProfile();
+
 
     const handleSearchNavigate = (args: { category: string, productName: string, color: string, sku: string }) => {
         addSearch(`${args.productName.toUpperCase()}`);
@@ -90,8 +92,8 @@ const MainLayout = () => {
 
     // load customer profile
     useEffect(() => {
-        const loadCustomerData = async () => { await getProfile(); }
-        if (isAuth && !authCustomer) loadCustomerData;
+        if (isAuth && !authCustomer) handleLoadCustomerData();
+        if (!isAuth && !authCustomer && !sessionId) generateSesionId();
     }, []);
 
     // Close the search container when the location changed
@@ -180,9 +182,9 @@ const MainLayout = () => {
                         <div
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={scheduleHide}
-                            className="hidden md:flex"
+                            className="hidden md:flex relative h-full items-center"
                         >
-                            <Link to={"/tienda"}>Tienda</Link>
+                            <Link to={"/tienda"} className="h-full flex items-center">Tienda</Link>
                             {showShopMenuPreview && <ShopMenuPreview onScheduleHide={scheduleHide} />}
                         </div>
                         <Link to={"/acerca-de-iga"}>Acerca de IGA</Link>
@@ -225,6 +227,11 @@ const MainLayout = () => {
 
                 </div>
             </div>
+            {authCustomer && !authCustomer.verified && (
+                <div className="bg-warning text-center p-3">
+                    <div>Tu correo electrónico no ha sido verificado, por favor <span><Link to="/verificar-correo" className="underline text-primary">realiza tu verificación para poder realizar tus compras aqui.</Link></span></div>
+                </div>
+            )}
 
             <main className={`w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat`}>
                 <Outlet />

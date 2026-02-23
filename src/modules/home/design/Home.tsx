@@ -1,7 +1,7 @@
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
 import { useFetchAds } from "../../../layouts/hooks/useAds";
-import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
+import ProductVersionCard from "../../products/components/ProductVersionCard";
 import Carousel from "../components/Carousel";
 import PaymentMethodsImgsJSON from "../json/PaymentMethodsCarouselImgs.json";
 import IMG1 from "../../../assets/expo/IMG-1.webp";
@@ -193,7 +193,7 @@ const Home = () => {
                     {!isLoading && !error && data && (
                         <div className="w-full grid grid-cols-2 md:flex md:flex-wrap md:gap-10 mt-5">
                             {data.map((data, index) => (
-                                <ProductVersionCardShop key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
+                                <ProductVersionCard key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
                             ))}
                         </div>
                     )}

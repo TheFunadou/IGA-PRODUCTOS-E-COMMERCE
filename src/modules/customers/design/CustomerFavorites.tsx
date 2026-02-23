@@ -1,4 +1,4 @@
-import ProductVersionCardShop from "../../products/components/ProductVersionCardShop";
+import ProductVersionCard from "../../products/components/ProductVersionCard";
 import { useFetchCustomerFavorites } from "../hooks/useCustomer";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { Link, useSearchParams } from "react-router-dom";
@@ -36,7 +36,7 @@ const CustomerFavorites = () => {
                     )}
                     {!isLoading && !error && favorites && favorites.data.length > 0 && favorites.data.map((data, index) => (
                         <div>
-                            <ProductVersionCardShop key={`${index}-${data.product_version.sku}`} versionData={data} />
+                            <ProductVersionCard key={`${index}-${data.product_version.sku}`} versionData={data} />
                             {favorites.totalPages > 1 && (
                                 <div className="mt-5"><PaginationComponent currentPage={Number(pageParam) || 1} onPageChange={handlePageChange} totalPages={favorites.totalPages} /></div>
                             )}

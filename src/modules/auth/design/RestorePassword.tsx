@@ -1,23 +1,31 @@
-import IGALogo from "../../../assets/logo/IGA-LOGO.webp"
-import IMG1 from "../../../assets/info/IMG1.webp"
-import IMG2 from "../../../assets/info/IMG2.webp"
-import IMG3 from "../../../assets/info/IMG3.webp"
-import IMG4 from "../../../assets/info/IMG4.webp"
-import { Link, useNavigate } from "react-router-dom"
-import { useForm, type SubmitHandler } from "react-hook-form"
-import type { NewCustomerType } from "../AuthTypes"
-import { useEffect, useRef, useState } from "react"
-import { stringStrengthEvaluator } from "../helpers"
-import clsx from "clsx"
-import { useAuthStore } from "../states/authStore"
-import { useSendVerificationToken, useRegisterCustomer, useResendVerificationToken } from "../useAuth"
+import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
+import IMG1 from "../../../assets/info/IMG1.webp";
+import IMG2 from "../../../assets/info/IMG2.webp";
+import IMG3 from "../../../assets/info/IMG3.webp";
+import IMG4 from "../../../assets/info/IMG4.webp";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import clsx from "clsx";
+
+import { useAuthStore } from "../states/authStore";
+import { stringStrengthEvaluator } from "../helpers";
+import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+import { formatAxiosError } from "../../../api/helpers";
+import {
+    sendRestorePasswordToken,
+    validateRestorePasswordToken,
+    resendRestorePasswordToken,
+    restorePasswordPublic
+} from "../services/authServices";
 
 /* ─────────────────────────────────────────────
    types
 ───────────────────────────────────────────── */
-type VerificationFormType = {
-    verificationToken: string;
-};
+type EmailFormType = { email: string };
+type VerificationFormType = { restorePasswordToken: string };
+type PasswordFormType = { newPassword: string; confirm_password: string };
 
 /* ─────────────────────────────────────────────
    constants
@@ -27,15 +35,7 @@ const COUNTDOWN_SECONDS = 5 * 60;
 /* ─────────────────────────────────────────────
    Sub: Field wrapper reutilizable
 ───────────────────────────────────────────── */
-function Field({
-    label,
-    error,
-    children,
-}: {
-    label: string;
-    error?: string;
-    children: React.ReactNode;
-}) {
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode; }) {
     return (
         <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-slate-600 tracking-wide">
@@ -112,36 +112,38 @@ function PasswordStrengthBar({ strength }: { strength: number }) {
 /* ─────────────────────────────────────────────
    Sub: Steps
 ───────────────────────────────────────────── */
-function StepIndicator({ step }: { step: 1 | 2 }) {
+function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
     return (
         <div className="flex items-center mb-8">
+            {/* Step 1 */}
             <div className="flex items-center gap-2">
-                <span
-                    className={clsx(
-                        "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all",
-                        step === 1 ? "bg-primary text-white" : "bg-green-500 text-white"
-                    )}
-                >
+                <span className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all", step === 1 ? "bg-primary text-white" : "bg-green-500 text-white")}>
                     {step > 1 ? "✓" : "1"}
                 </span>
-                <span className={clsx("text-[11px] font-medium", step === 1 ? "text-primary" : "text-slate-400")}>
-                    Datos personales
+                <span className={clsx("text-[11px] font-medium hidden sm:block", step === 1 ? "text-primary" : "text-slate-400")}>
+                    Datos
                 </span>
             </div>
+            <div className={clsx("flex-1 h-[1.5px] mx-2 min-w-4 transition-colors duration-300", step > 1 ? "bg-green-500" : "bg-slate-200")} />
 
-            <div className={clsx("flex-1 h-[1.5px] mx-3 min-w-8 transition-colors duration-300", step > 1 ? "bg-green-500" : "bg-slate-200")} />
-
+            {/* Step 2 */}
             <div className="flex items-center gap-2">
-                <span
-                    className={clsx(
-                        "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold border transition-all",
-                        step === 2 ? "bg-blue-600 text-white border-transparent" : "bg-white text-slate-400 border-slate-200"
-                    )}
-                >
-                    2
+                <span className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold border transition-all", step === 2 ? "bg-blue-600 text-white border-transparent" : step > 2 ? "bg-green-500 text-white border-transparent" : "bg-white text-slate-400 border-slate-200")}>
+                    {step > 2 ? "✓" : "2"}
                 </span>
-                <span className={clsx("text-[11px] font-medium", step === 2 ? "text-blue-600" : "text-slate-400")}>
+                <span className={clsx("text-[11px] font-medium hidden sm:block", step === 2 ? "text-blue-600" : "text-slate-400")}>
                     Verificación
+                </span>
+            </div>
+            <div className={clsx("flex-1 h-[1.5px] mx-2 min-w-4 transition-colors duration-300", step > 2 ? "bg-green-500" : "bg-slate-200")} />
+
+            {/* Step 3 */}
+            <div className="flex items-center gap-2">
+                <span className={clsx("w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold border transition-all", step === 3 ? "bg-blue-600 text-white border-transparent" : "bg-white text-slate-400 border-slate-200")}>
+                    3
+                </span>
+                <span className={clsx("text-[11px] font-medium hidden sm:block", step === 3 ? "text-blue-600" : "text-slate-400")}>
+                    Modificar
                 </span>
             </div>
         </div>
@@ -196,56 +198,104 @@ function Spinner({ dark = false }: { dark?: boolean }) {
 /* ─────────────────────────────────────────────
    Componente principal
 ───────────────────────────────────────────── */
-const CreateAccount = () => {
-    const { isAuth, authCustomer, sessionId, generateSesionId } = useAuthStore();
+const RestorePassword = () => {
+    const { isAuth, sessionId } = useAuthStore();
     const navigate = useNavigate();
+    const { showTriggerAlert } = useTriggerAlert();
 
-    const sendTokenMutation = useSendVerificationToken();
-    const registerMutation = useRegisterCustomer();
-    const resendTokenMutation = useResendVerificationToken();
+    const [step, setStep] = useState<1 | 2 | 3>(1);
+    const [emailTarget, setEmailTarget] = useState<string>("");
+    const [validToken, setValidToken] = useState<string>("");
 
-    const [step, setStep] = useState<1 | 2>(1);
-    const [formData, setFormData] = useState<NewCustomerType | null>(null);
     const [canResend, setCanResend] = useState(false);
     const [countdownKey, setCountdownKey] = useState(0);
     const [passwordStrength, setPasswordStrength] = useState(0);
 
-    const { register, handleSubmit, formState: { errors }, watch } = useForm<NewCustomerType>();
-    const {
-        register: registerV,
-        handleSubmit: handleSubmitV,
-        formState: { errors: errorsV },
-        reset: resetVerification,
-    } = useForm<VerificationFormType>();
+    // Form Steps setups
+    const { register: regEmail, handleSubmit: handleEmail, formState: { errors: errEmail } } = useForm<EmailFormType>();
+    const { register: regToken, handleSubmit: handleToken, formState: { errors: errToken }, reset: resetToken } = useForm<VerificationFormType>();
+    const { register: regPwd, handleSubmit: handlePwd, formState: { errors: errPwd }, watch: watchPwd } = useForm<PasswordFormType>();
 
     if (isAuth) navigate("/");
 
+    // Strength updater
     useEffect(() => {
-        const sub = watch((v) => {
-            setPasswordStrength(v.password ? stringStrengthEvaluator(v.password) : 0);
+        const sub = watchPwd((v) => {
+            setPasswordStrength(v.newPassword ? stringStrengthEvaluator(v.newPassword) : 0);
         });
         return () => sub.unsubscribe();
-    }, [watch]);
+    }, [watchPwd]);
 
-    const onSubmitStep1: SubmitHandler<NewCustomerType> = async (data) => {
-        setFormData(data);
-        await sendTokenMutation.mutateAsync({ email: data.email });
-        setStep(2); setCanResend(false); setCountdownKey((k) => k + 1);
+    // Mutations
+    const sendTokenMut = useMutation({
+        mutationFn: async (mail: string) => await sendRestorePasswordToken({ sessionId: sessionId!, email: mail }),
+        onSuccess: (_, mail) => {
+            setEmailTarget(mail);
+            setStep(2);
+            setCanResend(false);
+            setCountdownKey(k => k + 1);
+            showTriggerAlert("Successfull", "Se ha enviado un código a tu correo electrónico", { duration: 3000 });
+        },
+        onError: (err) => showTriggerAlert("Error", formatAxiosError(err), { duration: 3000 })
+    });
+
+    const validateTokenMut = useMutation({
+        mutationFn: async (tk: string) => {
+            const isValid = await validateRestorePasswordToken({ sessionId: sessionId!, email: emailTarget, restorePasswordToken: tk });
+            return { tk, isValid };
+        },
+        onSuccess: ({ tk, isValid }) => {
+            if (isValid) {
+                setValidToken(tk);
+                setStep(3);
+            } else {
+                showTriggerAlert("Error", "El código es inválido", { duration: 3000 });
+            }
+        },
+        onError: (err) => showTriggerAlert("Error", formatAxiosError(err), { duration: 3000 })
+    });
+
+    const resendTokenMut = useMutation({
+        mutationFn: async () => await resendRestorePasswordToken({ sessionId: sessionId!, email: emailTarget }),
+        onSuccess: () => {
+            showTriggerAlert("Successfull", "Se ha reenviado tu código", { duration: 3000 });
+            setCanResend(false);
+            setCountdownKey(k => k + 1);
+        },
+        onError: (err) => showTriggerAlert("Error", formatAxiosError(err), { duration: 3000 })
+    });
+
+    const restorePwdMut = useMutation({
+        mutationFn: async (data: PasswordFormType) => await restorePasswordPublic({
+            email: emailTarget,
+            restorePasswordToken: validToken,
+            sessionId: sessionId!,
+            newPassword: data.newPassword,
+            confirmNewPassword: data.confirm_password
+        }),
+        onSuccess: () => {
+            showTriggerAlert("Successfull", "Tu contraseña se ha actualizado exitosamente. Inicia sesión.", { duration: 4000 });
+            navigate("/iniciar-sesion");
+        },
+        onError: (err) => showTriggerAlert("Error", formatAxiosError(err), { duration: 3000 })
+    });
+
+    const onSubmitStep1: SubmitHandler<EmailFormType> = async (data) => {
+        await sendTokenMut.mutateAsync(data.email);
     };
 
-    const onSubmitStep2: SubmitHandler<VerificationFormType> = async ({ verificationToken }) => {
-        if (!formData) return;
-        try {
-            await registerMutation.mutateAsync({ dto: formData, verificationToken });
-            navigate("/iniciar-sesion");
-        } catch { /* manejado por hook */ }
+    const onSubmitStep2: SubmitHandler<VerificationFormType> = async (data) => {
+        await validateTokenMut.mutateAsync(data.restorePasswordToken);
+    };
+
+    const onSubmitStep3: SubmitHandler<PasswordFormType> = async (data) => {
+        await restorePwdMut.mutateAsync(data);
     };
 
     const handleResend = async () => {
-        if (!formData) return;
-        resetVerification();
-        await resendTokenMutation.mutateAsync({ email: formData.email });
-        setCanResend(false); setCountdownKey((k) => k + 1);
+        if (!emailTarget) return;
+        resetToken();
+        await resendTokenMut.mutateAsync();
     };
 
     const trustItems = [
@@ -282,8 +332,8 @@ const CreateAccount = () => {
                     {/* Headline editorial */}
                     <h1 className="relative z-10 mt-10 text-[2.1rem] leading-[1.18] font-normal
             text-white tracking-[-0.01em] font-serif">
-                        Crea tu cuenta y disfruta una experiencia de compra{" "}
-                        <em className=" text-blue-300 font-serif">sin complicaciones.</em>
+                        Recupera el acceso a tu cuenta{" "}
+                        <em className=" text-blue-300 font-serif">fácil y rápido.</em>
                     </h1>
 
                     {/* Trust badges */}
@@ -319,43 +369,16 @@ const CreateAccount = () => {
                     {step === 1 && (
                         <>
                             <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
-                                Crear cuenta
+                                Recuperar cuenta
                             </h2>
                             <p className="text-[0.82rem] text-slate-400 mb-6 leading-relaxed">
-                                Completa tus datos para empezar a comprar.
+                                Ingresa el correo asociado a tu cuenta para continuar.
                             </p>
 
-                            <form onSubmit={handleSubmit(onSubmitStep1)} className="flex flex-col gap-4">
-
-                                {/* Nombre + Apellidos */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Field label="Nombre" error={errors.name?.message}>
-                                        <input
-                                            {...register("name", {
-                                                required: "Campo requerido",
-                                                pattern: { value: /^[a-zA-ZÀ-ÿ ]+$/, message: "Solo letras" },
-                                            })}
-                                            id="name" type="text" placeholder="Tu nombre"
-                                            className={inputCls(!!errors.name)}
-                                        />
-                                    </Field>
-
-                                    <Field label="Apellidos" error={errors.last_name?.message}>
-                                        <input
-                                            {...register("last_name", {
-                                                required: "Campo requerido",
-                                                pattern: { value: /^[a-zA-ZÀ-ÿ ]+$/, message: "Solo letras" },
-                                            })}
-                                            id="last_name" type="text" placeholder="Tus apellidos"
-                                            className={inputCls(!!errors.last_name)}
-                                        />
-                                    </Field>
-                                </div>
-
-                                {/* Correo */}
-                                <Field label="Correo electrónico" error={errors.email?.message}>
+                            <form onSubmit={handleEmail(onSubmitStep1)} className="flex flex-col gap-4">
+                                <Field label="Correo electrónico" error={errEmail.email?.message}>
                                     <input
-                                        {...register("email", {
+                                        {...regEmail("email", {
                                             required: "Campo requerido",
                                             pattern: {
                                                 value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -363,42 +386,17 @@ const CreateAccount = () => {
                                             },
                                         })}
                                         id="email" type="email" placeholder="correo@ejemplo.com"
-                                        className={inputCls(!!errors.email)}
-                                    />
-                                </Field>
-                                {/* Contraseña */}
-                                <Field label="Contraseña" error={errors.password?.message}>
-                                    <input
-                                        {...register("password", {
-                                            required: "Campo requerido",
-                                            validate: (v) =>
-                                                stringStrengthEvaluator(v) >= 55 || "Ingresa una contraseña más segura",
-                                        })}
-                                        id="password" type="password" placeholder="Mínimo 8 caracteres"
-                                        className={inputCls(!!errors.password)}
-                                    />
-                                    <PasswordStrengthBar strength={passwordStrength} />
-                                </Field>
-
-                                {/* Confirmar contraseña */}
-                                <Field label="Confirmar contraseña" error={errors.confirm_password?.message}>
-                                    <input
-                                        {...register("confirm_password", {
-                                            required: "Campo requerido",
-                                            validate: (v) => v === watch("password") || "Las contraseñas no coinciden",
-                                        })}
-                                        id="confirm_password" type="password" placeholder="Repite tu contraseña"
-                                        className={inputCls(!!errors.confirm_password)}
+                                        className={inputCls(!!errEmail.email)}
                                     />
                                 </Field>
 
                                 <button
                                     type="submit"
-                                    disabled={sendTokenMutation.isPending}
+                                    disabled={sendTokenMut.isPending}
                                     aria-label="Continuar al paso de verificación"
                                     className={btnPrimary}
                                 >
-                                    {sendTokenMutation.isPending
+                                    {sendTokenMut.isPending
                                         ? <><Spinner /> Enviando código…</>
                                         : "Continuar →"}
                                 </button>
@@ -410,21 +408,14 @@ const CreateAccount = () => {
                                     to="/iniciar-sesion"
                                     className="text-[0.80rem] font-medium text-blue-600 hover:text-blue-700 hover:underline"
                                 >
-                                    ¿Ya tienes una cuenta? Inicia sesión
+                                    Volver al inicio de sesión
                                 </Link>
                                 <Link
-                                    to="/recuperar-contraseña"
+                                    to="/nueva-cuenta"
                                     className="text-[0.80rem] font-medium text-blue-600 hover:text-blue-700 hover:underline"
                                 >
-                                    ¿Olvidaste tu contraseña? Recupérala
+                                    ¿Aún no tienes cuenta? Regístrate
                                 </Link>
-                                <p className="mt-1 text-[0.70rem] text-slate-400 leading-relaxed">
-                                    Al continuar, aceptas la{" "}
-                                    <a href="/privacidad" className="text-slate-500 underline">política de privacidad</a>
-                                    {" "}y los{" "}
-                                    <a href="/terminos" className="text-slate-500 underline">términos y condiciones</a>
-                                    {" "}de IGA Productos.
-                                </p>
                             </div>
                         </>
                     )}
@@ -433,23 +424,21 @@ const CreateAccount = () => {
                     {step === 2 && (
                         <>
                             <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
-                                Verifica tu correo
+                                Verifica tu identidad
                             </h2>
                             <p className="text-[0.82rem] text-slate-400 mb-4 leading-relaxed">
-                                Te enviamos un código de 6 dígitos a:
+                                Ingresa el código de 6 dígitos enviado a tu correo.
                             </p>
 
-                            {/* Badge email */}
                             <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200/60
                 rounded-md px-3 py-2 mb-5 text-[0.80rem] font-medium text-blue-700 break-all">
                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
                                     <rect x="1" y="3" width="14" height="10" rx="2" stroke="#1d4ed8" strokeWidth="1.5" />
                                     <path d="M1 5l7 5 7-5" stroke="#1d4ed8" strokeWidth="1.5" strokeLinecap="round" />
                                 </svg>
-                                {formData?.email}
+                                {emailTarget}
                             </div>
 
-                            {/* Timer */}
                             <div className="flex items-center justify-between bg-slate-50 border border-slate-200
                 rounded-md px-4 py-3 mb-5">
                                 <span className="text-[0.75rem] font-medium text-slate-500">
@@ -462,20 +451,20 @@ const CreateAccount = () => {
                                 />
                             </div>
 
-                            <form onSubmit={handleSubmitV(onSubmitStep2)} className="flex flex-col gap-4">
-                                <Field label="Código de verificación" error={errorsV.verificationToken?.message}>
+                            <form onSubmit={handleToken(onSubmitStep2)} className="flex flex-col gap-4">
+                                <Field label="Código de recuperación" error={errToken.restorePasswordToken?.message}>
                                     <input
-                                        {...registerV("verificationToken", {
+                                        {...regToken("restorePasswordToken", {
                                             required: "El código es requerido",
                                             minLength: { value: 6, message: "Debe tener al menos 6 caracteres" },
                                         })}
-                                        id="verificationToken"
+                                        id="restorePasswordToken"
                                         type="text"
                                         placeholder="000000"
                                         maxLength={8}
                                         autoComplete="one-time-code"
                                         className={clsx(
-                                            inputCls(!!errorsV.verificationToken),
+                                            inputCls(!!errToken.restorePasswordToken),
                                             "text-center tracking-[0.35em] text-xl font-semibold h-[52px] tabular-nums"
                                         )}
                                     />
@@ -483,36 +472,33 @@ const CreateAccount = () => {
 
                                 <button
                                     type="submit"
-                                    disabled={registerMutation.isPending}
-                                    aria-label="Confirmar código y crear cuenta"
+                                    disabled={validateTokenMut.isPending}
+                                    aria-label="Confirmar código y proceder"
                                     className={btnPrimary}
                                 >
-                                    {registerMutation.isPending
+                                    {validateTokenMut.isPending
                                         ? <><Spinner /> Verificando…</>
-                                        : "Confirmar y crear cuenta"}
+                                        : "Validar código →"}
                                 </button>
                             </form>
 
-                            {/* Reenviar */}
                             <div className="mt-3 flex items-center justify-between">
                                 <span className="text-[0.78rem] text-slate-400">¿No recibiste el código?</span>
                                 <button
                                     type="button"
-                                    disabled={!canResend || sendTokenMutation.isPending}
+                                    disabled={!canResend || resendTokenMut.isPending}
                                     onClick={handleResend}
                                     aria-label="Reenviar código de verificación"
                                     className="text-[0.80rem] font-medium text-blue-600 transition-colors
                     hover:text-blue-700 hover:underline
                     disabled:text-slate-400 disabled:cursor-not-allowed disabled:no-underline"
                                 >
-                                    {sendTokenMutation.isPending ? <Spinner dark /> : "Reenviar código"}
+                                    {resendTokenMut.isPending ? <Spinner dark /> : "Reenviar código"}
                                 </button>
                             </div>
 
-                            {/* Divider */}
                             <div className="mt-5 h-px bg-slate-100" />
 
-                            {/* Volver */}
                             <button
                                 type="button"
                                 onClick={() => { setStep(1); setCanResend(false); }}
@@ -521,8 +507,57 @@ const CreateAccount = () => {
                   text-[0.82rem] font-medium transition-all duration-150
                   hover:bg-slate-50 hover:border-slate-300"
                             >
-                                ← Volver y editar datos
+                                ← Cambiar correo electrónico
                             </button>
+                        </>
+                    )}
+
+                    {/* ═══════════ PASO 3 ═══════════ */}
+                    {step === 3 && (
+                        <>
+                            <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
+                                Establece tu nueva contraseña
+                            </h2>
+                            <p className="text-[0.82rem] text-slate-400 mb-6 leading-relaxed">
+                                Ingresa aquí tu nueva contraseña de acceso.
+                            </p>
+
+                            <form onSubmit={handlePwd(onSubmitStep3)} className="flex flex-col gap-4">
+                                <Field label="Nueva contraseña" error={errPwd.newPassword?.message}>
+                                    <input
+                                        {...regPwd("newPassword", {
+                                            required: "Campo requerido",
+                                            validate: (v) =>
+                                                stringStrengthEvaluator(v) >= 55 || "Ingresa una contraseña más segura",
+                                        })}
+                                        id="newPassword" type="password" placeholder="Mínimo 8 caracteres"
+                                        className={inputCls(!!errPwd.newPassword)}
+                                    />
+                                    <PasswordStrengthBar strength={passwordStrength} />
+                                </Field>
+
+                                <Field label="Confirmar nueva contraseña" error={errPwd.confirm_password?.message}>
+                                    <input
+                                        {...regPwd("confirm_password", {
+                                            required: "Campo requerido",
+                                            validate: (v) => v === watchPwd("newPassword") || "Las contraseñas no coinciden",
+                                        })}
+                                        id="confirm_password" type="password" placeholder="Repite tu contraseña"
+                                        className={inputCls(!!errPwd.confirm_password)}
+                                    />
+                                </Field>
+
+                                <button
+                                    type="submit"
+                                    disabled={restorePwdMut.isPending}
+                                    aria-label="Restablecer contraseña"
+                                    className={btnPrimary}
+                                >
+                                    {restorePwdMut.isPending
+                                        ? <><Spinner /> Actualizando…</>
+                                        : "Cambiar contraseña"}
+                                </button>
+                            </form>
                         </>
                     )}
                 </div>
@@ -531,4 +566,4 @@ const CreateAccount = () => {
     );
 };
 
-export default CreateAccount;
+export default RestorePassword;
