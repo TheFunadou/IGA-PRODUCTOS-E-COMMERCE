@@ -15,6 +15,7 @@ import { useSearchParams } from "react-router-dom";
 import PaginationComponent from "../../../global/components/PaginationComponent";
 
 const CustomerAddresses = () => {
+    document.title = "Iga Productos | Mis direcciones de envio";
     const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");

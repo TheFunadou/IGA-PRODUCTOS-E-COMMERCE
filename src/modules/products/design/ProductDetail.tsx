@@ -23,6 +23,7 @@ import PaginationComponent from "../../../global/components/PaginationComponent"
 import { OverflowXComponent } from "../../home/components/OverflowXComponent";
 
 const ProductDetail = () => {
+    document.title = "Iga Productos | Tienda";
     const SHIPPING_COST = 264.00;
     const params = useParams();
     const {

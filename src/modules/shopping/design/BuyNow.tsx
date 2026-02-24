@@ -30,6 +30,7 @@ import { useFetchBuyNowItem } from "../../orders/hooks/useFetchOrders";
  * - Order creation and payment processing
  */
 const BuyNow = () => {
+    document.title = "Iga Productos | Comprar ahora";
     // ============================================================================
     // Constants
     // ============================================================================

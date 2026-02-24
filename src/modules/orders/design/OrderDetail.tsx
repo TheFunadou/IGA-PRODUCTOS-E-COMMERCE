@@ -14,6 +14,7 @@ import { useRef } from "react";
 
 
 const OrderDetail = () => {
+    document.title = "Iga Productos | Detalle de orden";
     const [searchParams] = useSearchParams();
     const orderUUID = searchParams.get("folio");
     const { data, isLoading, error, refetch } = useFetchOrderDetail({ orderUUID: orderUUID! });

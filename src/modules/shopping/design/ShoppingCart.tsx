@@ -21,6 +21,7 @@ import { FaShippingFast } from "react-icons/fa";
 
 
 const ShoppingCart = () => {
+    document.title = "Iga Productos | Carrito de compras";
     const { theme } = useThemeStore();
     const { order } = usePaymentStore();
     const { isAuth } = useAuthStore();

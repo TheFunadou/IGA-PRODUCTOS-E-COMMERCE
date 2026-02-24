@@ -10,6 +10,7 @@ import { formatOrderStatus } from "../../shopping/utils/ShoppingUtils";
 import clsx from "clsx";
 
 const Orders = () => {
+    document.title = "Iga Productos | Mis ordenes";
     const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");

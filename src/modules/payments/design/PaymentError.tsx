@@ -10,6 +10,7 @@ import { MdOutlinePending } from "react-icons/md";
 import type { OrderStatusType } from "../../shopping/ShoppingTypes";
 
 const PaymentError = () => {
+    document.title = "Iga Productos | Error en el pago";
     const requiredStatus: OrderStatusType[] = ["IN_PROCESS", "REJECTED"];
     const navigate = useNavigate();
     const { search } = useLocation();

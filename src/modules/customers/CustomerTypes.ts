@@ -41,3 +41,13 @@ export type GetCustomerAddressesType = {
     totalRecords: number;
     totalPages: number;
 };
+
+export type UpdateProfileFormType = {
+    name?: string;
+    last_name?: string;
+    phone?: string;
+    email?: string;
+    current_password: string;
+    new_password?: string;
+    confirm_password?: string;
+};

@@ -56,6 +56,7 @@ const queryClient = new QueryClient({
   },
 });
 
+
 // Wrapper para los providers
 function RootLayout() {
   return (

@@ -1,4 +1,4 @@
-import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
+import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType, UpdateProfileFormType } from "../CustomerTypes";
 import type { PVCardsResponseType } from "../../products/ProductTypes";
 import api from "../../../api/api.config";
 
@@ -28,8 +28,17 @@ export const getCustomerFavorites = async (params: { page: number, limit: number
     return data;
 };
 
-
 export const toggleFavoriteService = async (args: { sku: string, csrfToken: string }): Promise<onToogleFavoriteType> => {
     const { data } = await api.post<onToogleFavoriteType>(`/favorites`, { sku: args.sku }, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+    return data;
+};
+
+export const updateCustomer = async ({ dto, csrfToken }: { dto: UpdateProfileFormType, csrfToken: string }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer`, dto, { headers: { "X-CSRF-TOKEN": csrfToken } });
+    return data;
+};
+
+export const updatePassword = async ({ dto, csrfToken }: { dto: UpdateProfileFormType, csrfToken: string }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer-auth/password`, dto, { headers: { "X-CSRF-TOKEN": csrfToken } });
     return data;
 };

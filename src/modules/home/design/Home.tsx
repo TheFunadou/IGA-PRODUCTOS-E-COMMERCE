@@ -26,7 +26,7 @@ import { BiPackage } from "react-icons/bi";
 
 const Home = () => {
 
-    document.title = "Iga Productos - Inicio";
+    document.title = "Iga Productos | Inicio";
 
     const sampleVideos: { videoUrl: string, title: string }[] = [
         {
@@ -141,17 +141,37 @@ const Home = () => {
                             <p className="home-section-subtitle"> <FaVideo className="text-primary text-2xl" /> Desliza para ver videos que quizas te puedan interesar</p>
                             <Carousel className="hidden lg:flex gap-5 items-center mt-2 md:mt-5">
                                 {sampleVideos.map((video, index) => (
-                                    <div key={index}>
-                                        <p className="text-base md:text-lg font-medium line-clamp-1">{video.title}</p>
-                                        <iframe src={video.videoUrl} style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className=" w-60 h-80 md:w-80 md:h-100"></iframe>
+                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">
+                                        <p className="text-base md:text-lg font-medium line-clamp-1 mb-2">{video.title}</p>
+                                        <div className="w-full h-64 md:h-72 rounded-md overflow-hidden bg-base-300 flex items-center justify-center">
+                                            <iframe
+                                                src={video.videoUrl}
+                                                style={{ border: 'none', overflow: 'hidden' }}
+                                                scrolling="no"
+                                                frameBorder="0"
+                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                                                allowFullScreen
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </Carousel>
                             <div className="lg:hidden flex gap-5 overflow-x-scroll">
                                 {sampleVideos.map((video, index) => (
-                                    <div key={index} className="flex-shrink-0">
-                                        <p className="text-sm md:text-lg font-medium line-clamp-1">{video.title}</p>
-                                        <iframe src={video.videoUrl} style={{ border: 'none', overflow: 'hidden' }} scrolling="no" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen className=" w-60 h-80 md:w-80 md:h-100"></iframe>
+                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">
+                                        <p className="text-base md:text-lg font-medium line-clamp-1 mb-2">{video.title}</p>
+                                        <div className="w-full h-64 md:h-72 rounded-md overflow-hidden bg-black flex items-center justify-center">
+                                            <iframe
+                                                src={video.videoUrl}
+                                                style={{ border: 'none', overflow: 'hidden' }}
+                                                scrolling="no"
+                                                frameBorder="0"
+                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                                                allowFullScreen
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </div>

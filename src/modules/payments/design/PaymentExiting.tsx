@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
 
 const PaymentExiting = () => {
+    document.title = "Iga Productos | Pago procesado";
     const IVA = 0.16;
     const navigate = useNavigate();
     const queryClient = useQueryClient();

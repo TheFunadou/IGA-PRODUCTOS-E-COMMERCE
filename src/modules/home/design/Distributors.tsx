@@ -4,6 +4,7 @@ import PartnersCarousel from "../components/PartnersCarousel";
 
 
 const Distributors = () => {
+    document.title = "Iga Productos | Distribuidores";
     return (
         <div className="w-full bg-base-300 px-5 pt-10 pb-25 rounded-xl">
             <p className="text-3xl font-bold">Distribuidores</p>

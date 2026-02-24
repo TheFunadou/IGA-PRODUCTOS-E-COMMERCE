@@ -11,6 +11,7 @@ import { SiGooglecolab } from "react-icons/si";
 
 
 const AboutIGA = () => {
+    document.title = "Iga Productos | Acerca de IGA";
     const [select, setSelect] = useState<"mision" | "vision" | "policy" | "value">("mision");
     const cfeLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Comisi%C3%B3n_Federal_de_Electricidad_%28logo%29_.svg/2560px-Comisi%C3%B3n_Federal_de_Electricidad_%28logo%29_.svg.png";
     const pemexLogo = "https://upload.wikimedia.org/wikipedia/commons/9/99/Logo_Petr%C3%B3leos_Mexicanos.svg";

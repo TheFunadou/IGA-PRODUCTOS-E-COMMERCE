@@ -31,6 +31,7 @@ import { BiMinus, BiPlus } from "react-icons/bi";
  * - Order creation and payment processing
  */
 const ShoppingCartResume = () => {
+    document.title = "Iga Productos | Resumen de carrito";
     // ============================================================================
     // Constants
     // ============================================================================

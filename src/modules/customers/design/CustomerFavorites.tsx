@@ -6,6 +6,7 @@ import PaginationComponent from "../../../global/components/PaginationComponent"
 
 
 const CustomerFavorites = () => {
+    document.title = "Iga Productos | Mis favoritos";
     const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");

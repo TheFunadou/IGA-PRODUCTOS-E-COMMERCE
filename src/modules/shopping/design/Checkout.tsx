@@ -13,6 +13,7 @@ import { showModal } from "../../../global/GlobalHelpers";
 import { useCancelOrder, useFetchCheckoutOrder } from "../../orders/hooks/useFetchOrders";
 
 const Checkout = () => {
+    document.title = "Iga Productos | Resumen de pago";
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const { isAuth } = useAuthStore();
     const { order, cancelOrder } = usePaymentStore();

@@ -197,7 +197,8 @@ function Spinner({ dark = false }: { dark?: boolean }) {
    Componente principal
 ───────────────────────────────────────────── */
 const CreateAccount = () => {
-    const { isAuth, authCustomer, sessionId, generateSesionId } = useAuthStore();
+    document.title = "Iga Productos | Crear cuenta";
+    const { isAuth } = useAuthStore();
     const navigate = useNavigate();
 
     const sendTokenMutation = useSendVerificationToken();

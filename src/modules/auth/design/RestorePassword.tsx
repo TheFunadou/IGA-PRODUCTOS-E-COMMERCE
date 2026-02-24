@@ -199,6 +199,7 @@ function Spinner({ dark = false }: { dark?: boolean }) {
    Componente principal
 ───────────────────────────────────────────── */
 const RestorePassword = () => {
+    document.title = "Iga Productos | Recuperar contraseña";
     const { isAuth, sessionId } = useAuthStore();
     const navigate = useNavigate();
     const { showTriggerAlert } = useTriggerAlert();

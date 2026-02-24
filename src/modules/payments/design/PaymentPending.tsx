@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
 
 const PaymentPending = () => {
+    document.title = "Iga Productos | Pago pendiente";
     const IVA = 0.16;
     const navigate = useNavigate();
     const { search } = useLocation();

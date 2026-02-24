@@ -53,6 +53,7 @@ function Spinner({ dark = false }: { dark?: boolean }) {
 }
 
 const Login = () => {
+    document.title = "Iga Productos | Iniciar sesión";
     const { register, handleSubmit, formState: { errors } } = useForm<AuthCustomerCredentialsType>();
     const { login, loginWithGoogle, error, isAuth, clearError } = useAuthStore();
     const location = useLocation();

@@ -4,6 +4,7 @@ import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json
 import { useEffect, useState } from "react";
 
 const Contact = () => {
+    document.title = "Iga Productos | Contacto";
     const defualtCountry: CountriesPhoneCodeType = {
         "nameES": "México",
         "nameEN": "Mexico",

@@ -18,6 +18,7 @@ type AuthenticationState = {
     getProfile: () => Promise<void>;
     clearError: () => void;
     generateSesionId: () => string;
+    updateName: (data: { first_name?: string, last_name?: string }) => Promise<void>;
 };
 export const AUTH_CUSTOMER_KEY = "auth-customer-storage";
 
@@ -96,6 +97,17 @@ export const useAuthStore = create<AuthenticationState>()(
                 const sessionId = crypto.randomUUID();
                 set({ sessionId: sessionId })
                 return sessionId;
+            },
+            updateName: async (data: { first_name?: string, last_name?: string }) => {
+                const { authCustomer } = get();
+                if (!authCustomer) return;
+                set({
+                    authCustomer: {
+                        ...authCustomer,
+                        name: data.first_name ? data.first_name : authCustomer.name,
+                        last_name: data.last_name ? data.last_name : authCustomer.last_name
+                    }
+                })
             }
 
         }),

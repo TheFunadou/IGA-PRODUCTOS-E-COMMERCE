@@ -2,6 +2,7 @@ import IGALogo from "../../../assets/logo/IGA-LOGO.webp"
 import Header2 from "../../../assets/headers/HEADER2.webp"
 
 const Coverage = () => {
+    document.title = "Iga Productos | Cobertura";
     return (
         <div className="w-full bg-base-300 px-3 sm:px-5 lg:px-5 pt-6 sm:pt-10 pb-16 sm:pb-25 rounded-xl">
             <div className="w-full animate-fade-in-up">

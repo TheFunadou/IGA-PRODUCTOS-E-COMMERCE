@@ -1,10 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType } from "../CustomerTypes";
-import { createAddressService, deleteAddressService, getCustomerAddressesService, getCustomerFavorites, toggleFavoriteService, updateAddressService } from "../services/CustomerService";
+import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType, UpdateProfileFormType } from "../CustomerTypes";
+import { createAddressService, deleteAddressService, getCustomerAddressesService, getCustomerFavorites, toggleFavoriteService, updateAddressService, updateCustomer, updatePassword } from "../services/CustomerService";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useAuthStore } from "../../auth/states/authStore";
 import type { ProductVersionCardType, ProductVersionDetailType, PVCardsResponseType } from "../../products/ProductTypes";
+import UpdateProfileForm from "../components/UpdateProfileForm";
+import { formatAxiosError } from "../../../api/helpers";
+import type { ModalProfileFormType } from "../design/CustomerPersonalInfo";
 
 export const customerQueryKeys = {
     addresses: (customer: string | undefined) => buildKey("customer:addresses", { customer }),
@@ -87,6 +90,32 @@ export function useAddAddress() {
     });
 };
 
+
+export const useUpdateCustomer = ({ type }: { type: ModalProfileFormType }) => {
+    const { showTriggerAlert } = useTriggerAlert();
+    const { csrfToken, updateName } = useAuthStore();
+    return useMutation({
+        mutationFn: async ({ data }: { data: UpdateProfileFormType }) => {
+            if (type === "name") return await updateCustomer({ dto: data, csrfToken: csrfToken! });
+            if (type === "password") return await updatePassword({ dto: data, csrfToken: csrfToken! });
+        },
+        onSuccess: (response, form) => {
+            showTriggerAlert("Successfull", response!, {
+                duration: 3500,
+                delay: 1000
+            });
+
+            if (type === "name") updateName({ first_name: form.data.name, last_name: form.data.last_name });
+        },
+        onError: (error) => {
+            showTriggerAlert("Error", formatAxiosError(error), {
+                duration: 3500
+            });
+        }
+    })
+}
+
+
 // useDeleteAddress - CON LÓGICA DE SERVIDOR
 export function useDeleteAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
@@ -141,7 +170,6 @@ export function useDeleteAddress(customer: string | undefined) {
 };
 
 
-// useUpdateAddress - CON LÓGICA DE SERVIDOR
 // useUpdateAddress - CON LÓGICA DE SERVIDOR
 export function useUpdateAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
