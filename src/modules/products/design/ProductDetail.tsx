@@ -23,7 +23,6 @@ import PaginationComponent from "../../../global/components/PaginationComponent"
 import { OverflowXComponent } from "../../home/components/OverflowXComponent";
 
 const ProductDetail = () => {
-    document.title = "Iga Productos | Tienda";
     const SHIPPING_COST = 264.00;
     const params = useParams();
     const {
@@ -98,6 +97,8 @@ const ProductDetail = () => {
 
     useEffect(() => {
         if (!data) return;
+
+        document.title = `Iga Productos | ${data.product.product_name}`;
 
         if (data.product_images) {
             const mainImage = data.product_images.find(
