@@ -27,8 +27,9 @@ const Checkout = () => {
 
     const handleCanceled = async () => {
         await cancelOrderMutation.mutateAsync();
-        await cancelOrder();
-        return navigate("/carrito-de-compras");
+        await cancelOrder().then(() => {
+            return navigate("/carrito-de-compras");
+        });
     };
 
     if (isLoading) {
