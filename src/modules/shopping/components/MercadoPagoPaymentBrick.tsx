@@ -55,8 +55,7 @@ const PaymentBrick: React.FC<PaymentBrickProps> = ({
 
     // Callback al enviar el formulario
     const onSubmit = async ({ selectedPaymentMethod, formData }: SubmitParams) => {
-        console.log('Método de pago seleccionado:', selectedPaymentMethod);
-        console.log('Datos del formulario:', formData);
+        console.debug(selectedPaymentMethod);
 
         return new Promise<void>((resolve, reject) => {
             fetch("/api/process_payment", {

@@ -96,7 +96,6 @@ export function useCategories(options?: UseCategoriesOptions) {
                 .sort((a, b) => subcategoriesPath.indexOf(a.uuid) - subcategoriesPath.indexOf(b.uuid))
                 .map(item => item.description);
             setSubcategoriesBreadcrumb(breadcrumb);
-            console.log("init breadcrumb", breadcrumb);
         }
     };
 

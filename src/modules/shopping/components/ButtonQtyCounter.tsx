@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaMinus } from "react-icons/fa";
 import useDebounce from '../../../global/hooks/useDebounce';
+import { formatAxiosError } from '../../../api/helpers';
 
 type Props = {
   initQty: number;
@@ -65,10 +66,9 @@ const ButtonQtyCounter = ({
         setIsUpdating(true);
         isUpdatingRef.current = true; // Mark that we are updating
         onUpdateQty({ sku, newQuantity: debouncedQuantity });
-        console.log("Updating quantity....");
         lastSentQuantity.current = debouncedQuantity;
       } catch (error) {
-        console.error('Error updating quantity:', error);
+        console.error('Error updating quantity:', formatAxiosError(error));
         // Revert to previous quantity on error
         setQuantity(lastSentQuantity.current);
         setInputValue(lastSentQuantity.current.toString());

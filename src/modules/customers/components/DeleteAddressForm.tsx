@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import { useDeleteAddress } from "../hooks/useCustomer";
+import { formatAxiosError } from "../../../api/helpers";
 
 type Props = {
     address: string | undefined;
@@ -17,7 +18,7 @@ const DeleteAddressForm = ({ ref, onDeleted, address, customer }: Props) => {
             await deleteAddress.mutateAsync(address!);
             onDeleted();
         } catch (error) {
-            console.log("Error", error);
+            console.log("Error", formatAxiosError(error));
         }
     };
 

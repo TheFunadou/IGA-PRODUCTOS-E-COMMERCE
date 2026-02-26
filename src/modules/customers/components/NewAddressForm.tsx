@@ -3,8 +3,8 @@ import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { NewAddressType } from "../CustomerTypes";
-import { getErrorMessage } from "../../../global/GlobalUtils";
 import { useAddAddress } from "../hooks/useCustomer";
+import { formatAxiosError } from "../../../api/helpers";
 
 type Props = {
     ref: RefObject<HTMLDialogElement | null>;
@@ -28,14 +28,12 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
 
     const onSubmit: SubmitHandler<NewAddressType> = async (data: NewAddressType) => {
         try {
-            console.log("Data", JSON.stringify(data, null, 2))
             await addAddress.mutateAsync(data);
             reset();
             setCountry(defualtCountry);
             onCreated();
         } catch (error) {
-            console.log("Error", error);
-            setError(getErrorMessage(error));
+            setError(formatAxiosError(error));
         };
     };
 

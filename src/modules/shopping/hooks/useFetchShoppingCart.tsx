@@ -52,8 +52,6 @@ export function useAddItem() {
             return { previousShoppingCart };
         },
         onSuccess: (updatedCart, _args, _context) => {
-            console.log("🔍 Frontend received:", updatedCart.length, "items");
-
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
 

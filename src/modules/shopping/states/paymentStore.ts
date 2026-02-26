@@ -33,7 +33,6 @@ export const usePaymentStore = create<PaymentStoreState>()(
                         set({ isLoading: true });
                         const strategy = PaymentFactory.create(data.payment_method);
                         const order = await strategy.createOrder({ data: { shopping_cart: data.shopping_cart, address: data.address }, csrfToken: csrfToken!, isAuth });
-                        console.log(JSON.stringify(order, null, 2));
                         set({ order });
                     } catch (error) {
                         set({ error: formatAxiosError(error) });

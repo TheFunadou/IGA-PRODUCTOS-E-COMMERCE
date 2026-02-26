@@ -16,8 +16,6 @@ const CustomerFavorites = () => {
 
     const handlePageChange = (page: number) => setSearchParams({ page: page.toString() });
 
-    console.log(JSON.stringify(favorites, null, 2));
-
     return (
         <div className="animate-fade-in-up">
             <div className="w-full rounded-xl p-10 bg-base-300">

@@ -8,7 +8,6 @@ export const getShoppingCartService = async (): Promise<ShoppingCartType[] | nul
 
 export const shoppingCartAddItemService = async (args: { sku: string, quantity: number, csrfToken: string }): Promise<ShoppingCartType[]> => {
     const { data } = await api.post<ShoppingCartType[]>(`/shopping-cart`, { sku: args.sku, quantity: args.quantity }, { withCredentials: true, headers: { "X-CSRF-TOKEN": args.csrfToken } });
-    console.log(JSON.stringify(data, null, 2));
     return data;
 };
 
