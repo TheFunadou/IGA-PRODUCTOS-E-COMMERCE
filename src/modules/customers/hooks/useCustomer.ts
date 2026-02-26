@@ -82,7 +82,7 @@ export function useAddAddress() {
             if (!authCustomer || !context) return;
             const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             queryClient.setQueryData(queryKey, context.previousAddresses);
-            showTriggerAlert("Error", "No se pudo crear la dirección", {
+            showTriggerAlert("Error", formatAxiosError(error), {
                 duration: 3500
             });
         },
@@ -161,7 +161,7 @@ export function useDeleteAddress(customer: string | undefined) {
             if (!customer || !context) return;
             const queryKey = customerQueryKeys.addresses(customer);
             queryClient.setQueryData(queryKey, context.previousAddresses);
-            showTriggerAlert("Error", "No se pudo eliminar la dirección", {
+            showTriggerAlert("Error", formatAxiosError(error), {
                 duration: 3500
             });
         },
@@ -224,8 +224,7 @@ export function useUpdateAddress(customer: string | undefined) {
             if (!customer || !context) return;
             const queryKey = customerQueryKeys.addresses(customer);
             queryClient.setQueryData(queryKey, context.previousAddresses);
-            console.error("Error al actualizar la dirección", error);
-            showTriggerAlert("Error", "No se pudo actualizar la dirección", {
+            showTriggerAlert("Error", formatAxiosError(error), {
                 duration: 3500
             });
         },
@@ -330,7 +329,7 @@ export function useToggleFavorite() {
                 customerQueryKeys.favorites(authCustomer.uuid!),
                 context.previousFavorites
             );
-            showTriggerAlert("Error", "Ocurrio un error inesperado", {
+            showTriggerAlert("Error", formatAxiosError(error), {
                 duration: 3500
             });
         }

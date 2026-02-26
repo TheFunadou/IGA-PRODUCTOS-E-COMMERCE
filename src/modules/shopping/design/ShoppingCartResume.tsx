@@ -68,7 +68,6 @@ const ShoppingCartResume = () => {
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
     const addressesModal = useRef<HTMLDialogElement>(null);
     const guestAddressFormModal = useRef<HTMLDialogElement>(null);
-    const _guestFormBillingModal = useRef<HTMLDialogElement>(null);
 
     // Guest address form
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
