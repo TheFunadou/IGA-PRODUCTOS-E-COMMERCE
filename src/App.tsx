@@ -3,7 +3,7 @@ import './App.css'
 import MainLayout from "./layouts/MainLayout"
 import ProtectAuthRoutes from "./modules/auth/components/ProtectAuthRoutes"
 import Home from "./modules/home/design/Home"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+
 
 // Roboto font
 import '@fontsource/roboto/300.css';

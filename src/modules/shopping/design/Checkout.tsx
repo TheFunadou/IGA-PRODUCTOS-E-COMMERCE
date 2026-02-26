@@ -14,7 +14,7 @@ import { useCancelOrder, useFetchCheckoutOrder } from "../../orders/hooks/useFet
 
 const Checkout = () => {
     document.title = "Iga Productos | Resumen de pago";
-    const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
+    const [showGuestForm, _setShowGuestForm] = useState<boolean>(false);
     const { isAuth } = useAuthStore();
     const { order, cancelOrder } = usePaymentStore();
     const cancelOrderRef = useRef<HTMLDialogElement | null>(null);

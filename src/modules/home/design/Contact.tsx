@@ -23,7 +23,7 @@ const Contact = () => {
         // });
     }, [country]);
 
-    const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<ContactForm>();
+    const { register } = useForm<ContactForm>();
 
     return (
         <div className="w-full bg-base-300 px-3 sm:px-5 py-6 sm:py-10 rounded-xl flex flex-col lg:flex-row gap-6 lg:gap-0">

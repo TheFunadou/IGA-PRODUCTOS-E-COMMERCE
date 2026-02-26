@@ -1,6 +1,6 @@
 import { type RefObject, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaShieldAlt } from "react-icons/fa";
+import { FaUser, FaLock, FaShieldAlt } from "react-icons/fa";
 import type { UpdateProfileFormType } from "../CustomerTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useUpdateCustomer } from "../hooks/useCustomer";

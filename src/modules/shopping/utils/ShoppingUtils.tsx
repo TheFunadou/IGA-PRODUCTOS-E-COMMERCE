@@ -1,4 +1,4 @@
-import type { OrderStatusType, PaymentClassType, PaymentMethodDetails, PaymentMethodType, PaymentProviderDetails, PaymentProvidersType } from "../ShoppingTypes";
+import type { OrderStatusType, PaymentClassType, PaymentMethodDetails, PaymentMethodType, PaymentProvidersType } from "../ShoppingTypes";
 
 export const paymentProvider: Record<Exclude<PaymentProvidersType, null>, PaymentMethodDetails> = {
     paypal: {

@@ -61,7 +61,7 @@ const BuyNow = () => {
     const [guestBillingAddressChecked, setGuestBillingAddressChecked] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
-    const [billingGuestAddress, setBillingGuestAddress] = useState<GuestFormType | null>(null);
+    const [billingGuestAddress, _setBillingGuestAddress] = useState<GuestFormType | null>(null);
 
     const [discount, setDiscount] = useState<number>(0);
     const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);

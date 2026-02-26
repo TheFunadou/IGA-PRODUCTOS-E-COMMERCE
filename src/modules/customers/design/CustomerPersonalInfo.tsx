@@ -12,9 +12,7 @@ const CustomerPersonalInfo = () => {
     const updateProfileModalRef = useRef<HTMLDialogElement>(null);
     const [activeModalType, setActiveModalType] = useState<ModalProfileFormType>(null);
 
-    const openModal = (type: ModalProfileFormType) => {
-        setActiveModalType(type);
-    };
+
 
     const handleCloseModal = () => {
         setActiveModalType(null);

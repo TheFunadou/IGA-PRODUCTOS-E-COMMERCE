@@ -14,7 +14,7 @@ type Props = {
 
 const SubcategoryMenu = ({ data, onFindAncestors, onDisabled, queryParams }: Props) => {
     const { theme } = useThemeStore();
-    const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+    const [_openItems, setOpenItems] = useState<Set<string>>(new Set());
     const hideTimeoutRef = useRef<number | null>(null);
     const navigate = useNavigate();
 

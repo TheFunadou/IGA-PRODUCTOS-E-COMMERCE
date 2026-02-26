@@ -5,7 +5,6 @@ import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useAuthStore } from "../../auth/states/authStore";
 import type { ProductVersionCardType, ProductVersionDetailType, PVCardsResponseType } from "../../products/ProductTypes";
-import UpdateProfileForm from "../components/UpdateProfileForm";
 import { formatAxiosError } from "../../../api/helpers";
 import type { ModalProfileFormType } from "../design/CustomerPersonalInfo";
 
@@ -69,7 +68,7 @@ export function useAddAddress() {
             return { previousAddresses, tempUUID };
         },
 
-        onSuccess: (savedAddress, newAddress, context) => {
+        onSuccess: (_savedAddress, _newAddress, _context) => {
             if (!authCustomer) return;
             const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey });
@@ -79,7 +78,7 @@ export function useAddAddress() {
             });
         },
 
-        onError: (error, newAddress, context) => {
+        onError: (error, _newAddress, context) => {
             if (!authCustomer || !context) return;
             const queryKey = customerQueryKeys.addresses(authCustomer.uuid!);
             queryClient.setQueryData(queryKey, context.previousAddresses);
@@ -158,7 +157,7 @@ export function useDeleteAddress(customer: string | undefined) {
             showTriggerAlert("Successfull", message, { duration: 3500, delay: 1000 });
         },
 
-        onError: (error, addressUUID, context) => {
+        onError: (error, _addressUUID, context) => {
             if (!customer || !context) return;
             const queryKey = customerQueryKeys.addresses(customer);
             queryClient.setQueryData(queryKey, context.previousAddresses);
@@ -221,7 +220,7 @@ export function useUpdateAddress(customer: string | undefined) {
             showTriggerAlert("Successfull", message, { duration: 3500, delay: 1000 });
         },
 
-        onError: (error, data, context) => {
+        onError: (error, _data, context) => {
             if (!customer || !context) return;
             const queryKey = customerQueryKeys.addresses(customer);
             queryClient.setQueryData(queryKey, context.previousAddresses);
@@ -325,7 +324,7 @@ export function useToggleFavorite() {
                 refetchType: "none"
             });
         },
-        onError: (error, variables, context) => {
+        onError: (error, _variables, context) => {
             if (!authCustomer || !context) return;
             queryClient.setQueryData(
                 customerQueryKeys.favorites(authCustomer.uuid!),

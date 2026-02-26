@@ -1,5 +1,5 @@
 import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressPaymentType } from "../customers/CustomerTypes";
-import type { OrderItems, OrderPaidShipping } from "../payments/types";
+import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
 

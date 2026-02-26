@@ -104,7 +104,7 @@ export function useRemoveItem() {
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
             showTriggerAlert("Successfull", "Removido del carrito", { duration: 3500 });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -142,7 +142,7 @@ export function useUpdateItemQty() {
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -180,7 +180,7 @@ export function useToggleCheckItem() {
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -218,7 +218,7 @@ export function useCheckAllItems() {
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -256,7 +256,7 @@ export function useUncheckAllItems() {
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {
@@ -294,7 +294,7 @@ export function useClearShoppingCart() {
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             queryClient.invalidateQueries({ queryKey, refetchType: "none" });
         },
-        onError: (error, item, context) => {
+        onError: (_error, _item, context) => {
             if (!authCustomer?.uuid) return;
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             if (context?.previousShoppingCart !== undefined) {

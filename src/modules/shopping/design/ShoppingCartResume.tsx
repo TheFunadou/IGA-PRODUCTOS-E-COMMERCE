@@ -60,19 +60,19 @@ const ShoppingCartResume = () => {
     const [paymentMethod, setPaymentMethod] = useState<PaymentProvidersType>(null);
 
     /** Whether to show the guest checkout form */
-    const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
-    const [guestBillingAddressChecked, setGuestBillingAddressChecked] = useState<boolean>(false);
+    const [_showGuestForm, setShowGuestForm] = useState<boolean>(false);
+    const [_guestBillingAddressChecked, _setGuestBillingAddressChecked] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
 
     // Modal references
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
     const addressesModal = useRef<HTMLDialogElement>(null);
     const guestAddressFormModal = useRef<HTMLDialogElement>(null);
-    const guestFormBillingModal = useRef<HTMLDialogElement>(null);
+    const _guestFormBillingModal = useRef<HTMLDialogElement>(null);
 
     // Guest address form
     const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
-    const [billingGuestAddress, setBillingGuestAddress] = useState<GuestFormType | null>(null);
+    const [_billingGuestAddress, _setBillingGuestAddress] = useState<GuestFormType | null>(null);
 
     const [discount, setDiscount] = useState<number>(0);
     const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);

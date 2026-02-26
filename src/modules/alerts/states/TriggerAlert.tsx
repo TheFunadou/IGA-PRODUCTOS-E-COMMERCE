@@ -23,9 +23,9 @@ export const TriggerAlertContext = createContext<TriggerAlertContextType | undef
 export const TriggerAlertProvider = ({ children }: { children: ReactNode }) => {
     const [triggerAlertType, setTriggerAlertType] = useState<TriggerAlertType>(null);
     const [favoriteType, setFavoriteType] = useState<"add" | "remove" | null>(null);
-    const [title, setTitle] = useState<string>("");
+    const [_title, setTitle] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    const [callback, setCallback] = useState<() => void>();
+    const [_callback, setCallback] = useState<() => void>();
     const modal = useRef<HTMLDialogElement>(null);
 
 
@@ -42,10 +42,10 @@ export const TriggerAlertProvider = ({ children }: { children: ReactNode }) => {
             setTriggerAlertType(type);
             const hideTimeout = setTimeout(() => {
                 setTriggerAlertType(null);
-            },options.duration);
+            }, options.duration);
 
             return () => clearTimeout(hideTimeout);
-        },options.delay);
+        }, options.delay);
 
         return () => clearTimeout(showTimeout);
     };

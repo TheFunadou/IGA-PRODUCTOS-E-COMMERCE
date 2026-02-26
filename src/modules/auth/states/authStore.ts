@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthenticationState>()(
                 sessionId: state.sessionId
             }),
             version: 1,
-            migrate: (persistedState: any, version: number) => {
+            migrate: (persistedState: any, _version: number) => {
                 // Limpia el campo viejo 'authUser' si existe
                 if (persistedState.authUser) {
                     delete persistedState.authUser;
