@@ -19,6 +19,7 @@ import ShopMenuPreview from "./components/ShopMenuPreview";
 import ThemeController from "../modules/home/components/ThemeController";
 import { useShoppingCart } from "../modules/shopping/hooks/useShoppingCart";
 import { useSearchHistoryStore } from "./states/searchCachedStore";
+import { useThemeStore } from "./states/themeStore";
 
 const MainLayout = () => {
     const { searches: searchHistory, addSearch, clearSearches } = useSearchHistoryStore();
@@ -29,6 +30,7 @@ const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState<boolean>(false);
     const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 300);
     const { shoppingCart: authShoppingCart } = useShoppingCart();
+    const { setTheme, theme } = useThemeStore();
     const searchResultsRef = useRef<HTMLDivElement>(null);
     const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
     const { isAuth, logout, getProfile, authCustomer, generateSesionId, sessionId } = useAuthStore();
@@ -94,6 +96,7 @@ const MainLayout = () => {
     useEffect(() => {
         if (isAuth && !authCustomer) handleLoadCustomerData();
         if (!isAuth && !authCustomer && !sessionId) generateSesionId();
+        if (!theme) setTheme("ligth");
     }, []);
 
     // Close the search container when the location changed
@@ -201,7 +204,7 @@ const MainLayout = () => {
                     <button type="button" onClick={() => setShowMobileSubmenu(true)} className="w-10/100"><VscThreeBars className="text-3xl" /></button>
                     <div className="w-90/100 flex items-center justify-between">
                         <input type="text"
-                            className="w-90/100 bg-base-100 rounded-md text-black font-normal p-1 text-xs md:text-base"
+                            className="w-90/100 input input-bordered bg-base-100 rounded-md font-normal p-1 text-xs md:text-base"
                             placeholder="Buscar productos"
                             onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true) }}
                             onKeyDown={(e) => {

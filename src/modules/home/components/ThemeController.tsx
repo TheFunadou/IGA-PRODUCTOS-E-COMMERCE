@@ -1,19 +1,12 @@
-import { useState } from "react";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 
 
 const ThemeController = () => {
     const { setTheme, theme } = useThemeStore();
-    const [state, setState] = useState<boolean>(theme === "ligth");
-
-    const handleChange = () => {
-        setState(!state);
-        setTheme(state ? "ligth" : "dark");
-    };
 
     return (
         <label className="swap swap-rotate">
-            <input type="checkbox" className="theme-controller" value="synthwave" onChange={() => handleChange()} />
+            <input type="checkbox" className="theme-controller" value="synthwave" onChange={() => setTheme(theme === "ligth" ? "dark" : "ligth")} />
 
             {theme === "ligth" ? (
                 <svg

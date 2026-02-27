@@ -47,7 +47,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
 
     return (
         <dialog id="my_modal_3" className="modal" ref={ref}>
-            <div className="modal-box max-w-full sm:max-w-2xl lg:max-w-4xl h-auto max-h-[90vh] overflow-y-scroll px-4 sm:px-6 py-6">
+            <div className="modal-box max-w-full md:w-fit h-auto max-h-[90vh] overflow-y-scroll px-4 sm:px-6 py-6">
                 <form method="dialog">
                     <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
@@ -63,7 +63,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                         <div className="w-full flex flex-col gap-3 sm:gap-2 [&_div]:flex [&_div]:flex-col">
                             {/* Nombre y Apellidos */}
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="name" className="text-sm sm:text-base">Nombre</label>
                                     <input
                                         type="text"
@@ -82,7 +82,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     />
                                     {errors.recipient_name && <p className="text-error text-xs sm:text-sm mt-1">{errors.recipient_name.message}</p>}
                                 </div>
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="last_names" className="text-sm sm:text-base">Apellidos</label>
                                     <input
                                         type="text"
@@ -157,7 +157,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                         <div className="w-full flex flex-col gap-3 sm:gap-2 [&_div]:flex [&_div]:flex-col">
                             {/* País y Estado */}
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="country" className="text-sm sm:text-base">País</label>
                                     <input
                                         type="text"
@@ -176,7 +176,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     />
                                     {errors.country && <p className="text-error text-xs sm:text-sm mt-1">{errors.country.message}</p>}
                                 </div>
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="state" className="text-sm sm:text-base">Estado</label>
                                     <input
                                         type="text"
@@ -199,7 +199,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
 
                             {/* Ciudad y Localidad */}
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="city" className="text-sm sm:text-base">Ciudad</label>
                                     <input
                                         type="text"
@@ -218,7 +218,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     />
                                     {errors.city && <p className="text-error text-xs sm:text-sm mt-1">{errors.city.message}</p>}
                                 </div>
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full">
                                     <label htmlFor="locality" className="text-sm sm:text-base">Localidad</label>
                                     <input
                                         type="text"

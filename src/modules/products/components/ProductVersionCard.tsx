@@ -94,14 +94,14 @@ const ProductVersionCard = ({ versionData, className, imageLoading }: Props) => 
                     <div className="flex items-center gap-1 md:gap-2">
                         <p className={
                             clsx(
-                                "h-full px-1 md:px-2 text-sm md:text-2xl text-white font-bold rounded-md",
+                                "h-full px-1 md:px-2 text-xs md:text-2xl text-white font-bold rounded-md",
                                 versionData.discount && versionData.discount < 50 && "bg-error",
                                 versionData.discount && versionData.discount >= 50 && versionData.discount < 65 && "bg-success",
                                 versionData.discount && versionData.discount >= 65 && "bg-primary"
                             )
-                        }>{versionData.discount}%</p>
+                        }>{versionData.discount}<span className="text-[8px] md:text-2xl">%</span></p>
                         <div>
-                            <p className="font-bold text-sm md:text-2xl inline-block">${unitPriceWithDiscount[0]}.<span className="align-baseline text-xs md:text-lg">{unitPriceWithDiscount[1]}</span> <span className="line-through text-gray-400 text-xs md:text-lg align-baseline">${unitPrice[0]}.{unitPrice[1]}</span></p>
+                            <p className="font-bold text-sm md:text-2xl flex md:inline-block">${unitPriceWithDiscount[0]}.<span className="align-baseline text-xs md:text-lg">{unitPriceWithDiscount[1]}</span> <span className="line-through text-gray-400 text-[8px] md:text-lg align-baseline">${unitPrice[0]}.{unitPrice[1]}</span></p>
                         </div>
                     </div>
                 ) : (
