@@ -256,7 +256,7 @@ const Shop = () => {
                 subcategoriesError={subcategoriesError}
                 refetchSubcategories={refetchSubcategories}
                 handleSubcategoryNavigate={handleSubcategoryNavigate}
-                theme={theme}
+                theme={theme!}
                 onSetFavoriteCheck={handleSetFavoriteCheck}
                 favoriteCheck={favoriteCheck}
                 isAuth={isAuth}

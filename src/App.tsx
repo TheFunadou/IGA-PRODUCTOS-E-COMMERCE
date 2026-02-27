@@ -144,7 +144,7 @@ const router = createBrowserRouter([
 
 function App() {
   const { theme } = useThemeStore();
-  useEffect(() => { document.documentElement.setAttribute("data-theme", theme) }, [theme]);
+  useEffect(() => { document.documentElement.setAttribute("data-theme", theme!) }, [theme]);
   return <RouterProvider router={router} />
 }
 
