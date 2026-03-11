@@ -1,6 +1,5 @@
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
-import { useFetchAds } from "../../../layouts/hooks/useAds";
 import ProductVersionCard from "../../products/components/ProductVersionCard";
 import Carousel from "../components/Carousel";
 import PaymentMethodsImgsJSON from "../json/PaymentMethodsCarouselImgs.json";
@@ -23,6 +22,8 @@ import { FaArrowCircleDown } from "react-icons/fa";
 import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
+import { useFetchProductVersionCards } from "../../products/hooks/useFetchProductVersionCards";
+import Hero from "../components/Hero";
 
 const Home = () => {
 
@@ -62,11 +63,14 @@ const Home = () => {
     const MAX_PRODUCTS: number = 10;
 
     const {
-        data,
+        data: ads,
         isLoading,
         error,
         refetch
-    } = useFetchAds({ limit: MAX_PRODUCTS, entity: "ads" });
+    } = useFetchProductVersionCards({
+        limit: MAX_PRODUCTS,
+        random: true
+    });
 
     const paymentMethodsImgs = PaymentMethodsImgsJSON;
 
@@ -79,8 +83,9 @@ const Home = () => {
 
     return (
         <div>
-            <div>
-                <div className="md:h-150 md:flex md:gap-5 rounded-xl">
+            {/* HERO */}
+            <div className="hidden md:max-h-min border">
+                <div className=" md:flex md:gap-5 rounded-xl">
                     <figure className="w-full flex items-center justify-center md:hidden bg-base-100/20 rounded-xl shadow-lg">
                         <img src={HeroImg} alt="Hero image" className="w-70/100 h-full object-cover" />
                     </figure>
@@ -104,16 +109,17 @@ const Home = () => {
                         <img src={HeroImg} alt="Hero image" className="w-full h-full object-cover" />
                     </figure>
                 </div>
-                <div className="w-fit mx-auto mt-5 hidden md:block">
+                {/* <div className="w-fit mx-auto mt-5 hidden md:block">
                     <a
                         href="#home"
                         className="flex items-center text-2xl gap-2 underline underline-offset-8 font-bold text-primary bg-base-100 px-10 shadow-lg border-primary py-3 rounded-md"
                         aria-label="Explorar inicio">
                         <FaArrowCircleDown className="text-primary" />Explorar inicio
                     </a>
-                </div>
+                </div> */}
             </div>
-            <div className="p-1 md:p-5 md:mt-20 space-y-5 md:space-y-10">
+            <Hero />
+            <div className=" md:mt-30 space-y-5 md:space-y-10">
                 <section id="home" className="home-section">
                     <SectionBar />
                     <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300">Categorias principales</h1>
@@ -216,7 +222,7 @@ const Home = () => {
                         <p className="home-section-subtitle"> <BiPackage className="text-2xl" />Conoce la selección de productos que tenemos para ti</p>
                     </div>
 
-                    {isLoading && !error && !data && (
+                    {isLoading && !error && !ads && (
                         <div className="w-full flex flex-wrap gap-10 mt-5">
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
@@ -224,16 +230,16 @@ const Home = () => {
                             <ProductVersionCardSkeleton />
                         </div>
                     )}
-                    {!isLoading && !data && error && (
+                    {!isLoading && !ads && error && (
                         <div className="py-5">
                             <p className="text-2xl">Ocurrio un error inesperado</p>
                             <p className="text-error py-5 text-lg">{getErrorMessage(error)}</p>
                             <button type="button" className="btn btn-primary mt-5" onClick={() => refetch()}>Reintentar?</button>
                         </div>
                     )}
-                    {!isLoading && !error && data && (
-                        <div className="w-full grid grid-cols-2 md:flex md:flex-wrap md:gap-10 mt-5">
-                            {data.map((data, index) => (
+                    {!isLoading && !error && ads && (
+                        <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mt-5">
+                            {ads.data.map((data, index) => (
                                 <ProductVersionCard key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
                             ))}
                         </div>

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa6';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 
 interface Props {
     currentPage: number;
@@ -47,7 +47,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página anterior"
             >
-                <FaArrowRight size={18} className="sm:w-5 sm:h-5" />
+                <FaChevronRight className="sm:w-3 sm:h-3" />
             </button>
 
             {getPageNumbers().map((page, idx) => (
@@ -77,7 +77,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }: Props) =
                 className="p-1.5 sm:p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Página siguiente"
             >
-                <FaArrowLeft size={18} className="sm:w-5 sm:h-5" />
+                <FaChevronLeft className="sm:w-3 sm:h-3" />
             </button>
         </div>
     );

@@ -24,10 +24,11 @@ import Certifications from "./modules/home/design/Certifications"
 import Coverage from "./modules/home/design/Coverage"
 import Distributors from "./modules/home/design/Distributors"
 import Contact from "./modules/home/design/Contact"
+import FrecuentQuestions from "./modules/home/design/FrecuentQuestions"
 import ShoppingCartResume from "./modules/shopping/design/ShoppingCartResume"
 import Checkout from "./modules/shopping/design/Checkout"
 import NotFoundPage from "./global/design/NotFoundPage"
-import PoliticaPrivacidad from "./modules/policies/PoliticaPrivacidad"
+import PrivacyPolicy from "./modules/policies/PrivacyPolicy"
 import CustomerFavorites from "./modules/customers/design/CustomerFavorites"
 import CreateAccount from "./modules/auth/design/CreateAccount"
 import CustomerPersonalInfo from "./modules/customers/design/CustomerPersonalInfo"
@@ -40,11 +41,13 @@ import PNCPolicy from "./modules/policies/PNCPolicy"
 import Orders from "./modules/orders/design/Orders"
 import OrderDetail from "./modules/orders/design/OrderDetail"
 import PaymentError from "./modules/payments/design/PaymentError"
+import TermsAndConditions from "./modules/policies/TermsAndConditions"
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import RestorePassword from "./modules/auth/design/RestorePassword"
+import ScrollToTop from "./global/components/ScrollToTop"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -60,12 +63,13 @@ const queryClient = new QueryClient({
 // Wrapper para los providers
 function RootLayout() {
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "TU_CLAVE_DE_SITIO_RECAPTCHA"}>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "TU_CLIENT_ID_DE_GOOGLE"}>
+    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <QueryClientProvider client={queryClient}>
           {/* <ReactQueryDevtools initialIsOpen={false} /> */}
           <ThemeProvider>
             <TriggerAlertProvider>
+              <ScrollToTop />
               <Outlet />
             </TriggerAlertProvider>
           </ThemeProvider>
@@ -130,10 +134,12 @@ const router = createBrowserRouter([
           { path: "/cobertura", element: <Coverage /> },
           { path: "/contacto", element: <Contact /> },
           { path: "/distribuidores", element: <Distributors /> },
+          { path: "/preguntas-frecuentes", element: <FrecuentQuestions /> },
 
           // Policies
-          { path: "/politica-de-privacidad", element: <PoliticaPrivacidad /> },
+          { path: "/politica-de-privacidad", element: <PrivacyPolicy /> },
           { path: "/politica-de-devolucion", element: <PNCPolicy /> },
+          { path: "/terminos-y-condiciones", element: <TermsAndConditions /> },
 
         ]
       },

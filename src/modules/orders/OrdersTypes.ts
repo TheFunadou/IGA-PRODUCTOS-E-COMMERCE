@@ -1,4 +1,4 @@
-import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressPaymentType } from "../customers/CustomerTypes";
+import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressPaymentType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
 import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
@@ -44,12 +44,20 @@ export type OrderPaymentDetails = {
 };
 
 
-export type CreateOrderType = {
-    payment_method: PaymentProvidersType;
-    shopping_cart: PaymentShoppingCart[];
-    address: string;
-    coupon_code?: string;
-};
+// export type CreateOrderType = {
+//     payment_method: PaymentProvidersType;
+//     shopping_cart: PaymentShoppingCart[];
+//     address: string;
+//     coupon_code?: string;
+// };
+
+// export type CreateOrderTypeGuest = {
+//     payment_method: PaymentProvidersType;
+//     shopping_cart: PaymentShoppingCart[];
+//     form: GuestCreateOrderFormType;
+//     coupon_code?: string;
+//     session_id: string;
+// };
 
 export type Shipping = {
     shipping_status: ShippingStatus;
@@ -61,7 +69,8 @@ export type Shipping = {
     updated_at: Date
 };
 
-export type ProcessOrderType = Omit<CreateOrderType, "payment_method">;
+// export type ProcessOrderType = Omit<CreateOrderType, "payment_method">;
+// export type ProcessOrderTypeGuest = Omit<CreateOrderTypeGuest, "payment_method">;
 
 export type OrderCreatedResume = {
     shippingCost: number;
@@ -162,3 +171,11 @@ export type GetOrderDetails = {
     status: OrderStatusType;
     order?: OrderDetails;
 };
+
+export type CreateOrderType = {
+    orderItems: PaymentShoppingCart[];
+    addressUUID?: string;
+    couponCode?: string;
+    paymentProvider: PaymentProviders;
+    guestForm?: GuestCreateOrderFormType;
+}

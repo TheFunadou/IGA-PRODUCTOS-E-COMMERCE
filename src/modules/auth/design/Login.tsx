@@ -165,7 +165,7 @@ const Login = () => {
                     </h1>
 
                     {/* Trust badges: ocultos en mobile, visibles desde md */}
-                    <div className="relative z-10 mt-8 grid grid-cols-2 gap-3 hidden md:grid">
+                    <div className="relative z-10 mt-8 grid-cols-2 gap-3 hidden md:grid">
                         {trustItems.map((item, i) => (
                             <div
                                 key={i}
@@ -188,7 +188,7 @@ const Login = () => {
                     </div>
 
                     {/* Trust badges compactos en tablet (sm visible, md oculto por el grid de arriba) */}
-                    <div className="relative z-10 mt-5 flex flex-wrap gap-2 md:hidden sm:flex hidden">
+                    <div className="relative z-10 mt-5 flex-wrap gap-2 md:hidden sm:flex hidden">
                         {trustItems.map((item, i) => (
                             <div
                                 key={i}

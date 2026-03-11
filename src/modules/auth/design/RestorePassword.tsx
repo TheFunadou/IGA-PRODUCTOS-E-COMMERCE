@@ -212,14 +212,12 @@ const RestorePassword = () => {
     const [countdownKey, setCountdownKey] = useState(0);
     const [passwordStrength, setPasswordStrength] = useState(0);
 
-    // Form Steps setups
     const { register: regEmail, handleSubmit: handleEmail, formState: { errors: errEmail } } = useForm<EmailFormType>();
     const { register: regToken, handleSubmit: handleToken, formState: { errors: errToken }, reset: resetToken } = useForm<VerificationFormType>();
     const { register: regPwd, handleSubmit: handlePwd, formState: { errors: errPwd }, watch: watchPwd } = useForm<PasswordFormType>();
 
     if (isAuth) navigate("/");
 
-    // Strength updater
     useEffect(() => {
         const sub = watchPwd((v) => {
             setPasswordStrength(v.newPassword ? stringStrengthEvaluator(v.newPassword) : 0);
@@ -227,7 +225,6 @@ const RestorePassword = () => {
         return () => sub.unsubscribe();
     }, [watchPwd]);
 
-    // Mutations
     const sendTokenMut = useMutation({
         mutationFn: async (mail: string) => await sendRestorePasswordToken({ sessionId: sessionId!, email: mail }),
         onSuccess: (_, mail) => {
@@ -306,7 +303,6 @@ const RestorePassword = () => {
         { url: IMG4, label: "Envíos garantizados" },
     ];
 
-    /* ══ Clases reutilizables de botón primario ══ */
     const btnPrimary =
         "mt-2 w-full h-[42px] flex items-center justify-center gap-2 rounded-md " +
         "bg-primary text-white text-sm font-semibold tracking-wide transition-all duration-150 " +
@@ -314,37 +310,65 @@ const RestorePassword = () => {
         "active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed";
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-8 bg-base-300 rounded-xl">
+        // Wrapper — idéntico al Login
+        <div className="min-h-screen flex items-center justify-center
+            px-4 py-6
+            sm:px-6 sm:py-8
+            md:px-8 md:py-10
+            bg-base-300 rounded-xl">
 
-            <div className="w-full max-w-[960px] flex overflow-hidden rounded-2xl
-        shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06),0_20px_40px_rgba(0,0,0,0.06)]">
+            {/* Card — idéntico al Login */}
+            <div className="w-full
+                max-w-sm
+                sm:max-w-xl
+                md:max-w-[960px]
+                flex flex-col
+                md:flex-row
+                overflow-hidden rounded-2xl
+                shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06),0_20px_40px_rgba(0,0,0,0.06)]">
 
-                <div className="relative w-[52%] bg-slate-900 px-10 py-12 flex flex-col justify-between overflow-hidden">
+                {/* ══ Panel izquierdo: hero/branding — idéntico al Login ══ */}
+                <div className="relative
+                    w-full md:w-[52%]
+                    bg-slate-900
+                    px-6 py-8
+                    sm:px-8 sm:py-10
+                    md:px-10 md:py-12
+                    flex flex-col justify-between
+                    overflow-hidden
+                    min-h-[180px] sm:min-h-[220px] md:min-h-0">
 
-                    {/* Gradiente ambiental */}
+                    {/* Gradientes ambientales */}
                     <div className="pointer-events-none absolute inset-0 opacity-100
-            bg-[radial-gradient(ellipse_70%_50%_at_20%_80%,rgba(29,78,216,0.45)_0%,transparent_60%)]" />
+                        bg-[radial-gradient(ellipse_70%_50%_at_20%_80%,rgba(29,78,216,0.45)_0%,transparent_60%)]" />
                     <div className="pointer-events-none absolute inset-0
-            bg-[radial-gradient(ellipse_40%_40%_at_85%_10%,rgba(59,130,246,0.18)_0%,transparent_55%)]" />
+                        bg-[radial-gradient(ellipse_40%_40%_at_85%_10%,rgba(59,130,246,0.18)_0%,transparent_55%)]" />
 
                     {/* Logo */}
-                    <img src={IGALogo} alt="IGA Productos" className="relative z-10 w-20" />
+                    <img
+                        src={IGALogo}
+                        alt="IGA Productos"
+                        className="relative z-10 w-50 sm:w-16 md:w-25 lg:w-35"
+                    />
 
-                    {/* Headline editorial */}
-                    <h1 className="relative z-10 mt-10 text-[2.1rem] leading-[1.18] font-normal
-            text-white tracking-[-0.01em] font-serif">
+                    {/* Headline */}
+                    <h1 className="relative z-10
+                        mt-4 md:mt-10
+                        text-xl sm:text-2xl md:text-[2.1rem]
+                        leading-[1.18] font-normal
+                        text-white tracking-[-0.01em] font-serif">
                         Recupera el acceso a tu cuenta{" "}
-                        <em className=" text-blue-300 font-serif">fácil y rápido.</em>
+                        <em className="text-blue-300 font-serif">fácil y rápido.</em>
                     </h1>
 
-                    {/* Trust badges */}
-                    <div className="relative z-10 mt-8 grid grid-cols-2 gap-3">
+                    {/* Trust badges desktop (md+) */}
+                    <div className="relative z-10 mt-8 grid-cols-2 gap-3 hidden md:grid">
                         {trustItems.map((item, i) => (
                             <div
                                 key={i}
                                 className="flex items-center gap-3 rounded-xl
-                  border border-white/10 bg-white/[0.06] backdrop-blur-sm
-                  px-4 py-3 transition-colors duration-150 hover:bg-white/[0.09]"
+                                    border border-white/10 bg-white/[0.06] backdrop-blur-sm
+                                    px-4 py-3 transition-colors duration-150 hover:bg-white/[0.09]"
                             >
                                 <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0 bg-white/10">
                                     <img
@@ -359,17 +383,41 @@ const RestorePassword = () => {
                             </div>
                         ))}
                     </div>
+
+                    {/* Trust badges compactos tablet (sm visible, md oculto) */}
+                    <div className="relative z-10 mt-5 flex-wrap gap-2 md:hidden sm:flex hidden">
+                        {trustItems.map((item, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center gap-2 rounded-lg
+                                    border border-white/10 bg-white/[0.06] backdrop-blur-sm
+                                    px-3 py-2"
+                            >
+                                <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-white/10">
+                                    <img src={item.url} alt={item.label} className="w-full h-full object-cover brightness-110" />
+                                </div>
+                                <span className="text-[0.68rem] font-medium text-slate-200/80 leading-snug">
+                                    {item.label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                {/* ══ Panel derecho: formulario ══ */}
-                <div className="w-[48%] bg-white px-10 py-12 flex flex-col overflow-y-auto">
+                {/* ══ Panel derecho: formulario — idéntico al Login ══ */}
+                <div className="w-full md:w-[48%]
+                    bg-white
+                    px-6 py-8
+                    sm:px-8 sm:py-10
+                    md:px-10 md:py-12
+                    flex flex-col overflow-y-auto">
 
                     <StepIndicator step={step} />
 
                     {/* ═══════════ PASO 1 ═══════════ */}
                     {step === 1 && (
                         <>
-                            <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
+                            <h2 className="text-lg sm:text-[1.2rem] md:text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
                                 Recuperar cuenta
                             </h2>
                             <p className="text-[0.82rem] text-slate-400 mb-6 leading-relaxed">
@@ -403,8 +451,7 @@ const RestorePassword = () => {
                                 </button>
                             </form>
 
-                            {/* Footer */}
-                            <div className="mt-5 pt-5 border-t border-slate-100 flex flex-col gap-2">
+                            <div className="mt-7 pt-5 border-t border-slate-100 flex flex-col gap-2">
                                 <Link
                                     to="/iniciar-sesion"
                                     className="text-[0.80rem] font-medium text-blue-600 hover:text-blue-700 hover:underline"
@@ -424,7 +471,7 @@ const RestorePassword = () => {
                     {/* ═══════════ PASO 2 ═══════════ */}
                     {step === 2 && (
                         <>
-                            <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
+                            <h2 className="text-lg sm:text-[1.2rem] md:text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
                                 Verifica tu identidad
                             </h2>
                             <p className="text-[0.82rem] text-slate-400 mb-4 leading-relaxed">
@@ -432,7 +479,7 @@ const RestorePassword = () => {
                             </p>
 
                             <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200/60
-                rounded-md px-3 py-2 mb-5 text-[0.80rem] font-medium text-blue-700 break-all">
+                                rounded-md px-3 py-2 mb-5 text-[0.80rem] font-medium text-blue-700 break-all">
                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
                                     <rect x="1" y="3" width="14" height="10" rx="2" stroke="#1d4ed8" strokeWidth="1.5" />
                                     <path d="M1 5l7 5 7-5" stroke="#1d4ed8" strokeWidth="1.5" strokeLinecap="round" />
@@ -441,7 +488,7 @@ const RestorePassword = () => {
                             </div>
 
                             <div className="flex items-center justify-between bg-slate-50 border border-slate-200
-                rounded-md px-4 py-3 mb-5">
+                                rounded-md px-4 py-3 mb-5">
                                 <span className="text-[0.75rem] font-medium text-slate-500">
                                     El código expira en
                                 </span>
@@ -491,8 +538,8 @@ const RestorePassword = () => {
                                     onClick={handleResend}
                                     aria-label="Reenviar código de verificación"
                                     className="text-[0.80rem] font-medium text-blue-600 transition-colors
-                    hover:text-blue-700 hover:underline
-                    disabled:text-slate-400 disabled:cursor-not-allowed disabled:no-underline"
+                                        hover:text-blue-700 hover:underline
+                                        disabled:text-slate-400 disabled:cursor-not-allowed disabled:no-underline"
                                 >
                                     {resendTokenMut.isPending ? <Spinner dark /> : "Reenviar código"}
                                 </button>
@@ -504,9 +551,9 @@ const RestorePassword = () => {
                                 type="button"
                                 onClick={() => { setStep(1); setCanResend(false); }}
                                 className="mt-3 w-full h-[38px] flex items-center justify-center gap-2
-                  rounded-md border border-slate-200 bg-transparent text-slate-600
-                  text-[0.82rem] font-medium transition-all duration-150
-                  hover:bg-slate-50 hover:border-slate-300"
+                                    rounded-md border border-slate-200 bg-transparent text-slate-600
+                                    text-[0.82rem] font-medium transition-all duration-150
+                                    hover:bg-slate-50 hover:border-slate-300"
                             >
                                 ← Cambiar correo electrónico
                             </button>
@@ -516,7 +563,7 @@ const RestorePassword = () => {
                     {/* ═══════════ PASO 3 ═══════════ */}
                     {step === 3 && (
                         <>
-                            <h2 className="text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
+                            <h2 className="text-lg sm:text-[1.2rem] md:text-[1.35rem] font-semibold text-slate-900 tracking-tight mb-1">
                                 Establece tu nueva contraseña
                             </h2>
                             <p className="text-[0.82rem] text-slate-400 mb-6 leading-relaxed">

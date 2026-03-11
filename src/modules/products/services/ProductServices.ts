@@ -1,13 +1,8 @@
 import api from "../../../api/api.config";
-import type { AddPVReviewType, GetProductVersionReviewsType, ProductVersionCardFilters, ProductVersionCardType, ProductVersionDetailType, ProductVersionRandomOptions, PVCardsResponseType, PVReviewResumeType, SearchedProductType } from "../ProductTypes"
+import type { AddPVReviewType, GetProductVersionReviewsType, ProductVersionCardFilters, ProductVersionDetailType, PVCardsResponseType, PVReviewResumeType, SearchedProductType } from "../ProductTypes"
 
 export const searchProductVersionCards = async (params: ProductVersionCardFilters): Promise<PVCardsResponseType | null> => {
     const { data } = await api.post<PVCardsResponseType | null>("product-version/search", params);
-    return data;
-};
-
-export const searchCardsRandom = async (options: ProductVersionRandomOptions): Promise<ProductVersionCardType[]> => {
-    const { data } = await api.get<ProductVersionCardType[]>("product-version/random-cards", { params: options });
     return data;
 };
 

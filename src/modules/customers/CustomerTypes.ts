@@ -31,6 +31,14 @@ export type GuestBillingFormType = Omit<CustomerAddressType, "uuid" | "default_a
     rfc: string;
 };
 
+export type GuestCreateOrderFormType = Omit<CustomerAddressType, "uuid" | "default_address"> & {
+    first_name: string;
+    last_name: string;
+    email: string;
+    consent: boolean;
+};
+
+
 export type onToogleFavoriteType = {
     added: boolean;
     message: string;

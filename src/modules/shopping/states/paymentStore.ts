@@ -1,9 +1,9 @@
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "../../auth/states/authStore";
 import { create } from "zustand";
-import { PaymentFactory } from "../PaymentFactory";
 import type { CreateOrderType, OrderCreatedType } from "../../orders/OrdersTypes";
 import { formatAxiosError } from "../../../api/helpers";
+import { createProviderOrder } from "../services/PaymentServices";
 
 interface PaymentStoreState {
     buyNow: { sku: string, quantity: number } | null;
@@ -25,14 +25,11 @@ export const usePaymentStore = create<PaymentStoreState>()(
             buyNow: null,
 
             createOrder: async (data: CreateOrderType): Promise<void> => {
-                if (!data.payment_method) throw new Error("Selecciona un método de pago");
                 const { isAuth, csrfToken } = useAuthStore.getState();
-
                 if (isAuth) {
                     try {
                         set({ isLoading: true });
-                        const strategy = PaymentFactory.create(data.payment_method);
-                        const order = await strategy.createOrder({ data: { shopping_cart: data.shopping_cart, address: data.address }, csrfToken: csrfToken!, isAuth });
+                        const order = await createProviderOrder({ dto: data, csrfToken: csrfToken! });
                         set({ order });
                     } catch (error) {
                         set({ error: formatAxiosError(error) });

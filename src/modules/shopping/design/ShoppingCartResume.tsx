@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { SiMercadopago } from "react-icons/si";
 import { useAuthStore } from "../../auth/states/authStore";
 import { usePaymentStore } from "../states/paymentStore";
@@ -7,38 +8,642 @@ import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
 import { formatPrice } from "../../products/Helpers";
 import { calcShippingCost, closeModal, showModal } from "../../../global/GlobalHelpers";
-import ShoppingCartProductResume from "../components/ShoppingCartProductResume";
 import GuestAdvertisement from "../components/GuestAdvertisement";
 import AddressesModal from "../components/AddressesModal";
 import type { PaymentProvidersType, ShoppingCartType } from "../ShoppingTypes";
-import type { CustomerAddressType, GuestFormType } from "../../customers/CustomerTypes";
+import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 import type { PaymentShoppingCart } from "../../orders/OrdersTypes";
 import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useShoppingCart } from "../hooks/useShoppingCart";
 import { BiMinus, BiPlus } from "react-icons/bi";
+import ShoppingCartItem from "../components/ShoppingCartItem";
+import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json";
+import {
+    FaLock,
+    FaMapMarkerAlt,
+    FaShippingFast,
+    FaUserAlt,
+    FaTag,
+    FaGift,
+    FaStar,
+    FaUserPlus,
+    FaShoppingBag,
+} from "react-icons/fa";
+import { MdShoppingBag, MdCheckBox } from "react-icons/md";
+import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 
-/**
- * Shopping Cart Resume Component
- * 
- * Displays the checkout summary including:
- * - Selected products from cart
- * - Shipping address selection (for authenticated users)
- * - Guest checkout form (for non-authenticated users)
- * - Price breakdown (subtotal, IVA, shipping, total)
- * - Payment method selection
- * - Order creation and payment processing
- */
+// ── Guest Form Component ─────────────────────────────────────────────────────
+
+interface GuestCheckoutFormProps {
+    onSave: (data: GuestCreateOrderFormType) => void;
+    guestAddress?: GuestCreateOrderFormType | null;
+}
+
+const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormProps) => {
+
+    const defaultCountry: CountriesPhoneCodeType = {
+        nameES: "México",
+        nameEN: "Mexico",
+        iso2: "MX",
+        iso3: "MEX",
+        phoneCode: "+52",
+    };
+
+    const [country, setCountry] = useState<CountriesPhoneCodeType>(defaultCountry);
+    const [currentCountryFlag, setCurrentCountryFlag] = useState<string>("https://flagsapi.com/MX/flat/64.png");
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+    } = useForm<GuestCreateOrderFormType>({
+        defaultValues: {
+            consent: guestAddress?.consent || false,
+            email: guestAddress?.email || "",
+            first_name: guestAddress?.first_name || "",
+            last_name: guestAddress?.last_name || "",
+            recipient_name: guestAddress?.recipient_name || "",
+            recipient_last_name: guestAddress?.recipient_last_name || "",
+            country: guestAddress?.country || "",
+            state: guestAddress?.state || "",
+            city: guestAddress?.city || "",
+            locality: guestAddress?.locality || "",
+            neighborhood: guestAddress?.neighborhood || "",
+            street_name: guestAddress?.street_name || "",
+            number: guestAddress?.number || "",
+            aditional_number: guestAddress?.aditional_number || undefined,
+            zip_code: guestAddress?.zip_code || "",
+            address_type: guestAddress?.address_type || "Casa",
+            floor: guestAddress?.floor || undefined,
+            country_phone_code: guestAddress?.country_phone_code || "+52",
+            contact_number: guestAddress?.contact_number || "",
+            references_or_comments: guestAddress?.references_or_comments || undefined,
+        },
+    });
+
+    useEffect(() => {
+        setCurrentCountryFlag(`https://flagsapi.com/${country.iso2}/flat/64.png`);
+        setValue("country_phone_code", country.phoneCode, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+    }, [country]);
+
+    const inputClass = (hasError: boolean) =>
+        clsx(
+            "input input-sm sm:input-md w-full text-sm border rounded-lg bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+            hasError ? "border-error" : "border-base-300"
+        );
+
+    const selectClass = (hasError: boolean) =>
+        clsx(
+            "select select-sm sm:select-md w-full text-sm border rounded-lg bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+            hasError ? "border-error" : "border-base-300"
+        );
+
+    return (
+        <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-5">
+
+            {/* Personal Data */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <FaUserAlt className="text-primary text-sm" />
+                    <h3 className="text-sm font-bold text-base-content uppercase">Datos personales</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Nombre(s) *</label>
+                        <input
+                            {...register("first_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,50}$/, message: "Solo letras, 2-50 caracteres" },
+                            })}
+                            placeholder="Juan"
+                            className={inputClass(!!errors.first_name)}
+                        />
+                        {errors.first_name && <p className="text-error text-xs mt-1">{errors.first_name.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Apellidos *</label>
+                        <input
+                            {...register("last_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Solo letras, 2-80 caracteres" },
+                            })}
+                            placeholder="García López"
+                            className={inputClass(!!errors.last_name)}
+                        />
+                        {errors.last_name && <p className="text-error text-xs mt-1">{errors.last_name.message}</p>}
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-xs text-base-content/60 mb-1 block">Correo electrónico *</label>
+                        <input
+                            {...register("email", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/, message: "Correo inválido" },
+                            })}
+                            type="email"
+                            placeholder="juan@ejemplo.com"
+                            className={inputClass(!!errors.email)}
+                        />
+                        {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
+                    </div>
+                </div>
+            </div>
+
+            {/* Recipient Data */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <FaUserAlt className="text-primary text-sm" />
+                    <h3 className="text-sm font-bold text-base-content uppercase">Datos del destinatario</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Nombre del destinatario *</label>
+                        <input
+                            {...register("recipient_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,50}$/, message: "Solo letras, 2-50 caracteres" },
+                            })}
+                            placeholder="Juan"
+                            className={inputClass(!!errors.recipient_name)}
+                        />
+                        {errors.recipient_name && <p className="text-error text-xs mt-1">{errors.recipient_name.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Apellidos del destinatario *</label>
+                        <input
+                            {...register("recipient_last_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Solo letras, 2-80 caracteres" },
+                            })}
+                            placeholder="García López"
+                            className={inputClass(!!errors.recipient_last_name)}
+                        />
+                        {errors.recipient_last_name && <p className="text-error text-xs mt-1">{errors.recipient_last_name.message}</p>}
+                    </div>
+
+                    {/* ── Teléfono con selector de país ── */}
+                    <div className="sm:col-span-2">
+                        <label className="text-xs text-base-content/60 mb-1 block">Teléfono de contacto *</label>
+                        <div className="flex gap-2 items-center">
+                            <figure className="w-8 sm:w-10 flex-shrink-0">
+                                <img src={currentCountryFlag} alt={country.nameES} className="w-full h-auto" />
+                            </figure>
+                            <select
+                                defaultValue={JSON.stringify(defaultCountry)}
+                                className="w-20 sm:w-24 select select-sm sm:select-md text-xs sm:text-sm flex-shrink-0 border border-base-300 bg-base-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                                onChange={(e) => setCountry(JSON.parse(e.target.value))}
+                            >
+                                {CountriesAreaCodesJSON.map((data, index) => (
+                                    <option
+                                        key={index}
+                                        value={JSON.stringify({
+                                            nameES: data.nameES,
+                                            nameEN: data.nameEN,
+                                            iso2: data.iso2,
+                                            iso3: data.iso3,
+                                            phoneCode: `+${data.phoneCode}`,
+                                        })}
+                                    >
+                                        {data.iso3}
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                type="tel"
+                                {...register("contact_number", {
+                                    required: "Campo requerido",
+                                    pattern: { value: /^\d{7,15}$/, message: "Solo números, 7-15 dígitos" },
+                                })}
+                                placeholder="3312345678"
+                                className={clsx(inputClass(!!errors.contact_number), "flex-1")}
+                            />
+                        </div>
+                        {errors.contact_number && (
+                            <p className="text-error text-xs mt-1">{errors.contact_number.message}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Address */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <FaMapMarkerAlt className="text-primary text-sm" />
+                    <h3 className="text-sm font-bold text-base-content uppercase">Dirección de envío</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    {/* ── Tipo de dirección como select ── */}
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Tipo de dirección *</label>
+                        <select
+                            {...register("address_type", { required: "Campo requerido" })}
+                            className={selectClass(!!errors.address_type)}
+                        >
+                            <option value="Casa">Casa</option>
+                            <option value="Departamento">Departamento</option>
+                            <option value="Oficina">Oficina</option>
+                        </select>
+                        {errors.address_type && <p className="text-error text-xs mt-1">{errors.address_type.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">País *</label>
+                        <input
+                            {...register("country", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,60}$/, message: "Nombre de país inválido" },
+                            })}
+                            placeholder="México"
+                            className={inputClass(!!errors.country)}
+                        />
+                        {errors.country && <p className="text-error text-xs mt-1">{errors.country.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Estado *</label>
+                        <input
+                            {...register("state", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,60}$/, message: "Nombre de estado inválido" },
+                            })}
+                            placeholder="Jalisco"
+                            className={inputClass(!!errors.state)}
+                        />
+                        {errors.state && <p className="text-error text-xs mt-1">{errors.state.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Ciudad *</label>
+                        <input
+                            {...register("city", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Nombre de ciudad inválido" },
+                            })}
+                            placeholder="Guadalajara"
+                            className={inputClass(!!errors.city)}
+                        />
+                        {errors.city && <p className="text-error text-xs mt-1">{errors.city.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Localidad *</label>
+                        <input
+                            {...register("locality", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s0-9]{2,80}$/, message: "Localidad inválida" },
+                            })}
+                            placeholder="Centro"
+                            className={inputClass(!!errors.locality)}
+                        />
+                        {errors.locality && <p className="text-error text-xs mt-1">{errors.locality.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Código postal *</label>
+                        <input
+                            {...register("zip_code", {
+                                required: "Campo requerido",
+                                pattern: { value: /^\d{4,10}$/, message: "Código postal inválido" },
+                            })}
+                            placeholder="44100"
+                            className={inputClass(!!errors.zip_code)}
+                        />
+                        {errors.zip_code && <p className="text-error text-xs mt-1">{errors.zip_code.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Colonia *</label>
+                        <input
+                            {...register("neighborhood", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s0-9]{2,100}$/, message: "Colonia inválida" },
+                            })}
+                            placeholder="Colonia Americana"
+                            className={inputClass(!!errors.neighborhood)}
+                        />
+                        {errors.neighborhood && <p className="text-error text-xs mt-1">{errors.neighborhood.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Calle *</label>
+                        <input
+                            {...register("street_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s0-9.#°',-]{2,120}$/, message: "Calle inválida" },
+                            })}
+                            placeholder="Av. Juárez"
+                            className={inputClass(!!errors.street_name)}
+                        />
+                        {errors.street_name && <p className="text-error text-xs mt-1">{errors.street_name.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Número exterior *</label>
+                        <input
+                            {...register("number", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-Z0-9\-]{1,10}$/, message: "Número inválido (máx. 10 caracteres)" },
+                            })}
+                            placeholder="123"
+                            className={inputClass(!!errors.number)}
+                        />
+                        {errors.number && <p className="text-error text-xs mt-1">{errors.number.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">
+                            Número interior <span className="text-base-content/40">(opcional)</span>
+                        </label>
+                        <input
+                            {...register("aditional_number", {
+                                pattern: { value: /^[a-zA-Z0-9\-]{0,10}$/, message: "Número inválido" },
+                                setValueAs: (value) => value === "" ? undefined : value
+                            })}
+                            placeholder="Depto. 4B"
+                            className={inputClass(!!errors.aditional_number)}
+                        />
+                        {errors.aditional_number && <p className="text-error text-xs mt-1">{errors.aditional_number.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">
+                            Piso <span className="text-base-content/40">(opcional)</span>
+                        </label>
+                        <input
+                            {...register("floor", {
+                                pattern: { value: /^[a-zA-Z0-9\-\s]{0,10}$/, message: "Piso inválido" },
+                                setValueAs: (value) => value === "" ? undefined : value
+                            })}
+                            placeholder="2"
+                            className={inputClass(!!errors.floor)}
+                        />
+                        {errors.floor && <p className="text-error text-xs mt-1">{errors.floor.message}</p>}
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-xs text-base-content/60 mb-1 block">
+                            Referencias o comentarios <span className="text-base-content/40">(opcional)</span>
+                        </label>
+                        <input
+                            {...register("references_or_comments", {
+                                maxLength: { value: 255, message: "Máximo 255 caracteres" },
+                                setValueAs: (value) => value === "" ? undefined : value
+                            })}
+                            placeholder="Entre calles Reforma y Morelos, casa azul"
+                            className={inputClass(!!errors.references_or_comments)}
+                        />
+                        {errors.references_or_comments && <p className="text-error text-xs mt-1">{errors.references_or_comments.message}</p>}
+                    </div>
+                </div>
+            </div>
+
+            {/* Consent */}
+            <div className={clsx(
+                "flex items-start gap-3 p-3 rounded-xl border",
+                errors.consent ? "border-error bg-error/5" : "border-base-300 bg-base-200"
+            )}>
+                <input
+                    type="checkbox"
+                    {...register("consent", {
+                        required: "Debes aceptar el consentimiento para continuar"
+                    })}
+                    className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0"
+                />
+                <div>
+                    <p className="text-xs text-base-content/70 leading-relaxed">
+                        Acepto el tratamiento de mis datos personales conforme al aviso de privacidad y autorizo el uso de mi información para procesar este pedido y enviarme actualizaciones relacionadas.
+                    </p>
+                    {errors.consent && <p className="text-error text-xs mt-1">{errors.consent.message}</p>}
+                </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-sm sm:btn-md w-full gap-2 font-bold">
+                <FaShippingFast />
+                Guardar y continuar con envío
+            </button>
+        </form>
+    );
+};
+
+// ── Auth Prompt Component ────────────────────────────────────────────────────
+
+interface AuthPromptProps {
+    onContinueAsGuest: () => void;
+}
+
+const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
+    return (
+        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-primary" />
+                    Dirección de envío
+                </h2>
+            </div>
+
+            <div className="p-5 flex flex-col gap-5">
+                {/* Sign in CTA */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FaUserPlus className="text-primary text-lg" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="font-bold text-base-content text-sm sm:text-base">¿Ya tienes cuenta? Inicia sesión</p>
+                        <p className="text-xs text-base-content/50 mt-0.5">Accede a tus direcciones guardadas y completa tu compra más rápido</p>
+                    </div>
+                    <Link
+                        to="/iniciar-sesion"
+                        className="btn btn-primary btn-sm flex-shrink-0 w-full sm:w-auto"
+                    >
+                        Iniciar sesión
+                    </Link>
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-base-300" />
+                    <span className="text-xs text-base-content/40 font-medium">o</span>
+                    <div className="flex-1 h-px bg-base-300" />
+                </div>
+
+                {/* Guest benefits warning */}
+                <div className="rounded-xl border border-warning/30 bg-warning/5 p-4">
+                    <div className="flex items-start gap-3">
+                        <FaGift className="text-warning text-lg flex-shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold text-base-content mb-1.5">
+                                ¡No te pierdas estos beneficios al registrarte!
+                            </p>
+                            <ul className="flex flex-col gap-1.5">
+                                {[
+                                    { icon: <FaStar className="text-warning text-xs" />, text: "Acumula puntos con cada compra y canjéalos por productos" },
+                                    { icon: <FaShoppingBag className="text-primary text-xs" />, text: "Guarda tus direcciones y agiliza futuros pedidos" },
+                                    { icon: <MdCheckBox className="text-info text-xs" />, text: "Historial completo de pedidos y seguimiento de envíos" },
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                        <span className="mt-0.5 flex-shrink-0">{item.icon}</span>
+                                        <span className="text-xs text-base-content/70">{item.text}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Continue as guest */}
+                <button
+                    type="button"
+                    onClick={onContinueAsGuest}
+                    className="btn btn-ghost btn-sm border border-base-300 hover:bg-base-200 gap-2 text-base-content/60 w-full"
+                >
+                    <FaUserAlt className="text-xs" />
+                    Continuar como invitado
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// ── Order Summary Component ──────────────────────────────────────────────────
+
+interface OrderSummaryProps {
+    subtotalBeforeIva: number;
+    iva: number;
+    shippingCost: number;
+    boxQty: number;
+    discount: number;
+    total: number;
+    selectedProductsCount: number;
+    subtotalWithDisc: number;
+    couponCode: string | null;
+    onCouponChange: (code: string) => void;
+    paymentProvider: PaymentProvidersType;
+    onPaymentProviderChange: (method: PaymentProvidersType) => void;
+    onCreateOrder: () => void;
+    orderLoading: boolean;
+    theme: string;
+}
+
+const OrderSummaryPanel = ({
+    subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
+    selectedProductsCount, couponCode, onCouponChange,
+    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme,
+}: OrderSummaryProps) => {
+    return (
+        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
+            {/* Header */}
+            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                <h2 className="text-sm font-bold text-base-content uppercase">Resumen del pedido</h2>
+            </div>
+
+            <div className="p-4 flex flex-col gap-4">
+                {/* Price breakdown */}
+                <div className="flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-base-content/60">Subtotal ({selectedProductsCount} {selectedProductsCount === 1 ? "producto" : "productos"})</span>
+                        <span className="font-medium">${formatPrice(subtotalBeforeIva.toString(), "es-MX")}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-base-content/60">IVA (16%)</span>
+                        <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${formatPrice(iva.toString(), "es-MX")}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm rounded-lg bg-base-200 px-3 py-2">
+                        <span className="flex items-center gap-1.5 text-base-content/70">
+                            <FaShippingFast className="text-primary text-sm" />
+                            Envío ({boxQty} {boxQty === 1 ? "caja" : "cajas"})
+                        </span>
+                        <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${formatPrice(shippingCost.toString(), "es-MX")}</span>
+                    </div>
+                    {discount > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-primary font-bold flex items-center gap-1.5">
+                                <FaTag className="text-xs" />
+                                Descuento
+                            </span>
+                            <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${formatPrice(discount.toString(), "es-MX")}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Total */}
+                <div className="border-t border-base-300 pt-3 flex items-center justify-between">
+                    <span className="text-sm sm:text-base font-bold text-base-content">Total estimado</span>
+                    <span className="text-lg sm:text-xl font-extrabold text-primary">
+                        ${formatPrice(total.toString(), "es-MX")}
+                    </span>
+                </div>
+
+                {/* Coupon */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-base-content/60 uppercase flex items-center gap-1.5">
+                        <FaTag className="text-xs text-primary" />
+                        Cupón de descuento
+                    </label>
+                    <input
+                        onChange={(e) => onCouponChange(e.target.value)}
+                        type="text"
+                        className="input input-sm w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        placeholder="Introduce tu código"
+                        defaultValue={couponCode ?? ""}
+                    />
+                </div>
+
+                {/* Payment method */}
+                <div className="flex flex-col gap-2">
+                    <p className="text-xs font-bold text-base-content/60 uppercase">Método de pago</p>
+                    <label
+                        className={clsx(
+                            "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
+                            paymentProvider === "mercado_pago"
+                                ? "border-primary/40 bg-primary/5"
+                                : "border-base-300 bg-base-200 hover:border-primary/30"
+                        )}
+                    >
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            className="radio radio-primary radio-sm"
+                            onClick={() => onPaymentProviderChange("mercado_pago")}
+                        />
+                        <div className="flex flex-col gap-0.5">
+                            <span className={clsx(
+                                "flex items-center gap-1.5 font-bold text-sm",
+                                theme === "ligth" ? "text-blue-500" : "text-base-content"
+                            )}>
+                                <SiMercadopago className="text-2xl" />
+                                Mercado Pago
+                            </span>
+                            <span className="text-[10px] text-base-content/50">
+                                Crédito, débito, OXXO, MSI y más
+                            </span>
+                        </div>
+                    </label>
+                </div>
+
+                {/* CTA */}
+                <button
+                    className="w-full btn btn-primary font-bold gap-2 mt-1"
+                    disabled={paymentProvider === null || orderLoading}
+                    onClick={onCreateOrder}
+                >
+                    {orderLoading ? (
+                        <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                        <FaLock className="text-sm" />
+                    )}
+                    {orderLoading ? "Procesando..." : "Proceder al pago"}
+                </button>
+
+                <p className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1">
+                    <FaLock className="text-[8px]" /> Pago seguro y encriptado
+                </p>
+            </div>
+        </div>
+    );
+};
+
+// ── Main Component ───────────────────────────────────────────────────────────
+
 const ShoppingCartResume = () => {
     document.title = "Iga Productos | Resumen de carrito";
-    // ============================================================================
-    // Constants
-    // ============================================================================
+
     const IVA = 0.16;
-    // ============================================================================
-    // Hooks & State Management
-    // ============================================================================
 
     const { theme } = useThemeStore();
     const navigate = useNavigate();
@@ -47,348 +652,365 @@ const ShoppingCartResume = () => {
     const { order, createOrder, isLoading: orderLoading } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
 
-    /** Selected shipping address for the order */
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
-
-    /** Calculated shipping cost based on number of boxes needed */
     const [shippingCost, setShippingCost] = useState<number>(0);
-
-    /** Number of boxes required for shipping */
     const [boxQty, setBoxQty] = useState<number>(1);
-
-    /** Selected payment provider (mercado_pago, paypal, etc.) */
-    const [paymentMethod, setPaymentMethod] = useState<PaymentProvidersType>(null);
-
-    /** Whether to show the guest checkout form */
-    const [_showGuestForm, setShowGuestForm] = useState<boolean>(false);
-    const [_guestBillingAddressChecked, _setGuestBillingAddressChecked] = useState<boolean>(false);
+    const [paymentProvider, setPaymentProvider] = useState<PaymentProvidersType>(null);
+    const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
-
-    // Modal references
-    const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
-    const addressesModal = useRef<HTMLDialogElement>(null);
-    const guestAddressFormModal = useRef<HTMLDialogElement>(null);
-
-    // Guest address form
-    const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
-    const [_billingGuestAddress, _setBillingGuestAddress] = useState<GuestFormType | null>(null);
-
+    const [guestAddressForm, setGuestAddressForm] = useState<GuestCreateOrderFormType | null>(null);
     const [discount, setDiscount] = useState<number>(0);
     const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);
     const [subtotalBeforeIva, setSubtotalBeforeIva] = useState<number>(0);
     const [total, setTotal] = useState<number>(0);
     const [iva, setIva] = useState<number>(0);
+    const [showGuestFormEdit, setShowGuestFormEdit] = useState<boolean>(false);
 
+    const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
+    const addressesModal = useRef<HTMLDialogElement>(null);
+    const guestAddressFormModal = useRef<HTMLDialogElement>(null);
 
-    // ============================================================================
-    // Data Fetching
-    // ============================================================================
+    const { data: addresses, isLoading: addressesLoading, error: addressesError, refetch: addressesRefetch } =
+        useFetchCustomerAddresses({ pagination: { page: 1, limit: 10 } });
 
-    /** Fetch customer addresses if authenticated */
-    const {
-        data: addresses,
-        isLoading: addressesLoading,
-        error: addressesError,
-        refetch: addressesRefetch
-    } = useFetchCustomerAddresses({ pagination: { page: 1, limit: 10 } });
-
-    // ============================================================================
-    // Computed Values
-    // ============================================================================
-
-    /** Products that are checked/selected for purchase */
     const selectedProducts: ShoppingCartType[] = shoppingCart && shoppingCart.filter(item => item.isChecked === true);
 
-    // ============================================================================
-    // Navigation Guard
-    // ============================================================================
-
-    /** Redirect to cart if no items are selected */
-    if (!shoppingCart || shoppingCart.length === 0 || shoppingCart.filter(item => item.isChecked === true).length < 1) {
+    if (!shoppingCart || shoppingCart.length === 0 || shoppingCart.filter(item => item.isChecked).length < 1) {
         navigate("/carrito-de-compras");
     }
 
-    /** Redirect to payment page if order was successfully created */
     if (order) navigate("/pagar-productos");
 
-    // ============================================================================
-    // Helper Functions
-    // ============================================================================
-
-    // ============================================================================
-    // Event Handlers
-    // ============================================================================
-
-    /**
-     * Sets the selected shipping address
-     * @param selected - The address selected by the user
-     */
     const handleSetSelectedAddress = (selected: CustomerAddressType) => setSelectedAddress(selected);
 
-    /**
-     * Handles the response from the guest advertisement modal
-     * If user confirms, shows the guest checkout form
-     * @param response - Whether user wants to continue as guest
-     */
     const modalResponse = (response: boolean) => {
         if (response) {
-            const modal = guestAdvertisementModal.current;
-            if (modal) { modal.close(); }
+            guestAdvertisementModal.current?.close();
             setShowGuestForm(true);
         }
     };
 
-    /**
-     * Creates an order and initiates payment process
-     * Validates that an address is selected before proceeding
-     */
-    const handleCreateOrder = async () => {
+    const handlePreValidation = () => {
+        if (isAuth) {
+            if (!selectedAddress) {
+                showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
+                return;
+            };
+        };
+
         if (!isAuth) {
-            showTriggerAlert("Message", "Registrate para poder continuar con tu compra ✨");
-            return;
-        }
-        if (!selectedAddress) {
-            showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
-            return;
-        }
+            if (!guestAddressForm) {
+                showTriggerAlert("Message", "Rellena el formulario de envío para continuar.");
+                return;
+            }
 
-        if (selectedAddress) {
-            const products: PaymentShoppingCart[] = selectedProducts.map(item => {
-                return {
-                    product: item.product_version.sku,
-                    quantity: item.quantity
-                }
-            });
+            if (guestAddressForm && !guestAddressForm.consent) {
+                showTriggerAlert("Message", "Debes aceptar el consentimiento antes de continuar.");
+                return;
+            }
+        }
+    }
 
+    const handleCreateOrder = async () => {
+        handlePreValidation();
+        if (!paymentProvider) {
+            showTriggerAlert("Message", "Seleccionar un método de pago para continuar.");
+            return;
+        };
+        const products: PaymentShoppingCart[] = selectedProducts.map(item => ({
+            product: item.product_version.sku,
+            quantity: item.quantity,
+        }));
+
+        if (isAuth && selectedAddress) {
             await createOrder({
-                shopping_cart: products,
-                address: selectedAddress.uuid,
-                payment_method: paymentMethod,
-                coupon_code: couponCode || undefined
+                orderItems: products,
+                addressUUID: selectedAddress.uuid,
+                paymentProvider,
+                couponCode: couponCode || undefined,
             });
+            return;
+        };
+
+        if (!isAuth && guestAddressForm && guestAddressForm.consent) {
+            await createOrder({
+                orderItems: products,
+                guestForm: guestAddressForm,
+                paymentProvider,
+                couponCode: couponCode || undefined,
+            });
+            return;
         }
     };
 
-    const handleGuestAddressForm = (savedAddress: GuestFormType) => setGuestAddressForm(savedAddress);
+    const handleGuestFormSave = (data: GuestCreateOrderFormType) => {
+        setGuestAddressForm(data);
+        setShowGuestFormEdit(false);
+    };
 
-    const calcShipping = (): { boxesQty: number, shippingCost: number } => {
-        const totalItems = shoppingCart.reduce((acc, current) => { return acc + current.quantity }, 0);
+    const calcShipping = () => {
+        const totalItems = shoppingCart.reduce((acc, curr) => acc + curr.quantity, 0);
         const { boxesQty, shippingCost } = calcShippingCost({ itemQty: totalItems });
         setBoxQty(boxesQty);
         setShippingCost(shippingCost);
         return { boxesQty, shippingCost };
     };
 
-    // ============================================================================
-    // Effects
-    // ============================================================================
-
-    /** Set default address when addresses are loaded */
     useEffect(() => {
         if (!addresses) return;
-        const defaultAddress = addresses.data.find(data => data.default_address === true);
-        if (!defaultAddress) return;
-        setSelectedAddress(defaultAddress);
+        const defaultAddress = addresses.data.find(d => d.default_address === true);
+        if (defaultAddress) setSelectedAddress(defaultAddress);
     }, [addresses]);
 
     useEffect(() => {
-        if (shoppingCart) {
-            const { shippingCost } = calcShipping();
-            /** Products that are checked/selected for purchase */
-            const onlyChecked = shoppingCart.filter(item => item.isChecked === true);
-
-            /** Subtotal including IVA (sum of all selected products) */
-            const subtotal = onlyChecked.reduce((acc, item) => {
-                const itemTotal = parseFloat(item.product_version.unit_price) * item.quantity;
-                return acc + itemTotal;
-            }, 0);
-
-            const discount = onlyChecked.reduce((acc, item) => {
-                if (item.isOffer && item.product_version.unit_price_with_discount) {
-                    return acc + (parseFloat(item.product_version.unit_price) - parseFloat(item.product_version.unit_price_with_discount)) * item.quantity;
-                } else {
-                    return acc;
-                }
-            }, 0);
-
-            const calcIva = subtotal * IVA;
-            const calcSubtotalBeforeIVA: number = subtotal - calcIva;
-            const subtotalWithDiscount = subtotal - discount;
-            const total: number = subtotalWithDiscount + shippingCost;
-
-            setSubtotalWithDisc(subtotalWithDiscount);
-            setSubtotalBeforeIva(calcSubtotalBeforeIVA);
-            setDiscount(discount);
-            setIva(calcIva);
-            setTotal(total);
-        }
+        if (!shoppingCart) return;
+        const { shippingCost } = calcShipping();
+        const onlyChecked = shoppingCart.filter(item => item.isChecked);
+        const subtotal = onlyChecked.reduce((acc, item) => acc + parseFloat(item.product_version.unit_price) * item.quantity, 0);
+        const disc = onlyChecked.reduce((acc, item) => {
+            if (item.isOffer && item.product_version.unit_price_with_discount) {
+                return acc + (parseFloat(item.product_version.unit_price) - parseFloat(item.product_version.unit_price_with_discount)) * item.quantity;
+            }
+            return acc;
+        }, 0);
+        const calcIva = subtotal * IVA;
+        setSubtotalBeforeIva(subtotal - calcIva);
+        setDiscount(disc);
+        setIva(calcIva);
+        setSubtotalWithDisc(subtotal - disc);
+        setTotal(subtotal - disc + shippingCost);
     }, [shoppingCart]);
 
-    /** Recalculate shipping cost when items or quantities change */
     useEffect(() => { calcShipping(); }, [updateQty]);
 
-    // ============================================================================
-    // Render
-    // ============================================================================
+    const orderSummaryProps: OrderSummaryProps = {
+        subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
+        selectedProductsCount: selectedProducts?.length ?? 0,
+        subtotalWithDisc,
+        couponCode,
+        onCouponChange: setCouponCode,
+        paymentProvider,
+        onPaymentProviderChange: setPaymentProvider,
+        onCreateOrder: handleCreateOrder,
+        orderLoading: orderLoading ?? false,
+        theme: theme!,
+    };
 
     return (
-        <div className="w-full px-3 sm:px-5 py-6 sm:py-10 rounded-xl bg-base-300">
-            <p className="text-2xl sm:text-3xl font-bold">Resumen del carrito</p>
+        <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200">
 
-            <section className="w-full flex flex-col lg:flex-row mt-5 gap-5">
-                {/* Left Column - Address & Products */}
-                <div className="w-full lg:w-3/4">
-                    {/* Address Selection / Guest Form */}
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <MdShoppingBag className="text-primary text-lg sm:text-xl" />
+                </div>
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
+                        Resumen del carrito
+                    </h1>
+                    <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
+                        Revisa tu pedido antes de pagar
+                    </p>
+                </div>
+            </div>
+
+            <section className="w-full flex flex-col lg:flex-row gap-5">
+
+                {/* ── Left Column ── */}
+                <div className="flex-1 min-w-0 flex flex-col gap-5">
+
+                    {/* Address Section */}
                     {isAuth ? (
-                        <div className="w-full px-3 sm:px-5 py-5 sm:py-7 rounded-xl bg-base-100">
-                            {/* Loading State */}
-                            {addressesLoading && !addresses && !addressesError && "Cargando direcciones de envio..."}
+                        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                                <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                    <FaMapMarkerAlt className="text-primary" />
+                                    Dirección de envío
+                                </h2>
+                            </div>
+                            <div className="p-4 sm:p-5">
+                                {addressesLoading && !addresses && !addressesError && (
+                                    <div className="flex items-center gap-3 py-4">
+                                        <span className="loading loading-spinner loading-sm text-primary" />
+                                        <span className="text-sm text-base-content/60">Cargando direcciones...</span>
+                                    </div>
+                                )}
 
-                            {/* Selected Address Display */}
-                            {!addressesLoading && !addressesError && selectedAddress &&
-                                <div className="w-full flex">
-                                    <div className="w-full">
-                                        <p className="text-lg sm:text-xl font-bold">Enviar a</p>
-                                        <p className="text-xl sm:text-2xl font-bold">{`${selectedAddress.recipient_name} ${selectedAddress.recipient_last_name} (${selectedAddress.address_type})`}</p>
-                                        <p className="text-base sm:text-lg">{selectedAddress.country_phone_code} {selectedAddress.contact_number}</p>
-                                        <p className="text-base sm:text-lg">{`${selectedAddress.street_name}, #${selectedAddress.number} EXT.${selectedAddress.aditional_number === "N/A" ? "" : `${selectedAddress.aditional_number} INT.`} ${selectedAddress.neighborhood}, ${selectedAddress.zip_code}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}</p>
-                                        {selectedAddress.default_address === true && <p className="text-lg sm:text-xl font-bold">Dirección predeterminada</p>}
+                                {!addressesLoading && !addressesError && selectedAddress && (
+                                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                                        <div className="flex-1">
+                                            <p className="text-base sm:text-lg font-extrabold text-base-content">
+                                                {selectedAddress.recipient_name} {selectedAddress.recipient_last_name}
+                                                <span className="ml-2 badge badge-sm badge-primary badge-outline">{selectedAddress.address_type}</span>
+                                            </p>
+                                            <p className="text-sm text-base-content/70 mt-1">
+                                                {selectedAddress.country_phone_code} {selectedAddress.contact_number}
+                                            </p>
+                                            <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
+                                                {`${selectedAddress.street_name} #${selectedAddress.number}${selectedAddress.aditional_number !== "N/A" ? ` Int. ${selectedAddress.aditional_number}` : ""}, ${selectedAddress.neighborhood}, ${selectedAddress.zip_code}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}
+                                            </p>
+                                            {selectedAddress.default_address && (
+                                                <span className="mt-2 inline-flex items-center gap-1 text-xs text-primary font-bold">
+                                                    <MdCheckBox /> Dirección predeterminada
+                                                </span>
+                                            )}
+                                        </div>
                                         <button
                                             type="button"
-                                            className="btn btn-primary btn-sm sm:btn-md cursor-pointer text-xs sm:text-sm mt-3 text-right"
+                                            className="btn btn-ghost btn-sm border border-base-300 hover:bg-base-200 text-xs flex-shrink-0 gap-1.5"
                                             onClick={() => showModal(addressesModal.current)}
                                         >
-                                            Elegir una dirección diferente
+                                            <FaMapMarkerAlt className="text-primary text-xs" />
+                                            Cambiar dirección
                                         </button>
                                     </div>
-                                </div>
-                            }
+                                )}
 
-                            {/* Error State */}
-                            {!addressesLoading && !addresses && addressesError &&
-                                <div>
-                                    <p className="text-base sm:text-lg">Error al cargar las direcciones de envio</p>
-                                    <button type="button" className="btn btn-primary btn-sm sm:btn-md mt-2" onClick={() => addressesRefetch()}>Cargar otra vez</button>
-                                </div>
-                            }
+                                {!addressesLoading && !addresses && addressesError && (
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-sm text-base-content/70">Error al cargar las direcciones de envío</p>
+                                        <button type="button" className="btn btn-primary btn-sm w-fit" onClick={() => addressesRefetch()}>
+                                            Reintentar
+                                        </button>
+                                    </div>
+                                )}
 
-                            {!addressesLoading && addresses && addresses.data.length === 0 &&
-                                <div>
-                                    <h2 className="text-lg sm:text-xl font-semibold">No tienes direcciones de envio registradas</h2>
-                                    <Link to={"/mi-cuenta/direcciones-de-envio"} type="button" className="underline text-primary text-sm sm:text-base">Crea una nueva dirección de envio ahora</Link>
-                                </div>
-                            }
+                                {!addressesLoading && addresses && addresses.data.length === 0 && (
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-sm font-semibold text-base-content">No tienes direcciones de envío registradas</p>
+                                        <Link to="/mi-cuenta/direcciones-de-envio" className="text-primary text-sm underline underline-offset-2 hover:opacity-70 transition-opacity">
+                                            Crea una nueva dirección ahora
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ) : (
-                        <div className="bg-base-100 rounded-xl px-3 sm:px-5 py-6 sm:py-10">
-                            <h3 className="text-base sm:text-lg">Inicia sesión para poder continuar con tu compra y añade mas comodidad y seguridad a tus compras 📦</h3>
-                            <Link to={"/iniciar-sesion"} className="btn btn-primary btn-sm sm:btn-md mt-3">Iniciar sesión</Link>
-                        </div>
+                        !showGuestForm ? (
+                            <AuthPrompt onContinueAsGuest={() => setShowGuestForm(true)} />
+                        ) : guestAddressForm && !showGuestFormEdit ? (
+                            // ── Resumen de dirección guardada ──
+                            <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                                <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                        <FaMapMarkerAlt className="text-primary" />
+                                        Dirección de envío (Invitado)
+                                    </h2>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowGuestFormEdit(true)}
+                                        className="text-xs text-base-content/50 hover:text-primary transition-colors underline underline-offset-2"
+                                    >
+                                        Editar
+                                    </button>
+                                </div>
+                                <div className="p-4 sm:p-5 flex flex-col gap-2">
+                                    <p className="text-base font-extrabold text-base-content">
+                                        {guestAddressForm.first_name} {guestAddressForm.last_name}
+                                    </p>
+                                    <p className="text-sm text-base-content/70">{guestAddressForm.email}</p>
+                                    <p className="text-sm text-base-content/60 leading-relaxed">
+                                        {`${guestAddressForm.street_name} #${guestAddressForm.number}${guestAddressForm.aditional_number ? ` Int. ${guestAddressForm.aditional_number}` : ""}, ${guestAddressForm.neighborhood}, ${guestAddressForm.locality}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}
+                                    </p>
+                                    <span className="inline-flex items-center gap-1 text-xs text-success font-bold mt-1">
+                                        <MdCheckBox /> Dirección guardada correctamente
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            // ── Formulario (nuevo o editando) ──
+                            <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                                <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                        <FaUserAlt className="text-primary text-xs" />
+                                        Datos de envío (Invitado)
+                                    </h2>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (guestAddressForm) {
+                                                setShowGuestFormEdit(false);
+                                            } else {
+                                                setShowGuestForm(false);
+                                            }
+                                        }}
+                                        className="text-xs text-base-content/50 hover:text-primary transition-colors underline underline-offset-2"
+                                    >
+                                        Volver
+                                    </button>
+                                </div>
+                                <div className="p-4 sm:p-5">
+                                    <GuestCheckoutFormComponent onSave={handleGuestFormSave} guestAddress={guestAddressForm} />
+                                </div>
+                            </div>
+                        )
                     )}
 
-                    {/* Selected Products List */}
-                    <div className="w-full flex flex-col gap-2 rounded-xl pt-3 sm:pt-5 pb-4 sm:pb-6 px-3 sm:px-5 mt-5 bg-base-100">
-                        {selectedProducts.map((item, index) => (
-                            <ShoppingCartProductResume
-                                key={index}
-                                data={item}
-                                onToggleCheck={toogleCheck}
-                                onUpdateQty={updateQty}
-                                onRemoveItem={remove}
-                                isAuth={isAuth ?? false}
-                            />
-                        ))}
-                        <div className="w-full border-t border-t-gray-300 pt-3 sm:pt-5">
-                            <p className="text-base sm:text-xl text-right">{`Subtotal (${shoppingCart && shoppingCart.filter(item => item.isChecked === true).length}) productos: `}<span className="font-bold">${formatPrice((subtotalWithDisc.toString()), "es-MX")}</span> </p>
+                    {/* Products List */}
+                    <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                        <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                            <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                <MdShoppingBag className="text-primary" />
+                                Productos seleccionados
+                            </h2>
                         </div>
+
+                        <div className="flex flex-col divide-y divide-base-200">
+                            {selectedProducts?.map((item, index) => (
+                                <div key={index} className="p-3 sm:p-4">
+                                    <ShoppingCartItem
+                                        data={item}
+                                        onToggleCheck={toogleCheck}
+                                        onUpdateQty={updateQty}
+                                        onRemoveItem={remove}
+                                        isAuth={isAuth ?? false}
+                                    />
+                                </div>
+                            ))}
+
+                            {/* Subtotal Footer */}
+                            <div className="px-4 py-3 bg-base-200 flex items-center justify-between">
+                                <span className="text-sm text-base-content/60">
+                                    Subtotal ({selectedProducts?.length ?? 0} {selectedProducts?.length === 1 ? "producto" : "productos"})
+                                </span>
+                                <span className="text-base sm:text-lg font-extrabold text-base-content">
+                                    ${formatPrice(subtotalWithDisc.toString(), "es-MX")}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Order Summary */}
+                    <div className="lg:hidden">
+                        <OrderSummaryPanel {...orderSummaryProps} />
                     </div>
                 </div>
 
-                {/* Right Column - Price Summary & Payment */}
-                <div className="w-full lg:w-1/4">
-                    <div className="w-full p-3 sm:p-5 rounded-xl bg-base-100">
-                        <h2 className="text-xl sm:text-2xl font-bold pb-5">Desglose</h2>
-                        {/* Price Breakdown */}
-                        <div className="w-full flex flex-col gap-2 border-b border-b-gray-400 pb-5">
-                            <div className="text-base sm:text-xl flex">
-                                <div className="w-3/5">
-                                    <p>Subtotal:</p>
-                                    <p className="text-xs">Antes de impuestos y descuentos</p>
-                                </div>
-                                <p className="pl-2 flex items-center"><BiPlus />${formatPrice((subtotalBeforeIva.toString()), "es-MX")}</p>
-                            </div>
-                            <div className="text-base sm:text-xl flex">
-                                <p className="w-3/5">IVA (16%):</p>
-                                <p className="pl-2 flex items-center"><BiPlus />${formatPrice((iva.toString()), "es-MX")}</p>
-                            </div>
-                            <div className="text-base sm:text-xl flex">
-                                <p className="w-3/5">Envio({boxQty > 1 ? `${boxQty} cajas` : `${boxQty} caja`}):</p>
-                                <p className="pl-2 flex items-center"><BiPlus />${formatPrice((shippingCost.toString()), "es-MX")}</p>
-                            </div>
-                            <div className="text-base sm:text-xl flex">
-                                <p className={clsx(
-                                    "w-3/5",
-                                    discount > 0 && "text-primary font-bold"
-                                )}>Descuento:</p>
-                                <p className={clsx(
-                                    "pl-2 flex items-center",
-                                    discount > 0 && "text-primary font-bold"
-                                )}><BiMinus />${formatPrice((discount.toString()), "es-MX")}</p>
-                            </div>
-                            <div className="text-xl sm:text-2xl font-bold flex">
-                                <p className="w-3/5">Total:</p>
-                                <p className="pl-2">${formatPrice((total.toString()), "es-MX")}</p>
-                            </div>
-                        </div>
-
-                        {/* Discount Coupon */}
-                        <div className="mt-5">
-                            <p className="text-base sm:text-xl">Cupón de descuento</p>
-                            <input onChange={(e) => setCouponCode(e.target.value)} type="text" className="w-full input input-sm sm:input-md text-sm sm:text-lg placeholder:text-xs sm:placeholder:text-sm mt-1" placeholder="Introduce el código de descuento" />
-                        </div>
-
-                        {/* Payment Method Selection */}
-                        <div className="mt-5">
-                            <p className="text-base sm:text-xl font-bold">Selecciona un metodo de pago</p>
-                            <div className="flex flex-col gap-4 pt-2">
-                                {/* Mercado Pago */}
-                                <div className="w-full flex items-center gap-3 sm:gap-5">
-                                    <input type="radio" name="payment_method" id="" className={clsx(
-                                        "radio radio-sm sm:radio-md",
-                                        theme === "ligth" ? "radio-primary" : "radio-white"
-                                    )} onClick={() => setPaymentMethod("mercado_pago")} />
-                                    <div className="relative w-full">
-                                        <button className="cursor-pointer mb-8 sm:mb-10">
-                                            <p className={clsx(
-                                                "flex items-center gap-2 font-bold text-base sm:text-xl",
-                                                theme === "ligth" ? "text-blue-500" : "text-white"
-                                            )}><SiMercadopago className="text-3xl sm:text-5xl" />Mercado pago</p>
-                                        </button>
-                                        <p className={clsx(
-                                            "text-xs sm:text-sm absolute bottom-0",
-                                            theme === "ligth" ? "text-blue-500" : "text-white"
-                                        )}>Pagos con tarjetas de crédito, debito, OXXO, MSI y mas...</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Proceed to Payment Button */}
-                            <button
-                                className="mt-6 sm:mt-10 btn btn-primary btn-sm sm:btn-md w-full text-sm sm:text-lg cursor-pointer"
-                                disabled={paymentMethod === null || orderLoading === true}
-                                onClick={handleCreateOrder}
-                            >
-                                {orderLoading ? ("Cargando...") : ("Proceder al pago")}
-                            </button>
-                        </div>
+                {/* ── Right Column ── */}
+                <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+                    <div className="hidden lg:block">
+                        <OrderSummaryPanel {...orderSummaryProps} />
                     </div>
                 </div>
             </section>
 
             {/* Modals */}
             <GuestAdvertisement refName={guestAdvertisementModal} onResponse={modalResponse} />
-            {addresses && selectedAddress && <AddressesModal ref={addressesModal} addresses={addresses.data} onSetSelected={handleSetSelectedAddress} selectedAddress={selectedAddress} onClose={() => closeModal(addressesModal.current)} />}
-            <GuestAddressFormModal ref={guestAddressFormModal} onClose={() => closeModal(guestAddressFormModal.current)} title={guestAddressForm ? "Editar dirección" : "Agregar dirección"} onSave={handleGuestAddressForm} />
+            {addresses && selectedAddress && (
+                <AddressesModal
+                    ref={addressesModal}
+                    addresses={addresses.data}
+                    onSetSelected={handleSetSelectedAddress}
+                    selectedAddress={selectedAddress}
+                    onClose={() => closeModal(addressesModal.current)}
+                />
+            )}
+            <GuestAddressFormModal
+                ref={guestAddressFormModal}
+                onClose={() => closeModal(guestAddressFormModal.current)}
+                title={guestAddressForm ? "Editar dirección" : "Agregar dirección"}
+                onSave={handleGuestFormSave as any}
+            />
         </div>
     );
 };

@@ -103,19 +103,15 @@ export type SearchedProductType = {
 
 export type ProductVersionCardFilters = {
     page?: number;
-    limit: number;
-    random?: boolean;
+    limit?: number;
     onlyFavorites?: boolean;
     category?: string;
     subcategoryPath?: string[];
     onlyOffers?: boolean;
     moreExpensive?: boolean;
-};
-
-
-export type ProductVersionRandomOptions = {
-    limit: number;
-    entity?: string;
+    random?: boolean;
+    skuList?: string[];
+    couponCode?: string;
 };
 
 export type ProductVersionReviews = {
