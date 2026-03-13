@@ -317,17 +317,13 @@ const Checkout = () => {
                         </div>
                     </div>
 
-                    {/* Mobile payment summary */}
-                    <div className="lg:hidden">
-                        <PaymentSummaryPanel order={order} data={data} />
-                    </div>
                 </div>
 
                 {/* ── Right Column ── */}
+                {/* Panel único — el flex-col / lg:flex-row del <section> lo posiciona
+                    automáticamente debajo en mobile y a la derecha en desktop */}
                 <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
-                    <div className="hidden lg:block">
-                        <PaymentSummaryPanel order={order} data={data} />
-                    </div>
+                    <PaymentSummaryPanel order={order} data={data} />
                 </div>
             </section>
 
