@@ -1,6 +1,5 @@
 import { Link, Navigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
 import { SiMercadopago } from "react-icons/si";
 import { useAuthStore } from "../../auth/states/authStore";
 import { usePaymentStore } from "../states/paymentStore";
@@ -11,7 +10,7 @@ import { calcShippingCost, closeModal, showModal } from "../../../global/GlobalH
 import GuestAdvertisement from "../components/GuestAdvertisement";
 import AddressesModal from "../components/AddressesModal";
 import type { PaymentProvidersType } from "../ShoppingTypes";
-import type { CustomerAddressType, GuestFormType } from "../../customers/CustomerTypes";
+import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
@@ -32,32 +31,68 @@ import {
 } from "react-icons/fa";
 import { MdShoppingBag, MdCheckBox } from "react-icons/md";
 import ShoppingCartItem from "../components/ShoppingCartItem";
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
-type GuestCheckoutForm = {
-    first_name: string;
-    last_name: string;
-    email: string;
-    country: string;
-    state: string;
-    city: string;
-    locality: string;
-    neighborhood: string;
-    street: string;
-    ext_number: string;
-    int_number?: string;
-    consent: boolean;
-};
+import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json";
+import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
+import { useForm } from "react-hook-form";
 
 // ── Guest Form Component ─────────────────────────────────────────────────────
 
 interface GuestCheckoutFormProps {
-    onSave: (data: GuestCheckoutForm) => void;
+    onSave: (data: GuestCreateOrderFormType) => void;
+    guestAddress?: GuestCreateOrderFormType | null;
 }
 
-const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
-    const { register, handleSubmit, formState: { errors } } = useForm<GuestCheckoutForm>();
+const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormProps) => {
+    // Inline import to avoid re-importing at top
+
+    const defaultCountry: CountriesPhoneCodeType = {
+        nameES: "México",
+        nameEN: "Mexico",
+        iso2: "MX",
+        iso3: "MEX",
+        phoneCode: "+52",
+    };
+
+    const [country, setCountry] = useState<CountriesPhoneCodeType>(defaultCountry);
+    const [currentCountryFlag, setCurrentCountryFlag] = useState<string>("https://flagsapi.com/MX/flat/64.png");
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+    } = useForm<GuestCreateOrderFormType>({
+        defaultValues: {
+            consent: guestAddress?.consent || false,
+            email: guestAddress?.email || "",
+            first_name: guestAddress?.first_name || "",
+            last_name: guestAddress?.last_name || "",
+            recipient_name: guestAddress?.recipient_name || "",
+            recipient_last_name: guestAddress?.recipient_last_name || "",
+            country: guestAddress?.country || "",
+            state: guestAddress?.state || "",
+            city: guestAddress?.city || "",
+            locality: guestAddress?.locality || "",
+            neighborhood: guestAddress?.neighborhood || "",
+            street_name: guestAddress?.street_name || "",
+            number: guestAddress?.number || "",
+            aditional_number: guestAddress?.aditional_number || undefined,
+            zip_code: guestAddress?.zip_code || "",
+            address_type: guestAddress?.address_type || "Casa",
+            floor: guestAddress?.floor || undefined,
+            country_phone_code: guestAddress?.country_phone_code || "+52",
+            contact_number: guestAddress?.contact_number || "",
+            references_or_comments: guestAddress?.references_or_comments || undefined,
+        },
+    });
+
+    useEffect(() => {
+        setCurrentCountryFlag(`https://flagsapi.com/${country.iso2}/flat/64.png`);
+        setValue("country_phone_code", country.phoneCode, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+    }, [country]);
 
     const inputClass = (hasError: boolean) =>
         clsx(
@@ -65,8 +100,15 @@ const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
             hasError ? "border-error" : "border-base-300"
         );
 
+    const selectClass = (hasError: boolean) =>
+        clsx(
+            "select select-sm sm:select-md w-full text-sm border rounded-lg bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+            hasError ? "border-error" : "border-base-300"
+        );
+
     return (
         <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-5">
+
             {/* Personal Data */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -114,6 +156,82 @@ const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
                 </div>
             </div>
 
+            {/* Recipient Data */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <FaUserAlt className="text-primary text-sm" />
+                    <h3 className="text-sm font-bold text-base-content uppercase">Datos del destinatario</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Nombre del destinatario *</label>
+                        <input
+                            {...register("recipient_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,50}$/, message: "Solo letras, 2-50 caracteres" },
+                            })}
+                            placeholder="Juan"
+                            className={inputClass(!!errors.recipient_name)}
+                        />
+                        {errors.recipient_name && <p className="text-error text-xs mt-1">{errors.recipient_name.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Apellidos del destinatario *</label>
+                        <input
+                            {...register("recipient_last_name", {
+                                required: "Campo requerido",
+                                pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Solo letras, 2-80 caracteres" },
+                            })}
+                            placeholder="García López"
+                            className={inputClass(!!errors.recipient_last_name)}
+                        />
+                        {errors.recipient_last_name && <p className="text-error text-xs mt-1">{errors.recipient_last_name.message}</p>}
+                    </div>
+
+                    {/* Phone with country selector */}
+                    <div className="sm:col-span-2">
+                        <label className="text-xs text-base-content/60 mb-1 block">Teléfono de contacto *</label>
+                        <div className="flex gap-2 items-center">
+                            <figure className="w-8 sm:w-10 flex-shrink-0">
+                                <img src={currentCountryFlag} alt={country.nameES} className="w-full h-auto" />
+                            </figure>
+                            <select
+                                defaultValue={JSON.stringify(defaultCountry)}
+                                className="w-20 sm:w-24 select select-sm sm:select-md text-xs sm:text-sm flex-shrink-0 border border-base-300 bg-base-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                                onChange={(e) => setCountry(JSON.parse(e.target.value))}
+                            >
+                                {CountriesAreaCodesJSON.map((data, index) => (
+                                    <option
+                                        key={index}
+                                        value={JSON.stringify({
+                                            nameES: data.nameES,
+                                            nameEN: data.nameEN,
+                                            iso2: data.iso2,
+                                            iso3: data.iso3,
+                                            phoneCode: `+${data.phoneCode}`,
+                                        })}
+                                    >
+                                        {data.iso3}
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                type="tel"
+                                {...register("contact_number", {
+                                    required: "Campo requerido",
+                                    pattern: { value: /^\d{7,15}$/, message: "Solo números, 7-15 dígitos" },
+                                })}
+                                placeholder="3312345678"
+                                className={clsx(inputClass(!!errors.contact_number), "flex-1")}
+                            />
+                        </div>
+                        {errors.contact_number && (
+                            <p className="text-error text-xs mt-1">{errors.contact_number.message}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Address */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -121,6 +239,20 @@ const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
                     <h3 className="text-sm font-bold text-base-content uppercase">Dirección de envío</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Tipo de dirección *</label>
+                        <select
+                            {...register("address_type", { required: "Campo requerido" })}
+                            className={selectClass(!!errors.address_type)}
+                        >
+                            <option value="Casa">Casa</option>
+                            <option value="Departamento">Departamento</option>
+                            <option value="Oficina">Oficina</option>
+                        </select>
+                        {errors.address_type && <p className="text-error text-xs mt-1">{errors.address_type.message}</p>}
+                    </div>
+
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">País *</label>
                         <input
@@ -170,6 +302,18 @@ const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
                         {errors.locality && <p className="text-error text-xs mt-1">{errors.locality.message}</p>}
                     </div>
                     <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">Código postal *</label>
+                        <input
+                            {...register("zip_code", {
+                                required: "Campo requerido",
+                                pattern: { value: /^\d{4,10}$/, message: "Código postal inválido" },
+                            })}
+                            placeholder="44100"
+                            className={inputClass(!!errors.zip_code)}
+                        />
+                        {errors.zip_code && <p className="text-error text-xs mt-1">{errors.zip_code.message}</p>}
+                    </div>
+                    <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Colonia *</label>
                         <input
                             {...register("neighborhood", {
@@ -184,39 +328,68 @@ const GuestCheckoutFormComponent = ({ onSave }: GuestCheckoutFormProps) => {
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Calle *</label>
                         <input
-                            {...register("street", {
+                            {...register("street_name", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s0-9.#°',-]{2,120}$/, message: "Calle inválida" },
                             })}
                             placeholder="Av. Juárez"
-                            className={inputClass(!!errors.street)}
+                            className={inputClass(!!errors.street_name)}
                         />
-                        {errors.street && <p className="text-error text-xs mt-1">{errors.street.message}</p>}
+                        {errors.street_name && <p className="text-error text-xs mt-1">{errors.street_name.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Número exterior *</label>
                         <input
-                            {...register("ext_number", {
+                            {...register("number", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-Z0-9\-]{1,10}$/, message: "Número inválido (máx. 10 caracteres)" },
                             })}
                             placeholder="123"
-                            className={inputClass(!!errors.ext_number)}
+                            className={inputClass(!!errors.number)}
                         />
-                        {errors.ext_number && <p className="text-error text-xs mt-1">{errors.ext_number.message}</p>}
+                        {errors.number && <p className="text-error text-xs mt-1">{errors.number.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">
                             Número interior <span className="text-base-content/40">(opcional)</span>
                         </label>
                         <input
-                            {...register("int_number", {
+                            {...register("aditional_number", {
                                 pattern: { value: /^[a-zA-Z0-9\-]{0,10}$/, message: "Número inválido" },
+                                setValueAs: (value) => value === "" ? undefined : value,
                             })}
                             placeholder="Depto. 4B"
-                            className={inputClass(!!errors.int_number)}
+                            className={inputClass(!!errors.aditional_number)}
                         />
-                        {errors.int_number && <p className="text-error text-xs mt-1">{errors.int_number.message}</p>}
+                        {errors.aditional_number && <p className="text-error text-xs mt-1">{errors.aditional_number.message}</p>}
+                    </div>
+                    <div>
+                        <label className="text-xs text-base-content/60 mb-1 block">
+                            Piso <span className="text-base-content/40">(opcional)</span>
+                        </label>
+                        <input
+                            {...register("floor", {
+                                pattern: { value: /^[a-zA-Z0-9\-\s]{0,10}$/, message: "Piso inválido" },
+                                setValueAs: (value) => value === "" ? undefined : value,
+                            })}
+                            placeholder="2"
+                            className={inputClass(!!errors.floor)}
+                        />
+                        {errors.floor && <p className="text-error text-xs mt-1">{errors.floor.message}</p>}
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-xs text-base-content/60 mb-1 block">
+                            Referencias o comentarios <span className="text-base-content/40">(opcional)</span>
+                        </label>
+                        <input
+                            {...register("references_or_comments", {
+                                maxLength: { value: 255, message: "Máximo 255 caracteres" },
+                                setValueAs: (value) => value === "" ? undefined : value,
+                            })}
+                            placeholder="Entre calles Reforma y Morelos, casa azul"
+                            className={inputClass(!!errors.references_or_comments)}
+                        />
+                        {errors.references_or_comments && <p className="text-error text-xs mt-1">{errors.references_or_comments.message}</p>}
                     </div>
                 </div>
             </div>
@@ -332,8 +505,8 @@ interface OrderSummaryPanelProps {
     quantity: number;
     couponCode: string | null;
     onCouponChange: (code: string) => void;
-    paymentMethod: PaymentProvidersType;
-    onPaymentMethodChange: (method: PaymentProvidersType) => void;
+    paymentProvider: PaymentProvidersType;
+    onPaymentProviderChange: (method: PaymentProvidersType) => void;
     onCreateOrder: () => void;
     orderLoading: boolean;
     theme: string;
@@ -342,7 +515,7 @@ interface OrderSummaryPanelProps {
 const OrderSummaryPanel = ({
     subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
     quantity, couponCode, onCouponChange,
-    paymentMethod, onPaymentMethodChange, onCreateOrder, orderLoading, theme,
+    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme,
 }: OrderSummaryPanelProps) => (
     <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
         {/* Header */}
@@ -413,7 +586,7 @@ const OrderSummaryPanel = ({
                 <p className="text-xs font-bold text-base-content/60 uppercase">Método de pago</p>
                 <label className={clsx(
                     "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
-                    paymentMethod === "mercado_pago"
+                    paymentProvider === "mercado_pago"
                         ? "border-primary/40 bg-primary/5"
                         : "border-base-300 bg-base-200 hover:border-primary/30"
                 )}>
@@ -421,7 +594,7 @@ const OrderSummaryPanel = ({
                         type="radio"
                         name="payment_method"
                         className="radio radio-primary radio-sm"
-                        onClick={() => onPaymentMethodChange("mercado_pago")}
+                        onClick={() => onPaymentProviderChange("mercado_pago")}
                     />
                     <div className="flex flex-col gap-0.5">
                         <span className={clsx(
@@ -441,7 +614,7 @@ const OrderSummaryPanel = ({
             {/* CTA */}
             <button
                 className="w-full btn btn-primary font-bold gap-2 mt-1"
-                disabled={paymentMethod === null || orderLoading}
+                disabled={paymentProvider === null || orderLoading}
                 onClick={onCreateOrder}
             >
                 {orderLoading
@@ -476,15 +649,16 @@ const BuyNow = () => {
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
     const [shippingCost, setShippingCost] = useState<number>(0);
     const [boxQty, setBoxQty] = useState<number>(1);
-    const [paymentMethod, setPaymentMethod] = useState<PaymentProvidersType>(null);
+    const [paymentProvider, setPaymentProvider] = useState<PaymentProvidersType>(null);
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
-    const [guestAddressForm, setGuestAddressForm] = useState<GuestFormType | null>(null);
+    const [guestAddressForm, setGuestAddressForm] = useState<GuestCreateOrderFormType | null>(null);
     const [discount, setDiscount] = useState<number>(0);
     const [subtotalWithDisc, setSubtotalWithDisc] = useState<number>(0);
     const [subtotalBeforeIva, setSubtotalBeforeIva] = useState<number>(0);
     const [total, setTotal] = useState<number>(0);
     const [iva, setIva] = useState<number>(0);
+    const [showGuestFormEdit, setShowGuestFormEdit] = useState<boolean>(false);
 
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
     const addressesModal = useRef<HTMLDialogElement>(null);
@@ -575,21 +749,64 @@ const BuyNow = () => {
         setShowGuestForm(true);
     };
 
-    const handleCreateOrder = async () => {
-        if (!selectedAddress) {
-            showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
-            return;
+    const handlePreValidation = () => {
+        if (isAuth) {
+            if (!selectedAddress) {
+                showTriggerAlert("Message", "Seleccionar una dirección de envío para continuar.");
+                return false;
+            }
         }
-        await createOrder({
-            shopping_cart: [{ product: data.product_version.sku, quantity }],
-            address: selectedAddress.uuid,
-            payment_method: paymentMethod,
-            coupon_code: couponCode || undefined,
-        });
+
+        if (!isAuth) {
+            if (!guestAddressForm) {
+                showTriggerAlert("Message", "Rellena el formulario de envío para continuar.");
+                return false;
+            }
+            if (guestAddressForm && !guestAddressForm.consent) {
+                showTriggerAlert("Message", "Debes aceptar el consentimiento antes de continuar.");
+                return false;
+            }
+        }
+
+        return true;
     };
 
-    const handleGuestFormSave = (savedData: GuestCheckoutForm) => {
-        setGuestAddressForm(savedData as unknown as GuestFormType);
+    const handleCreateOrder = async () => {
+        if (!handlePreValidation()) return;
+
+        if (!paymentProvider) {
+            showTriggerAlert("Message", "Seleccionar un método de pago para continuar.");
+            return;
+        }
+
+        const orderItems = [{ product: data.product_version.sku, quantity }];
+
+        // Authenticated user flow
+        if (isAuth && selectedAddress) {
+            await createOrder({
+                orderItems,
+                addressUUID: selectedAddress.uuid,
+                paymentProvider,
+                couponCode: couponCode || undefined,
+            });
+            return;
+        }
+
+        // Guest flow
+        if (!isAuth && guestAddressForm && guestAddressForm.consent) {
+            await createOrder({
+                orderItems,
+                guestForm: guestAddressForm,
+                paymentProvider,
+                couponCode: couponCode || undefined,
+            });
+            return;
+        }
+    };
+
+    const handleGuestFormSave = (savedData: GuestCreateOrderFormType) => {
+        setGuestAddressForm(savedData);
+        setShowGuestFormEdit(false);
     };
 
     const handleUpdateQuantity = (values: { sku: string; newQuantity: number }) => {
@@ -601,8 +818,8 @@ const BuyNow = () => {
         subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
         quantity, couponCode,
         onCouponChange: setCouponCode,
-        paymentMethod,
-        onPaymentMethodChange: setPaymentMethod,
+        paymentProvider,
+        onPaymentProviderChange: setPaymentProvider,
         onCreateOrder: handleCreateOrder,
         orderLoading: orderLoading ?? false,
         theme: theme!,
@@ -700,7 +917,37 @@ const BuyNow = () => {
                     ) : (
                         !showGuestForm ? (
                             <AuthPrompt onContinueAsGuest={() => setShowGuestForm(true)} />
+                        ) : guestAddressForm && !showGuestFormEdit ? (
+                            // ── Saved address summary ──
+                            <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                                <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                        <FaMapMarkerAlt className="text-primary" />
+                                        Dirección de envío (Invitado)
+                                    </h2>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowGuestFormEdit(true)}
+                                        className="text-xs text-base-content/50 hover:text-primary transition-colors underline underline-offset-2"
+                                    >
+                                        Editar
+                                    </button>
+                                </div>
+                                <div className="p-4 sm:p-5 flex flex-col gap-2">
+                                    <p className="text-base font-extrabold text-base-content">
+                                        {guestAddressForm.first_name} {guestAddressForm.last_name}
+                                    </p>
+                                    <p className="text-sm text-base-content/70">{guestAddressForm.email}</p>
+                                    <p className="text-sm text-base-content/60 leading-relaxed">
+                                        {`${guestAddressForm.street_name} #${guestAddressForm.number}${guestAddressForm.aditional_number ? ` Int. ${guestAddressForm.aditional_number}` : ""}, ${guestAddressForm.neighborhood}, ${guestAddressForm.locality}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}
+                                    </p>
+                                    <span className="inline-flex items-center gap-1 text-xs text-success font-bold mt-1">
+                                        <MdCheckBox /> Dirección guardada correctamente
+                                    </span>
+                                </div>
+                            </div>
                         ) : (
+                            // ── Form (new or editing) ──
                             <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
                                 <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
                                     <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
@@ -709,14 +956,20 @@ const BuyNow = () => {
                                     </h2>
                                     <button
                                         type="button"
-                                        onClick={() => setShowGuestForm(false)}
+                                        onClick={() => {
+                                            if (guestAddressForm) {
+                                                setShowGuestFormEdit(false);
+                                            } else {
+                                                setShowGuestForm(false);
+                                            }
+                                        }}
                                         className="text-xs text-base-content/50 hover:text-primary transition-colors underline underline-offset-2"
                                     >
                                         Volver
                                     </button>
                                 </div>
                                 <div className="p-4 sm:p-5">
-                                    <GuestCheckoutFormComponent onSave={handleGuestFormSave} />
+                                    <GuestCheckoutFormComponent onSave={handleGuestFormSave} guestAddress={guestAddressForm} />
                                 </div>
                             </div>
                         )

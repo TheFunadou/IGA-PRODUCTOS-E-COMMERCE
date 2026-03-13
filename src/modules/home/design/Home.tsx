@@ -18,7 +18,7 @@ import PartnersCarousel from "../components/PartnersCarousel";
 import Marquee from "react-fast-marquee";
 import { Link } from "react-router-dom";
 import CategoriesSummary from "../components/CategoriesSummary";
-import { FaArrowCircleDown } from "react-icons/fa";
+// import { FaArrowCircleDown } from "react-icons/fa";
 import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
