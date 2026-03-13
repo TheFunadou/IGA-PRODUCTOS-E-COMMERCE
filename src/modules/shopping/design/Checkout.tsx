@@ -427,7 +427,7 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                                     <p className="text-[10px] text-base-content/50">Crédito, débito, OXXO, MSI y más</p>
                                 </div>
                             </div>
-                            <MercadoPagoCheckoutPro preferenceId={data?.external_id!} />
+                            <MercadoPagoCheckoutPro preferenceId={data?.external_id} />
                         </>
                     )}
                 </div>
