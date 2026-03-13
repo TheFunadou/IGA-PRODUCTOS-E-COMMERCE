@@ -5,7 +5,7 @@ type Props = {
     preferenceId: string | null;
 };
 
-const nodeEnv = import.meta.env.VITE_NODE_ENV;
+const nodeEnv: string = import.meta.env.VITE_NODE_ENV;
 
 const MercadoPagoCheckoutPro = ({ preferenceId }: Props) => {
     if (!preferenceId) throw new Error("Error al construir el boton de pago");
