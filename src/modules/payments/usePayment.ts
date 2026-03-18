@@ -19,9 +19,9 @@ export const usePollingPaymentApprovedDetail = (args: { orderUUID: string }) => 
         refetchOnWindowFocus: false,
         enabled: !!orderUUID,
         refetchInterval: (query) => {
+            if (query.state.error) return false;
             const status = query.state.data?.status;
-
-            if (!status) return 3000;              // aún no hay data
+            if (!status) return 3000;
             return status === "APPROVED" ? false : 3000;
         },
         retry: false,
@@ -44,11 +44,12 @@ export const usePollingPaymentPendingDetail = (args: { orderUUID: string }) => {
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
         refetchInterval: (query) => {
+            if (query.state.error) return false;
             const status = query.state.data?.status;
-
             if (!status) return 3000;
-            return status === "PENDING" ? false : 3000;
+            return (status === "PENDING" || status === "APPROVED") ? false : 3000;
         },
+
         retry: false,
     });
 };
@@ -69,12 +70,12 @@ export const usePollingPaymentRejected = (args: { orderUUID: string }) => {
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
         refetchInterval: (query) => {
-            const status = query.state.data?.status;
+            if (query.state.error) return false;
 
+            const status = query.state.data?.status;
             if (!status) return 3000;
             return (status === "IN_PROCESS" || status === "REJECTED") ? false : 3000;
         },
         retry: false,
     });
 };
-

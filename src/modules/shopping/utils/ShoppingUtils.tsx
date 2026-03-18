@@ -1,39 +1,48 @@
+import MercadoPagoLogo from "../../../assets/providers/mercadopago.webp"
+import PayPalLogo from "../../../assets/providers/paypal.webp"
+import OxxoLogo from "../../../assets/providers/oxxo.webp"
+import SantanderLogo from "../../../assets/providers/santander.webp"
+import BBVALogo from "../../../assets/providers/bbva.webp"
+import SPEILogo from "../../../assets/providers/spei.webp"
+import VisaLogo from "../../../assets/providers/visa.webp"
+import MastercardLogo from "../../../assets/providers/mastercard.webp"
+
 import type { OrderStatusType, PaymentClassType, PaymentMethodDetails, PaymentMethodType, PaymentProvidersType } from "../ShoppingTypes";
 
 export const paymentProvider: Record<Exclude<PaymentProvidersType, null>, PaymentMethodDetails> = {
     paypal: {
-        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png",
+        image_url: PayPalLogo,
         description: "PayPal"
     },
     mercado_pago: {
-        image_url: "https://web.telmov.mx/images/Logo-mercadopago.svg",
+        image_url: MercadoPagoLogo,
         description: "Mercado Pago"
     }
 };
 
 export const paymentMethod: Record<PaymentMethodType, PaymentMethodDetails> = {
     visa: {
-        image_url: "https://cdn.worldvectorlogo.com/logos/visa-10.svg",
+        image_url: VisaLogo,
         description: "Visa"
     },
     mastercard: {
-        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png",
+        image_url: MastercardLogo,
         description: "Mastercard"
     },
     oxxo: {
-        image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Oxxo_Logo.svg/2560px-Oxxo_Logo.svg.png",
+        image_url: OxxoLogo,
         description: "OXXO"
     },
     paycash: {
-        image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYnm51TwY4R0HrCNAZB4Isk0JgrEKdBYvp-qEf-YP4OGfGgkHOgZbNybMxEpaY4kx0tg&usqp=CAU",
+        image_url: SantanderLogo,
         description: "Santander"
     },
     bancomer: {
-        image_url: "https://bmv.com.mx/docs-pub/GESTOR/IMAGENES_EMISORAS/5114.png",
+        image_url: BBVALogo,
         description: "BBVA"
     },
     clabe: {
-        image_url: "https://cdn2.downdetector.com/static/uploads/logo/spei.png",
+        image_url: SPEILogo,
         description: "Transferencia SPEI"
     }
 };

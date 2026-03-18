@@ -24,7 +24,8 @@ export type CustomerAddressType = {
 export type UpdateAddressType = Partial<CustomerAddressType>;
 export type NewAddressType = Omit<CustomerAddressType, "uuid">;
 export type GuestFormType = Omit<CustomerAddressType, "uuid" | "default_address">;
-export type GetCustomerAddressPaymentType = NewAddressType & { uuid?: string; };
+export type GetCustomerAddressOrderType = NewAddressType & { uuid?: string; };
+export type GetCustomerAddressPaymentType = Omit<CustomerAddressType, "id" | "customer_id" | "uuid" | "created_at" | "updated_at" | "default_address">;
 export type CustomerAttributes = Pick<CustomerType, "name" | "last_name" | "email">;
 export type GuestBillingFormType = Omit<CustomerAddressType, "uuid" | "default_address" | "recipient_name" | "recipient_last_name"> & {
     moral_or_fisical: "moral" | "física";

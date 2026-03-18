@@ -109,14 +109,6 @@ const Home = () => {
                         <img src={HeroImg} alt="Hero image" className="w-full h-full object-cover" />
                     </figure>
                 </div>
-                {/* <div className="w-fit mx-auto mt-5 hidden md:block">
-                    <a
-                        href="#home"
-                        className="flex items-center text-2xl gap-2 underline underline-offset-8 font-bold text-primary bg-base-100 px-10 shadow-lg border-primary py-3 rounded-md"
-                        aria-label="Explorar inicio">
-                        <FaArrowCircleDown className="text-primary" />Explorar inicio
-                    </a>
-                </div> */}
             </div>
             <Hero />
             <div className=" md:mt-30 space-y-5 md:space-y-10">

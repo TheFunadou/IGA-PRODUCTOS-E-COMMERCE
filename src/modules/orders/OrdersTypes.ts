@@ -1,4 +1,4 @@
-import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressPaymentType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
+import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
 import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
@@ -44,21 +44,6 @@ export type OrderPaymentDetails = {
 };
 
 
-// export type CreateOrderType = {
-//     payment_method: PaymentProvidersType;
-//     shopping_cart: PaymentShoppingCart[];
-//     address: string;
-//     coupon_code?: string;
-// };
-
-// export type CreateOrderTypeGuest = {
-//     payment_method: PaymentProvidersType;
-//     shopping_cart: PaymentShoppingCart[];
-//     form: GuestCreateOrderFormType;
-//     coupon_code?: string;
-//     session_id: string;
-// };
-
 export type Shipping = {
     shipping_status: ShippingStatus;
     tracking_number?: string | null;
@@ -69,10 +54,7 @@ export type Shipping = {
     updated_at: Date
 };
 
-// export type ProcessOrderType = Omit<CreateOrderType, "payment_method">;
-// export type ProcessOrderTypeGuest = Omit<CreateOrderTypeGuest, "payment_method">;
-
-export type OrderCreatedResume = {
+export type OrderResume = {
     shippingCost: number;
     boxesQty: number;
     subtotalBeforeIVA: number;
@@ -133,9 +115,9 @@ export type OrdersType = {
 export type OrderCheckoutType = {
     uuid: string;
     items: OrderItems[];
-    resume: OrderCreatedResume;
+    resume: OrderResume;
     external_id: string;
-    address: GetCustomerAddressPaymentType;
+    address: GetCustomerAddressOrderType;
 };
 
 export type GetLightOrderExtended = {
@@ -157,11 +139,11 @@ export type OrderMoreDetails = {
     order: SafeOrder;
     payments_details: OrderPaymentDetails[];
     shipping?: Shipping | null;
-    resume: OrderCreatedResume;
+    resume: OrderResume;
 };
 
 export type OrderDetails = {
-    address: GetCustomerAddressPaymentType;
+    address: GetCustomerAddressOrderType;
     items: OrderItems[];
     customer?: CustomerAttributes;
     details: OrderMoreDetails;

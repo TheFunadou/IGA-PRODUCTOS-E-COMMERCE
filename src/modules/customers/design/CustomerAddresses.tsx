@@ -1,6 +1,4 @@
-import { FaRegEdit } from "react-icons/fa";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { CiCirclePlus } from "react-icons/ci";
+import { FaRegEdit, FaRegTrashAlt, FaMapMarkerAlt, FaPlus, FaStar } from "react-icons/fa";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import NewAddressForm from "../components/NewAddressForm";
@@ -16,6 +14,7 @@ import PaginationComponent from "../../../global/components/PaginationComponent"
 
 const CustomerAddresses = () => {
     document.title = "Iga Productos | Mis direcciones de envio";
+
     const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");
@@ -24,16 +23,9 @@ const CustomerAddresses = () => {
     const deleteAddressModal = useRef<HTMLDialogElement>(null);
     const updateAddressModal = useRef<HTMLDialogElement>(null);
     const [selected, setSelected] = useState<CustomerAddressType | null>(null);
-    const {
-        data: addresses,
-        isLoading,
-        error,
-        refetch
-    } = useFetchCustomerAddresses({
-        pagination: {
-            page: Number(pageParam) || 1,
-            limit: MAX_LIMIT_ROWS
-        }
+
+    const { data: addresses, isLoading, error, refetch } = useFetchCustomerAddresses({
+        pagination: { page: Number(pageParam) || 1, limit: MAX_LIMIT_ROWS },
     });
 
     const handlePageChange = (page: number) => {
@@ -41,134 +33,210 @@ const CustomerAddresses = () => {
     };
 
     return (
-        <div className="w-full px-3 sm:px-5 py-6 sm:py-10 rounded-xl min-h-screen bg-base-300">
-            {/* Header Section */}
-            <p className="text-2xl sm:text-3xl font-bold">Direcciones de envio</p>
-            <div className="flex gap-2 mt-2">
+        <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200 min-h-screen">
+
+            {/* ── Header ── */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FaMapMarkerAlt className="text-primary text-lg sm:text-xl" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
+                            Mis direcciones
+                        </h1>
+                        <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
+                            Gestiona tus direcciones de envío
+                        </p>
+                    </div>
+                </div>
+
                 <button
                     type="button"
-                    className="flex items-center gap-1 text-base sm:text-lg underline text-primary cursor-pointer"
-                    onClick={() => showModal(newAddressModal.current)}>
-                    <CiCirclePlus className="text-xl sm:text-2xl" />
-                    <span className="hidden sm:inline">Agregar nueva dirección de envio</span>
-                    <span className="sm:hidden">Nueva dirección</span>
+                    className="btn btn-primary btn-sm gap-2 w-full sm:w-auto"
+                    onClick={() => showModal(newAddressModal.current)}
+                >
+                    <FaPlus className="text-xs" />
+                    Nueva dirección
                 </button>
             </div>
 
-            {/* Loading State */}
+            {/* ── Loading ── */}
             {isLoading && !error && !addresses && (
-                <div className="w-full [&_div]:mb-2 bg-base-100 px-3 sm:px-5 pt-5 py-5 mt-5 rounded-xl">
-                    <div className="w-full skeleton h-20 sm:h-24 lg:py-15"></div>
-                    <div className="w-full skeleton h-20 sm:h-24 lg:py-15"></div>
-                    <div className="w-full skeleton h-20 sm:h-24 lg:py-15"></div>
-                    <div className="w-full skeleton h-20 sm:h-24 lg:py-15"></div>
+                <div className="flex flex-col gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="w-full h-28 bg-base-100 border border-base-300 rounded-2xl animate-pulse" />
+                    ))}
                 </div>
             )}
 
-            {/* Error State */}
+            {/* ── Error ── */}
             {!isLoading && !addresses && error && (
-                <div className="w-full bg-base-100 p-4 sm:p-5 rounded-xl mt-5">
-                    <p className="mt-2 text-lg sm:text-xl">Ocurrio un error inesperado al obtener las direcciones de envio.</p>
-                    <p className="mt-1 text-base sm:text-lg text-error">{getErrorMessage(error)}</p>
-                    <div className="mt-3">
+                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                    <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center">
+                            <FaMapMarkerAlt className="text-error text-sm" />
+                        </div>
+                        <h2 className="font-bold text-base-content text-sm uppercase">
+                            Error al cargar direcciones
+                        </h2>
+                    </div>
+                    <div className="p-5 space-y-3">
+                        <p className="text-sm text-base-content/70">{getErrorMessage(error)}</p>
                         <button
                             type="button"
-                            className="btn btn-primary cursor-pointer btn-sm sm:btn-md"
-                            onClick={() => refetch}
+                            className="btn btn-primary btn-sm gap-2"
+                            onClick={() => refetch()}
                         >
-                            Reintentar?
+                            Intentar de nuevo
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Empty State */}
+            {/* ── Empty state ── */}
             {!isLoading && !error && addresses && addresses.data.length === 0 && (
-                <div className="w-full sm:w-fit bg-base-100 p-4 sm:p-5 rounded-xl mt-2">
-                    <h2 className="mt-2 text-lg sm:text-xl">Parece que aun no tienes direcciones de envio registradas por el momento 🤔</h2>
-                    <button
-                        type="button"
-                        className="link text-primary text-base sm:text-lg mt-2"
-                        onClick={() => showModal(newAddressModal.current)}
-                    >
-                        Crea una nueva dirección de envio ahora
-                    </button>
+                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                    <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-base-200 flex items-center justify-center">
+                            <FaMapMarkerAlt className="text-3xl text-base-content/20" />
+                        </div>
+                        <div>
+                            <p className="text-lg font-semibold text-base-content">
+                                No tienes direcciones registradas
+                            </p>
+                            <p className="text-sm text-base-content/50 mt-1">
+                                Agrega tu primera dirección de envío para poder realizar compras
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm gap-2 mt-1"
+                            onClick={() => showModal(newAddressModal.current)}
+                        >
+                            <FaPlus className="text-xs" />
+                            Agregar dirección
+                        </button>
+                    </div>
                 </div>
             )}
 
-            {/* Addresses List - Responsive */}
+            {/* ── Lista de direcciones ── */}
             {!isLoading && !error && addresses && addresses.data.length > 0 && (
-                <div className="w-full">
-                    <h3 className="text-base sm:text-lg mt-3">Selecciona una dirección de envio</h3>
-                    {addresses && addresses.data.map((data, index) => (
-                        <div
-                            role="button"
-                            onClick={() => setSelected(data)}
-                            key={index}
-                            className={clsx(
-                                "w-full flex flex-col lg:flex-row py-4 sm:py-5 px-3 sm:px-5 rounded-xl mt-3 cursor-pointer transition-all",
-                                selected === data && "border-2 border-primary bg-base-100 scale-101 duration-200",
-                                selected !== data && "hover:bg-base-100"
-                            )}
-                        >
-                            {/* Address Info Section */}
-                            <div className="w-full lg:w-85/100">
-                                <p className="text-lg sm:text-xl lg:text-2xl font-bold">
-                                    {`${data.recipient_name} ${data.recipient_last_name}`}
-                                </p>
-                                <p className="text-sm sm:text-base lg:text-lg mt-1">
-                                    {data.country_phone_code} {data.contact_number}
-                                </p>
-                                <p className="text-sm sm:text-base lg:text-lg mt-1 break-words">
-                                    {`${data.street_name}, #${data.number} ${data.aditional_number !== "N/A" ? `EXT.${data.aditional_number} INT.` : "EXT."} ${data.neighborhood}, ${data.zip_code}, ${data.city}, ${data.state}, ${data.country}`}
-                                </p>
-                                {data.default_address === true && (
-                                    <p className="text-base sm:text-lg lg:text-xl font-bold text-primary mt-2">
-                                        Dirección predeterminada
-                                    </p>
-                                )}
-                            </div>
+                <div className="flex flex-col gap-4">
+                    {addresses.data.map((data, index) => {
+                        const isSelected = selected === data;
 
-                            {/* Actions Section */}
-                            <div className="w-full lg:w-15/100 text-left lg:text-right mt-3 lg:mt-0">
-                                {selected === data && (
-                                    <div className="flex flex-row lg:flex-col xl:flex-row justify-start lg:justify-end items-start gap-3 sm:gap-4 text-base sm:text-lg lg:text-xl mb-2 lg:mb-0">
-                                        <button
-                                            type="button"
-                                            className="flex gap-1 sm:gap-2 items-center text-primary cursor-pointer hover:underline"
-                                            onClick={() => showModal(updateAddressModal.current)}
-                                        >
-                                            <span className="hidden sm:inline">Editar</span>
-                                            <span className="sm:hidden">Editar</span>
-                                            <FaRegEdit />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="flex gap-1 sm:gap-2 items-center text-error cursor-pointer hover:underline"
-                                            onClick={() => showModal(deleteAddressModal.current)}
-                                        >
-                                            <span className="hidden sm:inline">Eliminar</span>
-                                            <span className="sm:hidden">Eliminar</span>
-                                            <FaRegTrashAlt />
-                                        </button>
+                        return (
+                            <div
+                                role="button"
+                                key={index}
+                                onClick={() => setSelected(data)}
+                                className={clsx(
+                                    "w-full rounded-2xl border bg-base-100 overflow-hidden cursor-pointer transition-all duration-200",
+                                    isSelected
+                                        ? "border-primary shadow-sm shadow-primary/10"
+                                        : "border-base-300 hover:border-primary/30",
+                                )}
+                            >
+                                {/* Card header */}
+                                <div className={clsx(
+                                    "px-4 py-3 border-b flex items-center justify-between gap-2 transition-colors duration-200",
+                                    isSelected
+                                        ? "bg-primary/5 border-primary/20"
+                                        : "bg-base-200 border-base-300",
+                                )}>
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <span className={clsx(
+                                            "text-sm font-bold truncate",
+                                            isSelected ? "text-primary" : "text-base-content",
+                                        )}>
+                                            {data.recipient_name} {data.recipient_last_name}
+                                        </span>
+                                        {data.default_address && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary flex-shrink-0">
+                                                <FaStar className="text-[9px]" />
+                                                Predeterminada
+                                            </span>
+                                        )}
                                     </div>
-                                )}
-                                <p className="font-bold text-sm sm:text-base lg:text-xl text-primary lg:text-inherit">
-                                    {data.address_type}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
 
-                    {/* Pagination - Responsive */}
+                                    {/* Acciones — solo visibles cuando está seleccionada */}
+                                    {isSelected && (
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-xs gap-1 text-primary hover:bg-primary/10"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(updateAddressModal.current);
+                                                }}
+                                            >
+                                                <FaRegEdit className="text-xs" />
+                                                <span className="hidden sm:inline">Editar</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-xs gap-1 text-error hover:bg-error/10"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(deleteAddressModal.current);
+                                                }}
+                                            >
+                                                <FaRegTrashAlt className="text-xs" />
+                                                <span className="hidden sm:inline">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Card body */}
+                                <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">Contacto</p>
+                                        <p className="text-sm text-base-content">
+                                            {data.country_phone_code} {data.contact_number}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">Calle y número</p>
+                                        <p className="text-sm text-base-content break-words">
+                                            {data.street_name} #{data.number}
+                                            {data.aditional_number && data.aditional_number !== "N/A"
+                                                ? ` int. ${data.aditional_number}`
+                                                : ""}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">Colonia / Fracc.</p>
+                                        <p className="text-sm text-base-content break-words">{data.neighborhood}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">Ciudad y Estado</p>
+                                        <p className="text-sm text-base-content">{data.city}, {data.state}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">País · CP</p>
+                                        <p className="text-sm text-base-content">{data.country} · {data.zip_code}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <p className="text-xs font-semibold uppercase text-base-content/40">Tipo de dirección</p>
+                                        <p className="text-sm text-base-content">{data.address_type}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* Paginación */}
                     {addresses.totalPages > 1 && (
-                        <div className="mt-5 w-full sm:w-fit">
+                        <div className="flex flex-col items-center sm:items-start gap-2 mt-2">
                             <PaginationComponent
                                 currentPage={Number(pageParam) || 1}
                                 onPageChange={handlePageChange}
                                 totalPages={addresses.totalPages}
                             />
-                            <p className="text-center text-sm sm:text-base mt-2">
+                            <p className="text-sm text-base-content/50">
                                 Página {Number(pageParam) || 1} de {addresses.totalPages}
                             </p>
                         </div>
@@ -176,7 +244,7 @@ const CustomerAddresses = () => {
                 </div>
             )}
 
-            {/* Modals */}
+            {/* ── Modales ── */}
             {newAddressModal && (
                 <NewAddressForm
                     ref={newAddressModal}
