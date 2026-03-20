@@ -125,7 +125,7 @@ export default function Hero() {
                 {/* ── Subtítulo como BADGE PILL (igual al fragmento) */}
                 <div className="mt-4 mb-3" style={enter(0.2)}>
                     <span className="inline-flex items-center gap-2 rounded-full
-                        bg-base-300 text-black
+                        bg-base-300
                         px-4 py-1.5 text-xs sm:text-sm font-semibold">
                         <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                         Cada jornada merece seguridad total

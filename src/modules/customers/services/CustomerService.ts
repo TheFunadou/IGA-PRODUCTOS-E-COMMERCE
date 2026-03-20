@@ -8,18 +8,18 @@ export const getCustomerAddressesService = async (params: { page: number, limit:
 };
 
 
-export const createAddressService = async (args: { data: NewAddressType, csrfToken: string }): Promise<CustomerAddressType> => {
-    const { data } = await api.post<CustomerAddressType>(`/customer-addresses`, args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const createAddressService = async (args: { data: NewAddressType }): Promise<CustomerAddressType> => {
+    const { data } = await api.post<CustomerAddressType>(`/customer-addresses`, args.data);
     return data;
 };
 
-export const updateAddressService = async (args: { addressUUID: string, data: UpdateAddressType, csrfToken: string }): Promise<string> => {
-    const { data } = await api.patch<string>(`/customer-addresses`, { ...args.data, uuid: args.addressUUID }, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const updateAddressService = async (args: { addressUUID: string, data: UpdateAddressType }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer-addresses`, { ...args.data, uuid: args.addressUUID });
     return data;
 };
 
-export const deleteAddressService = async (args: { addressUUID: string, csrfToken: string }): Promise<string> => {
-    const { data } = await api.delete<string>(`/customer-addresses/${args.addressUUID}`, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const deleteAddressService = async (args: { addressUUID: string }): Promise<string> => {
+    const { data } = await api.delete<string>(`/customer-addresses/${args.addressUUID}`);
     return data;
 };
 
@@ -28,17 +28,17 @@ export const getCustomerFavorites = async (params: { page: number, limit: number
     return data;
 };
 
-export const toggleFavoriteService = async (args: { sku: string, csrfToken: string }): Promise<onToogleFavoriteType> => {
-    const { data } = await api.post<onToogleFavoriteType>(`/favorites`, { sku: args.sku }, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const toggleFavoriteService = async (args: { sku: string }): Promise<onToogleFavoriteType> => {
+    const { data } = await api.post<onToogleFavoriteType>(`/favorites`, { sku: args.sku });
     return data;
 };
 
-export const updateCustomer = async ({ dto, csrfToken }: { dto: UpdateProfileFormType, csrfToken: string }): Promise<string> => {
-    const { data } = await api.patch<string>(`/customer`, dto, { headers: { "X-CSRF-TOKEN": csrfToken } });
+export const updateCustomer = async ({ dto }: { dto: UpdateProfileFormType }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer`, dto);
     return data;
 };
 
-export const updatePassword = async ({ dto, csrfToken }: { dto: UpdateProfileFormType, csrfToken: string }): Promise<string> => {
-    const { data } = await api.patch<string>(`/customer-auth/password`, dto, { headers: { "X-CSRF-TOKEN": csrfToken } });
+export const updatePassword = async ({ dto }: { dto: UpdateProfileFormType }): Promise<string> => {
+    const { data } = await api.patch<string>(`/customer-auth/password`, dto);
     return data;
 };

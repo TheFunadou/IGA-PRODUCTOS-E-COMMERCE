@@ -54,3 +54,10 @@ export const formatAxiosError = (error: unknown): string => {
     // Fallback
     return 'Ha ocurrido un error inesperado';
 };
+
+export const getCookie = (name: string): string | null => {
+    const match = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${name}=`));
+    return match ? decodeURIComponent(match.split('=')[1]) : null;
+};

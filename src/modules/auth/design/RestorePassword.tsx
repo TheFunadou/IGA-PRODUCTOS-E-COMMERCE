@@ -200,7 +200,7 @@ function Spinner({ dark = false }: { dark?: boolean }) {
 ───────────────────────────────────────────── */
 const RestorePassword = () => {
     document.title = "Iga Productos | Recuperar contraseña";
-    const { isAuth, sessionId } = useAuthStore();
+    const { isAuth } = useAuthStore();
     const navigate = useNavigate();
     const { showTriggerAlert } = useTriggerAlert();
 
@@ -226,7 +226,7 @@ const RestorePassword = () => {
     }, [watchPwd]);
 
     const sendTokenMut = useMutation({
-        mutationFn: async (mail: string) => await sendRestorePasswordToken({ sessionId: sessionId!, email: mail }),
+        mutationFn: async (mail: string) => await sendRestorePasswordToken({ email: mail }),
         onSuccess: (_, mail) => {
             setEmailTarget(mail);
             setStep(2);
@@ -239,7 +239,7 @@ const RestorePassword = () => {
 
     const validateTokenMut = useMutation({
         mutationFn: async (tk: string) => {
-            const isValid = await validateRestorePasswordToken({ sessionId: sessionId!, email: emailTarget, restorePasswordToken: tk });
+            const isValid = await validateRestorePasswordToken({ email: emailTarget, restorePasswordToken: tk });
             return { tk, isValid };
         },
         onSuccess: ({ tk, isValid }) => {
@@ -254,7 +254,7 @@ const RestorePassword = () => {
     });
 
     const resendTokenMut = useMutation({
-        mutationFn: async () => await resendRestorePasswordToken({ sessionId: sessionId!, email: emailTarget }),
+        mutationFn: async () => await resendRestorePasswordToken({ email: emailTarget }),
         onSuccess: () => {
             showTriggerAlert("Successfull", "Se ha reenviado tu código", { duration: 3000 });
             setCanResend(false);
@@ -267,7 +267,6 @@ const RestorePassword = () => {
         mutationFn: async (data: PasswordFormType) => await restorePasswordPublic({
             email: emailTarget,
             restorePasswordToken: validToken,
-            sessionId: sessionId!,
             newPassword: data.newPassword,
             confirmNewPassword: data.confirm_password
         }),

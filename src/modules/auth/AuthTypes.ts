@@ -17,7 +17,6 @@ export type NewCustomerType = Omit<CustomerType, "uuid" | "created_at" | "update
 
 export type NewCustomerWithToken = NewCustomerType & {
   token: string;
-  session_id: string;
 };
 
 export type CustomerPayloadType = {
@@ -48,7 +47,6 @@ export type RestorePasswordPublicDTO = {
   confirmNewPassword: string;
   newPassword: string;
   restorePasswordToken: string;
-  sessionId: string;
 };
 
 

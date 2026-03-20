@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ShoppingCartType } from "../ShoppingTypes";
-import { getShoppingCartService, shoppingCartAddItemService, shoppingCartCheckAllService, shoppingCartClearCartService, shoppingCartRemoveItemService, shoppingCartToggleCheckService, shoppingCartUpdateItemQty } from "../services/ShoppingServices";
+import { getShoppingCartService, shoppingCartAddItemService, shoppingCartCheckAllService, shoppingCartClearCartService, shoppingCartRemoveItemService, shoppingCartToggleCheckService, shoppingCartUncheckAllService, shoppingCartUpdateItemQty } from "../services/ShoppingServices";
 import { useAuthStore } from "../../auth/states/authStore";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
@@ -24,14 +24,14 @@ export const useFetchShoppingCart = () => {
 
 export function useAddItem() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (args: { sku: string, quantity: number }): Promise<ShoppingCartType[]> => {
-            return await shoppingCartAddItemService({ sku: args.sku, quantity: args.quantity, csrfToken: csrfToken! });
+            return await shoppingCartAddItemService({ sku: args.sku, quantity: args.quantity });
         },
         onMutate: async (args: { sku: string, quantity: number }) => {
-            if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
@@ -76,14 +76,14 @@ export function useAddItem() {
 
 export function useRemoveItem() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (sku: string): Promise<boolean> => {
-            return await shoppingCartRemoveItemService({ sku, csrfToken: csrfToken! });
+            return await shoppingCartRemoveItemService({ sku });
         },
         onMutate: async (sku: string) => {
-            if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
@@ -116,14 +116,14 @@ export function useRemoveItem() {
 
 export function useUpdateItemQty() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (values: { sku: string, newQuantity: number }): Promise<boolean> => {
-            return await shoppingCartUpdateItemQty({ sku: values.sku, newQuantity: values.newQuantity, csrfToken: csrfToken! });
+            return await shoppingCartUpdateItemQty({ sku: values.sku, newQuantity: values.newQuantity });
         },
         onMutate: async (values: { sku: string, newQuantity: number }) => {
-            if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
@@ -154,14 +154,14 @@ export function useUpdateItemQty() {
 
 export function useToggleCheckItem() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (sku: string): Promise<boolean> => {
-            return await shoppingCartToggleCheckService({ sku, csrfToken: csrfToken! });
+            return await shoppingCartToggleCheckService({ sku });
         },
         onMutate: async (sku: string) => {
-            if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);
@@ -192,11 +192,11 @@ export function useToggleCheckItem() {
 
 export function useCheckAllItems() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (): Promise<boolean> => {
-            return await shoppingCartCheckAllService({ csrfToken: csrfToken! });
+            return await shoppingCartCheckAllService();
         },
         onMutate: async () => {
             if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
@@ -230,11 +230,11 @@ export function useCheckAllItems() {
 
 export function useUncheckAllItems() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (): Promise<boolean> => {
-            return await shoppingCartCheckAllService({ csrfToken: csrfToken! });
+            return await shoppingCartUncheckAllService();
         },
         onMutate: async () => {
             if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
@@ -268,14 +268,14 @@ export function useUncheckAllItems() {
 
 export function useClearShoppingCart() {
     const queryClient = useQueryClient();
-    const { authCustomer, isAuth, csrfToken } = useAuthStore();
+    const { authCustomer, isAuth } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
         mutationFn: async (): Promise<boolean> => {
-            return await shoppingCartClearCartService({ csrfToken: csrfToken! });
+            return await shoppingCartClearCartService();
         },
         onMutate: async () => {
-            if (!authCustomer || !authCustomer?.uuid || !isAuth || !csrfToken) return { previousShoppingCart: undefined };
+            if (!authCustomer || !authCustomer?.uuid || !isAuth) return { previousShoppingCart: undefined };
             const queryKey = shoppingCartQueryKeys.shoppingCart(authCustomer.uuid!);
             await queryClient.cancelQueries({ queryKey });
             const previousShoppingCart = queryClient.getQueryData<ShoppingCartType[]>(queryKey);

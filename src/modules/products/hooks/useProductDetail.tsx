@@ -49,7 +49,7 @@ export const useFetchProductVersionReviewsResumeByUUID = (args: { uuid?: string 
 
 export function useAddPVReview() {
     const queryClient = useQueryClient();
-    const { authCustomer, csrfToken } = useAuthStore();
+    const { authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
 
     return useMutation<
@@ -59,10 +59,7 @@ export function useAddPVReview() {
         { previousReviews?: GetProductVersionReviewsType; tempUUID: string }
     >({
         mutationFn: async ({ data }) => {
-            return await addProductVersionReview({
-                data,
-                csrfToken: csrfToken!
-            });
+            return await addProductVersionReview({ data });
         },
 
         onMutate: async ({ data }) => {

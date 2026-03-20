@@ -1,7 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../auth/states/authStore";
+import { useNavigate } from "react-router-dom";
 import { formatPrice } from "../../products/Helpers";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import MercadoPagoCheckoutPro from "../components/MercadoPagoCheckoutPro";
 import { usePaymentStore } from "../states/paymentStore";
 import { BiMinus, BiPlus } from "react-icons/bi";
@@ -15,22 +14,15 @@ import {
     FaMapMarkerAlt,
     FaShippingFast,
     FaTag,
-    FaUserPlus,
-    FaGift,
-    FaStar,
-    FaShoppingBag,
-    FaUserAlt,
     FaExclamationTriangle,
 } from "react-icons/fa";
-import { MdShoppingBag, MdCheckBox, MdPayment } from "react-icons/md";
+import { MdShoppingBag, MdPayment } from "react-icons/md";
 import { SiMercadopago } from "react-icons/si";
 import CheckoutOrderItem from "../components/CheckoutOrderItem";
 import type { OrderCheckoutType, OrderCreatedType } from "../../orders/OrdersTypes";
 
 const Checkout = () => {
     document.title = "Iga Productos | Resumen de pago";
-    const [showGuestForm, _setShowGuestForm] = useState<boolean>(false);
-    const { isAuth } = useAuthStore();
     const { order, cancelOrder } = usePaymentStore();
     const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
     const navigate = useNavigate();
@@ -38,7 +30,7 @@ const Checkout = () => {
     if (!order) throw new Error("No se encontro la orden de pago");
 
     const { data, isLoading, error, refetch } = useFetchCheckoutOrder({ orderUUID: order.folio });
-    if (data && data.items.filter(item => item.isChecked === true).length === 0) navigate("/carrito-de-compras");
+    if (data && data.items.length === 0) navigate("/carrito-de-compras");
 
     const handleCanceled = async () => {
         await cancelOrderMutation.mutateAsync();
@@ -75,7 +67,9 @@ const Checkout = () => {
                 </button>
             </div>
         );
-    }
+    };
+
+    const hasAditonalNumber = data?.address.aditional_number && data.address.aditional_number !== "N/A";
 
     return (
         <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200">
@@ -111,187 +105,38 @@ const Checkout = () => {
                 <div className="flex-1 min-w-0 flex flex-col gap-5">
 
                     {/* ── Address Section ── */}
-                    {isAuth ? (
-                        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
-                            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
-                                <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
-                                    <FaMapMarkerAlt className="text-primary" />
-                                    Dirección de envío
-                                </h2>
-                            </div>
-                            <div className="p-4 sm:p-5">
-                                {data?.address && (
-                                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                                        <div className="flex-1">
-                                            <p className="text-base sm:text-lg font-extrabold text-base-content">
-                                                {data.address.recipient_name} {data.address.recipient_last_name}
-                                                <span className="ml-2 badge badge-sm badge-primary badge-outline">{data.address.address_type}</span>
-                                            </p>
-                                            <p className="text-sm text-base-content/70 mt-1">
-                                                {data.address.country_phone_code} {data.address.contact_number}
-                                            </p>
-                                            <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
-                                                {`${data.address.street_name}, #${data.address.number}${data.address.aditional_number === "N/A" ? "" : ` Int. ${data.address.aditional_number}`}, ${data.address.neighborhood}, ${data.address.zip_code}, ${data.address.city}, ${data.address.state}, ${data.address.country}`}
-                                            </p>
-                                            {data.address.references_or_comments && data.address.references_or_comments !== "N/A" && (
-                                                <div className="mt-3 bg-base-200 rounded-xl p-3 border border-base-300">
-                                                    <p className="text-xs font-bold text-base-content/50 uppercase mb-1">Comentarios adicionales</p>
-                                                    <p className="text-sm text-base-content/70">{data.address.references_or_comments}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                        <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                            <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                <FaMapMarkerAlt className="text-primary" />
+                                Dirección de envío
+                            </h2>
                         </div>
-                    ) : (
-                        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
-                            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
-                                <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
-                                    <FaMapMarkerAlt className="text-primary" />
-                                    Dirección de envío
-                                </h2>
-                            </div>
-                            <div className="p-5 flex flex-col gap-5">
-                                {showGuestForm ? (
-                                    /* Guest form section — kept from original, styling updated */
-                                    <div className="w-full flex flex-col gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <FaUserAlt className="text-primary text-sm" />
-                                            <p className="text-sm font-bold text-base-content uppercase">Formulario de compra como invitado</p>
-                                        </div>
-                                        <p className="text-xs text-base-content/50 leading-relaxed">
-                                            Sus datos personales se utilizarán para procesar su pedido conforme a nuestra política de privacidad.
+                        <div className="p-4 sm:p-5">
+                            {data?.address && (
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                                    <div className="flex-1">
+                                        <p className="text-base sm:text-lg font-extrabold text-base-content">
+                                            {data.address.recipient_name} {data.address.recipient_last_name}
+                                            <span className="ml-2 badge badge-sm badge-primary badge-outline">{data.address.address_type}</span>
                                         </p>
-
-                                        {/* Personal info */}
-                                        <div>
-                                            <p className="text-xs font-bold text-base-content/50 uppercase mb-2">Información del comprador</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="text-xs text-base-content/60 mb-1 block">Correo electrónico</label>
-                                                    <input type="email" className="input input-sm sm:input-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-base-content/60 mb-1 block">Nombre</label>
-                                                    <input type="text" className="input input-sm sm:input-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-base-content/60 mb-1 block">Apellidos</label>
-                                                    <input type="text" className="input input-sm sm:input-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-base-content/60 mb-1 block">Número telefónico</label>
-                                                    <input type="tel" className="input input-sm sm:input-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                                                </div>
+                                        <p className="text-sm text-base-content/70 mt-1">
+                                            {data.address.country_phone_code} {data.address.contact_number}
+                                        </p>
+                                        <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
+                                            {`${data.address.street_name}, #${data.address.number}${hasAditonalNumber ? ` Int. ${data.address.aditional_number}` : ""}, ${data.address.neighborhood}, ${data.address.zip_code}, ${data.address.city}, ${data.address.state}, ${data.address.country}`}
+                                        </p>
+                                        {data.address.references_or_comments && data.address.references_or_comments !== "N/A" && (
+                                            <div className="mt-3 bg-base-200 rounded-xl p-3 border border-base-300">
+                                                <p className="text-xs font-bold text-base-content/50 uppercase mb-1">Comentarios adicionales</p>
+                                                <p className="text-sm text-base-content/70">{data.address.references_or_comments}</p>
                                             </div>
-                                        </div>
-
-                                        {/* Address */}
-                                        <div>
-                                            <p className="text-xs font-bold text-base-content/50 uppercase mb-2">Domicilio de envío</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                {[
-                                                    { label: "Calle", type: "text" },
-                                                    { label: "Número Ext.", type: "text" },
-                                                    { label: "Número Int.", type: "text" },
-                                                    { label: "Colonia / Fraccionamiento", type: "text" },
-                                                    { label: "Código Postal", type: "text" },
-                                                    { label: "Ciudad", type: "text" },
-                                                    { label: "Estado / Entidad Federativa", type: "text" },
-                                                    { label: "País", type: "text" },
-                                                ].map((field, i) => (
-                                                    <div key={i}>
-                                                        <label className="text-xs text-base-content/60 mb-1 block">{field.label}</label>
-                                                        <input type={field.type} className="input input-sm sm:input-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                                                    </div>
-                                                ))}
-                                                <div className="sm:col-span-2">
-                                                    <label className="text-xs text-base-content/60 mb-1 block">
-                                                        Referencias del domicilio <span className="text-base-content/40">(opcional)</span>
-                                                    </label>
-                                                    <textarea
-                                                        className="textarea textarea-sm sm:textarea-md w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
-                                                        placeholder="Entre calles, referencias, etc... Máximo 100 caracteres"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Consent */}
-                                        <div className="flex items-start gap-3 p-3 rounded-xl border border-base-300 bg-base-200">
-                                            <input type="checkbox" className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0" />
-                                            <div>
-                                                <span className="text-xs text-base-content/70 leading-relaxed">
-                                                    Quiero utilizar la misma dirección para facturar el pedido.
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3 p-3 rounded-xl border border-base-300 bg-base-200">
-                                            <input type="checkbox" className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0" />
-                                            <Link to="/politica-de-privacidad" className="text-xs text-primary underline underline-offset-2 leading-relaxed hover:opacity-70 transition-opacity">
-                                                He leído y estoy de acuerdo con los términos y condiciones y política de privacidad de la web.
-                                            </Link>
-                                        </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <>
-                                        {/* Sign in CTA */}
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                                <FaUserPlus className="text-primary text-lg" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-bold text-base-content text-sm sm:text-base">¿Ya tienes cuenta? Inicia sesión</p>
-                                                <p className="text-xs text-base-content/50 mt-0.5">Accede a tus direcciones guardadas y completa tu compra más rápido</p>
-                                            </div>
-                                            <Link to="/iniciar-sesion" className="btn btn-primary btn-sm flex-shrink-0 w-full sm:w-auto">
-                                                Iniciar sesión
-                                            </Link>
-                                        </div>
-
-                                        {/* Divider */}
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex-1 h-px bg-base-300" />
-                                            <span className="text-xs text-base-content/40 font-medium">o</span>
-                                            <div className="flex-1 h-px bg-base-300" />
-                                        </div>
-
-                                        {/* Benefits */}
-                                        <div className="rounded-xl border border-warning/30 bg-warning/5 p-4">
-                                            <div className="flex items-start gap-3">
-                                                <FaGift className="text-warning text-lg flex-shrink-0 mt-0.5" />
-                                                <div>
-                                                    <p className="text-sm font-bold text-base-content mb-1.5">¡No te pierdas estos beneficios al registrarte!</p>
-                                                    <ul className="flex flex-col gap-1.5">
-                                                        {[
-                                                            { icon: <FaStar className="text-warning text-xs" />, text: "Acumula puntos con cada compra y canjéalos por productos" },
-                                                            { icon: <FaShoppingBag className="text-primary text-xs" />, text: "Guarda tus direcciones y agiliza futuros pedidos" },
-                                                            { icon: <MdCheckBox className="text-info text-xs" />, text: "Historial completo de pedidos y seguimiento de envíos" },
-                                                        ].map((item, i) => (
-                                                            <li key={i} className="flex items-start gap-2">
-                                                                <span className="mt-0.5 flex-shrink-0">{item.icon}</span>
-                                                                <span className="text-xs text-base-content/70">{item.text}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Continue as guest */}
-                                        <button
-                                            type="button"
-                                            className="btn btn-ghost btn-sm border border-base-300 hover:bg-base-200 gap-2 text-base-content/60 w-full"
-                                        >
-                                            <FaUserAlt className="text-xs" />
-                                            Continuar como invitado
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {/* ── Order Items ── */}
                     <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">

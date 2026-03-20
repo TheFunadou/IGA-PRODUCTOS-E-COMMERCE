@@ -2,7 +2,6 @@ import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
 import ProductVersionCard from "../../products/components/ProductVersionCard";
 import Carousel from "../components/Carousel";
-import PaymentMethodsImgsJSON from "../json/PaymentMethodsCarouselImgs.json";
 import IMG1 from "../../../assets/expo/IMG-1.webp";
 import IMG2 from "../../../assets/expo/IMG-2.webp";
 import IMG3 from "../../../assets/expo/IMG-3.webp";
@@ -12,22 +11,20 @@ import IMG6 from "../../../assets/expo/IMG-6.webp";
 import IMG7 from "../../../assets/expo/IMG-7.webp";
 import IMG8 from "../../../assets/expo/IMG-8.webp";
 import clsx from "clsx";
-import HeroImg from "../../../assets/hero/HeroImg.webp"
 import { useThemeStore } from "../../../layouts/states/themeStore";
-import PartnersCarousel from "../components/PartnersCarousel";
 import Marquee from "react-fast-marquee";
-import { Link } from "react-router-dom";
 import CategoriesSummary from "../components/CategoriesSummary";
-// import { FaArrowCircleDown } from "react-icons/fa";
 import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
 import { useFetchProductVersionCards } from "../../products/hooks/useFetchProductVersionCards";
 import Hero from "../components/Hero";
+import { paymentMethodsImages } from "../helpers";
 
 const Home = () => {
 
     document.title = "Iga Productos | Inicio";
+    const { theme } = useThemeStore();
 
     const sampleVideos: { videoUrl: string, title: string }[] = [
         {
@@ -59,7 +56,6 @@ const Home = () => {
         { index: 7, url: IMG8, description: "" },
     ];
 
-    const { theme } = useThemeStore();
     const MAX_PRODUCTS: number = 10;
 
     const {
@@ -72,8 +68,6 @@ const Home = () => {
         random: true
     });
 
-    const paymentMethodsImgs = PaymentMethodsImgsJSON;
-
     const SectionBar = () => {
         return (
             <div className="bg-primary px-10 py-1 w-fit rounded-xl shadow-lg"></div>
@@ -83,33 +77,6 @@ const Home = () => {
 
     return (
         <div>
-            {/* HERO */}
-            <div className="hidden md:max-h-min border">
-                <div className=" md:flex md:gap-5 rounded-xl">
-                    <figure className="w-full flex items-center justify-center md:hidden bg-base-100/20 rounded-xl shadow-lg">
-                        <img src={HeroImg} alt="Hero image" className="w-70/100 h-full object-cover" />
-                    </figure>
-                    <div className="w-full mt-2 md:mt-0 md:w-50/100 flex flex-col justify-between">
-                        <div className="flex flex-col gap-2 md:gap-5 items-center justify-center md:items-start md:justify-start text-center md:text-justify">
-                            <h1 className="text-center md:text-left text-2xl lg:text-3xl xl:text-6xl text-white ">Protección que</h1>
-                            <h1 className="text-center md:text-left text-3xl lg:text-5xl xl:text-7xl bg-white text-primary p-2 rounded-2xl ">inspira confianza</h1>
-                            <h2 className="text-white text-base md:text-xl lg:text-2xl bg-primary/90 px-2 rounded-md">Cada jornada merece seguridad total.</h2>
-                            <h3 className="text-white  text-sm md:text-base lg:text-xl">En IGA Productos ® encontraras articulos 100% Hechos en México que cumplen los estandares y cumplimientos normativos para cuidar tu desempeño sin comprometer tu comodidad.</h3>
-                            <div className="flex gap-5">
-                                <Link to={"/tienda"} className="btn btn-primary">Explorar tienda</Link>
-                                <Link to={"/acerca-de-iga"} className="btn btn-soft btn-primary">Conocenos</Link>
-                            </div>
-                        </div>
-                        <div className="mt-5 md:mt-0">
-                            <h3 className="text-primary/80">Inspirando confianza en</h3>
-                            <PartnersCarousel />
-                        </div>
-                    </div>
-                    <figure className="hidden md:block w-50/100 p-5 bg-base-100/20 rounded-xl shadow-lg">
-                        <img src={HeroImg} alt="Hero image" className="w-full h-full object-cover" />
-                    </figure>
-                </div>
-            </div>
             <Hero />
             <div className=" md:mt-30 space-y-5 md:space-y-10">
                 <section id="home" className="home-section">
@@ -128,7 +95,7 @@ const Home = () => {
                     </div>
                     <Marquee className="w-full" gradient={false} speed={80} direction="left">
                         <div className="flex gap-5 md:gap-15 items-center justify-center">
-                            {[...paymentMethodsImgs, ...paymentMethodsImgs].map((img, index) => (
+                            {[...paymentMethodsImages, ...paymentMethodsImages].map((img, index) => (
                                 <figure key={index} className="w-25 md:w-60 p-5 filter">
                                     <img className="w-full object-cover" src={img.image_url} alt={img.description} loading="lazy" />
                                 </figure>
@@ -137,7 +104,7 @@ const Home = () => {
                     </Marquee>
                     <Marquee className="w-full" gradient={false} speed={80} direction="right">
                         <div className="flex gap-5 md:gap-15 items-center justify-center">
-                            {[...paymentMethodsImgs, ...paymentMethodsImgs].map((img, index) => (
+                            {[...paymentMethodsImages, ...paymentMethodsImages].map((img, index) => (
                                 <figure key={index} className="w-25 md:w-60 p-5 filter">
                                     <img className="w-full object-cover" src={img.image_url} alt={img.description} loading="lazy" />
                                 </figure>

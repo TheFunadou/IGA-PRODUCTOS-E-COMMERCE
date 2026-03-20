@@ -1,5 +1,4 @@
 import { persist } from "zustand/middleware";
-import { useAuthStore } from "../../auth/states/authStore";
 import { create } from "zustand";
 import type { CreateOrderType, OrderCreatedType } from "../../orders/OrdersTypes";
 import { formatAxiosError } from "../../../api/helpers";
@@ -14,6 +13,7 @@ interface PaymentStoreState {
     cancelOrder: () => Promise<void>;
     success: () => void;
     setBuyNow: (args: { sku: string, quantity: number }) => void;
+    clearError: () => void;
 };
 
 export const usePaymentStore = create<PaymentStoreState>()(
@@ -25,17 +25,15 @@ export const usePaymentStore = create<PaymentStoreState>()(
             buyNow: null,
 
             createOrder: async (data: CreateOrderType): Promise<void> => {
-                const { isAuth, csrfToken } = useAuthStore.getState();
-                if (isAuth) {
-                    try {
-                        set({ isLoading: true });
-                        const order = await createProviderOrder({ dto: data, csrfToken: csrfToken! });
-                        set({ order });
-                    } catch (error) {
-                        set({ error: formatAxiosError(error) });
-                    } finally {
-                        set({ isLoading: false });
-                    }
+                try {
+                    set({ isLoading: true });
+                    console.log(data);
+                    const order = await createProviderOrder({ dto: data });
+                    set({ order });
+                } catch (error) {
+                    set({ error: formatAxiosError(error) });
+                } finally {
+                    set({ isLoading: false });
                 }
 
             },
@@ -48,6 +46,9 @@ export const usePaymentStore = create<PaymentStoreState>()(
             },
             setBuyNow(args: { sku: string, quantity: number }) {
                 set({ buyNow: args });
+            },
+            clearError() {
+                set({ error: null });
             }
         }),
         {

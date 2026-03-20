@@ -26,14 +26,13 @@ export const useFetchOrders = (params: { pagination: { page: number, limit: numb
 };
 
 export const useFetchCheckoutOrder = (params: { orderUUID: string }) => {
-    const { authCustomer } = useAuthStore();
     return useQuery<OrderCheckoutType>({
-        queryKey: ["order:checkout", { orderUUID: params.orderUUID, customer: authCustomer?.uuid }],
+        queryKey: ["order:checkout", { orderUUID: params.orderUUID }],
         queryFn: async () => await getCheckoutOrder({ orderUUID: params.orderUUID }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
-        enabled: !!params.orderUUID && !!authCustomer,
+        enabled: !!params.orderUUID,
     });
 };
 

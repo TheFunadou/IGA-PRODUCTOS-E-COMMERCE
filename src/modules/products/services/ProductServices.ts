@@ -16,8 +16,8 @@ export const listProductVersionsByName = async (input: string): Promise<Searched
     return data;
 };
 
-export const addProductVersionReview = async (args: { data: AddPVReviewType, csrfToken: string }): Promise<string> => {
-    const { data } = await api.post<string>("product/review", args.data, { headers: { "X-CSRF-TOKEN": args.csrfToken } });
+export const addProductVersionReview = async (args: { data: AddPVReviewType }): Promise<string> => {
+    const { data } = await api.post<string>("product/review", args.data);
     return data;
 }
 

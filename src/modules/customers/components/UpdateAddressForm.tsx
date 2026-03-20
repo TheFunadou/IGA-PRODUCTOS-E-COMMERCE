@@ -5,6 +5,17 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import type { CustomerAddressType, NewAddressType, UpdateAddressType } from "../CustomerTypes";
 import { getFormChanges } from "../../../global/GlobalHelpers";
 import { useUpdateAddress } from "../hooks/useCustomer";
+import {
+    FaMapMarkerAlt,
+    FaUserAlt,
+    FaHome,
+    FaBriefcase,
+    FaStar,
+    FaExclamationTriangle,
+    FaEdit,
+} from "react-icons/fa";
+import { MdApartment, MdEditNote } from "react-icons/md";
+import clsx from "clsx";
 
 type Props = {
     versionData: CustomerAddressType | null;
@@ -14,21 +25,101 @@ type Props = {
     onUpdated: () => void;
 };
 
+/* ── Shared helpers (same as NewAddressForm) ───────────────────── */
+
+const ADDRESS_TYPE_OPTIONS = [
+    { value: "Casa", label: "Casa", icon: <FaHome className="text-xs" /> },
+    { value: "Trabajo", label: "Trabajo", icon: <FaBriefcase className="text-xs" /> },
+    { value: "Departamento", label: "Departamento", icon: <MdApartment className="text-sm" /> },
+];
+
+const inputCls = (hasError?: boolean, isModified?: boolean) =>
+    clsx(
+        "input input-sm sm:input-md w-full text-sm border rounded-lg",
+        "bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+        hasError
+            ? "border-error text-error"
+            : isModified
+                ? "border-success text-success"
+                : "border-base-300"
+    );
+
+const SectionHeader = ({ icon, title }: { icon: React.ReactNode; title: string }) => (
+    <div className="flex items-center gap-2 mb-3">
+        <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <span className="text-primary text-xs">{icon}</span>
+        </div>
+        <h3 className="text-xs font-bold text-base-content/60 uppercase tracking-wide">{title}</h3>
+    </div>
+);
+
+const FieldError = ({ message }: { message?: string }) =>
+    message ? (
+        <p className="text-error text-xs mt-1 flex items-center gap-1">
+            <FaExclamationTriangle className="text-[10px] flex-shrink-0" />
+            {message}
+        </p>
+    ) : null;
+
+/* ── Helper: compara un valor del form con el original ─────────── */
+/**
+ * Devuelve true si el campo ha cambiado respecto a versionData.
+ * Normaliza undefined/null/"" como equivalentes a "N/A" en los campos opcionales.
+ */
+function isFieldModified(
+    fieldName: keyof UpdateAddressType,
+    watchedValue: unknown,
+    versionData: CustomerAddressType | null,
+    naFields: Array<keyof UpdateAddressType> = []
+): boolean {
+    if (!versionData) return false;
+
+    const original = versionData[fieldName as keyof CustomerAddressType];
+
+    // Para campos que en BD se guardan como "N/A" cuando están vacíos
+    const watched = watchedValue === "" || watchedValue === undefined || watchedValue === null
+        ? (naFields.includes(fieldName) ? "N/A" : watchedValue)
+        : watchedValue;
+
+    const orig = (original === "N/A" && naFields.includes(fieldName)) ? "N/A" : original;
+
+    // Comparación estricta con coerción de tipo para números/strings
+    return String(watched ?? "") !== String(orig ?? "");
+}
+
+/* ── Component ─────────────────────────────────────────────────── */
+
+// Campos que en BD se almacenan como "N/A" si están vacíos
+const NA_FIELDS: Array<keyof UpdateAddressType> = [
+    "floor",
+    "aditional_number",
+    "references_or_comments",
+];
+
 const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: Props) => {
 
-    const defualtCountry: CountriesPhoneCodeType = {
-        "nameES": "México",
-        "nameEN": "Mexico",
-        "iso2": "MX",
-        "iso3": "MEX",
-        "phoneCode": "+52"
+    const defaultCountry: CountriesPhoneCodeType = {
+        nameES: "México",
+        nameEN: "Mexico",
+        iso2: "MX",
+        iso3: "MEX",
+        phoneCode: "+52",
     };
-    const [country, setCountry] = useState<CountriesPhoneCodeType>(defualtCountry);
+
+    const [country, setCountry] = useState<CountriesPhoneCodeType>(defaultCountry);
     const [currentCountry, setCurrentCountry] = useState<string>("https://flagsapi.com/MX/flat/64.png");
     const [addressType, setAddressType] = useState<string>("Casa");
     const [error, setError] = useState<string>("");
-    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<UpdateAddressType>({});
+
+    const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<UpdateAddressType>({});
     const updateAddress = useUpdateAddress(customer);
+
+    // Observa todos los campos para detectar cambios en tiempo real
+    const watchedValues = watch();
+
+    // Función auxiliar para saber si un campo específico está modificado
+    const modified = (field: keyof UpdateAddressType) =>
+        isFieldModified(field, watchedValues[field], versionData, NA_FIELDS);
 
     const restoreForm = () => {
         if (!versionData) return;
@@ -51,7 +142,9 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
             contact_number: versionData.contact_number,
             default_address: versionData.default_address,
         });
-        const findDefaultCountry = CountriesAreaCodesJSON.find(country => country.phoneCode === versionData.country_phone_code.substring(1));
+        const findDefaultCountry = CountriesAreaCodesJSON.find(
+            (c) => c.phoneCode === versionData.country_phone_code.substring(1)
+        );
         setCurrentCountry(`https://flagsapi.com/${findDefaultCountry?.iso2!}/flat/64.png`);
         setAddressType(versionData.address_type);
     };
@@ -63,22 +156,22 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
             setError("");
             if (!versionData) return;
             const updatedFields: Partial<NewAddressType> = getFormChanges(versionData, data);
-            if (Object.keys(updatedFields).length === 0) { setError("Se necesita al menos actualizar un campo para actualizar la información"); return; }
-            updateAddress.mutate({
-                addressUUID: address!,
-                data: updatedFields
-            });
+            if (Object.keys(updatedFields).length === 0) {
+                setError("Se necesita al menos actualizar un campo para guardar los cambios");
+                return;
+            }
+            updateAddress.mutate({ addressUUID: address!, data: updatedFields });
             onUpdated();
-        } catch (error) {
-            console.error(error);
-        };
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     useEffect(() => {
         setCurrentCountry(`https://flagsapi.com/${country.iso2}/flat/64.png`);
         setValue("country_phone_code", country.phoneCode, {
             shouldValidate: true,
-            shouldDirty: true
+            shouldDirty: true,
         });
     }, [country]);
 
@@ -88,75 +181,134 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
         ref.current?.close();
     };
 
+    const isApartment = addressType === "Departamento";
+
     return (
-        <dialog id="my_modal_3" className="modal" ref={ref}>
-            <div className="modal-box max-w-full sm:max-w-2xl lg:max-w-4xl h-auto max-h-[90vh] overflow-y-scroll px-4 sm:px-6 py-6">
-                <form method="dialog">
-                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => handleClose()}>✕</button>
-                </form>
+        <dialog id="update_address_modal" className="modal" ref={ref}>
+            <div className="modal-box w-full max-w-2xl h-auto max-h-[92vh] overflow-y-auto p-0 rounded-2xl bg-base-100 border border-base-300">
 
-                <h3 className="font-bold text-xl sm:text-2xl mb-4">Actualizar dirección de envio</h3>
+                {/* ── Modal Header ── */}
+                <div className="sticky top-0 z-10 px-5 py-4 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <FaEdit className="text-primary text-sm" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-base text-base-content leading-none">
+                                Actualizar dirección de envío
+                            </h3>
+                            <p className="text-xs text-base-content/40 mt-0.5">
+                                Modifica los campos que desees actualizar
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-circle btn-ghost text-base-content/40 hover:text-base-content"
+                        aria-label="Cerrar"
+                        onClick={handleClose}
+                    >
+                        ✕
+                    </button>
+                </div>
 
-                <form className="mt-3 flex flex-col gap-4 sm:gap-4" onSubmit={handleSubmit(onSubmit)}>
-                    {/* Información del Remitente */}
-                    <fieldset className="border border-gray-300 rounded-xl pt-2 pb-4 sm:pb-5 px-3 sm:px-5">
-                        <legend className="text-base sm:text-lg px-2 sm:px-3" title="Persona que recibira el paquete">
-                            Información del remitente
-                        </legend>
-                        <div className="w-full flex flex-col gap-3 sm:gap-2 [&_div]:flex [&_div]:flex-col">
-                            {/* Nombre y Apellidos */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="name" className="text-sm sm:text-base">Nombre</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Nombre del remitente"
-                                        {...register("recipient_name",
-                                            {
-                                                required: "El nombre del remitente es requerido",
-                                                maxLength: { value: 40, message: "Solo se admiten un máximo de 40 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.recipient_name && <p className="text-error text-xs sm:text-sm mt-1">{errors.recipient_name.message}</p>}
-                                </div>
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="last_names" className="text-sm sm:text-base">Apellidos</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Apellidos del destinatario"
-                                        {...register("recipient_last_name",
-                                            {
-                                                required: "Los apellidos del remitente son requeridos",
-                                                maxLength: { value: 60, message: "Solo se admiten un máximo de 60 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.recipient_last_name && <p className="text-error text-xs sm:text-sm mt-1">{errors.recipient_last_name.message}</p>}
-                                </div>
+                {/* ── Form ── */}
+                <form
+                    id="update-address-form"
+                    autoComplete="on"
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="p-5 flex flex-col gap-6"
+                >
+                    {/* ════ 1. Remitente ════ */}
+                    <section aria-labelledby="section-remitente-update">
+                        <SectionHeader icon={<FaUserAlt />} title="Datos del destinatario" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                            {/* Nombre */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_recipient_name"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("recipient_name") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Nombre(s) *
+                                </label>
+                                <input
+                                    id="u_recipient_name"
+                                    type="text"
+                                    placeholder="Juan"
+                                    autoComplete="given-name"
+                                    className={inputCls(!!errors.recipient_name, modified("recipient_name"))}
+                                    {...register("recipient_name", {
+                                        required: "El nombre del remitente es requerido",
+                                        maxLength: { value: 40, message: "Máximo 40 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.recipient_name?.message} />
                             </div>
 
-                            {/* Número Telefónico */}
-                            <div>
-                                <label htmlFor="email" className="text-sm sm:text-base">Número telefonico</label>
-                                <article className="flex gap-2 sm:gap-3 items-center">
-                                    <figure className="w-10 sm:w-12 flex-shrink-0">
+                            {/* Apellidos */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_recipient_last_name"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("recipient_last_name") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Apellidos *
+                                </label>
+                                <input
+                                    id="u_recipient_last_name"
+                                    type="text"
+                                    placeholder="García López"
+                                    autoComplete="family-name"
+                                    className={inputCls(!!errors.recipient_last_name, modified("recipient_last_name"))}
+                                    {...register("recipient_last_name", {
+                                        required: "Los apellidos del remitente son requeridos",
+                                        maxLength: { value: 60, message: "Máximo 60 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.recipient_last_name?.message} />
+                            </div>
+
+                            {/* Teléfono */}
+                            <div className="sm:col-span-2 flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_contact_number"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("contact_number") || modified("country_phone_code")
+                                            ? "text-success font-medium"
+                                            : "text-base-content/60"
+                                    )}
+                                >
+                                    Número telefónico *
+                                </label>
+                                <div className="flex gap-2 items-center">
+                                    <figure className="w-8 sm:w-10 flex-shrink-0">
                                         <img src={currentCountry} alt={country.nameES} className="w-full h-auto" />
                                     </figure>
                                     <select
-                                        defaultValue={JSON.stringify(defualtCountry)}
-                                        className="w-20 sm:w-24 select select-sm sm:select-md text-xs sm:text-base flex-shrink-0"
-                                        onChange={(e) => { setCountry(JSON.parse(e.target.value)) }}
+                                        defaultValue={JSON.stringify(defaultCountry)}
+                                        aria-label="Código de país"
+                                        className={clsx(
+                                            "w-20 sm:w-24 select select-sm sm:select-md text-xs sm:text-sm flex-shrink-0 border bg-base-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+                                            modified("country_phone_code")
+                                                ? "border-success text-success"
+                                                : "border-base-300"
+                                        )}
+                                        onChange={(e) => setCountry(JSON.parse(e.target.value))}
                                     >
                                         {CountriesAreaCodesJSON.map((data, index) => (
                                             <option
@@ -166,308 +318,478 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                                     nameEN: data.nameEN,
                                                     iso2: data.iso2,
                                                     iso3: data.iso3,
-                                                    phoneCode: `+${data.phoneCode}`
-                                                })}>
+                                                    phoneCode: `+${data.phoneCode}`,
+                                                })}
+                                            >
                                                 {data.iso3}
                                             </option>
                                         ))}
                                     </select>
                                     <input
+                                        id="u_contact_number"
                                         type="tel"
-                                        className="input flex-1 text-sm sm:text-base"
-                                        placeholder="Número"
-                                        {...register("contact_number",
-                                            {
-                                                required: "El número telefonico del remitente es requerido",
-                                                pattern: {
-                                                    value: /^[0-9]{7,15}$/,
-                                                    message: "Solo se admiten valores númericos y el número debe tener entre 7 y 15 digitos"
-                                                }
-                                            }
-                                        )}
+                                        placeholder="3312345678"
+                                        autoComplete="tel-national"
+                                        className={clsx(inputCls(!!errors.contact_number, modified("contact_number")), "flex-1")}
+                                        {...register("contact_number", {
+                                            required: "El número telefónico es requerido",
+                                            pattern: {
+                                                value: /^[0-9]{7,15}$/,
+                                                message: "Solo números, entre 7 y 15 dígitos",
+                                            },
+                                        })}
                                     />
-                                </article>
-                                {errors.contact_number && <p className="text-error text-xs sm:text-sm mt-1">{errors.contact_number.message}</p>}
+                                </div>
+                                <FieldError message={errors.contact_number?.message} />
                             </div>
                         </div>
-                    </fieldset>
+                    </section>
 
-                    {/* Información del Domicilio */}
-                    <fieldset className="border border-gray-300 rounded-xl pt-2 pb-4 sm:pb-5 px-3 sm:px-5">
-                        <legend className="text-base sm:text-lg px-2 sm:px-3" title="Persona que recibira el paquete">
-                            Información del domicilio de entrega
-                        </legend>
-                        <div className="w-full flex flex-col gap-3 sm:gap-2 [&_div]:flex [&_div]:flex-col">
-                            {/* País y Estado */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="country" className="text-sm sm:text-base">País</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="México"
-                                        {...register("country",
-                                            {
-                                                required: "El país es requerido",
-                                                maxLength: { value: 40, message: "Solo se admiten un máximo de 40 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.country && <p className="text-error text-xs sm:text-sm mt-1">{errors.country.message}</p>}
-                                </div>
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="state" className="text-sm sm:text-base">Estado</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Veracruz"
-                                        {...register("state",
-                                            {
-                                                required: "El estado/departamento es requerido",
-                                                maxLength: { value: 40, message: "Solo se admiten un máximo de 40 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.state && <p className="text-error text-xs sm:text-sm mt-1">{errors.state.message}</p>}
-                                </div>
+                    {/* Divider */}
+                    <div className="border-t border-base-300" />
+
+                    {/* ════ 2. Domicilio ════ */}
+                    <section aria-labelledby="section-domicilio-update">
+                        <SectionHeader icon={<FaMapMarkerAlt />} title="Domicilio de entrega" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                            {/* País */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_country"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("country") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    País *
+                                </label>
+                                <input
+                                    id="u_country"
+                                    type="text"
+                                    placeholder="México"
+                                    autoComplete="country-name"
+                                    className={inputCls(!!errors.country, modified("country"))}
+                                    {...register("country", {
+                                        required: "El país es requerido",
+                                        maxLength: { value: 40, message: "Máximo 40 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.country?.message} />
                             </div>
 
-                            {/* Ciudad y Localidad */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="city" className="text-sm sm:text-base">Ciudad</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Ingresa tu ciudad"
-                                        {...register("city",
-                                            {
-                                                required: "La ciudad/alcaldia es requerida",
-                                                maxLength: { value: 50, message: "Solo se admiten un máximo de 50 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.city && <p className="text-error text-xs sm:text-sm mt-1">{errors.city.message}</p>}
-                                </div>
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="locality" className="text-sm sm:text-base">Localidad</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Ingresa tu localidad"
-                                        {...register("locality",
-                                            {
-                                                required: "La localidad es requerida",
-                                                maxLength: { value: 50, message: "Solo se admiten un máximo de 50 caracteres" },
-                                                pattern: {
-                                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                    message: "Solo se admiten mayusculas, minusculas y espacios"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.locality && <p className="text-error text-xs sm:text-sm mt-1">{errors.locality.message}</p>}
-                                </div>
+                            {/* Estado */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_state"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("state") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Estado *
+                                </label>
+                                <input
+                                    id="u_state"
+                                    type="text"
+                                    placeholder="Veracruz"
+                                    autoComplete="address-level1"
+                                    className={inputCls(!!errors.state, modified("state"))}
+                                    {...register("state", {
+                                        required: "El estado es requerido",
+                                        maxLength: { value: 40, message: "Máximo 40 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.state?.message} />
+                            </div>
+
+                            {/* Ciudad */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_city"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("city") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Ciudad *
+                                </label>
+                                <input
+                                    id="u_city"
+                                    type="text"
+                                    placeholder="Coatzacoalcos"
+                                    autoComplete="address-level2"
+                                    className={inputCls(!!errors.city, modified("city"))}
+                                    {...register("city", {
+                                        required: "La ciudad es requerida",
+                                        maxLength: { value: 50, message: "Máximo 50 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.city?.message} />
+                            </div>
+
+                            {/* Localidad */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_locality"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("locality") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Localidad *
+                                </label>
+                                <input
+                                    id="u_locality"
+                                    type="text"
+                                    placeholder="Centro"
+                                    autoComplete="address-level3"
+                                    className={inputCls(!!errors.locality, modified("locality"))}
+                                    {...register("locality", {
+                                        required: "La localidad es requerida",
+                                        maxLength: { value: 50, message: "Máximo 50 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.locality?.message} />
                             </div>
 
                             {/* Calle */}
-                            <div>
-                                <label htmlFor="street" className="text-sm sm:text-base">Calle</label>
-                                <input
-                                    type="text"
-                                    className="input w-full text-sm sm:text-base"
-                                    placeholder="Ingresa tu calle"
-                                    {...register("street_name",
-                                        {
-                                            required: "La calle es requerida",
-                                            maxLength: { value: 60, message: "Solo se admiten un máximo de 60 caracteres" },
-                                            pattern: {
-                                                value: /^(?=.{2,100}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
-                                                message: "Solo se admiten mayusculas, minusculas, espacios y numeros"
-                                            }
-                                        }
+                            <div className="sm:col-span-2 flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_street_name"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("street_name") ? "text-success font-medium" : "text-base-content/60"
                                     )}
+                                >
+                                    Calle *
+                                </label>
+                                <input
+                                    id="u_street_name"
+                                    type="text"
+                                    placeholder="Av. Insurgentes"
+                                    autoComplete="address-line1"
+                                    className={inputCls(!!errors.street_name, modified("street_name"))}
+                                    {...register("street_name", {
+                                        required: "La calle es requerida",
+                                        maxLength: { value: 60, message: "Máximo 60 caracteres" },
+                                        pattern: {
+                                            value: /^(?=.{2,100}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
+                                            message: "Solo letras, números, espacios y puntuación básica",
+                                        },
+                                    })}
                                 />
-                                {errors.street_name && <p className="text-error text-xs sm:text-sm mt-1">{errors.street_name.message}</p>}
+                                <FieldError message={errors.street_name?.message} />
                             </div>
 
                             {/* Colonia */}
-                            <div>
-                                <label htmlFor="neighborhood" className="text-sm sm:text-base">Colonia/Fraccionamiento</label>
+                            <div className="sm:col-span-2 flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_neighborhood"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("neighborhood") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Colonia / Fraccionamiento *
+                                </label>
                                 <input
+                                    id="u_neighborhood"
                                     type="text"
-                                    className="input w-full text-sm sm:text-base"
-                                    placeholder="Ingresa tu colonia, fraccionamiento, barrio, etc..."
-                                    {...register("neighborhood",
-                                        {
-                                            required: "La colonia/fracccionamiento/barrio es requerido",
-                                            maxLength: { value: 60, message: "Solo se admiten un máximo de 60 caracteres" },
-                                            pattern: {
-                                                value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                                message: "Solo se admiten mayusculas, minusculas, espacios y numeros"
-                                            }
-                                        }
-                                    )}
+                                    placeholder="Colonia del Valle, Fraccionamiento Las Palmas…"
+                                    autoComplete="address-level4"
+                                    className={inputCls(!!errors.neighborhood, modified("neighborhood"))}
+                                    {...register("neighborhood", {
+                                        required: "La colonia o fraccionamiento es requerida",
+                                        maxLength: { value: 60, message: "Máximo 60 caracteres" },
+                                        pattern: {
+                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+                                            message: "Solo letras y espacios",
+                                        },
+                                    })}
                                 />
-                                {errors.neighborhood && <p className="text-error text-xs sm:text-sm mt-1">{errors.neighborhood.message}</p>}
+                                <FieldError message={errors.neighborhood?.message} />
                             </div>
 
-                            {/* Código Postal y Tipo de Dirección */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="postal_code" className="text-sm sm:text-base">Código postal</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="Ingresa tu código postal"
-                                        {...register("zip_code",
-                                            {
-                                                required: "El código postal es requerido",
-                                                minLength: 3,
-                                                maxLength: { value: 10, message: "Solo se admiten un máximo de 10 caracteres" },
-                                                pattern: {
-                                                    value: /^(?!.*-.*-)[0-9-]+$/,
-                                                    message: "Solo se admiten números y guiones"
-                                                }
-                                            }
-                                        )}
-                                    />
-                                    {errors.zip_code && <p className="text-error text-xs sm:text-sm mt-1">{errors.zip_code.message}</p>}
+                            {/* CP */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_zip_code"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("zip_code") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Código postal *
+                                </label>
+                                <input
+                                    id="u_zip_code"
+                                    type="text"
+                                    placeholder="96400"
+                                    autoComplete="postal-code"
+                                    inputMode="numeric"
+                                    className={inputCls(!!errors.zip_code, modified("zip_code"))}
+                                    {...register("zip_code", {
+                                        required: "El código postal es requerido",
+                                        minLength: { value: 3, message: "Mínimo 3 caracteres" },
+                                        maxLength: { value: 10, message: "Máximo 10 caracteres" },
+                                        pattern: {
+                                            value: /^(?!.*-.*-)[0-9-]+$/,
+                                            message: "Solo números y guiones",
+                                        },
+                                    })}
+                                />
+                                <FieldError message={errors.zip_code?.message} />
+                            </div>
+
+                            {/* Tipo de dirección — pill selector */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("address_type") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Tipo de dirección *
+                                </label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {ADDRESS_TYPE_OPTIONS.map((opt) => {
+                                        const isSelected = addressType === opt.value;
+                                        const isTypeModified = modified("address_type");
+                                        return (
+                                            <label
+                                                key={opt.value}
+                                                className={clsx(
+                                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all select-none",
+                                                    isSelected
+                                                        ? isTypeModified
+                                                            ? "border-success/40 bg-success/10 text-success"
+                                                            : "border-primary/40 bg-primary/10 text-primary"
+                                                        : "border-base-300 bg-base-200 text-base-content/60 hover:border-primary/30"
+                                                )}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    className="hidden"
+                                                    value={opt.value}
+                                                    {...register("address_type")}
+                                                    onChange={(e) => setAddressType(e.target.value)}
+                                                />
+                                                {opt.icon}
+                                                {opt.label}
+                                            </label>
+                                        );
+                                    })}
                                 </div>
-                                <div className="w-full sm:w-1/2">
-                                    <label htmlFor="address_type" className="text-sm sm:text-base">Tipo de dirección</label>
-                                    <select
-                                        className="select w-full text-sm sm:text-base"
-                                        {...register("address_type")}
-                                        onChange={(e) => setAddressType(e.target.value)}
-                                        defaultValue={"Casa"}
+                            </div>
+
+                            {/* Piso — solo Departamento */}
+                            {isApartment && (
+                                <div className="flex flex-col gap-1">
+                                    <label
+                                        htmlFor="u_floor"
+                                        className={clsx(
+                                            "text-xs transition-colors",
+                                            modified("floor") ? "text-success font-medium" : "text-base-content/60"
+                                        )}
                                     >
-                                        <option value="Casa">Casa</option>
-                                        <option value="Trabajo">Trabajo</option>
-                                        <option value="Departamento">Departamento</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Números Exterior e Interior */}
-                            <article className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                {addressType === "Departamento" &&
-                                    <div className="w-full sm:w-1/3">
-                                        <label htmlFor="Piso" className="text-sm sm:text-base">Piso</label>
-                                        <input
-                                            type="number"
-                                            className="input w-full text-sm sm:text-base"
-                                            placeholder="ejem: 1"
-                                            {...register("floor",
-                                                {
-                                                    maxLength: { value: 3, message: "Solo se admiten un máximo de 3 caracteres" },
-                                                    setValueAs: (value) => value === "" ? undefined : value
-                                                }
-                                            )}
-                                        />
-                                    </div>
-                                }
-                                <div className={`w-full ${addressType === "Departamento" ? "sm:w-1/3" : "sm:w-1/2"}`}>
-                                    <label htmlFor="num_ext" className="text-sm sm:text-base">Número Exterior</label>
+                                        Piso <span className="text-base-content/40">(opcional)</span>
+                                    </label>
                                     <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder="ejem: 100A"
-                                        {...register("number",
-                                            {
-                                                required: "El número del domicilio es requerido",
-                                                maxLength: { value: 6, message: "Solo se admiten un máximo de 6 caracteres" },
-                                                pattern: {
-                                                    value: /^[1-9][0-9]*[A-Z]?$/,
-                                                    message: "Número: solo se admiten números y una sola mayuscula"
-                                                }
-                                            }
-                                        )}
+                                        id="u_floor"
+                                        type="number"
+                                        placeholder="ej. 3"
+                                        autoComplete="off"
+                                        className={inputCls(!!errors.floor, modified("floor"))}
+                                        {...register("floor", {
+                                            maxLength: { value: 3, message: "Máximo 3 caracteres" },
+                                            setValueAs: (v) => v === "" ? undefined : v,
+                                        })}
                                     />
+                                    <FieldError message={errors.floor?.message} />
                                 </div>
-                                <div className={`w-full ${addressType === "Departamento" ? "sm:w-1/3" : "sm:w-1/2"}`}>
-                                    <label htmlFor="num_int" className="text-sm sm:text-base">Número Interior</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full text-sm sm:text-base"
-                                        placeholder={addressType === "Departamento" ? "ejem: 14" : "Opcional"}
-                                        {...register("aditional_number",
-                                            {
-                                                maxLength: { value: 6, message: "Solo se admiten un máximo de 6 caracteres" },
-                                                pattern: {
-                                                    value: /^[1-9][0-9]*[A-Z]?$/,
-                                                    message: "Número interior: solo se admiten números y una sola mayuscula"
-                                                },
-                                                setValueAs: (value) => value === "" ? undefined : value
-                                            }
-                                        )}
-                                    />
-                                </div>
-                            </article>
-                            {errors.number && <p className="text-error text-xs sm:text-sm mt-1">{errors.number.message}</p>}
-                            {errors.aditional_number && <p className="text-error text-xs sm:text-sm mt-1">{errors.aditional_number.message}</p>}
-                        </div>
-                    </fieldset>
+                            )}
 
-                    {/* Información Adicional */}
-                    <fieldset className="border border-gray-300 rounded-xl pt-2 pb-4 sm:pb-5 px-3 sm:px-5">
-                        <legend className="text-base sm:text-lg px-2 sm:px-3" title="Persona que recibira el paquete">
-                            Información adicional
-                        </legend>
-                        <div className="w-full flex flex-col gap-3 sm:gap-2 [&_div]:flex [&_div]:flex-col">
-                            <div>
-                                <label htmlFor="aditional_comments" className="text-sm sm:text-base">Comentarios o referencias</label>
-                                <textarea
-                                    className="textarea w-full text-sm sm:text-base"
-                                    placeholder="Referencias visuales, información adicional,etc..."
-                                    rows={3}
-                                    {...register("references_or_comments",
-                                        {
-                                            maxLength: {
-                                                value: 80,
-                                                message: "Solo se permiten un máximo de 80 caracteres"
-                                            },
-                                            setValueAs: (value) => value === "" ? undefined : value
-                                        }
+                            {/* Número exterior */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_number"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("number") ? "text-success font-medium" : "text-base-content/60"
                                     )}
+                                >
+                                    Número exterior *
+                                </label>
+                                <input
+                                    id="u_number"
+                                    type="text"
+                                    placeholder="ej. 100A"
+                                    autoComplete="address-line2"
+                                    className={inputCls(!!errors.number, modified("number"))}
+                                    {...register("number", {
+                                        required: "El número exterior es requerido",
+                                        maxLength: { value: 6, message: "Máximo 6 caracteres" },
+                                        pattern: {
+                                            value: /^[1-9][0-9]*[A-Z]?$/,
+                                            message: "Solo números y una mayúscula al final",
+                                        },
+                                    })}
                                 />
-                                {errors.references_or_comments && <p className="text-error text-xs sm:text-sm mt-1">{errors.references_or_comments.message}</p>}
+                                <FieldError message={errors.number?.message} />
+                            </div>
+
+                            {/* Número interior */}
+                            <div className="flex flex-col gap-1">
+                                <label
+                                    htmlFor="u_aditional_number"
+                                    className={clsx(
+                                        "text-xs transition-colors",
+                                        modified("aditional_number") ? "text-success font-medium" : "text-base-content/60"
+                                    )}
+                                >
+                                    Número interior{" "}
+                                    <span className="text-base-content/40">
+                                        ({isApartment ? "recomendado" : "opcional"})
+                                    </span>
+                                </label>
+                                <input
+                                    id="u_aditional_number"
+                                    type="text"
+                                    placeholder={isApartment ? "ej. 14" : "Opcional"}
+                                    autoComplete="off"
+                                    className={inputCls(!!errors.aditional_number, modified("aditional_number"))}
+                                    {...register("aditional_number", {
+                                        maxLength: { value: 6, message: "Máximo 6 caracteres" },
+                                        pattern: {
+                                            value: /^[1-9][0-9]*[A-Z]?$/,
+                                            message: "Solo números y una mayúscula al final",
+                                        },
+                                        setValueAs: (v) => v === "" ? undefined : v,
+                                    })}
+                                />
+                                <FieldError message={errors.aditional_number?.message} />
                             </div>
                         </div>
-                    </fieldset>
+                    </section>
 
-                    {/* Checkbox Dirección Predeterminada */}
-                    <article className="flex gap-2 items-start sm:items-center">
+                    {/* Divider */}
+                    <div className="border-t border-base-300" />
+
+                    {/* ════ 3. Información adicional ════ */}
+                    <section aria-labelledby="section-adicional-update">
+                        <SectionHeader icon={<MdEditNote />} title="Información adicional" />
+                        <div className="flex flex-col gap-1">
+                            <label
+                                htmlFor="u_references_or_comments"
+                                className={clsx(
+                                    "text-xs transition-colors",
+                                    modified("references_or_comments") ? "text-success font-medium" : "text-base-content/60"
+                                )}
+                            >
+                                Referencias o comentarios{" "}
+                                <span className="text-base-content/40">(opcional, máx. 80 caracteres)</span>
+                            </label>
+                            <textarea
+                                id="u_references_or_comments"
+                                className={clsx(
+                                    "textarea w-full text-sm border rounded-lg bg-base-200",
+                                    "focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none",
+                                    errors.references_or_comments
+                                        ? "border-error text-error"
+                                        : modified("references_or_comments")
+                                            ? "border-success text-success"
+                                            : "border-base-300"
+                                )}
+                                placeholder="Entre calles Reforma y Morelos, casa azul con portón negro…"
+                                rows={3}
+                                autoComplete="off"
+                                {...register("references_or_comments", {
+                                    maxLength: { value: 80, message: "Máximo 80 caracteres" },
+                                    setValueAs: (v) => v === "" ? undefined : v,
+                                })}
+                            />
+                            <FieldError message={errors.references_or_comments?.message} />
+                        </div>
+                    </section>
+
+                    {/* Divider */}
+                    <div className="border-t border-base-300" />
+
+                    {/* ════ 4. Predeterminada ════ */}
+                    <label
+                        className={clsx(
+                            "flex items-start gap-3 p-3 rounded-xl border bg-base-200 cursor-pointer transition-colors",
+                            modified("default_address")
+                                ? "border-success/40 hover:border-success/60"
+                                : "border-base-300 hover:border-primary/30"
+                        )}
+                    >
                         <input
                             type="checkbox"
-                            className="checkbox checkbox-sm sm:checkbox-md mt-1 sm:mt-0 flex-shrink-0"
+                            className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0"
                             {...register("default_address")}
                         />
-                        <label htmlFor="state" className="text-sm sm:text-base">
-                            Utilizar esta dirección de envio como predeterminada
-                        </label>
-                    </article>
-                    {errors.default_address && <p className="text-error text-xs sm:text-sm">{errors.default_address.message}</p>}
+                        <div>
+                            <p
+                                className={clsx(
+                                    "text-sm font-medium flex items-center gap-1.5 transition-colors",
+                                    modified("default_address") ? "text-success" : "text-base-content"
+                                )}
+                            >
+                                <FaStar className={clsx("text-xs", modified("default_address") ? "text-success" : "text-primary")} />
+                                Usar como dirección predeterminada
+                            </p>
+                            <p className="text-xs text-base-content/40 mt-0.5">
+                                Se seleccionará automáticamente al realizar tu próxima compra
+                            </p>
+                        </div>
+                    </label>
 
-                    {/* Submit Button */}
-                    <button type="submit" className="btn btn-primary mt-3 sm:mt-5 w-full text-sm sm:text-base">
-                        Actualizar dirección de envio
+                    {/* ════ Error global ════ */}
+                    {error && error.length > 0 && (
+                        <div className="alert alert-error rounded-xl py-3 px-4 text-sm">
+                            <FaExclamationTriangle />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    {/* ════ Submit ════ */}
+                    <button
+                        type="submit"
+                        disabled={updateAddress.isPending}
+                        className="w-full btn btn-primary font-bold gap-2"
+                    >
+                        {updateAddress.isPending ? (
+                            <span className="loading loading-spinner loading-sm" />
+                        ) : (
+                            <FaEdit className="text-sm" />
+                        )}
+                        {updateAddress.isPending ? "Guardando cambios…" : "Guardar cambios"}
                     </button>
-                    {error && error.length > 0 && <p className="text-error text-sm sm:text-base">{error}</p>}
                 </form>
             </div>
+
+            {/* Backdrop click closes modal */}
+            <form method="dialog" className="modal-backdrop">
+                <button aria-label="Cerrar modal" onClick={handleClose} />
+            </form>
         </dialog>
     );
 };

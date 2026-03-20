@@ -29,11 +29,10 @@ export const useFetchCustomerAddresses = (args: { pagination: { page: number, li
 export function useAddAddress() {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
-    const { csrfToken } = useAuthStore();
     const { authCustomer } = useAuthStore();
     return useMutation({
         mutationFn: async (newAddress: NewAddressType): Promise<CustomerAddressType> => {
-            return await createAddressService({ data: newAddress, csrfToken: csrfToken! });
+            return await createAddressService({ data: newAddress });
         },
 
         onMutate: async (newAddress: NewAddressType) => {
@@ -92,11 +91,11 @@ export function useAddAddress() {
 
 export const useUpdateCustomer = ({ type }: { type: ModalProfileFormType }) => {
     const { showTriggerAlert } = useTriggerAlert();
-    const { csrfToken, updateName } = useAuthStore();
+    const { updateName } = useAuthStore();
     return useMutation({
         mutationFn: async ({ data }: { data: UpdateProfileFormType }) => {
-            if (type === "name") return await updateCustomer({ dto: data, csrfToken: csrfToken! });
-            if (type === "password") return await updatePassword({ dto: data, csrfToken: csrfToken! });
+            if (type === "name") return await updateCustomer({ dto: data });
+            if (type === "password") return await updatePassword({ dto: data });
         },
         onSuccess: (response, form) => {
             showTriggerAlert("Successfull", response!, {
@@ -119,11 +118,9 @@ export const useUpdateCustomer = ({ type }: { type: ModalProfileFormType }) => {
 export function useDeleteAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
-    const { csrfToken } = useAuthStore();
-
     return useMutation({
         mutationFn: async (addressUUID: string): Promise<string> => {
-            return await deleteAddressService({ addressUUID, csrfToken: csrfToken! });
+            return await deleteAddressService({ addressUUID });
         },
 
         onMutate: async (addressUUID: string) => {
@@ -173,13 +170,12 @@ export function useDeleteAddress(customer: string | undefined) {
 export function useUpdateAddress(customer: string | undefined) {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
-    const { csrfToken } = useAuthStore();
     return useMutation({
         mutationFn: async ({ addressUUID, data }: {
             addressUUID: string;
             data: UpdateAddressType
         }): Promise<string> => {
-            return await updateAddressService({ addressUUID, data, csrfToken: csrfToken! });
+            return await updateAddressService({ addressUUID, data });
         },
         onMutate: async ({ addressUUID, data }) => {
             if (!customer) return { previousAddresses: undefined };
@@ -247,10 +243,9 @@ export function useToggleFavorite() {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
     const { isAuth, authCustomer } = useAuthStore();
-    const { csrfToken } = useAuthStore();
     return useMutation({
         mutationFn: async ({ sku }: { sku: string, product: ProductVersionCardType }): Promise<onToogleFavoriteType> => {
-            return await toggleFavoriteService({ sku, csrfToken: csrfToken! });
+            return await toggleFavoriteService({ sku });
         },
         onMutate: async ({ sku, product }) => {
             if (!authCustomer && !isAuth) return { previousFavorites: undefined };

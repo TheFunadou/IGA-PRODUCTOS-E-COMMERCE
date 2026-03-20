@@ -21,15 +21,17 @@ const PartnersCarousel = () => {
     { id: 8, name: 'A Marine Services', logo: img8 },
   ];
 
-  // Duplicamos el array para crear el efecto infinito
-  const duplicatedPartners = [...partners, ...partners];
-
   return (
-    <Marquee className="w-full " speed={80}>
-      <div className="flex gap-5 md:gap-10 items-center justify-center">
-        {duplicatedPartners.map((partner, index) => (
-          <figure key={index} className="w-20 h-20 border border-gray-200 rounded-xl bg-base-100">
-            <img className="w-full h-full " src={partner.logo} alt={partner.name} loading="lazy" />
+    <Marquee className="w-full" speed={80} autoFill pauseOnHover>
+      <div className="flex gap-5 md:gap-5 items-center pl-5">
+        {partners.map((partner) => (
+          <figure key={partner.id} className="w-20 h-20 border border-gray-200 rounded-xl bg-base-100 flex items-center justify-center">
+            <img
+              className="w-full h-full object-contain"
+              src={partner.logo}
+              alt={partner.name}
+              loading="lazy"
+            />
           </figure>
         ))}
       </div>

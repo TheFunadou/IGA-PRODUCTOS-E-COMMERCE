@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../auth/states/authStore";
+import { useAuthStore } from "../../modules/auth/states/authStore";
 import { FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser, FaX } from "react-icons/fa6";
 import { BiLogOut } from "react-icons/bi";
 import { FaHome, FaInfoCircle } from "react-icons/fa";
@@ -10,7 +10,7 @@ type Props = {
     onLogout: () => Promise<void>
 }
 
-const DrawerSubMenu = ({ isOpen, onClose, onLogout }: Props) => {
+const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
     const navigate = useNavigate();
     const { isAuth, authCustomer } = useAuthStore();
 
@@ -20,7 +20,7 @@ const DrawerSubMenu = ({ isOpen, onClose, onLogout }: Props) => {
     };
 
     return (
-        <div className="drawer">
+        <div className="drawer z-250">
             {/* Control del checkbox con React */}
             <input
                 id="my-drawer-1"
@@ -81,4 +81,4 @@ const DrawerSubMenu = ({ isOpen, onClose, onLogout }: Props) => {
     );
 };
 
-export default DrawerSubMenu;
+export default DrawerMobileMenu;

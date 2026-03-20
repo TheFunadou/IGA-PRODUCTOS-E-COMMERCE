@@ -1,16 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTriggerAlert } from "../alerts/states/TriggerAlert";
 import { registerCustomer, sendVerificationToken } from "./services/authServices";
-import { useAuthStore } from "./states/authStore";
 import type { NewCustomerType } from "./AuthTypes";
 import { formatAxiosError } from "../../api/helpers";
 
 export function useSendVerificationToken() {
     const { showTriggerAlert } = useTriggerAlert();
-    const { sessionId } = useAuthStore();
     return useMutation({
         mutationFn: async ({ email }: { email: string }): Promise<string> => {
-            return await sendVerificationToken({ sessionId: sessionId!, email });
+            return await sendVerificationToken({ email });
         },
         onSuccess: () => {
             showTriggerAlert("Successfull", "Tu código de verificación ha sidoenviado a tu correo", {
@@ -29,10 +27,9 @@ export function useSendVerificationToken() {
 
 export function useResendVerificationToken() {
     const { showTriggerAlert } = useTriggerAlert();
-    const { sessionId } = useAuthStore();
     return useMutation({
         mutationFn: async ({ email }: { email: string }): Promise<string> => {
-            return await sendVerificationToken({ sessionId: sessionId!, email });
+            return await sendVerificationToken({ email });
         },
         onSuccess: () => {
             showTriggerAlert("Successfull", "Tu código de verificación ha sido reenviado a tu correo", {
@@ -48,15 +45,11 @@ export function useResendVerificationToken() {
     });
 };
 
-
-
-
 export function useRegisterCustomer() {
     const { showTriggerAlert } = useTriggerAlert();
-    const { sessionId } = useAuthStore();
     return useMutation({
         mutationFn: async ({ dto, verificationToken }: { dto: NewCustomerType, verificationToken: string }): Promise<string> => {
-            return await registerCustomer({ ...dto, session_id: sessionId!, token: verificationToken });
+            return await registerCustomer({ ...dto, token: verificationToken });
         },
         onSuccess: () => {
             showTriggerAlert("Successfull", "Registrado existosamente", {
@@ -72,4 +65,5 @@ export function useRegisterCustomer() {
         },
     });
 };
+
 

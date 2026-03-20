@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { SiMercadopago } from "react-icons/si";
@@ -30,6 +30,7 @@ import {
     FaStar,
     FaUserPlus,
     FaShoppingBag,
+    FaExclamationTriangle,
 } from "react-icons/fa";
 import { MdShoppingBag, MdCheckBox } from "react-icons/md";
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
@@ -518,12 +519,13 @@ interface OrderSummaryProps {
     onCreateOrder: () => void;
     orderLoading: boolean;
     theme: string;
+    error: string | null;
 }
 
 const OrderSummaryPanel = ({
     subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
     selectedProductsCount, couponCode, onCouponChange,
-    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme,
+    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error
 }: OrderSummaryProps) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
@@ -630,6 +632,13 @@ const OrderSummaryPanel = ({
                     {orderLoading ? "Procesando..." : "Proceder al pago"}
                 </button>
 
+                {error && (
+                    <div className="bg-soft alert alert-error">
+                        <FaExclamationTriangle className="text-lg" />
+                        <span>{error}</span>
+                    </div>
+                )}
+
                 <p className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1">
                     <FaLock className="text-[8px]" /> Pago seguro y encriptado
                 </p>
@@ -649,8 +658,9 @@ const ShoppingCartResume = () => {
     const navigate = useNavigate();
     const { isAuth } = useAuthStore();
     const { shoppingCart, toogleCheck, updateQty, remove } = useShoppingCart();
-    const { order, createOrder, isLoading: orderLoading } = usePaymentStore();
+    const { order, createOrder, isLoading: orderLoading, error, clearError } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
+    const location = useLocation();
 
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
     const [shippingCost, setShippingCost] = useState<number>(0);
@@ -794,7 +804,10 @@ const ShoppingCartResume = () => {
         onCreateOrder: handleCreateOrder,
         orderLoading: orderLoading ?? false,
         theme: theme!,
+        error
     };
+
+    useEffect(() => clearError(), [location.pathname])
 
     return (
         <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200">
