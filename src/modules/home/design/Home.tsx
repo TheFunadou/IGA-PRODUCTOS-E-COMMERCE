@@ -23,7 +23,7 @@ import { paymentMethodsImages } from "../helpers";
 
 const Home = () => {
 
-    document.title = "Iga Productos | Inicio";
+    document.title = "Iga Productos | Fabricantes y vendedores de equipo de protección personal";
     const { theme } = useThemeStore();
 
     const sampleVideos: { videoUrl: string, title: string }[] = [
