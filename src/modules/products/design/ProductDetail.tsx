@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import PaginationComponent from "../../../global/components/PaginationComponent";
 import { OverflowXComponent } from "../../home/components/OverflowXComponent";
 import ImageZoomViewer from "../components/ImageZoomViewer";
-import ImageGallery from "../components/ImageGallery";
+import ProductVersionImageGallery from "../components/ProductVersionImageGallery";
 import { showModal } from "../../../global/GlobalHelpers";
 import { useFetchProductVersionCards } from "../hooks/useFetchProductVersionCards";
 
@@ -303,7 +303,7 @@ const ProductDetail = () => {
 
                     {/* ── Galería de imágenes ── */}
                     <div className="w-full lg:w-[35%] xl:w-[33%] 2xl:w-[30%]">
-                        <div className="lg:sticky lg:top-5 flex flex-col gap-3">
+                        <div className="lg:sticky lg:top-30 flex flex-col gap-3">
                             <div className="relative w-full">
                                 {data.isOffer && (
                                     <div className={clsx(
@@ -467,7 +467,7 @@ const ProductDetail = () => {
 
                     {/* ── Purchase Card desktop ── */}
                     <div className="hidden lg:block w-full lg:w-[20%] xl:w-[20%] 2xl:w-[20%]">
-                        <div className="sticky top-5">
+                        <div className="sticky top-30">
                             <PurchaseCard {...purchaseCardProps} />
                         </div>
                     </div>
@@ -741,7 +741,7 @@ const ProductDetail = () => {
 
             {/* ══ MODAL GALERÍA ════════════════════════════════════════════════ */}
             {data && (
-                <ImageGallery
+                <ProductVersionImageGallery
                     ref={imageGalleryModal}
                     currentImage={image!}
                     images={data.product_images.map(img => img.image_url)}

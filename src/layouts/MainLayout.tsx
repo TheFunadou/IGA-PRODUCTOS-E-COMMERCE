@@ -5,11 +5,12 @@ import { useThemeStore } from "./states/themeStore";
 import { useAuthStore } from "../modules/auth/states/authStore";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import DrawerMobileMenu from "./components/DrawerMobileMenu";
+import CookieConsent from "./components/CookieConsent";
 
 const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer, cookieConsent, setCookieConsent } = useAuthStore();
     const { setTheme, theme } = useThemeStore();
     const navigate = useNavigate();
 
@@ -47,6 +48,7 @@ const MainLayout = () => {
             <main className="w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat">
                 <Outlet />
             </main>
+            {!cookieConsent && <CookieConsent onSetConsent={setCookieConsent} />}
             <MainFooter />
             <DrawerMobileMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} onLogout={handleLogout} />
         </div>

@@ -53,12 +53,9 @@ const ProductVersionCard = ({ versionData, className, imageLoading, transparent 
 
     return (
         <div className={clsx(
-            // Base — SIN anchos fijos responsivos: el ancho lo controla el padre (grid/flex)
             "relative flex flex-col rounded-2xl overflow-hidden border transition-all duration-300",
             "w-full h-auto",
-            // Hover elevation
             "hover:shadow-xl hover:-translate-y-1",
-            // Background logic via `transparent` prop
             !transparent && (isDark
                 ? "bg-gray-900 border-gray-700 shadow-md shadow-black/30"
                 : "bg-white border-gray-200 shadow-md shadow-gray-200/60"
@@ -70,10 +67,12 @@ const ProductVersionCard = ({ versionData, className, imageLoading, transparent 
             <figure
                 role="button"
                 onClick={() => navigate(`/tienda/${category}/${slug}/${sku}`)}
-                className="relative w-full overflow-hidden cursor-pointer group aspect-[4/3]"
+                // aspect-square → 1:1 en todos los breakpoints
+                className="relative w-full overflow-hidden cursor-pointer group aspect-square"
             >
                 <img
-                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    // object-contain → muestra la imagen completa sin recortes
+                    className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
                     src={image}
                     alt={versionData.product_name}
                     loading={imageLoading}

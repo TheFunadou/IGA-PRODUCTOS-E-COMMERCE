@@ -50,5 +50,5 @@
 
 /* Ocultar badge de reCaptcha v3 */
 .grecaptcha-badge {
-    visibility: block !important;
+  visibility: hidden !important;
 }

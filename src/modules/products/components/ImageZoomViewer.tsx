@@ -45,7 +45,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                 onMouseMove={handleMouseMove}
                 className={clsx(
                     "relative overflow-hidden rounded-2xl border-2 border-gray-200",
-                    "bg-gray-50 dark:bg-gray-900 select-none shrink-0",
+                    "bg-base-100 select-none shrink-0",
                     "w-full aspect-square",
                     "sm:w-64 sm:h-64",
                     "md:w-80 md:h-80",
@@ -92,7 +92,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                         "lg:w-96 lg:h-96",
                         "xl:w-[28rem] xl:h-[28rem]",
                         "2xl:w-[32rem] 2xl:h-[32rem]",
-                        "animate-in fade-in zoom-in-95 duration-150"
+                        "animate-in fade-in zoom-in-95 duration-150 bg-base-100"
                     )}
                 >
                     <div

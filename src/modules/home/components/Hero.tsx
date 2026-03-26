@@ -3,12 +3,13 @@ import HeroIMG from "../../../assets/hero/HeroImg2.png";
 import { ChevronRight, ShieldCheck } from "lucide-react"; // o el ícono que uses en el fragmento
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import PartnersCarousel from "./PartnersCarousel";
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
     const { theme } = useThemeStore();
     const isDark = theme === "dark";
-
     const [in_, setIn] = useState(false);
+    const navigate = useNavigate();
     useEffect(() => { const t = setTimeout(() => setIn(true), 60); return () => clearTimeout(t); }, []);
 
     const enter = (d = 0) => ({
@@ -145,7 +146,9 @@ export default function Hero() {
 
                 {/* ── CTAs */}
                 <div className="flex gap-2.5 flex-wrap mb-8 sm:mb-10" style={enter(0.38)}>
-                    <button className="bg-primary text-white border-0
+                    <button
+                        onClick={() => navigate("/tienda")}
+                        className="bg-primary text-white border-0
                         rounded-md px-6 sm:px-8 py-2.5 sm:py-3
                         text-[11px] sm:text-sm font-bold uppercase cursor-pointer
                         shadow-[0_6px_24px_rgba(59,130,246,0.4)]
@@ -153,13 +156,15 @@ export default function Hero() {
                         transition-all duration-200 flex items-center gap-2">
                         Explorar tienda<ChevronRight />
                     </button>
-                    <button className={`rounded-md px-6 sm:px-8 py-2.5 sm:py-3
+                    <button
+                        onClick={() => navigate("/acerca-de-iga")}
+                        className={`rounded-md px-6 sm:px-8 py-2.5 sm:py-3
                         text-[11px] sm:text-sm font-semibold uppercase cursor-pointer
                          backdrop-blur-lg hover:-translate-y-0.5 transition-all duration-200 shadow-sm
                         ${isDark
-                            ? "bg-white/[0.06] text-white/75 border-white/20 hover:bg-white/[0.12] hover:text-white hover:border-white/40"
-                            : "bg-white/60 text-slate-600 border-slate-300 hover:bg-white hover:text-slate-800 hover:border-blue-300"
-                        }`}>
+                                ? "bg-white/[0.06] text-white/75 border-white/20 hover:bg-white/[0.12] hover:text-white hover:border-white/40"
+                                : "bg-white/60 text-slate-600 border-slate-300 hover:bg-white hover:text-slate-800 hover:border-blue-300"
+                            }`}>
                         Conócenos
                     </button>
                 </div>

@@ -61,7 +61,7 @@ const Footer = () => {
                     </div>
                 </div>
             </footer>
-            <div className="hidden md:flex fixed bottom-20 right-0 text-5xl hover:scale-110 duration-250 bg-success rounded-l-md p-2 w-18 z-1000 tooltip tooltip-left items-center justify-center" data-tip="Contactanos por whatsapp">
+            <div className="hidden md:flex fixed bottom-2 right-0 text-5xl hover:scale-110 duration-250 bg-success rounded-l-md p-2 w-18 z-1000 tooltip tooltip-left items-center justify-center" data-tip="Contactanos por whatsapp">
                 <a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp className="w-8 h-8" /></a>
             </div>
         </>

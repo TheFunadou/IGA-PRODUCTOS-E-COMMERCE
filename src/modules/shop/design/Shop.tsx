@@ -93,7 +93,7 @@ const Shop = () => {
 
             {/* ── SIDEBAR ── */}
             <div className="hidden md:block md:w-20/100 md:flex-shrink-0 relative">
-                <div className="w-full border-r border-base-300 sticky top-5 pr-5">
+                <div className="w-full border-r border-base-300 sticky top-30 pr-5">
 
                     {/* Sidebar header */}
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-base-300">
