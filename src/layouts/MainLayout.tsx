@@ -10,8 +10,9 @@ import CookieConsent from "./components/CookieConsent";
 const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { isAuth, logout, getProfile, authCustomer, cookieConsent, setCookieConsent } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
     const { setTheme, theme } = useThemeStore();
+    const [cookieConsent, setCookieConsent] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -25,9 +26,17 @@ const MainLayout = () => {
         }
     };
 
+    const handleSetConsent = (consent: boolean) => {
+        localStorage.setItem("cookieConsent", consent.toString());
+        setCookieConsent(consent);
+    };
+
+
     useEffect(() => {
         if (isAuth && !authCustomer) getProfile();
         if (!theme) setTheme("ligth");
+        const consentValue = localStorage.getItem("cookieConsent");
+        if (consentValue) setCookieConsent(!!consentValue && consentValue === "true")
     }, []);
 
     return (
@@ -48,7 +57,7 @@ const MainLayout = () => {
             <main className="w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat">
                 <Outlet />
             </main>
-            {!cookieConsent && <CookieConsent onSetConsent={setCookieConsent} />}
+            {!cookieConsent && <CookieConsent onSetConsent={handleSetConsent} />}
             <MainFooter />
             <DrawerMobileMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} onLogout={handleLogout} />
         </div>

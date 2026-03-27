@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Páginas que no deben ser indexadas (Cuenta, Carrito, Checkout)
+Disallow: /mi-cuenta/
+Disallow: /carrito-de-compras/
+Disallow: /resumen-de-carrito/
+Disallow: /pagar-productos/
+Disallow: /pagar-ahora/
+Disallow: /mis-ordenes/
+Disallow: /mis-favoritos/
+
+# Páginas de autenticación
+Disallow: /iniciar-sesion/
+Disallow: /nueva-cuenta/
+Disallow: /restablecer-contraseña/
+
+# Ubicación del Sitemap
+Sitemap: https://igaproductos.com/sitemap.xml
