@@ -1,6 +1,5 @@
 import { MdOutlineVerified, MdOutlineContactMail } from "react-icons/md";
 
-/* ── Shared design tokens (idénticos a PrivacyPolicy) ─────── */
 const SectionBar = () => (
     <div className="bg-primary px-10 py-1 w-fit rounded-xl shadow-lg" />
 );
@@ -11,7 +10,6 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     </h2>
 );
 
-/* ── PolicySection (idéntico a PrivacyPolicy) ─────────────── */
 function PolicySection({
     id,
     title,
@@ -40,7 +38,6 @@ const PNCPolicy = () => {
         <section className="w-full bg-base-300 rounded-xl px-3 sm:px-5 py-6 sm:py-10">
             <div className="flex flex-col gap-8 sm:gap-10">
 
-                {/* ── INTRO — mismo estilo que PrivacyPolicy ───────── */}
                 <div id="intro" className="scroll-mt-6">
                     <div className="flex flex-col gap-2 mb-4">
                         <SectionBar />

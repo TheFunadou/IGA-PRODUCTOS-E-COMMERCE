@@ -141,7 +141,7 @@ const TermsAndConditions = () => {
 
                 {/* ── Sidebar nav (desktop) ─────────────────────────── */}
                 <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-                    <div className="bg-blue-950 text-white rounded-xl p-5 sticky top-5 shadow-lg">
+                    <div className="bg-blue-950 text-white rounded-xl p-5 sticky top-30 shadow-lg">
                         <p className="text-base font-bold mb-1 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-primary inline-block" />
                             Directorio

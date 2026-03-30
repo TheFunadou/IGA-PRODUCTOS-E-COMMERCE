@@ -75,12 +75,12 @@ export default function Hero() {
 
             {/* ░░ FLOATING STAT CHIPS */}
             {[
-                { label: "NOM-115", sub: "Cascos", top: "14%", right: "38%", d: 0.7 },
-                { label: "NOM-116", sub: "EPP", top: "38%", right: "42%", d: 0.85 },
-                { label: "NOM-138", sub: "Guantes", top: "62%", right: "35%", d: 1.0 },
+                { label: "Seguridad", sub: "", top: "14%", right: "38%", d: 0.7 },
+                { label: "Confianza", sub: "", top: "38%", right: "42%", d: 0.85 },
+                { label: "Calidad", sub: "", top: "62%", right: "35%", d: 1.0 },
             ].map((c, i) => (
                 <div key={i}
-                    className={`absolute z-[6] flex items-center gap-2 rounded-md px-3 py-1.5
+                    className={` absolute z-[6] flex items-center gap-2 rounded-md px-3 py-1.5
                         border backdrop-blur-xl
                         ${isDark ? "bg-white/[0.07] border-white/[0.14]"
                             : "bg-white/70 border-blue-200/60 shadow-sm"}`}
@@ -117,7 +117,7 @@ export default function Hero() {
                         <div className="bg-primary p-2 rounded-md my-2">
                             <span className="font-serif text-5xl sm:text-6xl lg:text-[5.5rem] font-bold leading-[0.9] tracking-tight
                             bg-white bg-clip-text text-transparent">
-                                confianza
+                                <span className="tracking-wide">confianza</span>
                             </span>
                         </div>
                     </div>

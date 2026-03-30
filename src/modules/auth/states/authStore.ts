@@ -10,12 +10,14 @@ type AuthenticationState = {
     isAuth: boolean;
     isLoading: boolean;
     error: string | null;
+    cookieConsent: boolean;
     login: (dto: AuthCustomerCredentialsType) => Promise<void>;
     loginWithGoogle: (id_token: string) => Promise<void>;
     logout: () => Promise<string>;
     getProfile: () => Promise<void>;
     clearError: () => void;
     updateName: (data: { first_name?: string, last_name?: string }) => Promise<void>;
+    onSetCookieConsent: (consent: boolean) => void;
 };
 export const AUTH_CUSTOMER_KEY = "auth-customer-storage";
 
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthenticationState>()(
             isLoading: false,
             error: null,
             csrfToken: null,
+            cookieConsent: false,
 
             login: async (data: AuthCustomerCredentialsType) => {
                 try {
@@ -96,6 +99,9 @@ export const useAuthStore = create<AuthenticationState>()(
                         last_name: data.last_name ? data.last_name : authCustomer.last_name
                     }
                 })
+            },
+            onSetCookieConsent: (consent: boolean) => {
+                set({ cookieConsent: consent })
             }
         }),
         {
@@ -104,6 +110,7 @@ export const useAuthStore = create<AuthenticationState>()(
             partialize: (state) => ({
                 authCustomer: state.authCustomer,
                 isAuth: state.isAuth,
+                cookieConsent: state.cookieConsent,
             }),
             version: 1,
             migrate: (persistedState: any, _version: number) => {
@@ -112,6 +119,7 @@ export const useAuthStore = create<AuthenticationState>()(
                 }
                 return persistedState as AuthenticationState;
             },
+
         }
     )
 );

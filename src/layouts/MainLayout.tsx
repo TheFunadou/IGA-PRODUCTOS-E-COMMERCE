@@ -10,9 +10,8 @@ import CookieConsent from "./components/CookieConsent";
 const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer, cookieConsent, onSetCookieConsent } = useAuthStore();
     const { setTheme, theme } = useThemeStore();
-    const [cookieConsent, setCookieConsent] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -27,16 +26,13 @@ const MainLayout = () => {
     };
 
     const handleSetConsent = (consent: boolean) => {
-        localStorage.setItem("cookieConsent", consent.toString());
-        setCookieConsent(consent);
+        onSetCookieConsent(consent);
     };
 
 
     useEffect(() => {
         if (isAuth && !authCustomer) getProfile();
         if (!theme) setTheme("ligth");
-        const consentValue = localStorage.getItem("cookieConsent");
-        if (consentValue) setCookieConsent(!!consentValue && consentValue === "true")
     }, []);
 
     return (
