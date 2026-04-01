@@ -10,7 +10,7 @@ type Props = {
 type Position = { x: number; y: number };
 
 const ZOOM_LEVEL = 2.5;
-const LENS_SIZE_PX = 100;
+const LENS_SIZE_PX = 120;
 
 const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -33,66 +33,57 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
     }, []);
 
     return (
-        <div
-            className="flex flex-col items-center gap-3 w-full sm:flex-row sm:items-start sm:gap-4 md:gap-6"
-            onClick={onClick}
-        >
-            {/* ── IMAGEN PRINCIPAL + LENTE ── */}
+        <div className="relative w-full group" onClick={onClick}>
+            {/* ── IMAGEN PRINCIPAL ── */}
             <div
                 ref={containerRef}
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
                 onMouseMove={handleMouseMove}
                 className={clsx(
-                    "relative overflow-hidden rounded-2xl border-2 border-gray-200",
-                    "bg-base-100 select-none shrink-0",
-                    "w-full aspect-square",
-                    "sm:w-64 sm:h-64",
-                    "md:w-80 md:h-80",
-                    "lg:w-96 lg:h-96",
-                    "xl:w-[28rem] xl:h-[28rem]",
-                    "2xl:w-[32rem] 2xl:h-[32rem]",
-                    "cursor-crosshair shadow-md transition-shadow duration-200 hover:shadow-xl"
+                    "relative overflow-hidden rounded-3xl border-2 border-base-300 bg-white",
+                    "select-none w-full aspect-square cursor-crosshair",
+                    "shadow-sm transition-all duration-500 hover:shadow-2xl group-hover:border-primary/30",
+                    "flex items-center justify-center"
                 )}
             >
                 <img
                     src={image_url}
                     alt={alt}
                     draggable={false}
-                    className="w-full h-full object-contain pointer-events-none"
+                    className="w-full h-full object-contain pointer-events-none transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
                 />
 
-                {/* Círculo lente */}
+                {/* Lente (Solo visible en desktop/hover) */}
                 {isHovering && (
                     <div
-                        className="absolute pointer-events-none rounded-full border-2 border-white/80 shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_4px_24px_rgba(0,0,0,0.18)]"
+                        className="absolute pointer-events-none rounded-full border-2 border-white/90 shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_12px_48px_rgba(0,0,0,0.2)] hidden lg:block"
                         style={{
                             width: LENS_SIZE_PX,
                             height: LENS_SIZE_PX,
                             left: cursor.x - LENS_SIZE_PX / 2,
                             top: cursor.y - LENS_SIZE_PX / 2,
-                            background: "rgba(255,255,255,0.18)",
+                            background: "rgba(255,255,255,0.1)",
+                            backdropFilter: "blur(4px)",
                         }}
                     />
                 )}
 
+                {/* Overlay sutil de interacción */}
                 {isHovering && (
-                    <div className="absolute inset-0 bg-black/5 pointer-events-none rounded-2xl" />
+                    <div className="absolute inset-0 bg-primary/5 pointer-events-none transition-opacity duration-300" />
                 )}
             </div>
 
-            {/* ── PANEL ZOOM — solo visible al hacer hover ── */}
+            {/* ── PANEL ZOOM (Posicionado absolutamente a la derecha en LG+) ── */}
             {isHovering && (
                 <div
                     className={clsx(
-                        "rounded-2xl border border-primary/50 overflow-hidden shrink-0 shadow-lg",
-                        "w-full aspect-square",
-                        "sm:w-64 sm:h-64",
-                        "md:w-80 md:h-80",
-                        "lg:w-96 lg:h-96",
-                        "xl:w-[28rem] xl:h-[28rem]",
-                        "2xl:w-[32rem] 2xl:h-[32rem]",
-                        "animate-in fade-in zoom-in-95 duration-150 bg-base-100 z-100"
+                        "z-[100] overflow-hidden bg-white shadow-2xl rounded-3xl border border-primary/20 pointer-events-none",
+                        "absolute top-0 w-full aspect-square",
+                        "hidden lg:block lg:left-[calc(100%+1.5rem)]",
+                        "animate-in fade-in zoom-in-95 duration-300 ease-out",
+                        "before:absolute before:inset-0 before:ring-1 before:ring-inset before:ring-black/5"
                     )}
                 >
                     <div
@@ -106,8 +97,16 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                     />
                 </div>
             )}
+
+            {/* Indicador visual móvil/tablet */}
+            <div className="mt-3 flex justify-center lg:hidden">
+                <span className="text-[11px] font-bold text-primary/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+                    Tocar para ampliar
+                </span>
+            </div>
         </div>
     );
 };
 
-export default ImageZoomViewer;
+export default ImageZoomViewer;
