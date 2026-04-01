@@ -92,7 +92,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                         "lg:w-96 lg:h-96",
                         "xl:w-[28rem] xl:h-[28rem]",
                         "2xl:w-[32rem] 2xl:h-[32rem]",
-                        "animate-in fade-in zoom-in-95 duration-150 bg-base-100"
+                        "animate-in fade-in zoom-in-95 duration-150 bg-base-100 z-100"
                     )}
                 >
                     <div

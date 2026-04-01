@@ -76,7 +76,7 @@ const Home = () => {
 
 
     return (
-        <div>
+        <div >
             <Hero />
             <div className=" md:mt-30 space-y-5 md:space-y-10">
                 <section id="home" className="home-section">
