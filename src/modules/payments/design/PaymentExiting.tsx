@@ -228,7 +228,7 @@ const PaymentExiting = () => {
         if (!data?.order) return;
         if (
             data.status === "APPROVED" &&
-            data.order.details.order.uuid === orderStore?.folio
+            data.order.details.order.uuid === orderStore?.orderUUID
         ) {
             success();
             if (authCustomer?.uuid) {

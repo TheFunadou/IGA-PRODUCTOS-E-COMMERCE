@@ -300,7 +300,7 @@ const PaymentPending = () => {
 
         if (
             data.status === "PENDING" &&
-            data.order.details.order.uuid === orderStore?.folio
+            data.order.details.order.uuid === orderStore?.orderUUID
         ) {
             success();
             if (authCustomer?.uuid) {

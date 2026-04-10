@@ -34,6 +34,7 @@ import ShoppingCartItem from "../components/ShoppingCartItem";
 import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json";
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import { useForm } from "react-hook-form";
+import type { PaymentShoppingCart } from "../../orders/OrdersTypes";
 
 // ── Guest Form Component ─────────────────────────────────────────────────────
 
@@ -779,7 +780,7 @@ const BuyNow = () => {
             return;
         }
 
-        const orderItems = [{ product: data.product_version.sku, quantity }];
+        const orderItems: PaymentShoppingCart[] = [{ sku: data.product_version.sku, quantity }];
 
         // Authenticated user flow
         if (isAuth && selectedAddress) {
