@@ -20,6 +20,7 @@ import { BiPackage } from "react-icons/bi";
 import { useFetchProductVersionCards } from "../../products/hooks/useFetchProductVersionCards";
 import Hero from "../components/Hero";
 import { paymentMethodsImages } from "../helpers";
+import MostPopularItems from "../components/MostPopularItems";
 
 const Home = () => {
 
@@ -75,11 +76,20 @@ const Home = () => {
     };
 
 
+
     return (
         <div >
             <Hero />
             <div className=" md:mt-30 space-y-5 md:space-y-10">
-                <section id="home" className="home-section">
+                <section className="home-section">
+                    <SectionBar />
+                    <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300">Conoce nuestros cascos mas populares</h1>
+                    <div className="bg-primary text-white w-fit px-2 rounded-xl ">
+                        <p className="home-section-subtitle"> <FaBox className="text-2xl" /> Los siempre confiables para tu seguridad</p>
+                    </div>
+                    <MostPopularItems />
+                </section>
+                <section className="home-section">
                     <SectionBar />
                     <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300">Categorias principales</h1>
                     <div className="bg-primary text-white w-fit px-2 rounded-xl ">

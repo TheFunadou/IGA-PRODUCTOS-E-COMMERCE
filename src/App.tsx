@@ -14,7 +14,7 @@ import Login from "./modules/auth/design/Login"
 import { TriggerAlertProvider } from "./modules/alerts/states/TriggerAlert"
 import Shop from "./modules/shop/design/Shop"
 import { ThemeProvider } from "./modules/products/states/ThemeContext"
-import ProductDetail from "./modules/products/design/ProductDetail"
+import ProductVersionDetail from "./modules/products/design/ProductVersionDetail"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ShoppingCart from "./modules/shopping/design/ShoppingCart"
 import BuyNow from "./modules/shopping/design/BuyNow"
@@ -109,7 +109,7 @@ const router = createBrowserRouter([
 
           // Shop
           { path: "/tienda", element: <Shop /> },
-          { path: "/tienda/:categoria/:slug/:sku", element: <ProductDetail /> },
+          { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetail /> },
 
           // Shopping Cart
           { path: "/carrito-de-compras", element: <ShoppingCart /> },

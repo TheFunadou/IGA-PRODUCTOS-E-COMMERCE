@@ -26,10 +26,10 @@ const Checkout = () => {
     const { order, cancelOrder } = usePaymentStore();
     const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
     const navigate = useNavigate();
-    const cancelOrderMutation = useCancelOrder({ orderUUID: order?.folio! });
+    const cancelOrderMutation = useCancelOrder({ orderUUID: order?.orderUUID! });
     if (!order) throw new Error("No se encontro la orden de pago");
 
-    const { data, isLoading, error, refetch } = useFetchCheckoutOrder({ orderUUID: order.folio });
+    const { data, isLoading, error, refetch } = useFetchCheckoutOrder({ orderUUID: order.orderUUID });
     if (data && data.items.length === 0) navigate("/carrito-de-compras");
 
     const handleCanceled = async () => {
@@ -85,7 +85,7 @@ const Checkout = () => {
                             Pago de productos
                         </h1>
                         <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
-                            Folio: <span className="font-mono font-semibold text-base-content/70">{order.folio}</span>
+                            Folio: <span className="font-mono font-semibold text-base-content/70">{order.orderUUID}</span>
                         </p>
                     </div>
                 </div>
@@ -191,8 +191,8 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                 <figure className="w-28 sm:w-36">
                     <img
                         className="w-full object-contain"
-                        src={paymentProvider[order.payment_method].image_url}
-                        alt={paymentProvider[order.payment_method].description}
+                        src={paymentProvider[order.paymentProvider].image_url}
+                        alt={paymentProvider[order.paymentProvider].description}
                     />
                 </figure>
             </div>
@@ -256,7 +256,7 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
 
                 {/* Payment CTA */}
                 <div className="flex flex-col gap-2 pt-1">
-                    {order.payment_method === "mercado_pago" && (
+                    {order.paymentProvider === "mercado_pago" && (
                         <>
                             <div className={clsx(
                                 "flex items-center gap-3 p-3 rounded-xl border",

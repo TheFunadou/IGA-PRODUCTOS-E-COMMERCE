@@ -4,7 +4,7 @@ import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
 
 export type PaymentShoppingCart = {
-    product: string;
+    sku: string;
     quantity: number;
 };
 
@@ -65,8 +65,8 @@ export type OrderResume = {
 };
 
 export type OrderCreatedType = {
-    folio: string;
-    payment_method: Exclude<PaymentProvidersType, null>;
+    orderUUID: string;
+    paymentProvider: Exclude<PaymentProvidersType, null>;
 };
 
 export type LightGetOrders = Omit<Order, "is_guest_order" | "exchange" | "payment_provider" | "coupon_code">;

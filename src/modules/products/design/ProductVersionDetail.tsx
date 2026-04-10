@@ -321,7 +321,7 @@ const PurchaseCard = ({
 );
 
 // ── Componente principal ───────────────────────────────────────────────────────
-const ProductDetail = () => {
+const ProductVersionDetail = () => {
     const SHIPPING_COST = 264.00;
     const params = useParams();
 
@@ -1027,4 +1027,4 @@ const ProductDetail = () => {
     );
 };
 
-export default ProductDetail;
+export default ProductVersionDetail;

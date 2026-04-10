@@ -728,7 +728,7 @@ const ShoppingCartResume = () => {
             return;
         };
         const products: PaymentShoppingCart[] = selectedProducts.map(item => ({
-            product: item.product_version.sku,
+            sku: item.product_version.sku,
             quantity: item.quantity,
         }));
 
