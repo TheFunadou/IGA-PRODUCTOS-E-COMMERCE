@@ -326,7 +326,7 @@ const ProductVersionDetailV2 = () => {
     const navigate = useNavigate();
 
     const { data, isLoading, error } = useFetchProductVersionDetailV2({ sku: params.sku! });
-    const { data: ads, isLoading: adsLoading, error: adsError } = useFetchProductVersionCardsV2({ limit: 10, random: true });
+    const { data: ads, isLoading: adsLoading, error: adsError } = useFetchProductVersionCardsV2({ filters: { limit: 10, random: true } });
     const { data: reviews, isLoading: reviewsLoading } = useFetchProductVersionReviews({ uuid: data?.sku });
     const { data: reviewsResume, isLoading: reviewsResumeLoading } = useFetchProductVersionReviewsResumeByUUID({ uuid: data?.sku });
 
@@ -343,7 +343,7 @@ const ProductVersionDetailV2 = () => {
     const [color, setColor] = useState("");
     const [stock, setStock] = useState(1);
     const [certifications, setCertifications] = useState<string[]>([]);
-    const [card, setCard] = useState<ProductVersionCardI | undefined>(undefined);
+    const [card, _] = useState<ProductVersionCardI | undefined>(undefined);
     const [shippingCost, setShippingCost] = useState(SHIPPING_COST);
     const [boxesQty, setBoxesQty] = useState(1);
     const [selectedRating, setSelectedRating] = useState(1);
@@ -384,7 +384,6 @@ const ProductVersionDetailV2 = () => {
         setColor(data.color.code);
         setStock(data.stock);
         setCertifications(data.details.certsDesc ? data.details.certsDesc.split(",") : []);
-        setCard(data as ProductVersionCardI);
         setValue("sku", data.sku);
     }, [data, setValue]);
 

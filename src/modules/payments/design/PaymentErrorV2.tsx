@@ -1,4 +1,3 @@
-import { formatDate, formatPrice } from "../../products/Helpers";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -282,7 +281,7 @@ const PaymentErrorV2 = () => {
     if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") throw new Error("Error al obtener el estatus de la orden de compra");
 
     const { order } = data;
-    const { shipping, items, buyer } = order;
+    const { shipping, items } = order;
     const isRejected = data.status === "REJECTED";
     const isInProcess = data.status === "IN_PROCESS";
 
@@ -463,7 +462,7 @@ const PaymentErrorV2 = () => {
                         >
                             <div className="flex flex-col gap-4">
                                 {items.map((item, idx) => (
-                                    <CheckoutOrderItemV2 key={`${item.sku}-${idx}`} item={item} />
+                                    <CheckoutOrderItemV2 key={`${item.sku}-${idx}`} data={item} />
                                 ))}
                             </div>
                         </SectionCard>
