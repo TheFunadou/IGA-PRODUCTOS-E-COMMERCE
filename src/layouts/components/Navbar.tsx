@@ -4,18 +4,18 @@ import { FaSearch } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { IoLogOutOutline } from "react-icons/io5";
 import { VscThreeBars } from "react-icons/vsc";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../../modules/auth/states/authStore";
-import { useShoppingCartStore } from "../../modules/shopping/states/shoppingCartStore";
 import { useFetchSearchProductVersions } from "../../modules/products/hooks/useFetchProductVersionCards";
 import useDebounceInputString from "../../modules/products/hooks/useDebounce";
 import { useOutsideSearchClick } from "../../modules/products/hooks/useOutsideSearchClick";
 import { makeSlug } from "../../modules/products/Helpers";
-import { useShoppingCart } from "../../modules/shopping/hooks/useShoppingCart";
 import { useSearchHistoryStore } from "../states/searchCachedStore";
 import ThemeController from "../../modules/home/components/ThemeController";
 import ShopMenuPreview from "./ShopMenuPreview";
 import IgaLogo from "../../assets/logo/IGA-LOGO.webp";
+import { useTriggerAlert } from "../../modules/alerts/states/TriggerAlert";
+import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
 
 interface MainNavbarProps {
     onOpenMobileMenu: () => void;
@@ -30,11 +30,15 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [showShopMenuPreview, setShowShopMenuPreview] = useState(false);
     const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 300);
-    const { shoppingCart: authShoppingCart } = useShoppingCart();
     const searchResultsRef = useRef<HTMLDivElement>(null);
     const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
     const { isAuth, authCustomer } = useAuthStore();
-    const { items: localShoppingCart } = useShoppingCartStore();
+    const { showTriggerAlert } = useTriggerAlert();
+    const { data } = useHandleShoppingCart({
+        isAuth,
+        authCustomer,
+        showTriggerAlert: (type, message, options) => showTriggerAlert(type, message, options)
+    });
     const hideTimeoutRef = useRef<number | null>(null);
     const navigate = useNavigate();
 
@@ -72,6 +76,11 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
         args.e.preventDefault();
         clearSearches();
     };
+
+
+    useEffect(() => {
+        console.log(data?.shoppingCart);
+    }, [data]);
 
     return (
         <section className="sticky top-0 z-50 w-full">
@@ -168,7 +177,7 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                     <Link to="/carrito-de-compras" className="relative flex-shrink-0">
                         <MdOutlineShoppingCart className="text-2xl md:text-3xl" />
                         <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
-                            {isAuth ? authShoppingCart.length : localShoppingCart.length}
+                            {data && data.shoppingCart.length}
                         </span>
                     </Link>
                     <button type="button" className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0" onClick={onOpenMobileMenu} aria-label="Abrir menú">

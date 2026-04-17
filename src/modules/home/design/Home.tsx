@@ -1,6 +1,5 @@
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
-import ProductVersionCard from "../../products/components/ProductVersionCard";
 import Carousel from "../components/Carousel";
 import IMG1 from "../../../assets/expo/IMG-1.webp";
 import IMG2 from "../../../assets/expo/IMG-2.webp";
@@ -17,10 +16,11 @@ import CategoriesSummary from "../components/CategoriesSummary";
 import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
-import { useFetchProductVersionCards } from "../../products/hooks/useFetchProductVersionCards";
+import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
 import Hero from "../components/Hero";
 import { paymentMethodsImages } from "../helpers";
 import MostPopularItems from "../components/MostPopularItems";
+import ProductVersionCardV2 from "../../products/components/ProductVersionCardV2";
 
 const Home = () => {
 
@@ -64,9 +64,11 @@ const Home = () => {
         isLoading,
         error,
         refetch
-    } = useFetchProductVersionCards({
-        limit: MAX_PRODUCTS,
-        random: true
+    } = useFetchProductVersionCardsV2({
+        filters: {
+            limit: MAX_PRODUCTS,
+            random: true
+        }
     });
 
     const SectionBar = () => {
@@ -209,7 +211,7 @@ const Home = () => {
                     {!isLoading && !error && ads && (
                         <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mt-5">
                             {ads.data.map((data, index) => (
-                                <ProductVersionCard key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
+                                <ProductVersionCardV2 key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
                             ))}
                         </div>
                     )}

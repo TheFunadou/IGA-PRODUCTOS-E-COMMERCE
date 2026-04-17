@@ -14,9 +14,7 @@ import Login from "./modules/auth/design/Login"
 import { TriggerAlertProvider } from "./modules/alerts/states/TriggerAlert"
 import Shop from "./modules/shop/design/Shop"
 import { ThemeProvider } from "./modules/products/states/ThemeContext"
-import ProductVersionDetail from "./modules/products/design/ProductVersionDetail"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import ShoppingCart from "./modules/shopping/design/ShoppingCart"
 import BuyNow from "./modules/shopping/design/BuyNow"
 import CustomerAddresses from "./modules/customers/design/CustomerAddresses"
 import AboutIGA from "./modules/home/design/AboutIGA"
@@ -25,8 +23,6 @@ import Coverage from "./modules/home/design/Coverage"
 import Distributors from "./modules/home/design/Distributors"
 import Contact from "./modules/home/design/Contact"
 import FrecuentQuestions from "./modules/home/design/FrecuentQuestions"
-import ShoppingCartResume from "./modules/shopping/design/ShoppingCartResume"
-import Checkout from "./modules/shopping/design/Checkout"
 import NotFoundPage from "./global/design/NotFoundPage"
 import PrivacyPolicy from "./modules/policies/PrivacyPolicy"
 import CustomerFavorites from "./modules/customers/design/CustomerFavorites"
@@ -35,12 +31,9 @@ import CustomerPersonalInfo from "./modules/customers/design/CustomerPersonalInf
 import Ticket from "./modules/orders/design/Ticket"
 import { useThemeStore } from "./layouts/states/themeStore"
 import { useEffect } from "react"
-import PaymentExiting from "./modules/payments/design/PaymentExiting"
-import PaymentPending from "./modules/payments/design/PaymentPending"
 import PNCPolicy from "./modules/policies/PNCPolicy"
 import Orders from "./modules/orders/design/Orders"
 import OrderDetail from "./modules/orders/design/OrderDetail"
-import PaymentError from "./modules/payments/design/PaymentError"
 import TermsAndConditions from "./modules/policies/TermsAndConditions"
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -48,6 +41,15 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import RestorePassword from "./modules/auth/design/RestorePassword"
 import ScrollToTop from "./global/components/ScrollToTop"
+import ProductVersionDetailV2 from "./modules/products/design/ProductVersionDetailV2"
+import ShoppingCartV2 from "./modules/shopping/design/ShoppingCartV2"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import ShoppingCartResumeV2 from "./modules/shopping/design/ShoppingCartResumeV2"
+import CheckoutV2 from "./modules/shopping/design/CheckoutV2"
+import PaymentExitingV2 from "./modules/payments/design/PaymentExitingV2"
+import PaymentPendingV2 from "./modules/payments/design/PaymentPendingV2"
+import PaymentErrorV2 from "./modules/payments/design/PaymentErrorV2"
+import { QRRedirectCorazaPlago, QRRedirectPlagoCorazaAI } from "./modules/products/components/QRRedirect"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -66,7 +68,7 @@ function RootLayout() {
     <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <QueryClientProvider client={queryClient}>
-          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+          <ReactQueryDevtools initialIsOpen={false} />
           <ThemeProvider>
             <TriggerAlertProvider>
               <ScrollToTop />
@@ -109,10 +111,10 @@ const router = createBrowserRouter([
 
           // Shop
           { path: "/tienda", element: <Shop /> },
-          { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetail /> },
+          { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
 
           // Shopping Cart
-          { path: "/carrito-de-compras", element: <ShoppingCart /> },
+          { path: "/carrito-de-compras", element: <ShoppingCartV2 /> },
 
           // Orders
           { path: "/mis-ordenes", element: <Orders /> },
@@ -121,12 +123,12 @@ const router = createBrowserRouter([
           { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 
           // Checkout
-          { path: "/resumen-de-carrito", element: <ShoppingCartResume /> },
-          { path: "/pagar-productos", element: <Checkout /> },
+          { path: "/resumen-de-carrito", element: <ShoppingCartResumeV2 /> },
+          { path: "/pagar-productos", element: <CheckoutV2 /> },
           { path: "/pagar-ahora", element: <BuyNow /> },
-          { path: "/pagar-productos/pago-exitoso", element: <PaymentExiting /> },
-          { path: "/pagar-productos/pago-pendiente", element: <PaymentPending /> },
-          { path: "/pagar-productos/pago-fallido", element: <PaymentError /> },
+          { path: "/pagar-productos/pago-exitoso", element: <PaymentExitingV2 /> },
+          { path: "/pagar-productos/pago-pendiente", element: <PaymentPendingV2 /> },
+          { path: "/pagar-productos/pago-fallido", element: <PaymentErrorV2 /> },
 
           // Rutas públicas
           { path: "/acerca-de-iga", element: <AboutIGA /> },
@@ -140,6 +142,8 @@ const router = createBrowserRouter([
           { path: "/politica-de-privacidad", element: <PrivacyPolicy /> },
           { path: "/politica-de-devolucion", element: <PNCPolicy /> },
           { path: "/terminos-y-condiciones", element: <TermsAndConditions /> },
+          { path: "/wp-content/uploads/2025/09/CERT_CORAZA_Y_PLAGOSUR_A_M_CLASE_E-.pdf", element: <QRRedirectCorazaPlago /> },
+          { path: "/wp-content/uploads/2025/09/CERT_PLAGOSUR_C_CORAZA_A_I_CLASE_E_.pdf", element: <QRRedirectPlagoCorazaAI /> },
 
         ]
       },

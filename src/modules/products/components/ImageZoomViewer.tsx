@@ -79,7 +79,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
             {isHovering && (
                 <div
                     className={clsx(
-                        "z-[100] overflow-hidden bg-white shadow-2xl rounded-3xl border border-primary/20 pointer-events-none",
+                    "z-[500] overflow-hidden bg-white shadow-2xl rounded-3xl border border-primary/20 pointer-events-none",
                         "absolute top-0 w-full aspect-square",
                         "hidden lg:block lg:left-[calc(100%+1.5rem)]",
                         "animate-in fade-in zoom-in-95 duration-300 ease-out",

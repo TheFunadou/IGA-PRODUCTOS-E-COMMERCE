@@ -1,8 +1,8 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelOrder, getBuyNowItem, getCheckoutOrder, getOrderDetails, getOrders } from "../../orders/OrdersServices";
-import type { GetOrderDetails, GetOrdersType, OrderCheckoutType } from "../OrdersTypes";
+import { cancelOrder, getBuyNowItem, getCheckoutOrder, getCheckoutOrderV2, getOrderDetails, getOrders } from "../../orders/OrdersServices";
+import type { CheckoutOrderI, GetOrderDetails, GetOrdersType, OrderCheckoutType } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { ShoppingCartType } from "../../shopping/ShoppingTypes";
@@ -29,6 +29,17 @@ export const useFetchCheckoutOrder = (params: { orderUUID: string }) => {
     return useQuery<OrderCheckoutType>({
         queryKey: ["order:checkout", { orderUUID: params.orderUUID }],
         queryFn: async () => await getCheckoutOrder({ orderUUID: params.orderUUID }),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: !!params.orderUUID,
+    });
+};
+
+export const useFetchCheckoutOrderV2 = (params: { orderUUID: string }) => {
+    return useQuery<CheckoutOrderI>({
+        queryKey: ["order:checkout", { orderUUID: params.orderUUID }],
+        queryFn: async () => await getCheckoutOrderV2({ orderUUID: params.orderUUID }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

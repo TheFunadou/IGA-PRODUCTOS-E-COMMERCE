@@ -1,7 +1,7 @@
 import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
 import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
-import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartType } from "../shopping/ShoppingTypes";
+import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
 
 export type PaymentShoppingCart = {
     sku: string;
@@ -120,6 +120,30 @@ export type OrderCheckoutType = {
     address: GetCustomerAddressOrderType;
 };
 
+export interface OrderCheckoutItemI {
+    name: string;
+    category: string;
+    subcategories: { uuid: string, name: string }[];
+    sku: string;
+    color: { line: string, name: string, code: string };
+    unitPrice: string;
+    finalPrice: string;
+    quantity: number;
+    offer: { isOffer: boolean, discount: number };
+    subtotal: string;
+    images: { url: string, mainImage: boolean }[];
+};
+
+
+export interface CheckoutOrderI {
+    orderUUID: string;
+    items: OrderCheckoutItemI[];
+    resume: ShoppingCartResumeI;
+    couponCode: string | null;
+    externalId: string;
+    shippingAddress: GetCustomerAddressOrderType;
+};
+
 export type GetLightOrderExtended = {
     order: LightGetOrders;
     shippingStatus?: ShippingStatus;
@@ -156,6 +180,13 @@ export type GetOrderDetails = {
 
 export type CreateOrderType = {
     orderItems: PaymentShoppingCart[];
+    addressUUID?: string;
+    couponCode?: string;
+    paymentProvider: PaymentProviders;
+    guestForm?: GuestCreateOrderFormType;
+}
+
+export interface CreateOrderI {
     addressUUID?: string;
     couponCode?: string;
     paymentProvider: PaymentProviders;

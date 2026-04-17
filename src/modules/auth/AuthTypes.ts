@@ -25,6 +25,7 @@ export type CustomerPayloadType = {
   last_name: string;
   email: string;
   verified: boolean;
+  hasShoppingCart: boolean;
 };
 
 export type AuthCustomerCredentialsType = {

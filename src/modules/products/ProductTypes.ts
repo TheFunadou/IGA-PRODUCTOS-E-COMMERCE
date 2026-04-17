@@ -88,8 +88,83 @@ export type ProductVersionCardType = {
     isFavorite?: boolean;
 };
 
+export interface ProductVersionCardI {
+    name: string
+    productUUID: string
+    category: { uuid: string, name: string }
+    subcategories: { uuid: string, name: string }[]
+    sku: string
+    codeBar?: string
+    color: { line: string, name: string, code: string }
+    unitPrice: string
+    finalPrice: string
+    isFavorite: boolean
+    stock: number
+    images: { url: string, mainImage: boolean }[]
+    rating: number
+    offer: { isOffer: boolean, discount: number }
+    parents: { sku: string, colorCode: string }[]
+};
+
+export interface ProductListI {
+    productUUID: string
+    sku: string[]
+};
+
+export interface ProductVersionStockI {
+    sku: string;
+    stock: number;
+};
+
+export interface ParentBaseI {
+    id: string; // Crucial para resolver la oferta a target_type PRODUCT_VERSION
+    sku: string;
+    colorCode: string;
+};
+
+export interface SafeParentDetailedI extends Omit<ParentBaseI, "id"> {
+    imageUrl: string;
+    unitPrice: string;
+    finalPrice: string;
+    offer: { isOffer: boolean, discount: number };
+};
+
+export interface ProductVersionDetailI {
+    name: string;
+    category: { uuid: string, name: string };
+    subcategories: { uuid: string, name: string }[];
+    sku: string;
+    codeBar?: string;
+    color: { line: string, name: string, code: string };
+    unitPrice: string;
+    finalPrice: string;
+    isFavorite: boolean;
+    stock: number;
+    images: { url: string, mainImage: boolean }[];
+    rating: number;
+    offer: { isOffer: boolean, discount: number };
+    parents: SafeParentDetailedI[];
+    details: {
+        techSheetUrl: string;
+        status: string;
+        specs: string;
+        applications: string;
+        recommendations: string;
+        certsDesc: string;
+        createdAt?: Date;
+        updatedAt?: Date;
+        isReviewed: boolean;
+    };
+}
+
 export type PVCardsResponseType = {
     data: ProductVersionCardType[];
+    totalRecords: number;
+    totalPages: number;
+};
+
+export type PVCardsResponseTypeV2 = {
+    data: ProductVersionCardI[];
     totalRecords: number;
     totalPages: number;
 };
@@ -113,6 +188,11 @@ export type ProductVersionCardFilters = {
     skuList?: string[];
     couponCode?: string;
 };
+
+export interface SearchCardsDTO {
+    filters?: ProductVersionCardFilters;
+    productList?: { productUUID: string, sku: string[] }[]
+}
 
 export type ProductVersionReviews = {
     uuid: string;

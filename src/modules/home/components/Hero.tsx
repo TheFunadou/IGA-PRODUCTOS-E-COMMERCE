@@ -184,7 +184,7 @@ export default function Hero() {
                 {/* ── SUB-HEADLINE — secondary legend, smaller hierarchy ── */}
                 <p
                     className={[
-                        "text-[11px] sm:text-sm font-bold tracking-[0.2em] uppercase mb-2 sm:mb-3",
+                        "text-[11px] sm:text-base font-bold tracking-[0.2em] uppercase mb-2 sm:mb-3",
                         isDark ? "text-blue-400/80" : "text-primary",
                     ].join(" ")}
                     style={enter(0.06)}

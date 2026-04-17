@@ -24,7 +24,8 @@ export const formatDate = (inputDate: Date, zone: "es-MX" | "es-ES"): string => 
  * @returns formated number string example formatPrice(10000,"es-MX") => 10,0000
  */
 export const formatPrice = (price: string, zone: "es-MX" | "en-US"): string => {
-    return parseFloat(price).toLocaleString(zone, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const normalizedPrice = price.replace(',', '.');
+    return parseFloat(normalizedPrice).toLocaleString(zone, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 
