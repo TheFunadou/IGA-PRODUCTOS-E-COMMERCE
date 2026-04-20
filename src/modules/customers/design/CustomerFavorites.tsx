@@ -1,21 +1,20 @@
 import ProductVersionCard from "../../products/components/ProductVersionCard";
-import { useFetchCustomerFavorites } from "../hooks/useCustomer";
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import { Link, useSearchParams } from "react-router-dom";
 import PaginationComponent from "../../../global/components/PaginationComponent";
 import { FaHeart, FaShoppingBag } from "react-icons/fa";
+import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
 
 const CustomerFavorites = () => {
     document.title = "Iga Productos | Mis favoritos";
 
-    const MAX_LIMIT_ROWS = 10;
     const [searchParams, setSearchParams] = useSearchParams();
     const pageParam = searchParams.get("page");
     const orderByParam = searchParams.get("orderBy") as "recent" | "ancient" | null;
     const currentOrderBy = orderByParam || "recent";
 
-    const { data: favorites, isLoading, error } = useFetchCustomerFavorites({
-        pagination: { page: Number(pageParam) || 1, limit: MAX_LIMIT_ROWS },
+    const { data: favorites, isLoading, error } = useFetchProductVersionCardsV2({
+        filters: { onlyFavorites: true }
     });
 
     const handlePageChange = (page: number) => {
@@ -110,7 +109,7 @@ const CustomerFavorites = () => {
                     <div className="flex flex-wrap gap-4">
                         {favorites.data.map((data, index) => (
                             <ProductVersionCard
-                                key={`${index}-${data.product_version.sku}`}
+                                key={`${index}-${data.sku}`}
                                 versionData={data}
                                 className="sm:w-56 sm:min-h-80 md:w-64 md:min-h-96 lg:w-72 lg:min-h-[26rem] xl:w-76 xl:min-h-[28rem] 2xl:w-80 2xl:min-h-[30rem]"
                             />

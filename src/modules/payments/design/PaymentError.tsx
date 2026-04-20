@@ -1,5 +1,4 @@
-import { formatPrice } from "../../products/Helpers";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
     FaBoxOpen,
@@ -8,46 +7,28 @@ import {
     FaPhone,
     FaMapMarkerAlt,
     FaStore,
-    FaFire,
+    FaRedo,
     FaExclamationTriangle,
     FaTimesCircle,
-    FaRedo,
 } from "react-icons/fa";
 import { MdOutlinePending } from "react-icons/md";
-import { usePollingPaymentRejected } from "../usePayment";
+import { usePollingPaymentRejectedV2 } from "../usePayment";
+import {
+    formatOrderStatus,
+} from "../../shopping/utils/ShoppingUtils";
 import { formatAxiosError } from "../../../api/helpers";
-import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import type { OrderStatusType } from "../../shopping/ShoppingTypes";
-import { formatOrderStatus } from "../../shopping/utils/ShoppingUtils";
+import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 
-const MAX_POLL_ATTEMPTS = 10; // intentos máximos antes de mostrar error de timeout
-
-/* ─────────────────────────────────────────────
-   Helpers de descuento (mismo patrón ShoppingCartItem / PaymentExiting)
-───────────────────────────────────────────── */
-
-const discountBg = (discount?: number | null) => {
-    if (!discount) return "";
-    if (discount < 50) return "bg-error";
-    if (discount < 65) return "bg-success";
-    return "bg-primary";
-};
-
-const discountText = (discount?: number | null) => {
-    if (!discount) return "text-base-content";
-    if (discount < 50) return "text-error";
-    if (discount < 65) return "text-success";
-    return "text-primary";
-};
+const MAX_POLL_ATTEMPTS = 10;
 
 /* ─────────────────────────────────────────────
-   Helpers de UI (idénticos a PaymentExiting)
-───────────────────────────────────────────── */
+   Helpers de UI
+ ───────────────────────────────────────────── */
 
 const InfoRow = ({
     label,
@@ -95,13 +76,12 @@ const SectionCard = ({
 );
 
 /* ─────────────────────────────────────────────
-   Skeleton loader (idéntico a PaymentExiting)
-───────────────────────────────────────────── */
+   Skeleton loader
+ ───────────────────────────────────────────── */
 
 const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttempts: number }) => (
     <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-            {/* Estado de polling */}
             <div className="bg-base-100 rounded-2xl border border-base-200 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <MdOutlinePending className="text-warning text-2xl" />
@@ -121,8 +101,6 @@ const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttemp
                     </p>
                 </div>
             </div>
-
-            {/* Skeleton de contenido */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="h-64 bg-base-200 rounded-2xl animate-pulse" />
                 <div className="lg:col-span-2 space-y-4">
@@ -135,8 +113,8 @@ const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttemp
 );
 
 /* ─────────────────────────────────────────────
-   Pantalla de timeout (max intentos alcanzados)
-───────────────────────────────────────────── */
+   Pantalla de timeout
+ ───────────────────────────────────────────── */
 
 const PollingTimeoutScreen = ({
     orderUUID,
@@ -156,18 +134,15 @@ const PollingTimeoutScreen = ({
                 </h1>
                 <p className="text-base-content/60 text-sm">
                     Excedimos el número de intentos de verificación. Tu pago puede estar
-                    siendo procesado por el banco. Te recomendamos revisar tu correo de
-                    confirmación o intentar de nuevo en unos minutos.
+                    siendo procesado por el banco o fue rechazado. Te recomendamos revisar tu
+                    correo o intentar de nuevo en unos minutos.
                 </p>
                 <p className="text-xs font-mono text-base-content/40 mt-2">
                     Folio: {orderUUID}
                 </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <button
-                    className="flex-1 btn btn-primary gap-2"
-                    onClick={onRetry}
-                >
+                <button className="flex-1 btn btn-primary gap-2" onClick={onRetry}>
                     <FaRedo /> Reintentar verificación
                 </button>
                 <button
@@ -183,18 +158,16 @@ const PollingTimeoutScreen = ({
 
 /* ─────────────────────────────────────────────
    Main component
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 
-const PaymentError = () => {
+const PaymentErrorV2 = () => {
     document.title = "Iga Productos | Error en el pago";
 
-    const requiredStatus: OrderStatusType[] = ["IN_PROCESS", "REJECTED"];
     const navigate = useNavigate();
     const { search } = useLocation();
     const query = new URLSearchParams(search);
     const orderUUID = query.get("external_reference");
 
-    // Contador de intentos de polling
     const pollAttemptsRef = useRef(0);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
@@ -225,23 +198,20 @@ const PaymentError = () => {
         );
     }
 
-    const { data, error, isLoading, refetch } = usePollingPaymentRejected({ orderUUID });
+    const { data, error, isLoading, refetch } = usePollingPaymentRejectedV2({ orderUUID });
 
-    // Conteo de intentos: cada vez que el query se ejecuta sin datos confirmados
     useEffect(() => {
         if (isLoading && !data) return;
         if (!data) return;
 
-        const statusResolved = data.status && requiredStatus.includes(data.status);
-        if (statusResolved) return;
+        const isResolved = data.status === "REJECTED" || data.status === "IN_PROCESS";
+        if (isResolved) return;
 
-        if (data.status && !requiredStatus.includes(data.status)) {
-            pollAttemptsRef.current += 1;
-            setPollAttempts(pollAttemptsRef.current);
+        pollAttemptsRef.current += 1;
+        setPollAttempts(pollAttemptsRef.current);
 
-            if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
-                setPollTimedOut(true);
-            }
+        if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
+            setPollTimedOut(true);
         }
     }, [data]);
 
@@ -252,9 +222,8 @@ const PaymentError = () => {
         refetch();
     };
 
-    /* ── Guard: error HTTP — detiene el polling inmediatamente (ej. 404) ── */
+    /* ── Guard: error HTTP ── */
     if (error) {
-        // Detectar si es un 404 específicamente
         const is404 = (error as any)?.response?.status === 404;
 
         return (
@@ -264,7 +233,7 @@ const PaymentError = () => {
                         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto">
                             <FaTimesCircle className="text-error text-2xl" />
                         </div>
-                        <h2 className="font-bold text-base-content text-xl">
+                        <h2 className="text-xl font-bold text-base-content">
                             {is404 ? "Orden no encontrada" : "Error al verificar el pago"}
                         </h2>
                         <p className="text-base-content/60 text-sm">
@@ -282,10 +251,7 @@ const PaymentError = () => {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
                             {!is404 && (
-                                <button
-                                    className="flex-1 btn btn-primary gap-2"
-                                    onClick={handleRetry}
-                                >
+                                <button className="flex-1 btn btn-primary gap-2" onClick={handleRetry}>
                                     <FaRedo /> Reintentar
                                 </button>
                             )}
@@ -302,29 +268,20 @@ const PaymentError = () => {
         );
     }
 
-    /* ── Guard: timeout de polling ── */
+    /* ── Guard: timeout ── */
     if (pollTimedOut) {
-        return (
-            <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />
-        );
+        return <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />;
     }
 
     /* ── Guard: cargando / polling ── */
     if (isLoading || !data || !data.order) {
-        return (
-            <SkeletonLoader
-                attempts={pollAttempts}
-                maxAttempts={MAX_POLL_ATTEMPTS}
-            />
-        );
+        return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
     }
 
-    if (!requiredStatus.includes(data.status))
-        throw new Error("Error al obtener el estatus de la orden de compra");
+    if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") throw new Error("Error al obtener el estatus de la orden de compra");
 
     const { order } = data;
-    const { address, items } = order;
-
+    const { shipping, items } = order;
     const isRejected = data.status === "REJECTED";
     const isInProcess = data.status === "IN_PROCESS";
 
@@ -375,7 +332,7 @@ const PaymentError = () => {
                                 >
                                     {isRejected
                                         ? "Ocurrió un error al procesar tu pago"
-                                        : "Tu orden aun esta en espera de tu pago. "}
+                                        : "Tu orden aún está en espera de tu pago"}
                                 </h1>
                                 <p
                                     className={clsx(
@@ -407,7 +364,7 @@ const PaymentError = () => {
                                     isInProcess && "text-warning-content/60",
                                 )}
                             >
-                                Folio: {orderUUID}
+                                Folio: {order.orderUUID}
                             </p>
                         </div>
                     </div>
@@ -421,63 +378,21 @@ const PaymentError = () => {
                         )}
                     >
                         <div>
-                            <p
-                                className={clsx(
-                                    "text-xs uppercase",
-                                    isRejected && "text-error-content/60",
-                                    isInProcess && "text-warning-content/60",
-                                )}
-                            >
-                                Productos
-                            </p>
-                            <p
-                                className={clsx(
-                                    "font-semibold",
-                                    isRejected && "text-error-content",
-                                    isInProcess && "text-warning-content",
-                                )}
-                            >
+                            <p className={clsx("text-xs uppercase opacity-60")}>Productos</p>
+                            <p className="font-semibold">
                                 {items.length} {items.length === 1 ? "artículo" : "artículos"}
                             </p>
                         </div>
                         <div>
-                            <p
-                                className={clsx(
-                                    "text-xs uppercase",
-                                    isRejected && "text-error-content/60",
-                                    isInProcess && "text-warning-content/60",
-                                )}
-                            >
-                                Destino
-                            </p>
-                            <p
-                                className={clsx(
-                                    "font-semibold",
-                                    isRejected && "text-error-content",
-                                    isInProcess && "text-warning-content",
-                                )}
-                            >
-                                {address.city}, {address.state}
+                            <p className={clsx("text-xs uppercase opacity-60")}>Destino</p>
+                            <p className="font-semibold">
+                                {shipping.city}, {shipping.state}
                             </p>
                         </div>
                         <div>
-                            <p
-                                className={clsx(
-                                    "text-xs uppercase",
-                                    isRejected && "text-error-content/60",
-                                    isInProcess && "text-warning-content/60",
-                                )}
-                            >
-                                Destinatario
-                            </p>
-                            <p
-                                className={clsx(
-                                    "font-semibold",
-                                    isRejected && "text-error-content",
-                                    isInProcess && "text-warning-content",
-                                )}
-                            >
-                                {address.recipient_name} {address.recipient_last_name}
+                            <p className={clsx("text-xs uppercase opacity-60")}>Destinatario</p>
+                            <p className="font-semibold">
+                                {shipping.recipient_name} {shipping.recipient_last_name}
                             </p>
                         </div>
                     </div>
@@ -502,11 +417,11 @@ const PaymentError = () => {
                                     </p>
                                     <InfoRow
                                         label="Nombre completo"
-                                        value={`${address.recipient_name} ${address.recipient_last_name}`}
+                                        value={`${shipping.recipient_name} ${shipping.recipient_last_name}`}
                                     />
                                     <InfoRow
                                         label="Contacto"
-                                        value={`${address.country_phone_code} ${address.contact_number}`}
+                                        value={`${shipping.country_phone_code} ${shipping.contact_number}`}
                                         icon={<FaPhone />}
                                     />
                                 </div>
@@ -517,37 +432,22 @@ const PaymentError = () => {
                                     </p>
                                     <InfoRow
                                         label="Calle y número"
-                                        value={`${address.street_name} #${address.number}${address.aditional_number ? ` int. ${address.aditional_number}` : ""}`}
+                                        value={`${shipping.street_name} #${shipping.number}${shipping.aditional_number ? ` int. ${shipping.aditional_number}` : ""}`}
                                         icon={<FaHome />}
                                     />
-                                    {address.floor && (
-                                        <InfoRow label="Piso" value={address.floor} />
-                                    )}
-                                    <InfoRow label="Colonia / Fracc." value={address.neighborhood} />
+                                    {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
+                                    <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
                                     <InfoRow
                                         label="Ciudad y Estado"
-                                        value={`${address.city}, ${address.state}`}
+                                        value={`${shipping.city}, ${shipping.state}`}
                                         icon={<FaMapMarkerAlt />}
                                     />
-                                    <InfoRow label="Localidad" value={address.locality} />
+                                    <InfoRow label="Localidad" value={shipping.locality} />
                                     <InfoRow
                                         label="País"
-                                        value={`${address.country} · CP ${address.zip_code}`}
+                                        value={`${shipping.country} · CP ${shipping.zip_code}`}
                                     />
-                                    <InfoRow label="Tipo de dirección" value={address.address_type} />
-                                </div>
-
-                                <div className="bg-warning/10 rounded-xl p-3 space-y-2">
-                                    <p className="text-xs font-bold uppercase text-warning">
-                                        Comentarios / Referencias
-                                    </p>
-                                    <p className="text-sm text-base-content">
-                                        {address.references_or_comments || (
-                                            <span className="italic text-base-content/30">
-                                                Sin comentarios adicionales
-                                            </span>
-                                        )}
-                                    </p>
+                                    <InfoRow label="Tipo de dirección" value={shipping.address_type} />
                                 </div>
                             </div>
                         </SectionCard>
@@ -555,175 +455,18 @@ const PaymentError = () => {
 
                     {/* ── Columna derecha: Productos + CTA ── */}
                     <div className="lg:col-span-2 space-y-5">
-
-                        {/* Productos */}
                         <SectionCard
                             icon={<FaBoxOpen />}
                             title={`Productos del pedido (${items.length})`}
                             accent="border-primary"
                         >
                             <div className="flex flex-col gap-4">
-                                {items.map((item, index) => {
-                                    const hasDiscount =
-                                        item.isOffer &&
-                                        item.discount &&
-                                        item.discount > 0 &&
-                                        item.product_version.unit_price_with_discount;
-
-                                    const mainImage =
-                                        item.product_images.find((img) => img.main_image)?.image_url
-                                        ?? item.product_images[0]?.image_url;
-
-                                    const subtotal =
-                                        parseFloat(item.product_version.unit_price) * item.quantity;
-                                    const subtotalWithDisc = hasDiscount
-                                        ? parseFloat(item.product_version.unit_price_with_discount!) * item.quantity
-                                        : 0;
-
-                                    return (
-                                        <div
-                                            key={`item-${index}`}
-                                            className="w-full rounded-2xl bg-base-100 border border-base-300 hover:border-primary/30 transition-colors duration-200 p-3 sm:p-4"
-                                        >
-                                            <div className="flex gap-3 sm:gap-4">
-                                                {/* Imagen */}
-                                                <div className="flex-shrink-0">
-                                                    <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-xl overflow-hidden border border-base-300">
-                                                        <img
-                                                            src={mainImage}
-                                                            alt={item.product_name}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {/* Contenido principal */}
-                                                <div className="flex-1 min-w-0 flex flex-col gap-2">
-                                                    {/* Nombre + badge oferta */}
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <p className="text-sm sm:text-base font-bold text-base-content leading-snug">
-                                                            {item.product_name}
-                                                        </p>
-                                                        {item.isOffer && item.discount && (
-                                                            <span className={clsx(
-                                                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0",
-                                                                discountBg(item.discount)
-                                                            )}>
-                                                                <FaFire className="text-[10px]" />
-                                                                {item.discount}% OFF
-                                                            </span>
-                                                        )}
-                                                        {item.isFavorite && (
-                                                            <span className="text-xs">⭐</span>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Breadcrumbs categorías */}
-                                                    <div className="breadcrumbs text-xs text-base-content/50 bg-base-200 w-fit rounded-lg px-2 sm:px-3 py-0.5">
-                                                        <ul>
-                                                            <li>
-                                                                <strong className="text-base-content/70">
-                                                                    {item.category}
-                                                                </strong>
-                                                            </li>
-                                                            {item.subcategories.map((sub, i) => (
-                                                                <li key={i}>
-                                                                    <strong className="text-base-content/70">
-                                                                        {sub}
-                                                                    </strong>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-
-                                                    {/* Color */}
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span
-                                                            className="w-4 h-4 rounded-full border border-base-300 flex-shrink-0 shadow-sm"
-                                                            style={{ backgroundColor: item.product_version.color_code }}
-                                                        />
-                                                        <span className="text-xs sm:text-sm text-base-content/60">
-                                                            {item.product_version.color_line} —{" "}
-                                                            <span className="text-base-content font-medium">
-                                                                {item.product_version.color_name}
-                                                            </span>
-                                                        </span>
-                                                    </div>
-
-                                                    {/* SKU */}
-                                                    <span className="text-xs font-mono text-base-content/40 w-fit bg-base-200 px-2 py-0.5 rounded-lg">
-                                                        SKU: {item.product_version.sku}
-                                                    </span>
-
-                                                    {/* Cantidad + Precios */}
-                                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mt-1">
-                                                        {/* Cantidad */}
-                                                        <div className="flex flex-col gap-1">
-                                                            <span className="text-xs text-base-content/50 uppercase">
-                                                                Cantidad
-                                                            </span>
-                                                            <span className="btn btn-primary btn-sm w-fit pointer-events-none">
-                                                                {item.quantity} pz
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Precios */}
-                                                        <div className="flex gap-4 sm:gap-6 items-end">
-                                                            {/* Precio unitario */}
-                                                            <div className="flex flex-col items-start sm:items-end">
-                                                                <span className="text-[10px] sm:text-xs text-base-content/40 uppercase mb-0.5">
-                                                                    Precio unitario
-                                                                </span>
-                                                                {hasDiscount ? (
-                                                                    <div className="flex flex-col items-start sm:items-end">
-                                                                        <span className={clsx("text-base sm:text-lg font-bold", discountText(item.discount))}>
-                                                                            ${formatPrice(item.product_version.unit_price_with_discount!, "es-MX")}
-                                                                        </span>
-                                                                        <span className="text-xs line-through text-base-content/30">
-                                                                            ${formatPrice(item.product_version.unit_price, "es-MX")}
-                                                                        </span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className="text-base sm:text-lg font-bold text-base-content">
-                                                                        ${formatPrice(item.product_version.unit_price, "es-MX")}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Separador */}
-                                                            <div className="w-px h-10 bg-base-300 hidden sm:block" />
-
-                                                            {/* Subtotal */}
-                                                            <div className="flex flex-col items-start sm:items-end">
-                                                                <span className="text-[10px] sm:text-xs text-base-content/40 uppercase mb-0.5">
-                                                                    Subtotal
-                                                                </span>
-                                                                {hasDiscount ? (
-                                                                    <div className="flex flex-col items-start sm:items-end">
-                                                                        <span className={clsx("text-lg sm:text-xl font-extrabold", discountText(item.discount))}>
-                                                                            ${formatPrice(subtotalWithDisc.toString(), "es-MX")}
-                                                                        </span>
-                                                                        <span className="text-xs line-through text-base-content/30">
-                                                                            ${formatPrice(subtotal.toString(), "es-MX")}
-                                                                        </span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className="text-lg sm:text-xl font-extrabold text-base-content">
-                                                                        ${formatPrice(subtotal.toString(), "es-MX")}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {items.map((item, idx) => (
+                                    <CheckoutOrderItemV2 key={`${item.sku}-${idx}`} data={item} />
+                                ))}
                             </div>
                         </SectionCard>
 
-                        {/* ── CTA: acción según status ── */}
                         <div
                             className={clsx(
                                 "bg-base-100 rounded-2xl border overflow-hidden",
@@ -749,10 +492,10 @@ const PaymentError = () => {
                                 </h2>
                             </div>
                             <div className="px-5 py-5 space-y-3">
-                                <p className="text-sm text-base-content/60">
+                                <p className="text-sm text-base-content/60 text-balance">
                                     {isRejected
                                         ? "El pago fue rechazado por el proveedor. Verifica los datos de tu tarjeta o utiliza otro método de pago."
-                                        : "Tu transacción está siendo revisada. Recibirás una confirmación por correo electrónico en breve."}
+                                        : "Tu transacción está siendo revisada. Recibirás una confirmación por correo electrónico en cuanto el pago sea aprobado."}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     {isRejected && (
@@ -779,4 +522,4 @@ const PaymentError = () => {
     );
 };
 
-export default PaymentError;
+export default PaymentErrorV2;

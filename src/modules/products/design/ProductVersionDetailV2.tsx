@@ -9,8 +9,8 @@ import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
 import clsx from "clsx";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import { useFavorite } from "../hooks/useProductFavorites";
-import type { AddPVReviewType, ProductVersionCardI } from "../ProductTypes";
-import { useShoppingCart } from "../../shopping/hooks/useShoppingCart";
+import type { AddPVReviewType } from "../ProductTypes";
+import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import {
     FaCircleUser, FaFire, FaBoxOpen, FaTruck,
     FaShieldHalved, FaClipboardCheck,
@@ -33,7 +33,7 @@ import ImageZoomViewer from "../components/ImageZoomViewer";
 import ProductVersionImageGallery from "../components/ProductVersionImageGallery";
 import { showModal } from "../../../global/GlobalHelpers";
 import { useFetchProductVersionCardsV2, useFetchProductVersionDetailV2 } from "../hooks/useFetchProductVersionCards";
-import ProductVersionCardV2 from "../components/ProductVersionCardV2";
+import ProductVersionCardV2 from "../components/ProductVersionCard";
 
 // ── Helpers de descuento ──────────────────────────────────────────────────────
 const discountColorBg = (discount?: number | null) => {
@@ -330,9 +330,13 @@ const ProductVersionDetailV2 = () => {
     const { data: reviews, isLoading: reviewsLoading } = useFetchProductVersionReviews({ uuid: data?.sku });
     const { data: reviewsResume, isLoading: reviewsResumeLoading } = useFetchProductVersionReviewsResumeByUUID({ uuid: data?.sku });
 
-    const { isAuth } = useAuthStore();
-    const { add, addBuyNow } = useShoppingCart();
+    const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
+    const { updateQtyItem } = useHandleShoppingCart({
+        isAuth,
+        authCustomer: { uuid: authCustomer?.uuid || "" },
+        showTriggerAlert,
+    });
 
     const [selectProductQty, setSelectProductQty] = useState("1");
     const [productQty, setProductQty] = useState(1);
@@ -343,7 +347,6 @@ const ProductVersionDetailV2 = () => {
     const [color, setColor] = useState("");
     const [stock, setStock] = useState(1);
     const [certifications, setCertifications] = useState<string[]>([]);
-    const [card, _] = useState<ProductVersionCardI | undefined>(undefined);
     const [shippingCost, setShippingCost] = useState(SHIPPING_COST);
     const [boxesQty, setBoxesQty] = useState(1);
     const [selectedRating, setSelectedRating] = useState(1);
@@ -362,7 +365,7 @@ const ProductVersionDetailV2 = () => {
     const { isFavorite, toggleFavorite } = useFavorite({
         sku: data?.sku ?? "",
         initialFavoriteState: data?.isFavorite ?? false,
-        item: card as any,
+        item: undefined as any,
     });
 
     useEffect(() => {
@@ -432,6 +435,7 @@ const ProductVersionDetailV2 = () => {
 
     const quickSpecs = data ? [
         { label: "SKU", value: data.sku },
+        ...(data.codeBar ? [{ label: "Código de Barras", value: data.codeBar }] : []),
         { label: "Color", value: data.color.name },
         { label: "Línea", value: data.color.line },
         { label: "Estado", value: data.details.status },
@@ -449,8 +453,15 @@ const ProductVersionDetailV2 = () => {
         onQtySelect: handleSelectProductQty,
         onQtySet: handleSetProductQty,
         onQtyLimit: handleQtyLimit,
-        onAddCart: () => card && add(card as any, productQty),
-        onBuyNow: () => card && addBuyNow({ sku: data?.sku!, quantity: productQty }),
+        onAddCart: () => data && updateQtyItem({
+            isChecked: true,
+            item: {
+                sku: data.sku,
+                productUUID: data.productUUID,
+            },
+            quantity: productQty
+        }),
+        onBuyNow: () => data && navigate(`/pagar-ahora/${data.productUUID}/${data.sku}?quantity=${productQty}`),
         onToggleFavorite: toggleFavorite,
         onShare: handleShareProduct,
         maxStock: data?.stock ?? 1,
@@ -472,6 +483,7 @@ const ProductVersionDetailV2 = () => {
     if (!data) return <Navigate to="/tienda" />;
 
     const tabs = [
+        { label: "Descripción", content: data.details.description },
         { label: "Características", content: data.details.specs },
         { label: "Aplicaciones", content: data.details.applications },
         { label: "Recomendaciones", content: data.details.recommendations },

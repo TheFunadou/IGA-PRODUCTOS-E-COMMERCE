@@ -12,10 +12,8 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import Login from "./modules/auth/design/Login"
 import { TriggerAlertProvider } from "./modules/alerts/states/TriggerAlert"
-import Shop from "./modules/shop/design/Shop"
 import { ThemeProvider } from "./modules/products/states/ThemeContext"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import BuyNow from "./modules/shopping/design/BuyNow"
 import CustomerAddresses from "./modules/customers/design/CustomerAddresses"
 import AboutIGA from "./modules/home/design/AboutIGA"
 import Certifications from "./modules/home/design/Certifications"
@@ -42,14 +40,16 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import RestorePassword from "./modules/auth/design/RestorePassword"
 import ScrollToTop from "./global/components/ScrollToTop"
 import ProductVersionDetailV2 from "./modules/products/design/ProductVersionDetailV2"
-import ShoppingCartV2 from "./modules/shopping/design/ShoppingCartV2"
+import ShoppingCartV2 from "./modules/shopping/design/ShoppingCart"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import ShoppingCartResumeV2 from "./modules/shopping/design/ShoppingCartResumeV2"
-import CheckoutV2 from "./modules/shopping/design/CheckoutV2"
-import PaymentExitingV2 from "./modules/payments/design/PaymentExitingV2"
-import PaymentPendingV2 from "./modules/payments/design/PaymentPendingV2"
-import PaymentErrorV2 from "./modules/payments/design/PaymentErrorV2"
+import ShoppingCartResumeV2 from "./modules/shopping/design/ShoppingCartResume"
+import CheckoutV2 from "./modules/shopping/design/Checkout"
+import PaymentExitingV2 from "./modules/payments/design/PaymentExiting"
+import PaymentPendingV2 from "./modules/payments/design/PaymentPending"
+import PaymentErrorV2 from "./modules/payments/design/PaymentError"
 import { QRRedirectCorazaPlago, QRRedirectPlagoCorazaAI } from "./modules/products/components/QRRedirect"
+import ShopV2 from "./modules/shop/design/Shop"
+import BuyNow from "./modules/shopping/design/BuyNow"
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -110,7 +110,7 @@ const router = createBrowserRouter([
           { path: "/", element: <Home /> },
 
           // Shop
-          { path: "/tienda", element: <Shop /> },
+          { path: "/tienda", element: <ShopV2 /> },
           { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
 
           // Shopping Cart
@@ -125,7 +125,7 @@ const router = createBrowserRouter([
           // Checkout
           { path: "/resumen-de-carrito", element: <ShoppingCartResumeV2 /> },
           { path: "/pagar-productos", element: <CheckoutV2 /> },
-          { path: "/pagar-ahora", element: <BuyNow /> },
+          { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNow /> },
           { path: "/pagar-productos/pago-exitoso", element: <PaymentExitingV2 /> },
           { path: "/pagar-productos/pago-pendiente", element: <PaymentPendingV2 /> },
           { path: "/pagar-productos/pago-fallido", element: <PaymentErrorV2 /> },

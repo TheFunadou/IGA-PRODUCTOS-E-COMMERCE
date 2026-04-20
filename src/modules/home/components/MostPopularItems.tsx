@@ -119,8 +119,8 @@ const items: PopularItemData[] = [
         ],
     },
     {
-        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/coraza/CAS2-AM1-005-3.webp",
-        data: { sku: "CAS2-AM1-005", name: "Casco de Seguridad Industrial IGA tipo Coraza (Ala Ancha)" },
+        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/coraza/CAS2-AM1-001-1.webp",
+        data: { sku: "CAS2-AM1-001", name: "Casco de Seguridad Industrial IGA tipo Coraza (Ala Ancha)" },
         subcategories: [
             { name: "Casco de Seguridad Industrial", uuid: "gYGhgUO4GHBECXninMd9R" },
             { name: "Coraza (Ala Ancha)", uuid: "FLGrHXv6Te8VmR56SY6hS" },

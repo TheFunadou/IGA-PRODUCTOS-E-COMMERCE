@@ -1,6 +1,6 @@
 import type { CheckoutOrderI, GetOrderDetails, GetOrdersType, OrderCheckoutType } from "./OrdersTypes";
 import api from "../../api/api.config";
-import type { ShoppingCartType } from "../shopping/ShoppingTypes";
+import type { LoadShoppingCartI, ShoppingCartI } from "../shopping/ShoppingTypes";
 
 export const getOrders = async (params: { page: number, limit: number, orderBy: "recent" | "oldest" }) => {
     const { data } = await api.get<GetOrdersType>(`/orders`, { params })
@@ -23,8 +23,14 @@ export const getOrderDetails = async ({ orderUUID }: { orderUUID: string }): Pro
     return data;
 };
 
-export const getBuyNowItem = async ({ sku }: { sku: string }): Promise<ShoppingCartType> => {
-    const { data } = await api.get<ShoppingCartType>(`/orders/buy-now/${sku}`);
+export const getBuyNowItem = async ({ item }: { item: ShoppingCartI }): Promise<LoadShoppingCartI> => {
+    const { data } = await api.get<LoadShoppingCartI>(`/orders/buy-now`, {
+        params: {
+            sku: item.item.sku,
+            productUUID: item.item.productUUID,
+            quantity: item.quantity,
+        }
+    });
     return data;
 };
 

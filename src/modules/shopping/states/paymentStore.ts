@@ -1,18 +1,16 @@
 import { persist } from "zustand/middleware";
 import { create } from "zustand";
-import type { CreateOrderType, OrderCreatedType } from "../../orders/OrdersTypes";
+import type { CreateOrderI, OrderCreatedType } from "../../orders/OrdersTypes";
 import { formatAxiosError } from "../../../api/helpers";
-import { createProviderOrder } from "../services/PaymentServices";
+import { createProviderOrderV2 } from "../services/PaymentServices";
 
 interface PaymentStoreState {
-    buyNow: { sku: string, quantity: number } | null;
     order: OrderCreatedType | null;
     isLoading: boolean;
     error: string | null;
-    createOrder: (data: CreateOrderType) => Promise<void>;
+    createOrder: (data: CreateOrderI) => Promise<void>;
     cancelOrder: () => Promise<void>;
     success: () => void;
-    setBuyNow: (args: { sku: string, quantity: number }) => void;
     clearError: () => void;
 };
 
@@ -22,13 +20,11 @@ export const usePaymentStore = create<PaymentStoreState>()(
             order: null,
             isLoading: false,
             error: null,
-            buyNow: null,
 
-            createOrder: async (data: CreateOrderType): Promise<void> => {
+            createOrder: async (data: CreateOrderI): Promise<void> => {
                 try {
                     set({ isLoading: true });
-                    console.log(data);
-                    const order = await createProviderOrder({ dto: data });
+                    const order = await createProviderOrderV2({ dto: data });
                     set({ order });
                 } catch (error) {
                     set({ error: formatAxiosError(error) });
@@ -42,10 +38,7 @@ export const usePaymentStore = create<PaymentStoreState>()(
             },
             success() {
                 usePaymentStore.persist.clearStorage();
-                usePaymentStore.setState({ order: null, isLoading: false, buyNow: null })
-            },
-            setBuyNow(args: { sku: string, quantity: number }) {
-                set({ buyNow: args });
+                usePaymentStore.setState({ order: null, isLoading: false })
             },
             clearError() {
                 set({ error: null });

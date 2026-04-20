@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CustomerAddressType, GetCustomerAddressesType, NewAddressType, onToogleFavoriteType, UpdateAddressType, UpdateProfileFormType } from "../CustomerTypes";
-import { createAddressService, deleteAddressService, getCustomerAddressesService, getCustomerFavorites, toggleFavoriteService, updateAddressService, updateCustomer, updatePassword } from "../services/CustomerService";
+import { createAddressService, deleteAddressService, getCustomerAddressesService, toggleFavoriteService, updateAddressService, updateCustomer, updatePassword } from "../services/CustomerService";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useAuthStore } from "../../auth/states/authStore";
@@ -227,17 +227,6 @@ export function useUpdateAddress(customer: string | undefined) {
     });
 };
 
-export const useFetchCustomerFavorites = (args: { pagination: { page: number, limit: number } }) => {
-    const { isAuth, authCustomer } = useAuthStore();
-    return useQuery<PVCardsResponseType | null>({
-        queryKey: customerQueryKeys.favorites(authCustomer?.uuid!),
-        queryFn: async () => await getCustomerFavorites(args.pagination),
-        enabled: !!isAuth,
-        staleTime: 10 * 60000,
-        gcTime: 15 * 60000,
-        refetchOnWindowFocus: false
-    });
-};
 
 export function useToggleFavorite() {
     const queryClient = useQueryClient();

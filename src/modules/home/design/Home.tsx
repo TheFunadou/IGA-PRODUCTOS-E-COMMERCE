@@ -1,6 +1,5 @@
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
-import Carousel from "../components/Carousel";
 import IMG1 from "../../../assets/expo/IMG-1.webp";
 import IMG2 from "../../../assets/expo/IMG-2.webp";
 import IMG3 from "../../../assets/expo/IMG-3.webp";
@@ -20,7 +19,8 @@ import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProd
 import Hero from "../components/Hero";
 import { paymentMethodsImages } from "../helpers";
 import MostPopularItems from "../components/MostPopularItems";
-import ProductVersionCardV2 from "../../products/components/ProductVersionCardV2";
+import ProductVersionCardV2 from "../../products/components/ProductVersionCard";
+import { OverflowXComponent } from "../components/OverflowXComponent";
 
 const Home = () => {
 
@@ -37,12 +37,24 @@ const Home = () => {
             title: "¿Tu casco realmente te protege?"
         },
         {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F852065423877990%2F&show_text=false&width=560&t=0",
-            title: "Cumplimos los estandares mas altos en calidad "
+            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2003782983796640%2F&show_text=false&width=380&t=0",
+            title: "En Cascos IGA fabricamos cascos certificados bajo la NOM-115-STPS-2009, cumpliendo con los estándares más altos de protección"
         },
         {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=515&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1370385861112633%2F&show_text=false&width=560&t=0",
-            title: "¿Sabes que tipo de casco es el mas seguro?"
+            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2FCascos.Iga%2Fvideos%2F1072011298391393%2F&show_text=false&width=380&t=0",
+            title: "Cascos Iga  en  su ultimo día de actividades en la Expoferre 2025."
+        },
+        {
+            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1226019325980440%2F&show_text=false&width=267&t=0",
+            title: "Banda de Sudor para Cascos"
+        },
+        {
+            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1369548547637737%2F&show_text=false&width=267&t=0",
+            title: "💛 Sabemos que cada jornada comienza con esfuerzo… y debe terminar con un abrazo."
+        },
+        {
+            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1245484200499156%2F&show_text=false&width=267&t=0",
+            title: "Conoce mas sobre nuestros cascos"
         }
     ];
 
@@ -132,7 +144,7 @@ const Home = () => {
                             <div className="bg-primary text-white w-fit px-2 rounded-xl ">
                                 <p className="home-section-subtitle"> <FaVideo className="text-2xl" /> Desliza para ver videos que quizas te puedan interesar</p>
                             </div>
-                            <Carousel className="hidden lg:flex gap-5 items-center mt-2 md:mt-5">
+                            <OverflowXComponent className="hidden lg:flex gap-5 items-center mt-2 md:mt-5">
                                 {sampleVideos.map((video, index) => (
                                     <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">
                                         <p className="text-base md:text-lg font-medium line-clamp-1 mb-2">{video.title}</p>
@@ -149,7 +161,7 @@ const Home = () => {
                                         </div>
                                     </div>
                                 ))}
-                            </Carousel>
+                            </OverflowXComponent>
                             <div className="lg:hidden flex gap-5 overflow-x-scroll">
                                 {sampleVideos.map((video, index) => (
                                     <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">

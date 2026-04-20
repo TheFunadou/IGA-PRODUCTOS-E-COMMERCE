@@ -31,7 +31,7 @@ const Coverage = () => {
                     <section className="w-full mt-4 sm:mt-5">
                         <figure className="w-full">
                             <img
-                                src="https://igaproductos.com.mx/wp-content/themes/igaproductos/images/cobertura_nacional_centroamerica.png"
+                                src="https://proyeccionempresarial.com.mx/wp-content/igaproductos/recursos/cobertura-nacional-e-internacional.png"
                                 alt="Zonas de cobertura nacional e internacional"
                                 className="w-full h-auto rounded-lg"
                             />

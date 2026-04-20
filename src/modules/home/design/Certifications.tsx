@@ -104,17 +104,20 @@ const certifications: Cert[] = [
 
 const certImages = [
     {
-        src: "https://igaproductos.com.mx/wp-content/themes/igaproductos/images/certificaciones/1portadaancejpg_P%C3%A1gina_1.jpg",
+        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-coraza-y-plagosur-am-clase-e.pdf",
+        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-coraza-y-plagosur-am-clase-e.jpg",
         alt: "Certificado de conformidad de producto 1",
         label: "Certificado ANCE 1",
     },
     {
-        src: "https://igaproductos.com.mx/wp-content/themes/igaproductos/images/certificaciones/2portadaance.jpg",
+        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-plagosur-c-coraza-a-i-clase-e.pdf",
+        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-plagosur-c-coraza-a-i-clase-e.jpg",
         alt: "Certificado de conformidad de producto 2",
         label: "Certificado ANCE 2",
     },
     {
-        src: "https://igaproductos.com.mx/wp-content/themes/igaproductos/images/certificaciones/3portadaics_P%C3%A1gina_1.jpg",
+        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/test-report-plagosur-am.pdf",
+        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/test-report-plagosur-am.jpg",
         alt: "Certificado de conformidad de producto 3",
         label: "Certificado ICS",
     },
@@ -239,15 +242,15 @@ const Certifications = () => {
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                         {certImages.map((img) => (
                             <a
-                                key={img.src}
-                                href={img.src}
+                                key={img.label}
+                                href={img.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow"
                             >
                                 <figure className="w-full">
                                     <img
-                                        src={img.src}
+                                        src={img.image}
                                         alt={img.alt}
                                         className="w-full h-auto rounded-xl group-hover:opacity-80 transition-opacity"
                                     />

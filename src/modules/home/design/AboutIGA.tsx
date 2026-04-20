@@ -4,10 +4,11 @@ import { BiCertification, BiTargetLock } from "react-icons/bi";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useState } from "react";
 import { TbDeviceVisionPro } from "react-icons/tb";
-import clsx from "clsx";
 import { IoDiamond } from "react-icons/io5";
 import { TiWorld } from "react-icons/ti";
 import { SiGooglecolab } from "react-icons/si";
+import { FaCheckCircle } from "react-icons/fa";
+import clsx from "clsx";
 
 /* ── Shared design tokens (same as Home.tsx) ─────────────── */
 const SectionBar = () => (
@@ -15,7 +16,7 @@ const SectionBar = () => (
 );
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300 text-2xl sm:text-3xl lg:text-4xl font-bold">
+    <h1 className="px-3 py-2 mt-2 w-fit rounded-xl border border-base-300 bg-base-100 shadow-sm text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-base-content">
         {children}
     </h1>
 );
@@ -27,9 +28,9 @@ const SectionSubtitle = ({
     icon: React.ReactNode;
     children: React.ReactNode;
 }) => (
-    <div className="bg-primary text-white w-fit px-2 rounded-xl">
-        <p className="home-section-subtitle flex items-center gap-2">
-            <span className="text-xl flex-shrink-0">{icon}</span>
+    <div className="bg-primary/10 text-primary border border-primary/20 w-fit px-3 py-1.5 rounded-xl shadow-sm mt-3">
+        <p className="home-section-subtitle flex items-center gap-2 font-bold text-sm sm:text-base">
+            {icon && <span className="text-lg flex-shrink-0">{icon}</span>}
             {children}
         </p>
     </div>
@@ -41,7 +42,7 @@ const CheckIcon = () => (
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className="h-5 w-5 text-primary"
+        className="h-6 w-6 text-primary drop-shadow-sm"
     >
         <path
             fillRule="evenodd"
@@ -93,25 +94,39 @@ const AboutIGA = () => {
 
     const principleKeys = ["mision", "vision", "policy", "value"] as const;
 
+    const servicesList = [
+        "Ofrecemos servicio de maquila de inyección en plásticos, contando con la experiencia, equipo y maquinaria para el proceso de materiales termoplásticos y resinas de ingeniería.",
+        "Capacidad instalada en máquinas de inyección de 35 a 320 toneladas de cierre.",
+        "Equipo periférico para proceso y control del producto en moldeo, deshidratadores, cargadores de material, termorreguladores y enfriamiento.",
+        "Tiempos de entrega confiables e insuperables.",
+        "Logísticas de surtimiento de acuerdo a sus necesidades.",
+        "Garantía de calidad en los productos marca IGA.",
+        "Precios Accesibles y competitivos.",
+        "Innovación constante en la imagen y empaque de productos.",
+        "Productos con código de barras en etiquetas.",
+        "Personal operativo en constante capacitación y altamente calificado.",
+        "Equipo de ventas corporativo dedicado a tu atención."
+    ];
+
     return (
-        <div className="w-full px-3 sm:px-5 lg:px-5 pt-6 sm:pt-10 pb-16 sm:pb-25 rounded-xl">
-            <div className="w-full flex flex-col gap-10 md:gap-14 animate-fade-in-up">
+        <div className="max-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-16 sm:pb-24 rounded-xl">
+            <div className="w-full flex flex-col gap-12 sm:gap-16 lg:gap-24 animate-fade-in-up">
 
                 {/* ── HERO HEADER ─────────────────────────────────────────── */}
                 <div
-                    className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-60 py-6 sm:py-10 md:py-15 flex flex-col lg:flex-row text-white rounded-xl bg-cover bg-center lg:bg-right"
+                    className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-32 py-10 sm:py-16 flex flex-col lg:flex-row text-white rounded-2xl shadow-2xl bg-cover bg-center lg:bg-right overflow-hidden relative"
                     style={{ backgroundImage: `url(${Header1})` }}
                 >
-                    <div className="w-full lg:w-1/2 mb-6 lg:mb-0">
-                        <p className="text-2xl sm:text-3xl font-bold">Acerca de IGA</p>
-                        <section className="text-base sm:text-lg leading-6 sm:leading-8 text-justify mt-3 sm:mt-5">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-950/80 to-transparent"></div>
+                    <div className="w-full lg:w-3/5 mb-6 lg:mb-0 relative z-10">
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-black drop-shadow-lg tracking-tight">Acerca de IGA</p>
+                        <section className="text-base sm:text-lg leading-relaxed text-justify mt-5 sm:mt-7 space-y-4 font-medium opacity-90">
                             <p>
-                                <strong>Plásticos del Golfo-Sur, S.A. de C.V.</strong> Es una
+                                <strong className="font-bold opacity-100 drop-shadow-md text-xl">Plásticos del Golfo-Sur, S.A. de C.V.</strong> Es una
                                 empresa 100% mexicana, certificada bajo la norma ISO 9001:2015;
                                 especializada en la producción, comercialización y distribución
                                 de lentes, barboquejos y cascos de seguridad industrial.
                             </p>
-                            <br />
                             <p>
                                 Inició sus actividades el 8 de marzo de 1999, en Coatzacoalcos,
                                 Veracruz, como una empresa dedicada a la transformación por
@@ -119,7 +134,6 @@ const AboutIGA = () => {
                                 proceso fue la fabricación de palillos con hilo dental
                                 integrado.
                             </p>
-                            <br />
                             <p>
                                 En el 2003 incursionó en el área de seguridad personal, con la
                                 producción de dos líneas específicas: cascos y lentes de
@@ -128,207 +142,214 @@ const AboutIGA = () => {
                             </p>
                         </section>
                     </div>
-                    <div className="w-full lg:w-1/2 flex items-center justify-center lg:items-end">
-                        <figure className="lg:ml-10 w-full sm:w-3/4 max-w-sm">
+                    <div className="w-full lg:w-2/5 flex items-center justify-center lg:items-end relative z-10">
+                        <figure className="lg:ml-10 w-full sm:w-3/4 max-w-xs drop-shadow-2xl">
                             <img
                                 src={IGALogo}
                                 alt="IGA productos Logo"
-                                className="w-full h-auto"
+                                className="w-full h-auto filter brightness-0 invert"
                             />
                         </figure>
                     </div>
                 </div>
 
                 {/* ── NUESTROS PRINCIPIOS ─────────────────────────────────── */}
-                <div className="home-section">
+                <div className="home-section flex flex-col relative w-full">
                     <SectionBar />
-                    <SectionTitle>Nuestros principios</SectionTitle>
+                    <SectionTitle>Nuestros Principios</SectionTitle>
                     <SectionSubtitle icon={null}>
                         Da clic en cada uno de los principios para obtener más información
                     </SectionSubtitle>
 
-                    <div className="mt-5 flex flex-col lg:flex-row gap-5">
-                        {/* selector */}
-                        <div className="w-full lg:w-1/2 p-4 sm:p-5 bg-base-100 rounded-xl">
-                            <div className="flex flex-col gap-3 sm:gap-5 mt-3">
-                                {principleKeys.map((key) => (
-                                    <button
-                                        key={key}
-                                        className={clsx(
-                                            "flex items-center gap-2 cursor-pointer text-lg sm:text-2xl font-medium transition-colors",
-                                            select === key ? "text-primary" : ""
-                                        )}
-                                        onClick={() => setSelect(key)}
-                                    >
+                    <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 min-h-[300px]">
+                        {/* Selector Tab List */}
+                        <div className="w-full lg:w-[40%] flex flex-col gap-3">
+                            {principleKeys.map((key) => (
+                                <button
+                                    key={key}
+                                    className={clsx(
+                                        "flex justify-between items-center w-full px-6 py-4 rounded-2xl cursor-pointer text-lg font-bold transition-all duration-300 border",
+                                        select === key
+                                            ? "bg-primary text-primary-content shadow-lg shadow-primary/20 border-primary scale-[1.02]"
+                                            : "bg-base-100 text-base-content/70 hover:bg-base-200 border-base-200 hover:shadow-md"
+                                    )}
+                                    onClick={() => setSelect(key)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xl opacity-80">{principles[key].icon}</span>
                                         {principles[key].title}
-                                        <MdKeyboardArrowRight />
-                                    </button>
-                                ))}
-                            </div>
+                                    </div>
+                                    <MdKeyboardArrowRight className={clsx("text-2xl transition-transform", select === key ? "rotate-90 md:rotate-0" : "opacity-50")} />
+                                </button>
+                            ))}
                         </div>
 
-                        {/* content */}
-                        <div className="w-full lg:w-1/2 bg-slate-900 rounded-xl px-6 sm:px-10 lg:px-20 py-5">
-                            <p className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-                                {principles[select].title}
-                                {principles[select].icon}
-                            </p>
-                            <p className="text-base sm:text-lg lg:text-xl leading-6 sm:leading-7 text-white text-justify mt-3">
-                                {principles[select].description}
-                            </p>
+                        {/* Content Viewer Plate */}
+                        <div className="w-full lg:w-[60%] relative group">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 to-slate-800 rounded-3xl shadow-xl transform transition-transform duration-500 scale-100 group-hover:scale-[1.01]"></div>
+                            <div className="relative h-full text-white rounded-3xl px-8 sm:px-12 py-10 flex flex-col justify-center gap-4">
+                                <h3 className="text-3xl sm:text-4xl font-black flex items-center gap-3 text-primary-content drop-shadow-md" key={principles[select].title + "-title"}>
+                                    {principles[select].icon}
+                                    {principles[select].title}
+                                </h3>
+                                <p className="text-base sm:text-lg lg:text-xl leading-relaxed text-slate-200 opacity-90 mt-2 font-medium" key={principles[select].title + "-desc"}>
+                                    {principles[select].description}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* ── HISTORIA ────────────────────────────────────────────── */}
-                <div className="home-section">
+                <div className="home-section w-full">
                     <SectionBar />
-                    <SectionTitle>Historia</SectionTitle>
+                    <SectionTitle>Historia Corporativa</SectionTitle>
                     <SectionSubtitle icon={null}>
-                        FABRICAMOS UNA VARIEDAD DE PRODUCTOS DE SEGURIDAD INDUSTRIAL
-                        APLICANDO ANÁLISIS, INNOVACIÓN, NORMALIZACIÓN Y CERTIFICACIÓN EN
-                        PROCESOS DE INYECCIÓN DE PLÁSTICOS
+                        FABRICAMOS UNA VARIEDAD DE PRODUCTOS DE SEGURIDAD INDUSTRIAL APLICANDO ANÁLISIS, INNOVACIÓN, NORMALIZACIÓN Y CERTIFICACIÓN
                     </SectionSubtitle>
 
-                    <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical mt-5">
-                        <li>
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-lg sm:text-xl font-bold">1999</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
-                                    PLÁSTICOS DEL GOLFO SUR S.A. DE CV. como Asociación Civil se
-                                    involucra en la transformación y comercialización de productos
-                                    mediante el proceso de inyección de plásticos.
+                    <div className="mt-12 bg-base-100/50 rounded-3xl p-4 sm:p-10 border border-base-200 shadow-sm">
+                        <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
+                            <li>
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-start mb-10 md:text-end group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">1999</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        <strong className="text-base-content font-bold">PLÁSTICOS DEL GOLFO SUR S.A. DE CV.</strong> como Asociación Civil se
+                                        involucra en la transformación y comercialización de productos
+                                        mediante el proceso de inyección de plásticos.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-end md:mb-10">
-                                <time className="text-lg sm:text-xl font-bold">2003</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
-                                    Incursionamos en el área de seguridad personal, fabricando dos
-                                    líneas específicas; cascos y lentes de seguridad en varios
-                                    modelos. Producidos bajo los más altos estándares de calidad en
-                                    cumplimiento con las Normas: NOM-115-STPS-1994,
-                                    NMX-S-055-SCF1-2002 y ANSI/ISEA Z891-199.
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-end md:mb-10 group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2003</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Incursionamos en el área de seguridad personal, fabricando dos
+                                        líneas específicas; cascos y lentes de seguridad en varios
+                                        modelos. Producidos bajo los más altos estándares de calidad en
+                                        cumplimiento con las Normas: <span className="font-semibold px-1 bg-base-200 rounded text-xs ml-1">NOM-115-STPS-1994</span>, <span className="font-semibold px-1 bg-base-200 rounded text-xs">NMX-S-055-SCF1-2002</span> y <span className="font-semibold px-1 bg-base-200 rounded text-xs">ANSI/ISEA Z891-199</span>.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-lg sm:text-xl font-bold">2009</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
-                                    Implementamos una serie de equipos de producción de primera
-                                    calidad para lograr ahorros energéticos substanciales y una
-                                    mejor operación de inyección.
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-start mb-10 md:text-end group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2009</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Implementamos una serie de equipos de producción de primera
+                                        calidad para lograr ahorros energéticos substanciales y una
+                                        mejor operación de inyección.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-end md:mb-10">
-                                <time className="text-lg sm:text-xl font-bold">2014-2020</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-3 sm:py-5 text-justify">
-                                    Certificación al proceso Normativos de nuestros cascos de
-                                    seguridad industrial en las siguientes Normas:
-                                    NOM-115-STPS-2009, NMX-S-055-SCFI-2002, ANSI/ISEA Z89.1-2014
-                                    (R2019), PEMEX-EST-SS-058-2018 y CFE: 8H 341-02.
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-end md:mb-10 group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2014-2020</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Certificación al proceso Normativos de nuestros cascos de
+                                        seguridad industrial en las diversas Normas Mexicanas e Internacionales.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-lg sm:text-xl font-bold">2017</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
-                                    Plásticos obtiene la presidencia del subcomité de equipos de
-                                    protección a la cabeza del comité técnico de normalización
-                                    nacional para productos de protección y seguridad.
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-start mb-10 md:text-end group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2017</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Plásticos obtiene la presidencia del subcomité de equipos de
+                                        protección a la cabeza del comité técnico de normalización
+                                        nacional para productos de protección y seguridad.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-end md:mb-10">
-                                <time className="text-lg sm:text-xl font-bold">2018</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
-                                    Se obtiene la certificación ISO 9001-2015, alcance que
-                                    comprende las actividades de: fabricación de cascos de
-                                    protección personal, lentes, barbiquejos, actividades de
-                                    ensamble e inyección.
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-end md:mb-10 group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2018</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Se obtiene la certificación <strong className="text-primary font-black">ISO 9001-2015</strong>, alcance que
+                                        comprende las actividades de: fabricación de cascos de
+                                        protección personal, lentes, barbiquejos, actividades de
+                                        ensamble e inyección.
+                                    </div>
                                 </div>
-                            </div>
-                            <hr className="bg-primary" />
-                        </li>
-                        <li>
-                            <hr className="bg-primary" />
-                            <div className="timeline-middle"><CheckIcon /></div>
-                            <div className="timeline-start mb-10 md:text-end">
-                                <time className="text-lg sm:text-xl font-bold">2021</time>
-                                <div className="text-sm sm:text-base lg:text-lg mt-2 bg-base-100 rounded-xl px-5 sm:px-10 py-2 sm:py-2 text-justify">
-                                    Plásticos del Golfo Sur obtiene el certificado ANSI/ISEA
-                                    Z89.1-2014 (R2019) para el casco Plagosur C en ajuste de
-                                    matraca tipo I, Forma II en clase "E".
+                                <hr className="bg-primary/30" />
+                            </li>
+                            <li>
+                                <hr className="bg-primary/30" />
+                                <div className="timeline-middle"><CheckIcon /></div>
+                                <div className="timeline-start mb-10 md:text-end group">
+                                    <time className="text-2xl font-black text-primary drop-shadow-sm">2021</time>
+                                    <div className="text-base mt-2 bg-base-100 border border-base-200 rounded-2xl shadow-sm px-6 py-5 text-justify group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                                        Plásticos del Golfo Sur obtiene el certificado <strong className="text-primary font-black">ANSI/ISEA Z89.1-2014 (R2019)</strong> para el casco Plagosur C en ajuste de
+                                        matraca tipo I, Forma II en clase "E".
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 {/* ── SERVICIOS Y LICITACIONES ─────────────────────────────── */}
-                <div className="flex flex-col lg:flex-row gap-5 lg:gap-0">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 w-full">
 
                     {/* servicios */}
-                    <div className="w-full lg:w-1/2 lg:pr-5 home-section">
+                    <div className="w-full lg:w-1/2 home-section flex flex-col">
                         <SectionBar />
                         <SectionTitle>Servicios al Cliente</SectionTitle>
                         <SectionSubtitle icon={<TiWorld />}>
-                            Nacional e internacional
+                            Distintos Servicios Especiales
                         </SectionSubtitle>
-                        <ul className="w-full text-justify list-disc list-inside text-base sm:text-lg lg:text-xl flex flex-col gap-3 sm:gap-5 mt-3 sm:mt-5">
-                            <li>Ofrecemos servicio de maquila de inyección en plásticos, contando con la experiencia, equipo y maquinaria para el proceso de materiales termoplásticos y resinas de ingeniería.</li>
-                            <li>Capacidad instalada en máquinas de inyección de 35 a 320 toneladas de cierre.</li>
-                            <li>Equipo periférico para proceso y control del producto en moldeo, deshidratadores, cargadores de material, termorreguladores y enfriamiento.</li>
-                            <li>Tiempos de entrega confiables.</li>
-                            <li>Logísticas de surtimiento de acuerdo a sus necesidades.</li>
-                            <li>Ganancia de calidad en los productos Iga.</li>
-                            <li>Precios Accesibles.</li>
-                            <li>Innovación constante en la imagen y empaque de productos.</li>
-                            <li>Productos con código de barras en etiquetas.</li>
-                            <li>Personal operativo calificado.</li>
-                            <li>Equipo de ventas corporativa.</li>
-                        </ul>
+
+                        <div className="mt-8 bg-base-100 rounded-3xl p-6 sm:p-8 flex-1 border border-base-200 shadow-sm flex flex-col gap-4">
+                            {servicesList.map((service, i) => (
+                                <div key={i} className="flex gap-4 items-start group">
+                                    <FaCheckCircle className="text-success text-xl mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                                    <p className="text-base font-medium opacity-80 leading-relaxed text-justify">{service}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* licitaciones */}
-                    <div className="w-full lg:w-1/2 lg:pl-5 home-section">
+                    <div className="w-full lg:w-1/2 home-section flex flex-col">
                         <SectionBar />
                         <SectionTitle>Licitaciones</SectionTitle>
                         <SectionSubtitle icon={<SiGooglecolab />}>
-                            Colaboramos con empresas/instituciones gubernamentales que requieren de productos de calidad.
+                            Instituciones gubernamentales que requieren alta calidad
                         </SectionSubtitle>
-                        <div className="mt-3 sm:mt-3 flex flex-wrap gap-3 sm:gap-5 items-center justify-center lg:justify-start">
-                            <figure className="w-2/5 sm:w-1/3 lg:w-1/3">
-                                <img src={cfeLogo} alt="CFE Logo" className="w-full h-auto" />
-                            </figure>
-                            <figure className="w-1/4 sm:w-1/5 lg:w-1/5">
-                                <img src={pemexLogo} alt="Pemex Logo" className="w-full h-auto" />
-                            </figure>
-                            <figure className="w-2/5 sm:w-1/3 lg:w-1/3">
-                                <img src={asaLogo} alt="ASA Logo" className="w-full h-auto" />
-                            </figure>
+
+                        <div className="mt-8 flex gap-4 sm:gap-6 items-stretch justify-center flex-wrap flex-1">
+                            {/* CFE */}
+                            <div className="bg-white rounded-3xl shadow-sm border border-base-200 p-6 flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-h-[160px]">
+                                <img src={cfeLogo} alt="CFE Logo" className="w-[80%] h-auto object-contain max-h-24 mix-blend-multiply" />
+                                <p className="text-xs font-bold text-base-content/50 uppercase mt-4 tracking-widest">Acreditado</p>
+                            </div>
+
+                            {/* Pemex */}
+                            <div className="bg-white rounded-3xl shadow-sm border border-base-200 p-6 flex flex-col items-center justify-center w-full sm:w-[calc(50%-12px)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-h-[160px]">
+                                <img src={pemexLogo} alt="Pemex Logo" className="w-[70%] h-auto object-contain max-h-24 mix-blend-multiply" />
+                                <p className="text-xs font-bold text-base-content/50 uppercase mt-4 tracking-widest">Acreditado</p>
+                            </div>
+
+                            {/* ASA */}
+                            <div className="bg-white rounded-3xl shadow-sm border border-base-200 p-6 flex flex-col items-center justify-center w-full hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-h-[160px]">
+                                <img src={asaLogo} alt="Aeropuertos y Servicios Auxiliares Logo" className="w-[60%] sm:w-[40%] h-auto object-contain max-h-24 mix-blend-multiply" />
+                                <p className="text-xs font-bold text-base-content/50 uppercase mt-4 tracking-widest">Acreditado</p>
+                            </div>
                         </div>
                     </div>
                 </div>

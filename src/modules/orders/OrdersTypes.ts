@@ -1,7 +1,7 @@
 import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
 import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
-import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
+import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartI, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
 
 export type PaymentShoppingCart = {
     sku: string;
@@ -191,4 +191,5 @@ export interface CreateOrderI {
     couponCode?: string;
     paymentProvider: PaymentProviders;
     guestForm?: GuestCreateOrderFormType;
+    buyNowItem?: ShoppingCartI
 }

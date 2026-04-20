@@ -6,11 +6,13 @@ import { useAuthStore } from "../modules/auth/states/authStore";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import DrawerMobileMenu from "./components/DrawerMobileMenu";
 import CookieConsent from "./components/CookieConsent";
+import { useCookieStore } from "../modules/auth/states/cookieStore";
 
 const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { isAuth, logout, getProfile, authCustomer, cookieConsent, onSetCookieConsent } = useAuthStore();
+    const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
+    const { cookieConsent, setCookieConsent } = useCookieStore();
     const { setTheme, theme } = useThemeStore();
     const navigate = useNavigate();
 
@@ -26,7 +28,7 @@ const MainLayout = () => {
     };
 
     const handleSetConsent = (consent: boolean) => {
-        onSetCookieConsent(consent);
+        setCookieConsent(consent);
     };
 
 

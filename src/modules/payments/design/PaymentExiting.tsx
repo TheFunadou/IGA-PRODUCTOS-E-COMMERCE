@@ -1,59 +1,44 @@
 import { formatDate, formatPrice } from "../../products/Helpers";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import {
-    FaCheckCircle,
     FaBoxOpen,
-    FaReceipt,
     FaShippingFast,
     FaCreditCard,
     FaHome,
     FaPhone,
     FaMapMarkerAlt,
+    FaReceipt,
     FaTag,
-    FaDownload,
     FaStore,
-    FaFire,
+    FaDownload,
+    FaRedo,
     FaExclamationTriangle,
     FaTimesCircle,
 } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
-import { usePollingPaymentApprovedDetail } from "../usePayment";
+import { MdOutlinePending, MdVerified } from "react-icons/md";
+import { usePollingPaymentApprovedDetailV2 } from "../usePayment";
 import {
     formatOrderStatus,
-    formatPaymentClass,
-    paymentMethod,
     paymentProvider,
 } from "../../shopping/utils/ShoppingUtils";
 import { formatAxiosError } from "../../../api/helpers";
-import { useNavigate } from "react-router-dom";
-import { usePaymentStore } from "../../shopping/states/paymentStore";
+import { usePaymentStore as usePaymentStoreV2 } from "../../shopping/states/paymentStore";
 import clsx from "clsx";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
+import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 
 /* ─────────────────────────────────────────────
-   Helpers de descuento (mismo patrón ShoppingCartItem)
-───────────────────────────────────────────── */
+   Constantes de polling
+ ───────────────────────────────────────────── */
 
-const discountBg = (discount?: number | null) => {
-    if (!discount) return "";
-    if (discount < 50) return "bg-error";
-    if (discount < 65) return "bg-success";
-    return "bg-primary";
-};
-
-const discountText = (discount?: number | null) => {
-    if (!discount) return "text-base-content";
-    if (discount < 50) return "text-error";
-    if (discount < 65) return "text-success";
-    return "text-primary";
-};
+const MAX_POLL_ATTEMPTS = 10;
 
 /* ─────────────────────────────────────────────
    Helpers de UI
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 
 const Badge = ({ label, color = "gray" }: { label: string; color?: string }) => (
     <span
@@ -62,7 +47,7 @@ const Badge = ({ label, color = "gray" }: { label: string; color?: string }) => 
             color === "success" && "bg-success/20 text-success",
             color === "warning" && "bg-warning/20 text-warning",
             color === "error" && "bg-error/20 text-error",
-            color === "primary" && "bg-primary/10 text-primary",
+            color === "primary" && "bg-primary/20 text-primary",
             color === "gray" && "bg-base-200 text-base-content/70",
         )}
     >
@@ -163,12 +148,30 @@ const SummaryLine = ({
 
 /* ─────────────────────────────────────────────
    Skeleton loader
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 
-const SkeletonLoader = () => (
+const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttempts: number }) => (
     <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-            <div className="h-24 bg-base-200 rounded-2xl animate-pulse" />
+            <div className="bg-base-100 rounded-2xl border border-base-200 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MdOutlinePending className="text-warning text-2xl" />
+                </div>
+                <div className="flex-1">
+                    <p className="font-bold text-base-content text-lg">
+                        Verificando el estado de tu orden...
+                    </p>
+                    <p className="text-base-content/60 text-sm mt-0.5">
+                        Esto puede tomar unos momentos. No cierres esta ventana.
+                    </p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                    <div className="loading loading-dots loading-md text-primary" />
+                    <p className="text-xs text-base-content/40">
+                        Intento {attempts} de {maxAttempts}
+                    </p>
+                </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="h-64 bg-base-200 rounded-2xl animate-pulse" />
                 <div className="lg:col-span-2 space-y-4">
@@ -181,20 +184,67 @@ const SkeletonLoader = () => (
 );
 
 /* ─────────────────────────────────────────────
-   Main component
-───────────────────────────────────────────── */
+   Pantalla de timeout
+ ───────────────────────────────────────────── */
 
-const PaymentExiting = () => {
-    document.title = "Iga Productos | Pago procesado";
+const PollingTimeoutScreen = ({
+    orderUUID,
+    onRetry,
+}: {
+    orderUUID: string;
+    onRetry: () => void;
+}) => (
+    <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
+        <div className="max-w-md mx-auto flex flex-col items-center text-center gap-6 py-8">
+            <div className="w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center">
+                <FaExclamationTriangle className="text-warning text-3xl" />
+            </div>
+            <div className="space-y-2">
+                <h1 className="text-xl font-bold text-base-content">
+                    No pudimos confirmar tu orden
+                </h1>
+                <p className="text-base-content/60 text-sm">
+                    Excedimos el número de intentos de verificación. Tu pago puede estar
+                    siendo procesado por el banco. Te recomendamos revisar tu correo de
+                    confirmación o intentar de nuevo en unos minutos.
+                </p>
+                <p className="text-xs font-mono text-base-content/40 mt-2">
+                    Folio: {orderUUID}
+                </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button className="flex-1 btn btn-primary gap-2" onClick={onRetry}>
+                    <FaRedo /> Reintentar verificación
+                </button>
+                <button
+                    className="flex-1 btn btn-ghost gap-2"
+                    onClick={() => window.location.assign("/")}
+                >
+                    <FaStore /> Ir a la tienda
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
+/* ─────────────────────────────────────────────
+   Main component
+ ───────────────────────────────────────────── */
+
+const PaymentExitingV2 = () => {
+    document.title = "Iga Productos | ¡Gracias por tu compra!";
 
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { order: orderStore, success } = usePaymentStoreV2();
     const { authCustomer } = useAuthStore();
     const { search } = useLocation();
-    const { order: orderStore, success } = usePaymentStore();
-
     const query = new URLSearchParams(search);
     const orderUUID = query.get("external_reference");
+
+    const pollAttemptsRef = useRef(0);
+    const [pollTimedOut, setPollTimedOut] = useState(false);
+    const [pollAttempts, setPollAttempts] = useState(0);
 
     /* ── Guard: sin UUID ── */
     if (!orderUUID) {
@@ -203,7 +253,7 @@ const PaymentExiting = () => {
                 <div className="flex items-center justify-center min-h-[40vh]">
                     <div className="bg-base-100 rounded-2xl border border-error/20 p-8 max-w-md w-full text-center space-y-4">
                         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto">
-                            <FaReceipt className="text-error text-2xl" />
+                            <FaTimesCircle className="text-error text-2xl" />
                         </div>
                         <h1 className="text-xl font-bold text-base-content">
                             Referencia de pago inválida
@@ -222,13 +272,14 @@ const PaymentExiting = () => {
         );
     }
 
-    const { data, error, isLoading } = usePollingPaymentApprovedDetail({ orderUUID });
+    const { data, error, isLoading, refetch } = usePollingPaymentApprovedDetailV2({ orderUUID });
 
     useEffect(() => {
         if (!data?.order) return;
+
         if (
             data.status === "APPROVED" &&
-            data.order.details.order.uuid === orderStore?.orderUUID
+            data.order.orderUUID === orderStore?.orderUUID
         ) {
             success();
             if (authCustomer?.uuid) {
@@ -239,6 +290,27 @@ const PaymentExiting = () => {
         }
     }, [data?.order]);
 
+    useEffect(() => {
+        if (isLoading && !data) return;
+        if (!data) return;
+        if (data.status === "APPROVED") return;
+
+        pollAttemptsRef.current += 1;
+        setPollAttempts(pollAttemptsRef.current);
+
+        if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
+            setPollTimedOut(true);
+        }
+    }, [data]);
+
+    const handleRetry = () => {
+        pollAttemptsRef.current = 0;
+        setPollAttempts(0);
+        setPollTimedOut(false);
+        refetch();
+    };
+
+    /* ── Guard: error HTTP ── */
     if (error) {
         const is404 = (error as any)?.response?.status === 404;
 
@@ -247,10 +319,7 @@ const PaymentExiting = () => {
                 <div className="flex items-center justify-center min-h-[40vh]">
                     <div className="bg-base-100 rounded-2xl border border-error/20 p-8 max-w-md w-full text-center space-y-4">
                         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto">
-                            {is404
-                                ? <FaTimesCircle className="text-error text-2xl" />
-                                : <FaExclamationTriangle className="text-error text-2xl" />
-                            }
+                            <FaTimesCircle className="text-error text-2xl" />
                         </div>
                         <h2 className="text-xl font-bold text-base-content">
                             {is404 ? "Orden no encontrada" : "Error al verificar el pago"}
@@ -258,8 +327,7 @@ const PaymentExiting = () => {
                         <p className="text-base-content/60 text-sm">
                             {is404
                                 ? "No existe ninguna orden asociada a esta referencia de pago. Verifica tu correo de confirmación o contacta a soporte."
-                                : "Ocurrió un error inesperado al consultar el estado de tu orden."
-                            }
+                                : "Ocurrió un error inesperado al consultar el estado de tu orden."}
                         </p>
                         {!is404 && (
                             <p className="text-xs text-error bg-error/10 px-3 py-2 rounded-xl text-left font-mono break-all">
@@ -269,24 +337,39 @@ const PaymentExiting = () => {
                         <p className="text-xs font-mono text-base-content/40">
                             Folio: {orderUUID}
                         </p>
-                        <button className="btn btn-ghost w-full gap-2" onClick={() => navigate("/")}>
-                            <FaStore /> Ir a la tienda
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {!is404 && (
+                                <button className="flex-1 btn btn-primary gap-2" onClick={handleRetry}>
+                                    <FaRedo /> Reintentar
+                                </button>
+                            )}
+                            <button
+                                className={clsx("btn btn-ghost gap-2", is404 ? "w-full" : "flex-1")}
+                                onClick={() => navigate("/")}
+                            >
+                                <FaStore /> Ir a la tienda
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         );
     }
 
-    /* ── Guard: cargando ── */
-    if (isLoading || !data || !data.order) return <SkeletonLoader />;
+    /* ── Guard: timeout ── */
+    if (pollTimedOut) {
+        return <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />;
+    }
 
-    if (data.status !== "APPROVED")
-        throw new Error("Error al obtener el estatus de la orden de compra");
+    /* ── Guard: cargando / polling ── */
+    if (isLoading || !data || !data.order) {
+        return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
+
+    if (data.status !== "APPROVED") throw new Error("Error al obtener el estatus de la orden de compra");
 
     const { order } = data;
-    const { address, items, details, customer } = order;
-    const { resume } = details;
+    const { shipping, items, paymentResume, buyer, paymentDetails } = order;
 
     const fmt = (n: number) => formatPrice(n.toString(), "es-MX");
 
@@ -297,49 +380,49 @@ const PaymentExiting = () => {
                 {/* ══════════════════════════════════════
                     HERO: bg-success
                 ══════════════════════════════════════ */}
-                <div className="bg-success rounded-2xl p-5 sm:p-8 text-success-content">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-success rounded-2xl p-5 sm:p-8 text-success-content relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <MdVerified className="text-[12rem] -rotate-12" />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-success-content/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                <FaCheckCircle className="text-2xl text-success-content" />
+                                <MdVerified className="text-2xl text-success-content" />
                             </div>
                             <div>
                                 <p className="text-xs font-semibold uppercase text-success-content/70">
-                                    Pago procesado exitosamente
+                                    ¡Pago confirmado!
                                 </p>
                                 <h1 className="text-xl sm:text-2xl font-bold leading-tight text-success-content">
-                                    ¡Gracias por tu compra!
+                                    ¡Gracias por tu compra, {buyer.name}!
                                 </h1>
-                                {customer && (
-                                    <p className="text-success-content/70 text-sm mt-0.5">
-                                        {customer.name} {customer.last_name} · {customer.email}
-                                    </p>
-                                )}
+                                <p className="text-success-content/70 text-sm mt-0.5">
+                                    Hemos enviado un correo a <span className="font-semibold">{buyer.email}</span> con los detalles de tu pedido.
+                                </p>
                             </div>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-content/20 text-success-content">
-                                {formatOrderStatus[data.status]}
-                            </span>
+                            <Badge label={formatOrderStatus[data.status]} color="success" />
                             <p className="text-success-content/60 text-xs font-mono break-all max-w-xs text-right">
-                                Folio: {orderUUID}
+                                Folio: {order.orderUUID}
                             </p>
                             <p className="text-success-content/60 text-xs">
-                                {formatDate(details.order.created_at, "es-MX")}
+                                {formatDate(order.createdAt, "es-MX")}
                             </p>
                         </div>
                     </div>
 
                     {/* Meta de la orden */}
-                    <div className="mt-5 pt-5 border-t border-success-content/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                    <div className="mt-5 pt-5 border-t border-success-content/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm relative z-10">
                         <div>
-                            <p className="text-success-content/60 text-xs uppercase">Total pagado</p>
-                            <p className="font-bold text-xl text-success-content">${fmt(resume.total)}</p>
+                            <p className="text-success-content/60 text-xs uppercase">Total Pagado</p>
+                            <p className="font-bold text-xl text-success-content">${paymentResume.total}</p>
                         </div>
                         <div>
                             <p className="text-success-content/60 text-xs uppercase">Proveedor</p>
                             <p className="font-semibold text-success-content">
-                                {details.order.payment_provider === "mercado_pago" ? "Mercado Pago" : "PayPal"}
+                                {paymentProvider[order.paymentProvider].description}
                             </p>
                         </div>
                         <div>
@@ -351,7 +434,7 @@ const PaymentExiting = () => {
                         <div>
                             <p className="text-success-content/60 text-xs uppercase">Tipo de orden</p>
                             <p className="font-semibold text-success-content">
-                                {details.order.is_guest_order ? "Invitado" : "Cliente registrado"}
+                                {order.isGuestOrder ? "Invitado" : "Cliente registrado"}
                             </p>
                         </div>
                     </div>
@@ -364,8 +447,6 @@ const PaymentExiting = () => {
 
                     {/* ── Columna izquierda: Envío + Resumen ── */}
                     <div className="space-y-5">
-
-                        {/* Información de envío */}
                         <SectionCard
                             icon={<FaShippingFast />}
                             title="Información de envío"
@@ -378,11 +459,11 @@ const PaymentExiting = () => {
                                     </p>
                                     <InfoRow
                                         label="Nombre completo"
-                                        value={`${address.recipient_name} ${address.recipient_last_name}`}
+                                        value={`${shipping.recipient_name} ${shipping.recipient_last_name}`}
                                     />
                                     <InfoRow
                                         label="Contacto"
-                                        value={`${address.country_phone_code} ${address.contact_number}`}
+                                        value={`${shipping.country_phone_code} ${shipping.contact_number}`}
                                         icon={<FaPhone />}
                                     />
                                 </div>
@@ -393,42 +474,37 @@ const PaymentExiting = () => {
                                     </p>
                                     <InfoRow
                                         label="Calle y número"
-                                        value={`${address.street_name} #${address.number}${address.aditional_number ? ` int. ${address.aditional_number}` : ""}`}
+                                        value={`${shipping.street_name} #${shipping.number}${shipping.aditional_number ? ` int. ${shipping.aditional_number}` : ""}`}
                                         icon={<FaHome />}
                                     />
-                                    {address.floor && (
-                                        <InfoRow label="Piso" value={address.floor} />
-                                    )}
-                                    <InfoRow label="Colonia / Fracc." value={address.neighborhood} />
+                                    {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
+                                    <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
                                     <InfoRow
                                         label="Ciudad y Estado"
-                                        value={`${address.city}, ${address.state}`}
+                                        value={`${shipping.city}, ${shipping.state}`}
                                         icon={<FaMapMarkerAlt />}
                                     />
-                                    <InfoRow label="Localidad" value={address.locality} />
+                                    <InfoRow label="Localidad" value={shipping.locality} />
                                     <InfoRow
                                         label="País"
-                                        value={`${address.country} · CP ${address.zip_code}`}
+                                        value={`${shipping.country} · CP ${shipping.zip_code}`}
                                     />
-                                    <InfoRow label="Tipo de dirección" value={address.address_type} />
+                                    <InfoRow label="Tipo de dirección" value={shipping.address_type} />
                                 </div>
 
-                                <div className="bg-warning/10 rounded-xl p-3 space-y-2">
-                                    <p className="text-xs font-bold uppercase text-warning">
-                                        Comentarios / Referencias
-                                    </p>
-                                    <p className="text-sm text-base-content">
-                                        {address.references_or_comments || (
-                                            <span className="italic text-base-content/30">
-                                                Sin comentarios adicionales
-                                            </span>
-                                        )}
-                                    </p>
-                                </div>
+                                {shipping.references_or_comments && (
+                                    <div className="bg-warning/10 rounded-xl p-3 space-y-2">
+                                        <p className="text-xs font-bold uppercase text-warning">
+                                            Comentarios / Referencias
+                                        </p>
+                                        <p className="text-sm text-base-content italic text-balance">
+                                            "{shipping.references_or_comments}"
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </SectionCard>
 
-                        {/* Resumen financiero */}
                         <SectionCard
                             icon={<FaReceipt />}
                             title="Resumen de pago"
@@ -436,342 +512,112 @@ const PaymentExiting = () => {
                         >
                             <div className="space-y-3">
                                 <SummaryLine
-                                    label="Subtotal (sin imp. ni desc.)"
-                                    value={`$${fmt(resume.subtotalBeforeIVA)}`}
+                                    label="Subtotal"
+                                    value={`$${paymentResume.itemsSubtotalBeforeTaxes}`}
                                     sub="Precio base de productos"
                                 />
-                                <SummaryLine
-                                    label="IVA (16%)"
-                                    value={`$${fmt(resume.iva)}`}
-                                />
-                                {resume.discount > 0 && (
+                                <SummaryLine label="IVA (16%)" value={`$${paymentResume.iva}`} />
+                                {parseInt(paymentResume.discount) > 0 && (
                                     <SummaryLine
                                         label="Descuentos aplicados"
-                                        value={`$${fmt(resume.discount)}`}
+                                        value={`$${paymentResume.discount}`}
                                         highlight
                                         minus
                                     />
                                 )}
-                                {resume.shippingCost > 0 && (
+                                {parseFloat(paymentResume.shippingCostBeforeTaxes) > 0 && (
                                     <SummaryLine
-                                        label={`Envío (${resume.boxesQty > 1 ? `${resume.boxesQty} cajas` : `${resume.boxesQty} caja`})`}
-                                        value={`$${fmt(resume.shippingCost)}`}
+                                        label={`Envío (${paymentResume.boxesCount > 1 ? `${paymentResume.boxesCount} cajas` : `${paymentResume.boxesCount} caja`})`}
+                                        value={`$${paymentResume.shippingCostBeforeTaxes}`}
                                     />
                                 )}
                                 <SummaryLine
-                                    label="Total pagado"
-                                    value={`$${fmt(resume.total)}`}
+                                    label="Total"
+                                    value={`$${paymentResume.total}`}
                                     large
                                 />
                             </div>
 
-                            {details.order.coupon_code && (
+                            {order.couponCode && (
                                 <div className="mt-4 flex items-center gap-2 bg-success/10 text-success text-xs font-semibold px-3 py-2 rounded-xl">
                                     <FaTag />
-                                    Cupón aplicado:{" "}
-                                    <span className="font-mono">{details.order.coupon_code}</span>
+                                    Cupón aplicado: <span className="font-mono">{order.couponCode}</span>
                                 </div>
                             )}
 
-                            <button
-                                className="btn btn-outline btn-sm w-full mt-4 gap-2"
-                                onClick={() => window.print()}
-                            >
-                                <FaDownload /> Descargar resumen
-                            </button>
+                            {order.aditionalResourceUrl && (
+                                <a
+                                    href={order.aditionalResourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-primary btn-sm w-full mt-4 gap-2"
+                                >
+                                    <FaDownload /> Descargar comprobante
+                                </a>
+                            )}
                         </SectionCard>
                     </div>
 
-                    {/* ── Columna derecha: Productos + Pago ── */}
+                    {/* ── Columna derecha: Productos + Detalle transaccion ── */}
                     <div className="lg:col-span-2 space-y-5">
-
-                        {/* ── Productos (estilo ShoppingCartItem) ── */}
                         <SectionCard
                             icon={<FaBoxOpen />}
-                            title={`Productos del pedido (${items.length})`}
+                            title={`Artículos de tu compra (${items.length})`}
                             accent="border-primary"
                         >
                             <div className="flex flex-col gap-4">
-                                {items.map((item, index) => {
-                                    const hasDiscount =
-                                        item.isOffer &&
-                                        item.discount &&
-                                        item.discount > 0 &&
-                                        item.product_version.unit_price_with_discount;
-
-                                    const mainImage =
-                                        item.product_images.find((img) => img.main_image)?.image_url
-                                        ?? item.product_images[0]?.image_url;
-
-                                    const subtotal =
-                                        parseFloat(item.product_version.unit_price) * item.quantity;
-                                    const subtotalWithDisc = hasDiscount
-                                        ? parseFloat(item.product_version.unit_price_with_discount!) * item.quantity
-                                        : 0;
-
-                                    return (
-                                        <div
-                                            key={`item-${index}`}
-                                            className="w-full rounded-2xl bg-base-100 border border-base-300 hover:border-primary/30 transition-colors duration-200 p-3 sm:p-4"
-                                        >
-                                            <div className="flex gap-3 sm:gap-4">
-                                                {/* Imagen */}
-                                                <div className="flex-shrink-0">
-                                                    <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-xl overflow-hidden border border-base-300">
-                                                        <img
-                                                            src={mainImage}
-                                                            alt={item.product_name}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {/* Contenido principal */}
-                                                <div className="flex-1 min-w-0 flex flex-col gap-2">
-                                                    {/* Nombre + badge oferta */}
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <p className="text-sm sm:text-base font-bold text-base-content leading-snug">
-                                                            {item.product_name}
-                                                        </p>
-                                                        {item.isOffer && item.discount && (
-                                                            <span className={clsx(
-                                                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0",
-                                                                discountBg(item.discount)
-                                                            )}>
-                                                                <FaFire className="text-[10px]" />
-                                                                {item.discount}% OFF
-                                                            </span>
-                                                        )}
-                                                        {item.isFavorite && (
-                                                            <span className="text-xs">⭐</span>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Breadcrumbs categorías */}
-                                                    <div className="breadcrumbs text-xs text-base-content/50 bg-base-200 w-fit rounded-lg px-2 sm:px-3 py-0.5">
-                                                        <ul>
-                                                            <li>
-                                                                <strong className="text-base-content/70">
-                                                                    {item.category}
-                                                                </strong>
-                                                            </li>
-                                                            {item.subcategories.map((sub, i) => (
-                                                                <li key={i}>
-                                                                    <strong className="text-base-content/70">
-                                                                        {sub}
-                                                                    </strong>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-
-                                                    {/* Color */}
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span
-                                                            className="w-4 h-4 rounded-full border border-base-300 flex-shrink-0 shadow-sm"
-                                                            style={{ backgroundColor: item.product_version.color_code }}
-                                                        />
-                                                        <span className="text-xs sm:text-sm text-base-content/60">
-                                                            {item.product_version.color_line} —{" "}
-                                                            <span className="text-base-content font-medium">
-                                                                {item.product_version.color_name}
-                                                            </span>
-                                                        </span>
-                                                    </div>
-
-                                                    {/* SKU */}
-                                                    <span className="text-xs font-mono text-base-content/40 w-fit bg-base-200 px-2 py-0.5 rounded-lg">
-                                                        SKU: {item.product_version.sku}
-                                                    </span>
-
-                                                    {/* Cantidad + Precios */}
-                                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mt-1">
-                                                        {/* Cantidad */}
-                                                        <div className="flex flex-col gap-1">
-                                                            <span className="text-xs text-base-content/50 uppercase">
-                                                                Cantidad
-                                                            </span>
-                                                            <span className="btn btn-primary btn-sm w-fit pointer-events-none">
-                                                                {item.quantity} pz
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Precios */}
-                                                        <div className="flex gap-4 sm:gap-6 items-end">
-                                                            {/* Precio unitario */}
-                                                            <div className="flex flex-col items-start sm:items-end">
-                                                                <span className="text-[10px] sm:text-xs text-base-content/40 uppercase mb-0.5">
-                                                                    Precio unitario
-                                                                </span>
-                                                                {hasDiscount ? (
-                                                                    <div className="flex flex-col items-start sm:items-end">
-                                                                        <span className={clsx("text-base sm:text-lg font-bold", discountText(item.discount))}>
-                                                                            ${formatPrice(item.product_version.unit_price_with_discount!, "es-MX")}
-                                                                        </span>
-                                                                        <span className="text-xs line-through text-base-content/30">
-                                                                            ${formatPrice(item.product_version.unit_price, "es-MX")}
-                                                                        </span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className="text-base sm:text-lg font-bold text-base-content">
-                                                                        ${formatPrice(item.product_version.unit_price, "es-MX")}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Separador */}
-                                                            <div className="w-px h-10 bg-base-300 hidden sm:block" />
-
-                                                            {/* Subtotal */}
-                                                            <div className="flex flex-col items-start sm:items-end">
-                                                                <span className="text-[10px] sm:text-xs text-base-content/40 uppercase mb-0.5">
-                                                                    Subtotal
-                                                                </span>
-                                                                {hasDiscount ? (
-                                                                    <div className="flex flex-col items-start sm:items-end">
-                                                                        <span className={clsx("text-lg sm:text-xl font-extrabold", discountText(item.discount))}>
-                                                                            ${formatPrice(subtotalWithDisc.toString(), "es-MX")}
-                                                                        </span>
-                                                                        <span className="text-xs line-through text-base-content/30">
-                                                                            ${formatPrice(subtotal.toString(), "es-MX")}
-                                                                        </span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className="text-lg sm:text-xl font-extrabold text-base-content">
-                                                                        ${formatPrice(subtotal.toString(), "es-MX")}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {items.map((item, idx) => (
+                                    <CheckoutOrderItemV2 key={`${item.sku}-${idx}`} data={item} />
+                                ))}
                             </div>
                         </SectionCard>
 
-                        {/* ── Detalle de pagos ── */}
                         <SectionCard
                             icon={<FaCreditCard />}
-                            title="Detalle de pago"
+                            title="Detalles de la transacción"
                             accent="border-primary"
                         >
-                            {/* Logo proveedor */}
-                            <div className="flex items-center gap-3 mb-5">
-                                <figure className="h-8">
+                            <div className="flex items-center gap-4 mb-6">
+                                <figure className="h-10">
                                     <img
                                         className="h-full object-contain"
-                                        src={paymentProvider[details.order.payment_provider].image_url}
-                                        alt={details.order.payment_provider}
+                                        src={paymentProvider[order.paymentProvider]?.image_url}
+                                        alt={order.paymentProvider}
                                     />
                                 </figure>
-                                <div className="text-xs text-base-content/40 space-y-0.5">
-                                    <p>
-                                        Folio de orden:{" "}
-                                        <span className="font-mono text-base-content/70">
-                                            {details.order.uuid}
-                                        </span>
+                                <div className="flex-1">
+                                    <p className="text-sm font-bold text-base-content">
+                                        {paymentProvider[order.paymentProvider].description}
                                     </p>
-                                    {details.order.aditional_resource_url && (
-                                        <a
-                                            href={details.order.aditional_resource_url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="text-primary underline"
-                                        >
-                                            Ver recurso adicional
-                                        </a>
-                                    )}
+                                    <p className="text-xs text-base-content/50">
+                                        Transacción procesada de forma segura
+                                    </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                {details.payments_details.map((det, index) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {paymentDetails.map((det, idx) => (
                                     <div
-                                        key={`payment-${index}`}
-                                        className="rounded-xl border border-base-200 overflow-hidden"
+                                        key={idx}
+                                        className="bg-base-200 rounded-xl p-4 space-y-3 border border-base-300"
                                     >
-                                        {/* Header pago */}
-                                        <div className="bg-base-200 px-4 py-2.5 flex flex-wrap items-center gap-2">
-                                            <figure className="h-6">
-                                                <img
-                                                    className="h-full object-contain"
-                                                    src={paymentMethod[det.payment_method].image_url}
-                                                    alt={paymentMethod[det.payment_method].description}
-                                                />
-                                            </figure>
-                                            <span className="font-mono text-sm text-base-content/70">
-                                                •••• •••• •••• {det.last_four_digits}
-                                            </span>
-                                            <Badge
-                                                label={formatPaymentClass[det.payment_class]}
-                                                color="gray"
-                                            />
-                                            <Badge
-                                                label={formatOrderStatus[det.payment_status]}
-                                                color={
-                                                    det.payment_status === "APPROVED"
-                                                        ? "success"
-                                                        : det.payment_status === "PENDING"
-                                                            ? "warning"
-                                                            : "error"
-                                                }
-                                            />
+                                        <div className="flex justify-between items-start">
+                                            <Badge label={det.paymentMethod} color="primary" />
+                                            <p className="text-lg font-bold text-base-content">${fmt(parseFloat(det.paidAmount))}</p>
                                         </div>
-
-                                        {/* Cuerpo pago */}
-                                        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                                            <InfoRow
-                                                label="Total pagado"
-                                                value={`$${det.customer_paid_amount}`}
-                                            />
-                                            <InfoRow
-                                                label="Fecha de acreditación"
-                                                value={formatDate(det.updated_at, "es-MX")}
-                                            />
-                                            <InfoRow
-                                                label="Fecha de creación"
-                                                value={formatDate(det.created_at, "es-MX")}
-                                            />
-
-                                            {det.installments > 1 && (
-                                                <div className="col-span-2 sm:col-span-3 bg-primary/10 rounded-xl p-3 space-y-1">
-                                                    <p className="text-xs font-bold uppercase text-primary/70">
-                                                        Meses sin intereses
-                                                    </p>
-                                                    <p className="text-primary font-semibold">
-                                                        ${det.customer_installment_amount} × {det.installments} meses
-                                                    </p>
-                                                    <p className="text-xs text-primary/60">
-                                                        * Las aclaraciones e incidencias con MSI se gestionan directamente con tu banco.
-                                                    </p>
-                                                </div>
-                                            )}
+                                        <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
+                                            <InfoRow label="Tipo" value={det.paymentClass} />
+                                            <InfoRow label="Cargos" value={`${det.installments} ${det.installments === 1 ? "pago" : "mensualidades"}`} />
+                                            <InfoRow label="Estado" value={formatOrderStatus[det.paymentStatus]} />
                                         </div>
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Info del cliente */}
-                            {customer && (
-                                <div className="mt-4 pt-4 border-t border-base-200 flex flex-col sm:flex-row gap-4 text-sm">
-                                    <InfoRow
-                                        label="Comprador"
-                                        value={`${customer.name} ${customer.last_name}`}
-                                    />
-                                    <InfoRow
-                                        label="Email de confirmación"
-                                        value={customer.email}
-                                        icon={<MdEmail />}
-                                    />
-                                </div>
-                            )}
                         </SectionCard>
 
-                        {/* ── CTA final ── */}
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Botones de acción final */}
+                        <div className="flex flex-col sm:flex-row gap-3 pt-4">
                             <button
                                 className="flex-1 btn btn-primary gap-2"
                                 onClick={() => navigate("/")}
@@ -779,10 +625,10 @@ const PaymentExiting = () => {
                                 <FaStore /> Seguir comprando
                             </button>
                             <button
-                                className="flex-1 btn btn-outline gap-2"
-                                onClick={() => window.print()}
+                                className="flex-1 btn btn-ghost gap-2"
+                                onClick={() => navigate("/mis-ordenes")}
                             >
-                                <FaDownload /> Descargar comprobante
+                                <FaBoxOpen /> Ver mis pedidos
                             </button>
                         </div>
                     </div>
@@ -792,4 +638,4 @@ const PaymentExiting = () => {
     );
 };
 
-export default PaymentExiting;
+export default PaymentExitingV2;

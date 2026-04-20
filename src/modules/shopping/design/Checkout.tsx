@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { paymentProvider } from "../utils/ShoppingUtils";
 import CancelOrderForm from "../components/CancelOrderForm";
 import { showModal } from "../../../global/GlobalHelpers";
-import { useCancelOrder, useFetchCheckoutOrder } from "../../orders/hooks/useFetchOrders";
+import { useCancelOrder, useFetchCheckoutOrderV2 } from "../../orders/hooks/useFetchOrders";
 import {
     FaLock,
     FaMapMarkerAlt,
@@ -18,18 +18,20 @@ import {
 } from "react-icons/fa";
 import { MdShoppingBag, MdPayment } from "react-icons/md";
 import { SiMercadopago } from "react-icons/si";
-import CheckoutOrderItem from "../components/CheckoutOrderItem";
-import type { OrderCheckoutType, OrderCreatedType } from "../../orders/OrdersTypes";
+import CheckoutOrderItemV2 from "../components/CheckoutOrderItem";
+import type { CheckoutOrderI, OrderCreatedType } from "../../orders/OrdersTypes";
 
-const Checkout = () => {
+const CheckoutV2 = () => {
     document.title = "Iga Productos | Resumen de pago";
     const { order, cancelOrder } = usePaymentStore();
     const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
     const navigate = useNavigate();
-    const cancelOrderMutation = useCancelOrder({ orderUUID: order?.orderUUID! });
+
     if (!order) throw new Error("No se encontro la orden de pago");
 
-    const { data, isLoading, error, refetch } = useFetchCheckoutOrder({ orderUUID: order.orderUUID });
+    const cancelOrderMutation = useCancelOrder({ orderUUID: order.orderUUID });
+    const { data, isLoading, error, refetch } = useFetchCheckoutOrderV2({ orderUUID: order.orderUUID });
+
     if (data && data.items.length === 0) navigate("/carrito-de-compras");
 
     const handleCanceled = async () => {
@@ -69,7 +71,7 @@ const Checkout = () => {
         );
     };
 
-    const hasAditonalNumber = data?.address.aditional_number && data.address.aditional_number !== "N/A";
+    const hasAditonalNumber = data?.shippingAddress.aditional_number && data.shippingAddress.aditional_number !== "N/A";
 
     return (
         <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200">
@@ -113,23 +115,23 @@ const Checkout = () => {
                             </h2>
                         </div>
                         <div className="p-4 sm:p-5">
-                            {data?.address && (
+                            {data?.shippingAddress && (
                                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                                     <div className="flex-1">
                                         <p className="text-base sm:text-lg font-extrabold text-base-content">
-                                            {data.address.recipient_name} {data.address.recipient_last_name}
-                                            <span className="ml-2 badge badge-sm badge-primary badge-outline">{data.address.address_type}</span>
+                                            {data.shippingAddress.recipient_name} {data.shippingAddress.recipient_last_name}
+                                            <span className="ml-2 badge badge-sm badge-primary badge-outline">{data.shippingAddress.address_type}</span>
                                         </p>
                                         <p className="text-sm text-base-content/70 mt-1">
-                                            {data.address.country_phone_code} {data.address.contact_number}
+                                            {data.shippingAddress.country_phone_code} {data.shippingAddress.contact_number}
                                         </p>
                                         <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
-                                            {`${data.address.street_name}, #${data.address.number}${hasAditonalNumber ? ` Int. ${data.address.aditional_number}` : ""}, ${data.address.neighborhood}, ${data.address.zip_code}, ${data.address.city}, ${data.address.state}, ${data.address.country}`}
+                                            {`${data.shippingAddress.street_name}, #${data.shippingAddress.number}${hasAditonalNumber ? ` Int. ${data.shippingAddress.aditional_number}` : ""}, ${data.shippingAddress.neighborhood}, ${data.shippingAddress.zip_code}, ${data.shippingAddress.city}, ${data.shippingAddress.state}, ${data.shippingAddress.country}`}
                                         </p>
-                                        {data.address.references_or_comments && data.address.references_or_comments !== "N/A" && (
+                                        {data.shippingAddress.references_or_comments && data.shippingAddress.references_or_comments !== "N/A" && (
                                             <div className="mt-3 bg-base-200 rounded-xl p-3 border border-base-300">
                                                 <p className="text-xs font-bold text-base-content/50 uppercase mb-1">Comentarios adicionales</p>
-                                                <p className="text-sm text-base-content/70">{data.address.references_or_comments}</p>
+                                                <p className="text-sm text-base-content/70">{data.shippingAddress.references_or_comments}</p>
                                             </div>
                                         )}
                                     </div>
@@ -148,7 +150,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex flex-col divide-y divide-base-200">
                             {data && data.items.length > 0 && data.items.map((item, index) => (
-                                <CheckoutOrderItem key={index} data={item} />
+                                <CheckoutOrderItemV2 key={index} data={item} />
                             ))}
                             {/* Subtotal footer */}
                             <div className="px-4 py-3 bg-base-200 flex items-center justify-between">
@@ -156,7 +158,7 @@ const Checkout = () => {
                                     Subtotal ({data?.items.length} {data?.items.length === 1 ? "producto" : "productos"})
                                 </span>
                                 <span className="text-base sm:text-lg font-extrabold text-base-content">
-                                    ${formatPrice((data?.resume.subtotalWithDiscount.toString()!), "es-MX")}
+                                    ${data && formatPrice(data.resume.itemsSubtotal, "es-MX")}
                                 </span>
                             </div>
                         </div>
@@ -165,8 +167,6 @@ const Checkout = () => {
                 </div>
 
                 {/* ── Right Column ── */}
-                {/* Panel único — el flex-col / lg:flex-row del <section> lo posiciona
-                    automáticamente debajo en mobile y a la derecha en desktop */}
                 <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
                     <PaymentSummaryPanel order={order} data={data} />
                 </div>
@@ -178,7 +178,7 @@ const Checkout = () => {
 };
 
 // ── Payment Summary Panel ────────────────────────────────────────────────────
-const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: OrderCheckoutType }) => {
+const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: CheckoutOrderI }) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
 
@@ -203,6 +203,7 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
             </div>
             <div className="p-4 flex flex-col gap-4">
                 <div className="flex flex-col gap-2.5">
+                    {/* Items Subtotal Before Taxes */}
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-base-content/60">
                             Subtotal
@@ -210,29 +211,39 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                         </span>
                         <span className="font-medium flex items-center gap-0.5">
                             <BiPlus className="text-xs" />
-                            ${data?.resume && formatPrice(data.resume.subtotalBeforeIVA.toString(), "es-MX")}
+                            ${data?.resume && formatPrice(data.resume.itemsSubtotalBeforeTaxes, "es-MX")}
                         </span>
                     </div>
+
+                    {/* Shipping */}
+                    <div className="flex items-center justify-between text-sm rounded-lg bg-base-200 px-3 py-2">
+                        <div>
+                            <span className="flex items-center gap-1.5 text-base-content/70">
+                                <FaShippingFast className="text-primary text-sm" />
+                                Envío ({data?.resume && (
+                                    data.resume.boxesCount > 1 ? `${data.resume.boxesCount} cajas` : `${data.resume.boxesCount} caja`
+                                )})
+                            </span>
+
+                            <p className="text-[10px] text-base-content/40">Antes de impuestos</p>
+                        </div>
+                        <span className="font-medium flex items-center gap-0.5">
+                            <BiPlus className="text-xs" />
+                            ${data?.resume && formatPrice(data.resume.shippingCostBeforeTaxes, "es-MX")}
+                        </span>
+                    </div>
+
+                    {/* IVA */}
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-base-content/60">IVA (16%)</span>
                         <span className="font-medium flex items-center gap-0.5">
                             <BiPlus className="text-xs" />
-                            ${data?.resume && formatPrice(data.resume.iva.toString(), "es-MX")}
+                            ${data?.resume && formatPrice(data.resume.iva, "es-MX")}
                         </span>
                     </div>
-                    <div className="flex items-center justify-between text-sm rounded-lg bg-base-200 px-3 py-2">
-                        <span className="flex items-center gap-1.5 text-base-content/70">
-                            <FaShippingFast className="text-primary text-sm" />
-                            Envío ({data?.resume && (
-                                data.resume.boxesQty > 1 ? `${data.resume.boxesQty} cajas` : `${data.resume.boxesQty} caja`
-                            )})
-                        </span>
-                        <span className="font-medium flex items-center gap-0.5">
-                            <BiPlus className="text-xs" />
-                            ${data?.resume && formatPrice(data.resume.shippingCost.toString(), "es-MX")}
-                        </span>
-                    </div>
-                    {data?.resume && data.resume.discount > 0 && (
+
+                    {/* Discount */}
+                    {data?.resume && parseFloat(data.resume.discount) > 0 && (
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-primary font-bold flex items-center gap-1.5">
                                 <FaTag className="text-xs" />
@@ -240,17 +251,31 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                             </span>
                             <span className="text-primary font-bold flex items-center gap-0.5">
                                 <BiMinus className="text-xs" />
-                                ${formatPrice(data.resume.discount.toString(), "es-MX")}
+                                ${formatPrice(data.resume.discount, "es-MX")}
                             </span>
                         </div>
                     )}
                 </div>
 
+                {/* Coupon Code Section */}
+                {data?.couponCode && (
+                    <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                        <div className="flex items-center gap-2">
+                            <FaTag className="text-primary text-xs" />
+                            <span className="text-xs font-bold text-base-content uppercase">Cupón aplicado</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-mono font-bold text-primary">{data.couponCode}</span>
+                            <span className="badge badge-primary badge-sm">ACTIVO</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Total */}
                 <div className="border-t border-base-300 pt-3 flex items-center justify-between">
                     <span className="text-sm sm:text-base font-bold text-base-content">Total a pagar</span>
                     <span className="text-lg sm:text-xl font-extrabold text-primary">
-                        ${data?.resume && formatPrice(data.resume.total.toString(), "es-MX")}
+                        ${data?.resume && formatPrice(data.resume.total, "es-MX")}
                     </span>
                 </div>
 
@@ -268,7 +293,7 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                                     <p className="text-[10px] text-base-content/50">Crédito, débito, OXXO, MSI y más</p>
                                 </div>
                             </div>
-                            <MercadoPagoCheckoutPro preferenceId={data?.external_id} />
+                            <MercadoPagoCheckoutPro preferenceId={data?.externalId} />
                         </>
                     )}
                 </div>
@@ -281,4 +306,4 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
     );
 };
 
-export default Checkout;
+export default CheckoutV2;

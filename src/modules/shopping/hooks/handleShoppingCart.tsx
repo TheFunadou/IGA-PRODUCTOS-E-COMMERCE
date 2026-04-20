@@ -1,8 +1,7 @@
 // useHandleShoppingCart.ts
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import type { ShoppingCartI } from "../ShoppingTypes";
-import { usePaymentStore } from "../states/paymentStore";
-import { useShoppingCart } from "./useShoppingCartV2";
+import { useShoppingCart } from "./useShoppingCart";
 
 // Props necesarias para el hook base
 interface UseHandleShoppingCartProps {
@@ -26,8 +25,6 @@ export const useHandleShoppingCart = ({
         authCustomer,
         showTriggerAlert,
     });
-
-    const { setBuyNow } = usePaymentStore();
 
     // Debounce estándar para acciones de UI (evitar spam de clics)
     const debouncedUpdateQtyItem = useDebounceCallback((item: ShoppingCartI) => {
@@ -64,10 +61,6 @@ export const useHandleShoppingCart = ({
 
     const debouncedMergeCart = useDebounceCallback(() => {
         cart.mergeShoppingCart();
-    }, 400);
-
-    const debouncedSetBuyNow = useDebounceCallback((item: { quantity: number, sku: string }) => {
-        setBuyNow({ quantity: item.quantity, sku: item.sku });
     }, 400);
 
     /**
@@ -132,9 +125,6 @@ export const useHandleShoppingCart = ({
         mergeCart: () => {
             debouncedMergeCart();
             if (isAuth) triggerAutoSave();
-        },
-        setBuyNow: (item: { quantity: number, sku: string }) => {
-            debouncedSetBuyNow(item);
         },
         saveCart: () => {
             cart.saveShoppingCart(); // Guardado manual sin debounce

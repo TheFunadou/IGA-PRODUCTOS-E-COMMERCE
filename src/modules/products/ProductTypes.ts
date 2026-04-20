@@ -49,12 +49,6 @@ export type ProductImagesType = {
     main_image: boolean;
 };
 
-// export type GetSubcategoriesType = {
-//     subcategories: Pick<SubcategoriesType, "description">;
-// // };
-
-// export type GetSubcategoriesType = Pick<SubcategoriesType, "uuid" | "description">;
-
 export type ParentVersionType = {
     sku: string;
     unit_price: string;
@@ -130,6 +124,7 @@ export interface SafeParentDetailedI extends Omit<ParentBaseI, "id"> {
 };
 
 export interface ProductVersionDetailI {
+    productUUID: string;
     name: string;
     category: { uuid: string, name: string };
     subcategories: { uuid: string, name: string }[];
@@ -146,13 +141,12 @@ export interface ProductVersionDetailI {
     parents: SafeParentDetailedI[];
     details: {
         techSheetUrl: string;
+        description: string;
         status: string;
         specs: string;
         applications: string;
         recommendations: string;
         certsDesc: string;
-        createdAt?: Date;
-        updatedAt?: Date;
         isReviewed: boolean;
     };
 }
@@ -176,6 +170,8 @@ export type SearchedProductType = {
     color: string;
 };
 
+export type colorLine = "Linea Basica" | "Linea Especial" | "Linea Flourescente";
+
 export type ProductVersionCardFilters = {
     page?: number;
     limit?: number;
@@ -187,6 +183,10 @@ export type ProductVersionCardFilters = {
     random?: boolean;
     skuList?: string[];
     couponCode?: string;
+    onlyInStock?: boolean;
+    priceRange?: { min: number, max: number };
+    ratingRange?: number;
+    colorLine?: colorLine;
 };
 
 export interface SearchCardsDTO {
