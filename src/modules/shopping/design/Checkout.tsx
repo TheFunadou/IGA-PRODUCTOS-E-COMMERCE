@@ -29,7 +29,7 @@ const CheckoutV2 = () => {
 
     if (!order) throw new Error("No se encontro la orden de pago");
 
-    const cancelOrderMutation = useCancelOrder({ orderUUID: order.orderUUID });
+    const cancelOrderMutation = useCancelOrder({ orderUUID: order.orderUUID, type: "ABANDONED" });
     const { data, isLoading, error, refetch } = useFetchCheckoutOrderV2({ orderUUID: order.orderUUID });
 
     if (data && data.items.length === 0) navigate("/carrito-de-compras");

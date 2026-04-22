@@ -31,10 +31,10 @@ const ADDRESS_TYPE_ICONS: Record<string, React.ReactNode> = {
 
 const formatAddress = (data: CustomerAddressType): string => {
     const interior =
-        data.aditional_number && data.aditional_number !== "N/A"
-            ? ` INT. ${data.aditional_number}`
+        data.aditionalNumber && data.aditionalNumber !== "N/A"
+            ? ` INT. ${data.aditionalNumber}`
             : "";
-    return `${data.street_name} #${data.number}${interior}, ${data.neighborhood}, C.P. ${data.zip_code}, ${data.city}, ${data.state}, ${data.country}`;
+    return `${data.streetName} #${data.number}${interior}, ${data.neighborhood}, C.P. ${data.zipCode}, ${data.city}, ${data.state}, ${data.country}`;
 };
 
 /* ── Component ─────────────────────────────────────────────────── */
@@ -101,7 +101,7 @@ const AddressesModal = ({ addresses, ref, selectedAddress, onClose, onSetSelecte
                     <div className="flex flex-col gap-3">
                         {addresses && addresses.map((data, index) => {
                             const isSelected = selected === data;
-                            const typeIcon = ADDRESS_TYPE_ICONS[data.address_type] ?? <FaMapMarkerAlt className="text-xs" />;
+                            const typeIcon = ADDRESS_TYPE_ICONS[data.addressType] ?? <FaMapMarkerAlt className="text-xs" />;
 
                             return (
                                 <button
@@ -134,14 +134,14 @@ const AddressesModal = ({ addresses, ref, selectedAddress, onClose, onSetSelecte
                                                 {/* Name + type badge */}
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <p className="font-bold text-sm text-base-content leading-tight">
-                                                        {data.recipient_name} {data.recipient_last_name}
+                                                        {data.recipientName} {data.recipientLastName}
                                                     </p>
-                                                    {data.address_type && (
+                                                    {data.addressType && (
                                                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-base-300 bg-base-100 text-base-content/50 leading-none">
-                                                            {data.address_type}
+                                                            {data.addressType}
                                                         </span>
                                                     )}
-                                                    {data.default_address && (
+                                                    {data.defaultAddress && (
                                                         <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 leading-none">
                                                             <FaStar className="text-[8px]" />
                                                             Predeterminada
@@ -152,7 +152,7 @@ const AddressesModal = ({ addresses, ref, selectedAddress, onClose, onSetSelecte
                                                 {/* Phone */}
                                                 <p className="flex items-center gap-1.5 text-xs text-base-content/50 mt-1.5">
                                                     <FaPhone className="text-[10px] flex-shrink-0" />
-                                                    {data.country_phone_code} {data.contact_number}
+                                                    {data.countryPhoneCode} {data.contactNumber}
                                                 </p>
 
                                                 {/* Address */}

@@ -2,6 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import type { GetPaidOrderDetails, PaymentDetailsI } from "./types";
 import { useAuthStore } from "../auth/states/authStore";
 import { getOrderStatusWithDetails, getPaymentDetails } from "./services";
+import { buildKey } from "../../global/GlobalHelpers";
+
+export const paymentQueryKeys = {
+    getPaymentDetails: (params: { orderUUID: string, customerUUID?: string }) => buildKey("payment:detail", { params }),
+};
 
 export const usePollingPaymentApprovedDetail = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
@@ -83,11 +88,10 @@ export const usePollingPaymentRejected = (args: { orderUUID: string }) => {
 
 export const usePollingPaymentApprovedDetailV2 = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
-    const queryKey = { orderUUID };
 
     return useQuery<PaymentDetailsI>({
-        queryKey: ["payment:detail", queryKey],
-        queryFn: () => getPaymentDetails({ orderUUID, requiredStatus: ["APPROVED"] }),
+        queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["APPROVED"] } }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
@@ -104,11 +108,10 @@ export const usePollingPaymentApprovedDetailV2 = (args: { orderUUID: string }) =
 
 export const usePollingPaymentPendingDetailV2 = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
-    const queryKey = { orderUUID };
 
     return useQuery<PaymentDetailsI>({
-        queryKey: ["payment:pending-detail", queryKey],
-        queryFn: () => getPaymentDetails({ orderUUID, requiredStatus: ["PENDING"] }),
+        queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["PENDING"] } }),
         enabled: !!orderUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -126,11 +129,10 @@ export const usePollingPaymentPendingDetailV2 = (args: { orderUUID: string }) =>
 
 export const usePollingPaymentRejectedV2 = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
-    const queryKey = { orderUUID };
 
     return useQuery<PaymentDetailsI>({
-        queryKey: ["payment:pending-detail", queryKey],
-        queryFn: () => getPaymentDetails({ orderUUID, requiredStatus: ["REJECTED", "IN_PROCESS"] }),
+        queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["REJECTED", "IN_PROCESS"] } }),
         enabled: !!orderUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,

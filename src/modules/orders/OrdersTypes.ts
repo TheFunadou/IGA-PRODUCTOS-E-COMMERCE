@@ -193,3 +193,21 @@ export interface CreateOrderI {
     guestForm?: GuestCreateOrderFormType;
     buyNowItem?: ShoppingCartI
 }
+
+export interface CustomerOrdersSummaryI {
+    uuid: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: OrderStatusType;
+    paymentProvider: "mercado_pago" | "paypal";
+    totalAmount: string;
+    items: OrderCheckoutItemI[];
+};
+
+
+export interface GetOrdersSummaryI {
+    data: CustomerOrdersSummaryI[];
+    totalPages: number;
+    totalRecords: number;
+    currentPage: number;
+};

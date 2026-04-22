@@ -30,7 +30,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
     };
     useEffect(() => {
         setCurrentCountry(`https://flagsapi.com/${country.iso2}/flat/64.png`);
-        setValue("country_phone_code", country.phoneCode, {
+        setValue("countryPhoneCode", country.phoneCode, {
             shouldValidate: true,
             shouldDirty: true
         });
@@ -54,7 +54,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                     type="text"
                                     className="input w-full"
                                     placeholder="Nombre del remitente"
-                                    {...register("recipient_name",
+                                    {...register("recipientName",
                                         {
                                             required: "El nombre del remitente es requerido",
                                             maxLength: { value: 40, message: "Solo se admiten un máximo de 40 caracteres" },
@@ -65,7 +65,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         }
                                     )}
                                 />
-                                {errors.recipient_name && <p className="text-error text-sm">{errors.recipient_name.message}</p>}
+                                {errors.recipientName && <p className="text-error text-sm">{errors.recipientName.message}</p>}
                             </div>
                             <div>
                                 <label htmlFor="last_names">Apellidos</label>
@@ -73,7 +73,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                     type="text"
                                     className="input w-full"
                                     placeholder="Apellidos del destinatario"
-                                    {...register("recipient_last_name",
+                                    {...register("recipientLastName",
                                         {
                                             required: "Los apellidos del remitente son requeridos",
                                             maxLength: { value: 60, message: "Solo se admiten un máximo de 60 caracteres" },
@@ -84,7 +84,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         }
                                     )}
                                 />
-                                {errors.recipient_last_name && <p className="text-error text-sm">{errors.recipient_last_name.message}</p>}
+                                {errors.recipientLastName && <p className="text-error text-sm">{errors.recipientLastName.message}</p>}
                             </div>
                             <div>
                                 <label htmlFor="email">Número telefonico</label>
@@ -114,7 +114,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                     <input
                                         type="tel"
                                         className="input w-65/100"
-                                        {...register("contact_number",
+                                        {...register("contactNumber",
                                             {
                                                 required: "El número telefonico del remitente es requerido",
                                                 pattern: {
@@ -125,7 +125,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         )}
                                     />
                                 </article>
-                                {errors.contact_number && <p className="text-error text-sm">{errors.contact_number.message}</p>}
+                                {errors.contactNumber && <p className="text-error text-sm">{errors.contactNumber.message}</p>}
                             </div>
                         </div>
                     </fieldset>
@@ -214,7 +214,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                     type="text"
                                     className="input w-full"
                                     placeholder="Ingresa tu calle"
-                                    {...register("street_name",
+                                    {...register("streetName",
                                         {
                                             required: "La calle es requerida",
                                             maxLength: { value: 60, message: "Solo se admiten un máximo de 60 caracteres" },
@@ -225,7 +225,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         }
                                     )}
                                 />
-                                {errors.street_name && <p className="text-error text-sm">{errors.street_name.message}</p>}
+                                {errors.streetName && <p className="text-error text-sm">{errors.streetName.message}</p>}
                             </div>
                             <div>
                                 <label htmlFor="neighborhood">Colonia/Fraccionamiento</label>
@@ -252,7 +252,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                     type="text"
                                     className="input w-full"
                                     placeholder="Ingresa tu código postal"
-                                    {...register("zip_code",
+                                    {...register("zipCode",
                                         {
                                             required: "El código postal es requerido",
                                             minLength: 3,
@@ -264,13 +264,13 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         }
                                     )}
                                 />
-                                {errors.zip_code && <p className="text-error text-sm">{errors.zip_code.message}</p>}
+                                {errors.zipCode && <p className="text-error text-sm">{errors.zipCode.message}</p>}
                             </div>
                             <div>
                                 <label htmlFor="address_type">Tipo de dirección</label>
                                 <select
                                     className="select w-full"
-                                    {...register("address_type")}
+                                    {...register("addressType")}
                                     onChange={(e) => setAddressType(e.target.value)}
                                     defaultValue={"Casa"}
                                 >
@@ -320,7 +320,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         type="text"
                                         className="input w-full"
                                         placeholder={addressType === "Departamento" ? "ejem: 14" : "Opcional"}
-                                        {...register("aditional_number",
+                                        {...register("aditionalNumber",
                                             {
                                                 maxLength: { value: 6, message: "Solo se admiten un máximo de 6 caracteres" },
                                                 pattern: {
@@ -334,7 +334,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                 </div>
                             </article>
                             {errors.number && <p className="text-error text-sm">{errors.number.message}</p>}
-                            {errors.aditional_number && <p className="text-error text-sm">{errors.aditional_number.message}</p>}
+                            {errors.aditionalNumber && <p className="text-error text-sm">{errors.aditionalNumber.message}</p>}
                         </div>
                     </fieldset>
                     <fieldset className="border border-gray-300 rounded-xl pt-2 pb-5 px-5">
@@ -345,7 +345,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                 <textarea
                                     className="textarea w-full"
                                     placeholder="Referencias visuales, información adicional,etc..."
-                                    {...register("references_or_comments",
+                                    {...register("referencesOrComments",
                                         {
                                             maxLength: {
                                                 value: 80,
@@ -355,7 +355,7 @@ const GuestBillingFormModal = ({ ref, onSave, title, onClose }: Props) => {
                                         }
                                     )}
                                 />
-                                {errors.references_or_comments && <p className="text-error text-sm">{errors.references_or_comments.message}</p>}
+                                {errors.referencesOrComments && <p className="text-error text-sm">{errors.referencesOrComments.message}</p>}
                             </div>
                         </div>
                     </fieldset>

@@ -7,11 +7,14 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import DrawerMobileMenu from "./components/DrawerMobileMenu";
 import CookieConsent from "./components/CookieConsent";
 import { useCookieStore } from "../modules/auth/states/cookieStore";
+import { usePaymentStore } from "../modules/shopping/states/paymentStore";
+import { linkOrderToCustomer } from "../modules/orders/OrdersServices";
 
 const MainLayout = () => {
     const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
     const [loading, setLoading] = useState(false);
     const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
+    const { order } = usePaymentStore();
     const { cookieConsent, setCookieConsent } = useCookieStore();
     const { setTheme, theme } = useThemeStore();
     const navigate = useNavigate();
@@ -31,11 +34,23 @@ const MainLayout = () => {
         setCookieConsent(consent);
     };
 
+    const handleLinkOrder = async ({ orderUUID }: { orderUUID: string }) => {
+        try {
+            await linkOrderToCustomer({ orderUUID });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 
     useEffect(() => {
         if (isAuth && !authCustomer) getProfile();
         if (!theme) setTheme("ligth");
     }, []);
+
+    useEffect(() => {
+        if (authCustomer && order && order.orderUUID) handleLinkOrder({ orderUUID: order.orderUUID });
+    }, [authCustomer, order])
 
     return (
         <div className="w-full relative" id="top">

@@ -1,22 +1,24 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelOrder, getBuyNowItem, getCheckoutOrder, getCheckoutOrderV2, getOrderDetails, getOrders } from "../../orders/OrdersServices";
-import type { CheckoutOrderI, GetOrderDetails, GetOrdersType, OrderCheckoutType } from "../OrdersTypes";
+import { cancelOrder, getBuyNowItem, getCheckoutOrderV2, getOrders } from "../../orders/OrdersServices";
+import type { CheckoutOrderI, GetOrdersSummaryI } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { LoadShoppingCartI, ShoppingCartI } from "../../shopping/ShoppingTypes";
+import type { PaymentDetailsI } from "../../payments/types";
+import { getPaymentDetails } from "../../payments/services";
+import { buildKey } from "../../../global/GlobalHelpers";
+import { paymentQueryKeys } from "../../payments/usePayment";
 
+export const customerQueryKeys = {
+    getOrders: (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => buildKey("customer:orders", { params }),
+};
 
 export const useFetchOrders = (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => {
     const { authCustomer } = useAuthStore();
-    return useQuery<GetOrdersType>({
-        queryKey: ["orders", {
-            customer: authCustomer?.uuid,
-            page: params.pagination.page,
-            limit: params.pagination.limit,
-            orderBy: params.orderBy
-        }],
+    return useQuery<GetOrdersSummaryI>({
+        queryKey: customerQueryKeys.getOrders(params),
         queryFn: async () => await getOrders({ page: params.pagination.page, limit: params.pagination.limit, orderBy: params.orderBy }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -25,16 +27,6 @@ export const useFetchOrders = (params: { pagination: { page: number, limit: numb
     })
 };
 
-export const useFetchCheckoutOrder = (params: { orderUUID: string }) => {
-    return useQuery<OrderCheckoutType>({
-        queryKey: ["order:checkout", { orderUUID: params.orderUUID }],
-        queryFn: async () => await getCheckoutOrder({ orderUUID: params.orderUUID }),
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
-        refetchOnWindowFocus: false,
-        enabled: !!params.orderUUID,
-    });
-};
 
 export const useFetchCheckoutOrderV2 = (params: { orderUUID: string }) => {
     return useQuery<CheckoutOrderI>({
@@ -47,27 +39,28 @@ export const useFetchCheckoutOrderV2 = (params: { orderUUID: string }) => {
     });
 };
 
-export const useFetchOrderDetail = (params: { orderUUID: string }) => {
-    const { authCustomer } = useAuthStore();
-    return useQuery<GetOrderDetails>({
-        queryKey: ["order:details", { orderUUID: params.orderUUID, customer: authCustomer?.uuid }],
-        queryFn: async () => await getOrderDetails({ orderUUID: params.orderUUID }),
-        staleTime: 5 * 60 * 1000,
+export const useFetchOrderDetails = (args: { orderUUID: string }) => {
+    const { orderUUID } = args;
+
+    return useQuery<PaymentDetailsI>({
+        queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: false } }),
+        staleTime: 8 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
-        enabled: !!params.orderUUID && !!authCustomer,
     });
 };
 
-export const useCancelOrder = ({ orderUUID }: { orderUUID: string }) => {
+
+export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "CANCELLED" | "ABANDONED" }) => {
     const queryClient = useQueryClient();
     const { showTriggerAlert } = useTriggerAlert();
 
     return useMutation({
-        mutationFn: async () => await cancelOrder({ orderUUID }),
+        mutationFn: async () => await cancelOrder({ orderUUID, type }),
         onSuccess: (data) => {
             showTriggerAlert("Successfull", data, { duration: 3000 });
-            queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
         },
         onError: () => {
             showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden., intente nuevamente", { duration: 3000 });

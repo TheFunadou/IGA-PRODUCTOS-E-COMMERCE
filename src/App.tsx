@@ -118,7 +118,7 @@ const router = createBrowserRouter([
 
           // Orders
           { path: "/mis-ordenes", element: <Orders /> },
-          { path: "/mis-ordenes/detalle", element: <OrderDetail /> },
+          { path: "/mis-ordenes/detalle/:order-uuid", element: <OrderDetail /> },
           { path: "/mis-favoritos", element: <CustomerFavorites /> },
           { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 

@@ -91,7 +91,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
         setValue,
         reset,
     } = useForm<NewAddressType>({
-        defaultValues: { default_address: false, floor: undefined, address_type: "Casa" },
+        defaultValues: { defaultAddress: false, floor: undefined, addressType: "Casa" },
     });
 
     const addAddress = useAddAddress();
@@ -109,7 +109,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
 
     useEffect(() => {
         setCurrentCountry(`https://flagsapi.com/${country.iso2}/flat/64.png`);
-        setValue("country_phone_code", country.phoneCode, {
+        setValue("countryPhoneCode", country.phoneCode, {
             shouldValidate: true,
             shouldDirty: true,
         });
@@ -169,8 +169,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="Juan"
                                     autoComplete="given-name"
-                                    className={inputCls(!!errors.recipient_name)}
-                                    {...register("recipient_name", {
+                                    className={inputCls(!!errors.recipientName)}
+                                    {...register("recipientName", {
                                         required: "El nombre del remitente es requerido",
                                         maxLength: { value: 40, message: "Máximo 40 caracteres" },
                                         pattern: {
@@ -179,7 +179,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.recipient_name?.message} />
+                                <FieldError message={errors.recipientName?.message} />
                             </div>
 
                             {/* Apellidos */}
@@ -192,8 +192,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="García López"
                                     autoComplete="family-name"
-                                    className={inputCls(!!errors.recipient_last_name)}
-                                    {...register("recipient_last_name", {
+                                    className={inputCls(!!errors.recipientLastName)}
+                                    {...register("recipientLastName", {
                                         required: "Los apellidos del remitente son requeridos",
                                         maxLength: { value: 60, message: "Máximo 60 caracteres" },
                                         pattern: {
@@ -202,7 +202,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.recipient_last_name?.message} />
+                                <FieldError message={errors.recipientLastName?.message} />
                             </div>
 
                             {/* Teléfono */}
@@ -244,8 +244,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         type="tel"
                                         placeholder="3312345678"
                                         autoComplete="tel-national"
-                                        className={clsx(inputCls(!!errors.contact_number), "flex-1")}
-                                        {...register("contact_number", {
+                                        className={clsx(inputCls(!!errors.contactNumber), "flex-1")}
+                                        {...register("contactNumber", {
                                             required: "El número telefónico es requerido",
                                             pattern: {
                                                 value: /^[0-9]{7,15}$/,
@@ -254,7 +254,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         })}
                                     />
                                 </div>
-                                <FieldError message={errors.contact_number?.message} />
+                                <FieldError message={errors.contactNumber?.message} />
                             </div>
                         </div>
                     </section>
@@ -369,8 +369,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="Av. Insurgentes"
                                     autoComplete="address-line1"
-                                    className={inputCls(!!errors.street_name)}
-                                    {...register("street_name", {
+                                    className={inputCls(!!errors.streetName)}
+                                    {...register("streetName", {
                                         required: "La calle es requerida",
                                         maxLength: { value: 60, message: "Máximo 60 caracteres" },
                                         pattern: {
@@ -379,7 +379,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.street_name?.message} />
+                                <FieldError message={errors.streetName?.message} />
                             </div>
 
                             {/* Colonia */}
@@ -416,8 +416,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     placeholder="96400"
                                     autoComplete="postal-code"
                                     inputMode="numeric"
-                                    className={inputCls(!!errors.zip_code)}
-                                    {...register("zip_code", {
+                                    className={inputCls(!!errors.zipCode)}
+                                    {...register("zipCode", {
                                         required: "El código postal es requerido",
                                         minLength: { value: 3, message: "Mínimo 3 caracteres" },
                                         maxLength: { value: 10, message: "Máximo 10 caracteres" },
@@ -427,7 +427,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.zip_code?.message} />
+                                <FieldError message={errors.zipCode?.message} />
                             </div>
 
                             {/* Tipo de dirección — pill selector */}
@@ -450,7 +450,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                                 type="radio"
                                                 className="hidden"
                                                 value={opt.value}
-                                                {...register("address_type")}
+                                                {...register("addressType")}
                                                 onChange={(e) => {
                                                     setAddressType(e.target.value);
                                                 }}
@@ -517,8 +517,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder={isApartment ? "ej. 14" : "Opcional"}
                                     autoComplete="off"
-                                    className={inputCls(!!errors.aditional_number)}
-                                    {...register("aditional_number", {
+                                    className={inputCls(!!errors.aditionalNumber)}
+                                    {...register("aditionalNumber", {
                                         maxLength: { value: 6, message: "Máximo 6 caracteres" },
                                         pattern: {
                                             value: /^[1-9][0-9]*[A-Z]?$/,
@@ -527,7 +527,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                         setValueAs: (v) => v === "" ? undefined : v,
                                     })}
                                 />
-                                <FieldError message={errors.aditional_number?.message} />
+                                <FieldError message={errors.aditionalNumber?.message} />
                             </div>
                         </div>
                     </section>
@@ -548,17 +548,17 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                 className={clsx(
                                     "textarea w-full text-sm border rounded-lg bg-base-200",
                                     "focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none",
-                                    errors.references_or_comments ? "border-error" : "border-base-300"
+                                    errors.referencesOrComments ? "border-error" : "border-base-300"
                                 )}
                                 placeholder="Entre calles Reforma y Morelos, casa azul con portón negro…"
                                 rows={3}
                                 autoComplete="off"
-                                {...register("references_or_comments", {
+                                {...register("referencesOrComments", {
                                     maxLength: { value: 80, message: "Máximo 80 caracteres" },
                                     setValueAs: (v) => v === "" ? undefined : v,
                                 })}
                             />
-                            <FieldError message={errors.references_or_comments?.message} />
+                            <FieldError message={errors.referencesOrComments?.message} />
                         </div>
                     </section>
 
@@ -570,7 +570,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                         <input
                             type="checkbox"
                             className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0"
-                            {...register("default_address")}
+                            {...register("defaultAddress")}
                         />
                         <div>
                             <p className="text-sm font-medium text-base-content flex items-center gap-1.5">

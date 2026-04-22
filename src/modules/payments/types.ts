@@ -1,7 +1,7 @@
 import type { CustomerAttributes, GetCustomerAddressPaymentType } from "../customers/CustomerTypes";
 import type { Order, OrderResume, OrderPaymentDetails, OrderCheckoutItemI } from "../orders/OrdersTypes";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
-import type { OrderStatusType, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
+import type { OrderStatusType, PaymentClassType, PaymentMethodType, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
 
 export type OrderItems = ShoppingCartType & { subtotal: string };
 export type OrderPaidShipping = { boxesQty?: number; shippingCost?: string }
@@ -30,8 +30,8 @@ export interface PaymentDescriptionI {
     createdAt: Date;
     updatedAt: Date;
     lastFourDigits: string;
-    paymentClass: string;
-    paymentMethod: string;
+    paymentClass: PaymentClassType;
+    paymentMethod: PaymentMethodType;
     paidAmount: string;
     installments: number;
     paymentStatus: OrderStatusType
@@ -39,6 +39,7 @@ export interface PaymentDescriptionI {
 
 export interface OrderDescriptionI {
     orderUUID: string;
+    status: OrderStatusType;
     isGuestOrder: boolean;
     paymentProvider: PaymentProviders;
     buyer: { name: string, surname: string, email: string, phone?: string | null };
@@ -57,4 +58,10 @@ export interface OrderDescriptionI {
 export interface PaymentDetailsI {
     status: OrderStatusType;
     order?: OrderDescriptionI;
+}
+
+
+export interface GetPaymentDetailsQueryDTO {
+    enablePolling: boolean,
+    requiredStatus?: OrderStatusType[],
 }

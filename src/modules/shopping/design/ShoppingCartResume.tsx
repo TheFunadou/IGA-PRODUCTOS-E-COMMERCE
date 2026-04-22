@@ -61,30 +61,30 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
         defaultValues: {
             consent: guestAddress?.consent || false,
             email: guestAddress?.email || "",
-            first_name: guestAddress?.first_name || "",
-            last_name: guestAddress?.last_name || "",
-            recipient_name: guestAddress?.recipient_name || "",
-            recipient_last_name: guestAddress?.recipient_last_name || "",
+            firstName: guestAddress?.firstName || "",
+            lastName: guestAddress?.lastName || "",
+            recipientName: guestAddress?.recipientName || "",
+            recipientLastName: guestAddress?.recipientLastName || "",
             country: guestAddress?.country || "",
             state: guestAddress?.state || "",
             city: guestAddress?.city || "",
             locality: guestAddress?.locality || "",
             neighborhood: guestAddress?.neighborhood || "",
-            street_name: guestAddress?.street_name || "",
+            streetName: guestAddress?.streetName || "",
             number: guestAddress?.number || "",
-            aditional_number: guestAddress?.aditional_number || undefined,
-            zip_code: guestAddress?.zip_code || "",
-            address_type: guestAddress?.address_type || "Casa",
+            aditionalNumber: guestAddress?.aditionalNumber || undefined,
+            zipCode: guestAddress?.zipCode || "",
+            addressType: guestAddress?.addressType || "Casa",
             floor: guestAddress?.floor || undefined,
-            country_phone_code: guestAddress?.country_phone_code || "+52",
-            contact_number: guestAddress?.contact_number || "",
-            references_or_comments: guestAddress?.references_or_comments || undefined,
+            countryPhoneCode: guestAddress?.countryPhoneCode || "+52",
+            contactNumber: guestAddress?.contactNumber || "",
+            referencesOrComments: guestAddress?.referencesOrComments || undefined,
         },
     });
 
     useEffect(() => {
         setCurrentCountryFlag(`https://flagsapi.com/${country.iso2}/flat/64.png`);
-        setValue("country_phone_code", country.phoneCode, {
+        setValue("countryPhoneCode", country.phoneCode, {
             shouldValidate: true,
             shouldDirty: true,
         });
@@ -113,26 +113,26 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Nombre(s) *</label>
                         <input
-                            {...register("first_name", {
+                            {...register("firstName", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,50}$/, message: "Solo letras, 2-50 caracteres" },
                             })}
                             placeholder="Juan"
-                            className={inputClass(!!errors.first_name)}
+                            className={inputClass(!!errors.firstName)}
                         />
-                        {errors.first_name && <p className="text-error text-xs mt-1">{errors.first_name.message}</p>}
+                        {errors.firstName && <p className="text-error text-xs mt-1">{errors.firstName.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Apellidos *</label>
                         <input
-                            {...register("last_name", {
+                            {...register("lastName", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Solo letras, 2-80 caracteres" },
                             })}
                             placeholder="García López"
-                            className={inputClass(!!errors.last_name)}
+                            className={inputClass(!!errors.lastName)}
                         />
-                        {errors.last_name && <p className="text-error text-xs mt-1">{errors.last_name.message}</p>}
+                        {errors.lastName && <p className="text-error text-xs mt-1">{errors.lastName.message}</p>}
                     </div>
                     <div className="sm:col-span-2">
                         <label className="text-xs text-base-content/60 mb-1 block">Correo electrónico *</label>
@@ -159,26 +159,26 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Nombre del destinatario *</label>
                         <input
-                            {...register("recipient_name", {
+                            {...register("recipientName", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,50}$/, message: "Solo letras, 2-50 caracteres" },
                             })}
                             placeholder="Juan"
-                            className={inputClass(!!errors.recipient_name)}
+                            className={inputClass(!!errors.recipientName)}
                         />
-                        {errors.recipient_name && <p className="text-error text-xs mt-1">{errors.recipient_name.message}</p>}
+                        {errors.recipientName && <p className="text-error text-xs mt-1">{errors.recipientName.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Apellidos del destinatario *</label>
                         <input
-                            {...register("recipient_last_name", {
+                            {...register("recipientLastName", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]{2,80}$/, message: "Solo letras, 2-80 caracteres" },
                             })}
                             placeholder="García López"
-                            className={inputClass(!!errors.recipient_last_name)}
+                            className={inputClass(!!errors.recipientLastName)}
                         />
-                        {errors.recipient_last_name && <p className="text-error text-xs mt-1">{errors.recipient_last_name.message}</p>}
+                        {errors.recipientLastName && <p className="text-error text-xs mt-1">{errors.recipientLastName.message}</p>}
                     </div>
 
                     <div className="sm:col-span-2">
@@ -209,16 +209,16 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                             </select>
                             <input
                                 type="tel"
-                                {...register("contact_number", {
+                                {...register("contactNumber", {
                                     required: "Campo requerido",
                                     pattern: { value: /^\d{7,15}$/, message: "Solo números, 7-15 dígitos" },
                                 })}
                                 placeholder="3312345678"
-                                className={clsx(inputClass(!!errors.contact_number), "flex-1")}
+                                className={clsx(inputClass(!!errors.contactNumber), "flex-1")}
                             />
                         </div>
-                        {errors.contact_number && (
-                            <p className="text-error text-xs mt-1">{errors.contact_number.message}</p>
+                        {errors.contactNumber && (
+                            <p className="text-error text-xs mt-1">{errors.contactNumber.message}</p>
                         )}
                     </div>
                 </div>
@@ -233,14 +233,14 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Tipo de dirección *</label>
                         <select
-                            {...register("address_type", { required: "Campo requerido" })}
-                            className={selectClass(!!errors.address_type)}
+                            {...register("addressType", { required: "Campo requerido" })}
+                            className={selectClass(!!errors.addressType)}
                         >
                             <option value="Casa">Casa</option>
                             <option value="Departamento">Departamento</option>
                             <option value="Oficina">Oficina</option>
                         </select>
-                        {errors.address_type && <p className="text-error text-xs mt-1">{errors.address_type.message}</p>}
+                        {errors.addressType && <p className="text-error text-xs mt-1">{errors.addressType.message}</p>}
                     </div>
 
                     <div>
@@ -294,14 +294,14 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Código postal *</label>
                         <input
-                            {...register("zip_code", {
+                            {...register("zipCode", {
                                 required: "Campo requerido",
                                 pattern: { value: /^\d{4,10}$/, message: "Código postal inválido" },
                             })}
                             placeholder="44100"
-                            className={inputClass(!!errors.zip_code)}
+                            className={inputClass(!!errors.zipCode)}
                         />
-                        {errors.zip_code && <p className="text-error text-xs mt-1">{errors.zip_code.message}</p>}
+                        {errors.zipCode && <p className="text-error text-xs mt-1">{errors.zipCode.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Colonia *</label>
@@ -318,14 +318,14 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Calle *</label>
                         <input
-                            {...register("street_name", {
+                            {...register("streetName", {
                                 required: "Campo requerido",
                                 pattern: { value: /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s0-9.#°',-]{2,120}$/, message: "Calle inválida" },
                             })}
                             placeholder="Av. Juárez"
-                            className={inputClass(!!errors.street_name)}
+                            className={inputClass(!!errors.streetName)}
                         />
-                        {errors.street_name && <p className="text-error text-xs mt-1">{errors.street_name.message}</p>}
+                        {errors.streetName && <p className="text-error text-xs mt-1">{errors.streetName.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">Número exterior *</label>
@@ -344,14 +344,14 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                             Número interior <span className="text-base-content/40">(opcional)</span>
                         </label>
                         <input
-                            {...register("aditional_number", {
+                            {...register("aditionalNumber", {
                                 pattern: { value: /^[a-zA-Z0-9\-]{0,10}$/, message: "Número inválido" },
                                 setValueAs: (value) => value === "" ? undefined : value
                             })}
                             placeholder="Depto. 4B"
-                            className={inputClass(!!errors.aditional_number)}
+                            className={inputClass(!!errors.aditionalNumber)}
                         />
-                        {errors.aditional_number && <p className="text-error text-xs mt-1">{errors.aditional_number.message}</p>}
+                        {errors.aditionalNumber && <p className="text-error text-xs mt-1">{errors.aditionalNumber.message}</p>}
                     </div>
                     <div>
                         <label className="text-xs text-base-content/60 mb-1 block">
@@ -372,14 +372,14 @@ const GuestCheckoutFormComponent = ({ onSave, guestAddress }: GuestCheckoutFormP
                             Referencias o comentarios <span className="text-base-content/40">(opcional)</span>
                         </label>
                         <input
-                            {...register("references_or_comments", {
+                            {...register("referencesOrComments", {
                                 maxLength: { value: 255, message: "Máximo 255 caracteres" },
                                 setValueAs: (value) => value === "" ? undefined : value
                             })}
                             placeholder="Entre calles Reforma y Morelos, casa azul"
-                            className={inputClass(!!errors.references_or_comments)}
+                            className={inputClass(!!errors.referencesOrComments)}
                         />
-                        {errors.references_or_comments && <p className="text-error text-xs mt-1">{errors.references_or_comments.message}</p>}
+                        {errors.referencesOrComments && <p className="text-error text-xs mt-1">{errors.referencesOrComments.message}</p>}
                     </div>
                 </div>
             </div>
@@ -746,7 +746,7 @@ const ShoppingCartResumeV2 = () => {
 
     useEffect(() => {
         if (!addresses) return;
-        const defaultAddress = addresses.data.find(d => d.default_address === true);
+        const defaultAddress = addresses.data.find(d => d.defaultAddress === true);
         if (defaultAddress) setSelectedAddress(defaultAddress);
     }, [addresses]);
 
@@ -808,16 +808,16 @@ const ShoppingCartResumeV2 = () => {
                                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                                         <div className="flex-1">
                                             <p className="text-base sm:text-lg font-extrabold text-base-content">
-                                                {selectedAddress.recipient_name} {selectedAddress.recipient_last_name}
-                                                <span className="ml-2 badge badge-sm badge-primary badge-outline">{selectedAddress.address_type}</span>
+                                                {selectedAddress.recipientName} {selectedAddress.recipientLastName}
+                                                <span className="ml-2 badge badge-sm badge-primary badge-outline">{selectedAddress.addressType}</span>
                                             </p>
                                             <p className="text-sm text-base-content/70 mt-1">
-                                                {selectedAddress.country_phone_code} {selectedAddress.contact_number}
+                                                {selectedAddress.countryPhoneCode} {selectedAddress.contactNumber}
                                             </p>
                                             <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
-                                                {`${selectedAddress.street_name} #${selectedAddress.number}${selectedAddress.aditional_number !== "N/A" && selectedAddress.aditional_number !== "" ? ` Int. ${selectedAddress.aditional_number}` : ""}, ${selectedAddress.neighborhood}, ${selectedAddress.zip_code}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}
+                                                {`${selectedAddress.streetName} #${selectedAddress.number}${selectedAddress.aditionalNumber !== "N/A" && selectedAddress.aditionalNumber !== "" ? ` Int. ${selectedAddress.aditionalNumber}` : ""}, ${selectedAddress.neighborhood}, ${selectedAddress.zipCode}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}
                                             </p>
-                                            {selectedAddress.default_address && (
+                                            {selectedAddress.defaultAddress && (
                                                 <span className="mt-2 inline-flex items-center gap-1 text-xs text-primary font-bold">
                                                     <MdCheckBox /> Dirección predeterminada
                                                 </span>
@@ -873,11 +873,11 @@ const ShoppingCartResumeV2 = () => {
                                 </div>
                                 <div className="p-4 sm:p-5 flex flex-col gap-2">
                                     <p className="text-base font-extrabold text-base-content">
-                                        {guestAddressForm.first_name} {guestAddressForm.last_name}
+                                        {guestAddressForm.firstName} {guestAddressForm.lastName}
                                     </p>
                                     <p className="text-sm text-base-content/70">{guestAddressForm.email}</p>
                                     <p className="text-sm text-base-content/60 leading-relaxed">
-                                        {`${guestAddressForm.street_name} #${guestAddressForm.number}${guestAddressForm.aditional_number ? ` Int. ${guestAddressForm.aditional_number}` : ""}, ${guestAddressForm.neighborhood}, ${guestAddressForm.locality}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}
+                                        {`${guestAddressForm.streetName} #${guestAddressForm.number}${guestAddressForm.aditionalNumber ? ` Int. ${guestAddressForm.aditionalNumber}` : ""}, ${guestAddressForm.neighborhood}, ${guestAddressForm.locality}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}
                                     </p>
                                     <span className="inline-flex items-center gap-1 text-xs text-success font-bold mt-1">
                                         <MdCheckBox /> Dirección guardada correctamente

@@ -50,8 +50,8 @@ export function useAddAddress() {
                         totalPages: 1
                     };
                     let updatedAddresses = old.data;
-                    if (newAddress.default_address) {
-                        updatedAddresses = old.data.map(addr => ({ ...addr, default_address: false }));
+                    if (newAddress.defaultAddress) {
+                        updatedAddresses = old.data.map(addr => ({ ...addr, defaultAddress: false }));
                     };
                     return {
                         ...old,
@@ -103,7 +103,7 @@ export const useUpdateCustomer = ({ type }: { type: ModalProfileFormType }) => {
                 delay: 1000
             });
 
-            if (type === "name") updateName({ first_name: form.data.name, last_name: form.data.last_name });
+            if (type === "name") updateName({ first_name: form.data.name, last_name: form.data.lastName });
         },
         onError: (error) => {
             showTriggerAlert("Error", formatAxiosError(error), {
@@ -197,8 +197,8 @@ export function useUpdateAddress(customer: string | undefined) {
                             if (addr.uuid === addressUUID) {
                                 return { ...addr, ...data };
                             };
-                            if (data.default_address === true) {
-                                return { ...addr, default_address: false };
+                            if (data.defaultAddress === true) {
+                                return { ...addr, defaultAddress: false };
                             };
                             return addr;
                         })

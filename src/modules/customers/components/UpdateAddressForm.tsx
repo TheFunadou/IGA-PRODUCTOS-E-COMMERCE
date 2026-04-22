@@ -92,8 +92,8 @@ function isFieldModified(
 // Campos que en BD se almacenan como "N/A" si están vacíos
 const NA_FIELDS: Array<keyof UpdateAddressType> = [
     "floor",
-    "aditional_number",
-    "references_or_comments",
+    "aditionalNumber",
+    "referencesOrComments",
 ];
 
 const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: Props) => {
@@ -124,29 +124,29 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
     const restoreForm = () => {
         if (!versionData) return;
         reset({
-            recipient_name: versionData.recipient_name,
-            recipient_last_name: versionData.recipient_last_name!,
+            recipientName: versionData.recipientName,
+            recipientLastName: versionData.recipientLastName!,
             country: versionData.country,
             state: versionData.state,
             city: versionData.city,
             locality: versionData.locality,
-            street_name: versionData.street_name,
+            streetName: versionData.streetName,
             neighborhood: versionData.neighborhood,
-            zip_code: versionData.zip_code,
-            address_type: versionData.address_type,
+            zipCode: versionData.zipCode,
+            addressType: versionData.addressType,
             floor: versionData.floor === "N/A" ? "" : versionData.floor,
             number: versionData.number,
-            aditional_number: versionData.aditional_number === "N/A" ? "" : versionData.aditional_number,
-            references_or_comments: versionData.references_or_comments === "N/A" ? "" : versionData.references_or_comments,
-            country_phone_code: versionData.country_phone_code,
-            contact_number: versionData.contact_number,
-            default_address: versionData.default_address,
+            aditionalNumber: versionData.aditionalNumber === "N/A" ? "" : versionData.aditionalNumber,
+            referencesOrComments: versionData.referencesOrComments === "N/A" ? "" : versionData.referencesOrComments,
+            countryPhoneCode: versionData.countryPhoneCode,
+            contactNumber: versionData.contactNumber,
+            defaultAddress: versionData.defaultAddress,
         });
         const findDefaultCountry = CountriesAreaCodesJSON.find(
-            (c) => c.phoneCode === versionData.country_phone_code.substring(1)
+            (c) => c.phoneCode === versionData.countryPhoneCode.substring(1)
         );
         setCurrentCountry(`https://flagsapi.com/${findDefaultCountry?.iso2!}/flat/64.png`);
-        setAddressType(versionData.address_type);
+        setAddressType(versionData.addressType);
     };
 
     useEffect(() => { if (versionData) restoreForm(); }, [versionData]);
@@ -169,7 +169,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
 
     useEffect(() => {
         setCurrentCountry(`https://flagsapi.com/${country.iso2}/flat/64.png`);
-        setValue("country_phone_code", country.phoneCode, {
+        setValue("countryPhoneCode", country.phoneCode, {
             shouldValidate: true,
             shouldDirty: true,
         });
@@ -230,7 +230,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_recipient_name"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("recipient_name") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("recipientName") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Nombre(s) *
@@ -240,8 +240,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     type="text"
                                     placeholder="Juan"
                                     autoComplete="given-name"
-                                    className={inputCls(!!errors.recipient_name, modified("recipient_name"))}
-                                    {...register("recipient_name", {
+                                    className={inputCls(!!errors.recipientName, modified("recipientName"))}
+                                    {...register("recipientName", {
                                         required: "El nombre del remitente es requerido",
                                         maxLength: { value: 40, message: "Máximo 40 caracteres" },
                                         pattern: {
@@ -250,7 +250,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.recipient_name?.message} />
+                                <FieldError message={errors.recipientName?.message} />
                             </div>
 
                             {/* Apellidos */}
@@ -259,7 +259,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_recipient_last_name"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("recipient_last_name") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("recipientLastName") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Apellidos *
@@ -269,8 +269,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     type="text"
                                     placeholder="García López"
                                     autoComplete="family-name"
-                                    className={inputCls(!!errors.recipient_last_name, modified("recipient_last_name"))}
-                                    {...register("recipient_last_name", {
+                                    className={inputCls(!!errors.recipientLastName, modified("recipientLastName"))}
+                                    {...register("recipientLastName", {
                                         required: "Los apellidos del remitente son requeridos",
                                         maxLength: { value: 60, message: "Máximo 60 caracteres" },
                                         pattern: {
@@ -279,7 +279,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.recipient_last_name?.message} />
+                                <FieldError message={errors.recipientLastName?.message} />
                             </div>
 
                             {/* Teléfono */}
@@ -288,7 +288,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_contact_number"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("contact_number") || modified("country_phone_code")
+                                        modified("contactNumber") || modified("countryPhoneCode")
                                             ? "text-success font-medium"
                                             : "text-base-content/60"
                                     )}
@@ -304,7 +304,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         aria-label="Código de país"
                                         className={clsx(
                                             "w-20 sm:w-24 select select-sm sm:select-md text-xs sm:text-sm flex-shrink-0 border bg-base-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
-                                            modified("country_phone_code")
+                                            modified("countryPhoneCode")
                                                 ? "border-success text-success"
                                                 : "border-base-300"
                                         )}
@@ -330,8 +330,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         type="tel"
                                         placeholder="3312345678"
                                         autoComplete="tel-national"
-                                        className={clsx(inputCls(!!errors.contact_number, modified("contact_number")), "flex-1")}
-                                        {...register("contact_number", {
+                                        className={clsx(inputCls(!!errors.contactNumber, modified("contactNumber")), "flex-1")}
+                                        {...register("contactNumber", {
                                             required: "El número telefónico es requerido",
                                             pattern: {
                                                 value: /^[0-9]{7,15}$/,
@@ -340,7 +340,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         })}
                                     />
                                 </div>
-                                <FieldError message={errors.contact_number?.message} />
+                                <FieldError message={errors.contactNumber?.message} />
                             </div>
                         </div>
                     </section>
@@ -475,7 +475,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_street_name"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("street_name") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("streetName") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Calle *
@@ -485,8 +485,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     type="text"
                                     placeholder="Av. Insurgentes"
                                     autoComplete="address-line1"
-                                    className={inputCls(!!errors.street_name, modified("street_name"))}
-                                    {...register("street_name", {
+                                    className={inputCls(!!errors.streetName, modified("streetName"))}
+                                    {...register("streetName", {
                                         required: "La calle es requerida",
                                         maxLength: { value: 60, message: "Máximo 60 caracteres" },
                                         pattern: {
@@ -495,7 +495,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.street_name?.message} />
+                                <FieldError message={errors.streetName?.message} />
                             </div>
 
                             {/* Colonia */}
@@ -533,7 +533,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_zip_code"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("zip_code") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("zipCode") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Código postal *
@@ -544,8 +544,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     placeholder="96400"
                                     autoComplete="postal-code"
                                     inputMode="numeric"
-                                    className={inputCls(!!errors.zip_code, modified("zip_code"))}
-                                    {...register("zip_code", {
+                                    className={inputCls(!!errors.zipCode, modified("zipCode"))}
+                                    {...register("zipCode", {
                                         required: "El código postal es requerido",
                                         minLength: { value: 3, message: "Mínimo 3 caracteres" },
                                         maxLength: { value: 10, message: "Máximo 10 caracteres" },
@@ -555,7 +555,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         },
                                     })}
                                 />
-                                <FieldError message={errors.zip_code?.message} />
+                                <FieldError message={errors.zipCode?.message} />
                             </div>
 
                             {/* Tipo de dirección — pill selector */}
@@ -563,7 +563,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                 <label
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("address_type") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("addressType") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Tipo de dirección *
@@ -571,7 +571,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                 <div className="flex gap-2 flex-wrap">
                                     {ADDRESS_TYPE_OPTIONS.map((opt) => {
                                         const isSelected = addressType === opt.value;
-                                        const isTypeModified = modified("address_type");
+                                        const isTypeModified = modified("addressType");
                                         return (
                                             <label
                                                 key={opt.value}
@@ -588,7 +588,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                                     type="radio"
                                                     className="hidden"
                                                     value={opt.value}
-                                                    {...register("address_type")}
+                                                    {...register("addressType")}
                                                     onChange={(e) => setAddressType(e.target.value)}
                                                 />
                                                 {opt.icon}
@@ -661,7 +661,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     htmlFor="u_aditional_number"
                                     className={clsx(
                                         "text-xs transition-colors",
-                                        modified("aditional_number") ? "text-success font-medium" : "text-base-content/60"
+                                        modified("aditionalNumber") ? "text-success font-medium" : "text-base-content/60"
                                     )}
                                 >
                                     Número interior{" "}
@@ -674,8 +674,8 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                     type="text"
                                     placeholder={isApartment ? "ej. 14" : "Opcional"}
                                     autoComplete="off"
-                                    className={inputCls(!!errors.aditional_number, modified("aditional_number"))}
-                                    {...register("aditional_number", {
+                                    className={inputCls(!!errors.aditionalNumber, modified("aditionalNumber"))}
+                                    {...register("aditionalNumber", {
                                         maxLength: { value: 6, message: "Máximo 6 caracteres" },
                                         pattern: {
                                             value: /^[1-9][0-9]*[A-Z]?$/,
@@ -684,7 +684,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                         setValueAs: (v) => v === "" ? undefined : v,
                                     })}
                                 />
-                                <FieldError message={errors.aditional_number?.message} />
+                                <FieldError message={errors.aditionalNumber?.message} />
                             </div>
                         </div>
                     </section>
@@ -700,7 +700,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                 htmlFor="u_references_or_comments"
                                 className={clsx(
                                     "text-xs transition-colors",
-                                    modified("references_or_comments") ? "text-success font-medium" : "text-base-content/60"
+                                    modified("referencesOrComments") ? "text-success font-medium" : "text-base-content/60"
                                 )}
                             >
                                 Referencias o comentarios{" "}
@@ -711,21 +711,21 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                                 className={clsx(
                                     "textarea w-full text-sm border rounded-lg bg-base-200",
                                     "focus:outline-none focus:ring-2 focus:ring-primary/40 transition resize-none",
-                                    errors.references_or_comments
+                                    errors.referencesOrComments
                                         ? "border-error text-error"
-                                        : modified("references_or_comments")
+                                        : modified("referencesOrComments")
                                             ? "border-success text-success"
                                             : "border-base-300"
                                 )}
                                 placeholder="Entre calles Reforma y Morelos, casa azul con portón negro…"
                                 rows={3}
                                 autoComplete="off"
-                                {...register("references_or_comments", {
+                                {...register("referencesOrComments", {
                                     maxLength: { value: 80, message: "Máximo 80 caracteres" },
                                     setValueAs: (v) => v === "" ? undefined : v,
                                 })}
                             />
-                            <FieldError message={errors.references_or_comments?.message} />
+                            <FieldError message={errors.referencesOrComments?.message} />
                         </div>
                     </section>
 
@@ -736,7 +736,7 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                     <label
                         className={clsx(
                             "flex items-start gap-3 p-3 rounded-xl border bg-base-200 cursor-pointer transition-colors",
-                            modified("default_address")
+                            modified("defaultAddress")
                                 ? "border-success/40 hover:border-success/60"
                                 : "border-base-300 hover:border-primary/30"
                         )}
@@ -744,16 +744,16 @@ const UpdateAddresssForm = ({ versionData, ref, address, onUpdated, customer }: 
                         <input
                             type="checkbox"
                             className="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0"
-                            {...register("default_address")}
+                            {...register("defaultAddress")}
                         />
                         <div>
                             <p
                                 className={clsx(
                                     "text-sm font-medium flex items-center gap-1.5 transition-colors",
-                                    modified("default_address") ? "text-success" : "text-base-content"
+                                    modified("defaultAddress") ? "text-success" : "text-base-content"
                                 )}
                             >
-                                <FaStar className={clsx("text-xs", modified("default_address") ? "text-success" : "text-primary")} />
+                                <FaStar className={clsx("text-xs", modified("defaultAddress") ? "text-success" : "text-primary")} />
                                 Usar como dirección predeterminada
                             </p>
                             <p className="text-xs text-base-content/40 mt-0.5">

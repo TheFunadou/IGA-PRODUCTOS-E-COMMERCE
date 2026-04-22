@@ -151,9 +151,9 @@ const CustomerAddresses = () => {
                                             "text-sm font-bold truncate",
                                             isSelected ? "text-primary" : "text-base-content",
                                         )}>
-                                            {data.recipient_name} {data.recipient_last_name}
+                                            {data.recipientName} {data.recipientLastName}
                                         </span>
-                                        {data.default_address && (
+                                        {data.defaultAddress && (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary flex-shrink-0">
                                                 <FaStar className="text-[9px]" />
                                                 Predeterminada
@@ -195,15 +195,15 @@ const CustomerAddresses = () => {
                                     <div className="flex flex-col gap-0.5">
                                         <p className="text-xs font-semibold uppercase text-base-content/40">Contacto</p>
                                         <p className="text-sm text-base-content">
-                                            {data.country_phone_code} {data.contact_number}
+                                            {data.countryPhoneCode} {data.contactNumber}
                                         </p>
                                     </div>
                                     <div className="flex flex-col gap-0.5">
                                         <p className="text-xs font-semibold uppercase text-base-content/40">Calle y número</p>
                                         <p className="text-sm text-base-content break-words">
-                                            {data.street_name} #{data.number}
-                                            {data.aditional_number && data.aditional_number !== "N/A"
-                                                ? ` int. ${data.aditional_number}`
+                                            {data.streetName} #{data.number}
+                                            {data.aditionalNumber && data.aditionalNumber !== "N/A"
+                                                ? ` int. ${data.aditionalNumber}`
                                                 : ""}
                                         </p>
                                     </div>
@@ -217,11 +217,11 @@ const CustomerAddresses = () => {
                                     </div>
                                     <div className="flex flex-col gap-0.5">
                                         <p className="text-xs font-semibold uppercase text-base-content/40">País · CP</p>
-                                        <p className="text-sm text-base-content">{data.country} · {data.zip_code}</p>
+                                        <p className="text-sm text-base-content">{data.country} · {data.zipCode}</p>
                                     </div>
                                     <div className="flex flex-col gap-0.5">
                                         <p className="text-xs font-semibold uppercase text-base-content/40">Tipo de dirección</p>
-                                        <p className="text-sm text-base-content">{data.address_type}</p>
+                                        <p className="text-sm text-base-content">{data.addressType}</p>
                                     </div>
                                 </div>
                             </div>

@@ -1,9 +1,9 @@
-import type { CheckoutOrderI, GetOrderDetails, GetOrdersType, OrderCheckoutType } from "./OrdersTypes";
+import type { CheckoutOrderI, GetOrderDetails, GetOrdersSummaryI, OrderCheckoutType } from "./OrdersTypes";
 import api from "../../api/api.config";
 import type { LoadShoppingCartI, ShoppingCartI } from "../shopping/ShoppingTypes";
 
 export const getOrders = async (params: { page: number, limit: number, orderBy: "recent" | "oldest" }) => {
-    const { data } = await api.get<GetOrdersType>(`/orders`, { params })
+    const { data } = await api.get<GetOrdersSummaryI>(`/orders`, { params })
     return data;
 };
 
@@ -34,8 +34,13 @@ export const getBuyNowItem = async ({ item }: { item: ShoppingCartI }): Promise<
     return data;
 };
 
-
-export const cancelOrder = async ({ orderUUID }: { orderUUID: string }): Promise<string> => {
-    const { data } = await api.post<string>(`/orders/cancel/${orderUUID}`);
+export const cancelOrder = async ({ orderUUID, type }: { orderUUID: string, type: "CANCELLED" | "ABANDONED" }): Promise<string> => {
+    const { data } = await api.post<string>(`/orders/cancel`, { orderUUID, type });
     return data;
 };
+
+export const linkOrderToCustomer = async ({ orderUUID }: { orderUUID: string }): Promise<string> => {
+    const { data } = await api.post<string>(`/orders/link-to-customer`, { orderUUID });
+    return data;
+};
+
