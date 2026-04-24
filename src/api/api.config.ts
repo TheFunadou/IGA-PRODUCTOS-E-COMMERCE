@@ -20,8 +20,8 @@ if (!baseURL) throw new Error("VITE_BACKEND_URL no está definido en este entorn
 const handleUnauthenticated = () => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     // Evita redirigir si ya estás en login (previene loops)
-    if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+    if (!window.location.pathname.includes('/iniciar-sesion')) {
+        window.location.href = '/iniciar-sesion';
     }
 };
 
