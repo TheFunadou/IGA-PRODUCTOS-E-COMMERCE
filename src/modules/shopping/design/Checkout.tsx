@@ -71,7 +71,6 @@ const CheckoutV2 = () => {
         );
     };
 
-    const hasAditonalNumber = data?.shippingAddress.aditional_number && data.shippingAddress.aditional_number !== "N/A";
 
     return (
         <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200">
@@ -115,28 +114,28 @@ const CheckoutV2 = () => {
                             </h2>
                         </div>
                         <div className="p-4 sm:p-5">
-                            {data?.shippingAddress && (
-                                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                            {data?.shippingAddress.map((address, index) => (
+                                <div key={index} className="flex flex-col sm:flex-row sm:items-start gap-4">
                                     <div className="flex-1">
                                         <p className="text-base sm:text-lg font-extrabold text-base-content">
-                                            {data.shippingAddress.recipient_name} {data.shippingAddress.recipient_last_name}
-                                            <span className="ml-2 badge badge-sm badge-primary badge-outline">{data.shippingAddress.address_type}</span>
+                                            {address.recipientName} {address.recipientLastName}
+                                            <span className="ml-2 badge badge-sm badge-primary badge-outline">{address.addressType}</span>
                                         </p>
                                         <p className="text-sm text-base-content/70 mt-1">
-                                            {data.shippingAddress.country_phone_code} {data.shippingAddress.contact_number}
+                                            {address.countryPhoneCode} {address.contactNumber}
                                         </p>
                                         <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
-                                            {`${data.shippingAddress.street_name}, #${data.shippingAddress.number}${hasAditonalNumber ? ` Int. ${data.shippingAddress.aditional_number}` : ""}, ${data.shippingAddress.neighborhood}, ${data.shippingAddress.zip_code}, ${data.shippingAddress.city}, ${data.shippingAddress.state}, ${data.shippingAddress.country}`}
+                                            {`${address.streetName}, #${address.number}${address.aditionalNumber ? ` Int. ${address.aditionalNumber}` : ""}, ${address.neighborhood}, ${address.zipCode}, ${address.city}, ${address.state}, ${address.country}`}
                                         </p>
-                                        {data.shippingAddress.references_or_comments && data.shippingAddress.references_or_comments !== "N/A" && (
+                                        {address.referencesOrComments && address.referencesOrComments !== "N/A" && (
                                             <div className="mt-3 bg-base-200 rounded-xl p-3 border border-base-300">
                                                 <p className="text-xs font-bold text-base-content/50 uppercase mb-1">Comentarios adicionales</p>
-                                                <p className="text-sm text-base-content/70">{data.shippingAddress.references_or_comments}</p>
+                                                <p className="text-sm text-base-content/70">{address.referencesOrComments}</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            )}
+                            ))}
                         </div>
                     </div>
 

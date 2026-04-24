@@ -52,7 +52,7 @@ export interface OrderDescriptionI {
     paymentDetails: PaymentDescriptionI[];
     items: OrderCheckoutItemI[];
     paymentResume: ShoppingCartResumeI;
-    shipping: GetCustomerAddressPaymentType;
+    shipping: GetCustomerAddressPaymentType[];
 };
 
 export interface PaymentDetailsI {

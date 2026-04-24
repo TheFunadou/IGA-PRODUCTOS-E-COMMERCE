@@ -19,7 +19,7 @@ export const getPaymentDetails = async (args: { orderUUID: string, query: GetPay
         params.append('requiredStatus', query.requiredStatus.join(','));
     }
     const { data } = await api.get<PaymentDetailsI>(
-        `/payment/order/details/${orderUUID}?${params.toString()}`
+        `/payment/details/${orderUUID}?${params.toString()}`
     );
     return data;
 };

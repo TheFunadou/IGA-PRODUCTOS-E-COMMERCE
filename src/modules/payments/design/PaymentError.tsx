@@ -383,18 +383,24 @@ const PaymentErrorV2 = () => {
                                 {items.length} {items.length === 1 ? "artículo" : "artículos"}
                             </p>
                         </div>
-                        <div>
-                            <p className={clsx("text-xs uppercase opacity-60")}>Destino</p>
-                            <p className="font-semibold">
-                                {shipping.city}, {shipping.state}
-                            </p>
-                        </div>
-                        <div>
-                            <p className={clsx("text-xs uppercase opacity-60")}>Destinatario</p>
-                            <p className="font-semibold">
-                                {shipping.recipient_name} {shipping.recipient_last_name}
-                            </p>
-                        </div>
+                        {
+                            shipping.map((shipping, i) => (
+                                <div key={`${i}-${shipping.number}`}>
+                                    <div>
+                                        <p className={clsx("text-xs uppercase opacity-60")}>Destino</p>
+                                        <p className="font-semibold">
+                                            {shipping.city}, {shipping.state}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className={clsx("text-xs uppercase opacity-60")}>Destinatario</p>
+                                        <p className="font-semibold">
+                                            {shipping.recipientName} {shipping.recipientLastName}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
 
@@ -405,52 +411,55 @@ const PaymentErrorV2 = () => {
 
                     {/* ── Columna izquierda: Envío ── */}
                     <div className="space-y-5">
-                        <SectionCard
-                            icon={<FaShippingFast />}
-                            title="Información de envío"
-                            accent="border-primary"
-                        >
-                            <div className="space-y-4">
-                                <div className="bg-primary/5 rounded-xl p-3 space-y-3">
-                                    <p className="text-xs font-bold uppercase text-primary/70">
-                                        Destinatario
-                                    </p>
-                                    <InfoRow
-                                        label="Nombre completo"
-                                        value={`${shipping.recipient_name} ${shipping.recipient_last_name}`}
-                                    />
-                                    <InfoRow
-                                        label="Contacto"
-                                        value={`${shipping.country_phone_code} ${shipping.contact_number}`}
-                                        icon={<FaPhone />}
-                                    />
-                                </div>
+                        {shipping.map((shipping, i) => (
+                            <SectionCard
+                                key={`${i}-${shipping.number}`}
+                                icon={<FaShippingFast />}
+                                title="Información de envío"
+                                accent="border-primary"
+                            >
+                                <div className="space-y-4">
+                                    <div className="bg-primary/5 rounded-xl p-3 space-y-3">
+                                        <p className="text-xs font-bold uppercase text-primary/70">
+                                            Destinatario
+                                        </p>
+                                        <InfoRow
+                                            label="Nombre completo"
+                                            value={`${shipping.recipientName} ${shipping.recipientLastName}`}
+                                        />
+                                        <InfoRow
+                                            label="Contacto"
+                                            value={`${shipping.countryPhoneCode} ${shipping.contactNumber}`}
+                                            icon={<FaPhone />}
+                                        />
+                                    </div>
 
-                                <div className="bg-base-200 rounded-xl p-3 space-y-3">
-                                    <p className="text-xs font-bold uppercase text-base-content/40">
-                                        Domicilio
-                                    </p>
-                                    <InfoRow
-                                        label="Calle y número"
-                                        value={`${shipping.street_name} #${shipping.number}${shipping.aditional_number ? ` int. ${shipping.aditional_number}` : ""}`}
-                                        icon={<FaHome />}
-                                    />
-                                    {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
-                                    <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
-                                    <InfoRow
-                                        label="Ciudad y Estado"
-                                        value={`${shipping.city}, ${shipping.state}`}
-                                        icon={<FaMapMarkerAlt />}
-                                    />
-                                    <InfoRow label="Localidad" value={shipping.locality} />
-                                    <InfoRow
-                                        label="País"
-                                        value={`${shipping.country} · CP ${shipping.zip_code}`}
-                                    />
-                                    <InfoRow label="Tipo de dirección" value={shipping.address_type} />
+                                    <div className="bg-base-200 rounded-xl p-3 space-y-3">
+                                        <p className="text-xs font-bold uppercase text-base-content/40">
+                                            Domicilio
+                                        </p>
+                                        <InfoRow
+                                            label="Calle y número"
+                                            value={`${shipping.streetName} #${shipping.number}${shipping.aditionalNumber ? ` int. ${shipping.aditionalNumber}` : ""}`}
+                                            icon={<FaHome />}
+                                        />
+                                        {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
+                                        <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
+                                        <InfoRow
+                                            label="Ciudad y Estado"
+                                            value={`${shipping.city}, ${shipping.state}`}
+                                            icon={<FaMapMarkerAlt />}
+                                        />
+                                        <InfoRow label="Localidad" value={shipping.locality} />
+                                        <InfoRow
+                                            label="País"
+                                            value={`${shipping.country} · CP ${shipping.zipCode}`}
+                                        />
+                                        <InfoRow label="Tipo de dirección" value={shipping.addressType} />
+                                    </div>
                                 </div>
-                            </div>
-                        </SectionCard>
+                            </SectionCard>
+                        ))}
                     </div>
 
                     {/* ── Columna derecha: Productos + CTA ── */}

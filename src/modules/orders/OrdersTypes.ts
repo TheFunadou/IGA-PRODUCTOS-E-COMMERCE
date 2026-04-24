@@ -1,4 +1,4 @@
-import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType } from "../customers/CustomerTypes";
+import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType, NewAddressType } from "../customers/CustomerTypes";
 import type { OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartI, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
@@ -112,13 +112,6 @@ export type OrdersType = {
     }[];
 };
 
-export type OrderCheckoutType = {
-    uuid: string;
-    items: OrderItems[];
-    resume: OrderResume;
-    external_id: string;
-    address: GetCustomerAddressOrderType;
-};
 
 export interface OrderCheckoutItemI {
     name: string;
@@ -141,7 +134,7 @@ export interface CheckoutOrderI {
     resume: ShoppingCartResumeI;
     couponCode: string | null;
     externalId: string;
-    shippingAddress: GetCustomerAddressOrderType;
+    shippingAddress: NewAddressType[];
 };
 
 export type GetLightOrderExtended = {

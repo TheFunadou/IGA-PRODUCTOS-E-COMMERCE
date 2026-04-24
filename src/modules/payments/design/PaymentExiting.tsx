@@ -447,63 +447,66 @@ const PaymentExitingV2 = () => {
 
                     {/* ── Columna izquierda: Envío + Resumen ── */}
                     <div className="space-y-5">
-                        <SectionCard
-                            icon={<FaShippingFast />}
-                            title="Información de envío"
-                            accent="border-primary"
-                        >
-                            <div className="space-y-4">
-                                <div className="bg-primary/5 rounded-xl p-3 space-y-3">
-                                    <p className="text-xs font-bold uppercase text-primary/70">
-                                        Destinatario
-                                    </p>
-                                    <InfoRow
-                                        label="Nombre completo"
-                                        value={`${shipping.recipient_name} ${shipping.recipient_last_name}`}
-                                    />
-                                    <InfoRow
-                                        label="Contacto"
-                                        value={`${shipping.country_phone_code} ${shipping.contact_number}`}
-                                        icon={<FaPhone />}
-                                    />
-                                </div>
-
-                                <div className="bg-base-200 rounded-xl p-3 space-y-3">
-                                    <p className="text-xs font-bold uppercase text-base-content/40">
-                                        Domicilio
-                                    </p>
-                                    <InfoRow
-                                        label="Calle y número"
-                                        value={`${shipping.street_name} #${shipping.number}${shipping.aditional_number ? ` int. ${shipping.aditional_number}` : ""}`}
-                                        icon={<FaHome />}
-                                    />
-                                    {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
-                                    <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
-                                    <InfoRow
-                                        label="Ciudad y Estado"
-                                        value={`${shipping.city}, ${shipping.state}`}
-                                        icon={<FaMapMarkerAlt />}
-                                    />
-                                    <InfoRow label="Localidad" value={shipping.locality} />
-                                    <InfoRow
-                                        label="País"
-                                        value={`${shipping.country} · CP ${shipping.zip_code}`}
-                                    />
-                                    <InfoRow label="Tipo de dirección" value={shipping.address_type} />
-                                </div>
-
-                                {shipping.references_or_comments && (
-                                    <div className="bg-warning/10 rounded-xl p-3 space-y-2">
-                                        <p className="text-xs font-bold uppercase text-warning">
-                                            Comentarios / Referencias
+                        {shipping.map((shipping, i) => (
+                            <SectionCard
+                                key={`${i}-${shipping.number}`}
+                                icon={<FaShippingFast />}
+                                title="Información de envío"
+                                accent="border-primary"
+                            >
+                                <div className="space-y-4">
+                                    <div className="bg-primary/5 rounded-xl p-3 space-y-3">
+                                        <p className="text-xs font-bold uppercase text-primary/70">
+                                            Destinatario
                                         </p>
-                                        <p className="text-sm text-base-content italic text-balance">
-                                            "{shipping.references_or_comments}"
-                                        </p>
+                                        <InfoRow
+                                            label="Nombre completo"
+                                            value={`${shipping.recipientName} ${shipping.recipientLastName}`}
+                                        />
+                                        <InfoRow
+                                            label="Contacto"
+                                            value={`${shipping.countryPhoneCode} ${shipping.contactNumber}`}
+                                            icon={<FaPhone />}
+                                        />
                                     </div>
-                                )}
-                            </div>
-                        </SectionCard>
+
+                                    <div className="bg-base-200 rounded-xl p-3 space-y-3">
+                                        <p className="text-xs font-bold uppercase text-base-content/40">
+                                            Domicilio
+                                        </p>
+                                        <InfoRow
+                                            label="Calle y número"
+                                            value={`${shipping.streetName} #${shipping.number}${shipping.aditionalNumber ? ` int. ${shipping.aditionalNumber}` : ""}`}
+                                            icon={<FaHome />}
+                                        />
+                                        {shipping.floor && <InfoRow label="Piso" value={shipping.floor} />}
+                                        <InfoRow label="Colonia / Fracc." value={shipping.neighborhood} />
+                                        <InfoRow
+                                            label="Ciudad y Estado"
+                                            value={`${shipping.city}, ${shipping.state}`}
+                                            icon={<FaMapMarkerAlt />}
+                                        />
+                                        <InfoRow label="Localidad" value={shipping.locality} />
+                                        <InfoRow
+                                            label="País"
+                                            value={`${shipping.country} · CP ${shipping.zipCode}`}
+                                        />
+                                        <InfoRow label="Tipo de dirección" value={shipping.addressType} />
+                                    </div>
+
+                                    {shipping.referencesOrComments && (
+                                        <div className="bg-warning/10 rounded-xl p-3 space-y-2">
+                                            <p className="text-xs font-bold uppercase text-warning">
+                                                Comentarios / Referencias
+                                            </p>
+                                            <p className="text-sm text-base-content italic text-balance">
+                                                "{shipping.referencesOrComments}"
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </SectionCard>
+                        ))}
 
                         <SectionCard
                             icon={<FaReceipt />}
