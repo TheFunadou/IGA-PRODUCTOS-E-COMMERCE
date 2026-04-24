@@ -1,4 +1,5 @@
 import api from "../../api/api.config";
+import type { PaymentDetailsExtendedI } from "../orders/OrdersTypes";
 import type { OrderStatusType } from "../shopping/ShoppingTypes";
 import type { GetPaidOrderDetails, GetPaymentDetailsQueryDTO, PaymentDetailsI } from "./types";
 
@@ -21,5 +22,11 @@ export const getPaymentDetails = async (args: { orderUUID: string, query: GetPay
     const { data } = await api.get<PaymentDetailsI>(
         `/payment/details/${orderUUID}?${params.toString()}`
     );
+    return data;
+};
+
+
+export const getPaymentDetailsExtended = async ({ orderUUID }: { orderUUID: string }): Promise<PaymentDetailsExtendedI> => {
+    const { data } = await api.get<PaymentDetailsExtendedI>(`/payment/details/client/extended/${orderUUID}`);
     return data;
 };

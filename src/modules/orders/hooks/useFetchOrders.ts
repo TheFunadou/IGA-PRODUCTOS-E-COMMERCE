@@ -2,12 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cancelOrder, getBuyNowItem, getCheckoutOrderV2, getOrders } from "../../orders/OrdersServices";
-import type { CheckoutOrderI, GetOrdersSummaryI } from "../OrdersTypes";
+import type { CheckoutOrderI, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { LoadShoppingCartI, ShoppingCartI } from "../../shopping/ShoppingTypes";
-import type { PaymentDetailsI } from "../../payments/types";
-import { getPaymentDetails } from "../../payments/services";
+import { getPaymentDetailsExtended } from "../../payments/services";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { paymentQueryKeys } from "../../payments/usePayment";
 
@@ -42,9 +41,9 @@ export const useFetchCheckoutOrderV2 = (params: { orderUUID: string }) => {
 export const useFetchOrderDetails = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
 
-    return useQuery<PaymentDetailsI>({
+    return useQuery<PaymentDetailsExtendedI>({
         queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
-        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: false } }),
+        queryFn: () => getPaymentDetailsExtended({ orderUUID }),
         staleTime: 8 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

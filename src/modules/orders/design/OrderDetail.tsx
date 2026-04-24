@@ -9,6 +9,7 @@ import { useReactToPrint } from "react-to-print";
 import { useRef, useState } from "react";
 import { useFetchOrderDetails } from "../hooks/useFetchOrders";
 import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
+import type { ShippingStatus, ShippingInfoI } from "../OrdersTypes";
 
 /* ─────────────────────────────────────────────
    Helper: color de badge por status de orden
@@ -35,6 +36,56 @@ const orderStatusIcon = (status: string) => {
         case "CANCELLED": return <FaExclamationCircle className="text-error" />;
         default: return <FaBox className="text-base-content/40" />;
     }
+};
+
+/* ─────────────────────────────────────────────
+   Helper: color e ícono de badge por status de envío
+   ───────────────────────────────────────────── */
+
+const shippingStatusBadge = (status: ShippingStatus) => {
+    switch (status) {
+        case "DELIVERED":
+        case "RETURNED_DELIVERED": return "bg-success/10 text-success border-success/20";
+        case "SHIPPED":
+        case "IN_TRANSIT": return "bg-info/10 text-info border-info/20";
+        case "PENDING":
+        case "IN_PROCESS":
+        case "IN_PREPARATION":
+        case "STAND_BY": return "bg-warning/10 text-warning border-warning/20";
+        case "CANCELLED": return "bg-error/10 text-error border-error/20";
+        case "RETURNED":
+        case "RETURNED_IN_PROCESS": return "bg-base-300 text-base-content/50 border-base-content/10";
+        default: return "bg-base-200 text-base-content/70 border-base-content/10";
+    }
+};
+
+const shippingStatusIcon = (status: ShippingStatus) => {
+    switch (status) {
+        case "DELIVERED":
+        case "RETURNED_DELIVERED": return <FaCheckCircle />;
+        case "SHIPPED":
+        case "IN_TRANSIT": return <FaBox className="text-xs" />;
+        case "PENDING":
+        case "IN_PROCESS":
+        case "IN_PREPARATION":
+        case "STAND_BY": return <FaClock />;
+        case "CANCELLED": return <FaExclamationCircle />;
+        default: return <FaBox />;
+    }
+};
+
+const formatShippingStatus: Record<ShippingStatus, string> = {
+    PENDING: "Pendiente",
+    SHIPPED: "Enviado",
+    DELIVERED: "Entregado",
+    CANCELLED: "Cancelado",
+    IN_PROCESS: "En proceso",
+    IN_TRANSIT: "En tránsito",
+    RETURNED: "Devuelto",
+    RETURNED_IN_PROCESS: "Devolución en proceso",
+    RETURNED_DELIVERED: "Devolución entregada",
+    IN_PREPARATION: "En preparación",
+    STAND_BY: "En espera",
 };
 
 /* ─────────────────────────────────────────────
@@ -150,7 +201,7 @@ const OrderDetail = () => {
         );
     }
 
-    const { order } = data;
+    const { order, shippings } = data;
     const itemsToShow = itemsExpanded ? order.items : order.items.slice(0, 5);
     const hasMoreItems = order.items.length > 5;
 
@@ -284,41 +335,84 @@ const OrderDetail = () => {
                     {/* Shipping and Billing Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <SectionContainer icon={<FaMapMarkerAlt />} title="Información de Envío">
-                            <div className="flex flex-col gap-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-base-200 flex items-center justify-center flex-shrink-0 border border-base-300">
-                                        <FaMapMarkerAlt className="text-xl text-primary/50" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">Destinatario</span>
-                                        <p className="text-base font-black text-base-content">{order.shipping.recipientName} {order.shipping.recipientLastName}</p>
-                                        <p className="text-sm font-bold text-base-content/50">{order.shipping.countryPhoneCode} {order.shipping.contactNumber}</p>
-                                    </div>
-                                </div>
+                            <div className="flex flex-col gap-10">
+                                {order.shipping.map((shippingAddress: ShippingInfoI, idx: number) => {
+                                    const tracking = shippings.find(s => s.shippingInfoId === shippingAddress.id);
 
-                                <div className="grid grid-cols-1 gap-5">
-                                    <InfoBlock
-                                        label="Dirección completa"
-                                        value={`${order.shipping.streetName} #${order.shipping.number}${order.shipping.aditionalNumber && order.shipping.aditionalNumber !== "N/A" ? ` Int. ${order.shipping.aditionalNumber}` : ""}`}
-                                    />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <InfoBlock label="Colonia" value={order.shipping.neighborhood} />
-                                        <InfoBlock label="CP" value={order.shipping.zipCode} />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <InfoBlock label="Ciudad" value={order.shipping.city} />
-                                        <InfoBlock label="Estado" value={order.shipping.state} />
-                                    </div>
-                                </div>
+                                    return (
+                                        <div key={idx} className={clsx("flex flex-col gap-6", idx > 0 && "pt-10 border-t border-base-300 border-dashed")}>
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-base-200 flex items-center justify-center flex-shrink-0 border border-base-300">
+                                                        <FaMapMarkerAlt className="text-xl text-primary/50" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">Destinatario</span>
+                                                        <p className="text-base font-black text-base-content">{shippingAddress.recipientName} {shippingAddress.recipientLastName}</p>
+                                                        <p className="text-sm font-bold text-base-content/50">{shippingAddress.countryPhoneCode} {shippingAddress.contactNumber}</p>
+                                                    </div>
+                                                </div>
 
-                                {order.shipping.referencesOrComments && order.shipping.referencesOrComments !== "N/A" && (
-                                    <div className="bg-warning/5 border border-warning/20 p-4 rounded-2xl">
-                                        <p className="text-[10px] font-black uppercase text-warning tracking-widest mb-2">Comentarios / Referencias</p>
-                                        <p className="text-xs font-bold text-base-content/70 italic leading-relaxed">
-                                            "{order.shipping.referencesOrComments}"
-                                        </p>
-                                    </div>
-                                )}
+                                                {tracking && (
+                                                    <div className="flex flex-col md:items-end">
+                                                        <span className="text-[10px] font-black uppercase text-base-content/30 tracking-widest mb-1">Estatus del Envió</span>
+                                                        <div className={clsx(
+                                                            "flex items-center gap-2 px-4 py-1.5 rounded-full border text-[10px] font-black uppercase shadow-sm whitespace-nowrap",
+                                                            shippingStatusBadge(tracking.shippingStatus)
+                                                        )}>
+                                                            {shippingStatusIcon(tracking.shippingStatus)}
+                                                            {formatShippingStatus[tracking.shippingStatus]}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {tracking?.trackingNumber && (
+                                                <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:bg-primary/10">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10">
+                                                            <FaBox />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-primary/60 uppercase tracking-widest">Número de guía ({tracking.carrier || 'Estafeta'})</span>
+                                                            <span className="text-sm font-mono font-black text-primary tabular-nums tracking-wider">{tracking.trackingNumber}</span>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => tracking.trackingNumber && window.open(`https://www.google.com/search?q=rastreo+${tracking.carrier || 'estafeta'}+${tracking.trackingNumber}`, "_blank")}
+                                                        className="btn btn-primary btn-sm rounded-xl font-black uppercase tracking-widest shadow-md shadow-primary/20"
+                                                    >
+                                                        Rastrear pedido
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="grid grid-cols-1 gap-5">
+                                                <InfoBlock
+                                                    label="Dirección completa"
+                                                    value={`${shippingAddress.streetName} #${shippingAddress.number}${shippingAddress.aditionalNumber && shippingAddress.aditionalNumber !== "N/A" ? ` Int. ${shippingAddress.aditionalNumber}` : ""}`}
+                                                />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <InfoBlock label="Colonia" value={shippingAddress.neighborhood} />
+                                                    <InfoBlock label="CP" value={shippingAddress.zipCode} />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <InfoBlock label="Ciudad" value={shippingAddress.city} />
+                                                    <InfoBlock label="Estado" value={shippingAddress.state} />
+                                                </div>
+                                            </div>
+
+                                            {shippingAddress.referencesOrComments && shippingAddress.referencesOrComments !== "N/A" && (
+                                                <div className="bg-warning/5 border border-warning/20 p-4 rounded-2xl">
+                                                    <p className="text-[10px] font-black uppercase text-warning tracking-widest mb-2">Comentarios / Referencias</p>
+                                                    <p className="text-xs font-bold text-base-content/70 italic leading-relaxed">
+                                                        "{shippingAddress.referencesOrComments}"
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </SectionContainer>
 

@@ -1,5 +1,5 @@
 import type { CustomerAttributes, GetCustomerAddressPaymentType } from "../customers/CustomerTypes";
-import type { Order, OrderResume, OrderPaymentDetails, OrderCheckoutItemI } from "../orders/OrdersTypes";
+import type { Order, OrderResume, OrderPaymentDetails, OrderCheckoutItemI, ShippingInfoI } from "../orders/OrdersTypes";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
 
@@ -52,7 +52,7 @@ export interface OrderDescriptionI {
     paymentDetails: PaymentDescriptionI[];
     items: OrderCheckoutItemI[];
     paymentResume: ShoppingCartResumeI;
-    shipping: GetCustomerAddressPaymentType[];
+    shipping: ShippingInfoI[];
 };
 
 export interface PaymentDetailsI {

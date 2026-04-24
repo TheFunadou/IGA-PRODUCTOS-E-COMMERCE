@@ -1,4 +1,4 @@
-import type { CheckoutOrderI, GetOrderDetails, GetOrdersSummaryI } from "./OrdersTypes";
+import type { CheckoutOrderI, GetOrdersSummaryI } from "./OrdersTypes";
 import api from "../../api/api.config";
 import type { LoadShoppingCartI, ShoppingCartI } from "../shopping/ShoppingTypes";
 
@@ -9,12 +9,6 @@ export const getOrders = async (params: { page: number, limit: number, orderBy: 
 
 export const getCheckoutOrderV2 = async ({ orderUUID }: { orderUUID: string }): Promise<CheckoutOrderI> => {
     const { data } = await api.get<CheckoutOrderI>(`/orders/checkout/v2/${orderUUID}`);
-    return data;
-};
-
-
-export const getOrderDetails = async ({ orderUUID }: { orderUUID: string }): Promise<GetOrderDetails> => {
-    const { data } = await api.get<GetOrderDetails>(`/orders/details/${orderUUID}`);
     return data;
 };
 

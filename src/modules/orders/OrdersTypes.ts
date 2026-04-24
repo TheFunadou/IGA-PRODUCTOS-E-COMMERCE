@@ -1,5 +1,5 @@
 import type { CustomerAddressType, CustomerAttributes, GetCustomerAddressOrderType, GuestCreateOrderFormType, NewAddressType } from "../customers/CustomerTypes";
-import type { OrderItems } from "../payments/types";
+import type { OrderDescriptionI, OrderItems } from "../payments/types";
 import type { PaymentProviders } from "../shopping/PaymentTypes";
 import type { OrderStatusType, PaymentClassType, PaymentMethodType, PaymentProvidersType, ShoppingCartI, ShoppingCartResumeI, ShoppingCartType } from "../shopping/ShoppingTypes";
 
@@ -204,3 +204,54 @@ export interface GetOrdersSummaryI {
     totalRecords: number;
     currentPage: number;
 };
+
+
+//----------------------
+
+
+export interface ShippingInfoI {
+    id: string;
+    recipientName: string;
+    recipientLastName: string;
+    country: string;
+    state: string;
+    city: string;
+    locality: string;
+    streetName: string;
+    neighborhood: string;
+    zipCode: string;
+    addressType: string;
+    floor?: string | null;
+    number: string;
+    aditionalNumber?: string | null;
+    referencesOrComments?: string | null;
+    countryPhoneCode: string;
+    contactNumber: string;
+};
+
+
+export interface ShippingI {
+    uuid: string;
+    orderUUID: string;
+    shippingStatus: ShippingStatus;
+    concept: string;
+    carrier?: string | null;
+    trackingNumber?: string | null;
+    shippingAmount: string;
+    insuranceAmount?: string | null;
+    boxesCount: number;
+    shippedAt?: Date | null;
+    deliveredAt?: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export interface ExtendedShippingI extends ShippingI {
+    shippingInfoId: string;
+};
+
+export interface PaymentDetailsExtendedI {
+    order: OrderDescriptionI;
+    shippings: ExtendedShippingI[];
+};
+
