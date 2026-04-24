@@ -103,7 +103,7 @@ export const useUpdateCustomer = ({ type }: { type: ModalProfileFormType }) => {
                 delay: 1000
             });
 
-            if (type === "name") updateName({ first_name: form.data.name, last_name: form.data.lastName });
+            if (type === "name") updateName({ first_name: form.data.name, last_name: form.data.last_name });
         },
         onError: (error) => {
             showTriggerAlert("Error", formatAxiosError(error), {
