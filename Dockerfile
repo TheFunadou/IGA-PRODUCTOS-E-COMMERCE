@@ -1,22 +1,25 @@
 # =========================
 # 1️⃣ Stage: Build
 # =========================
-FROM node:20-alpine AS builder
+FROM node:23.11.1-alpine AS builder
 
-# Crear directorio de trabajo
+# Activar Corepack (pnpm)
+RUN corepack enable
+
+# Directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json y lockfile primero (mejor cache)
-COPY package*.json ./
+# Copiar manifests primero (mejor cache)
+COPY package.json pnpm-lock.yaml ./
 
 # Instalar dependencias
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del proyecto
+# Copiar resto del proyecto
 COPY . .
 
 # Construir proyecto Vite
-RUN npm run build
+RUN pnpm build
 
 
 # =========================
@@ -24,13 +27,13 @@ RUN npm run build
 # =========================
 FROM nginx:stable-alpine
 
-# Eliminar configuración default de nginx
+# Eliminar archivos default
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar build generado por Vite
+# Copiar build generado
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copiar configuración personalizada (opcional pero recomendado)
+# Copiar configuración nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer puerto
