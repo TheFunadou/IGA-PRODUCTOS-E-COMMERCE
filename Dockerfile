@@ -1,45 +1,40 @@
-# =========================
-# 1️⃣ Stage: Builder
-# =========================
-FROM node:22.22.3-alpine AS builder
+# ---------- Builder ----------
+FROM node:22-alpine AS builder
 
-# Activar Corepack (pnpm oficial)
+# Activar Corepack
 RUN corepack enable
+
+# Fijar versión estable de pnpm
+RUN corepack prepare pnpm@10.15.0 --activate
 
 # Directorio de trabajo
 WORKDIR /app
 
-# Copiar manifests y configuración de pnpm
-# (importante para allowBuilds / onlyBuiltDependencies)
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
+# Copiar manifests primero
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-# Instalar dependencias usando lockfile
+# Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del proyecto
+# Copiar resto del proyecto
 COPY . .
 
-# Build de Vite
+# Build Vite
 RUN pnpm build
 
-
-# =========================
-# 2️⃣ Stage: Runner
-# =========================
+# ---------- Runner ----------
 FROM nginx:stable-alpine
 
-# Limpiar contenido default de nginx
+# Limpiar nginx default
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar build generado desde builder
+# Copiar build
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copiar configuración nginx
+# Configuración nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponer puerto HTTP
+# Exponer puerto
 EXPOSE 80
 
 # Iniciar nginx
