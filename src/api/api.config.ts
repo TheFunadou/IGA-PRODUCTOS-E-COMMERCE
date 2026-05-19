@@ -8,7 +8,6 @@ const CSRF_HEADER = 'x-csrf-token';
 const AUTH_STORAGE_KEY = 'auth-customer-storage';
 
 const nodeEnv = import.meta.env.VITE_NODE_ENV;
-if (!nodeEnv) throw new Error("VITE_NODE_ENV no está definido");
 
 const baseURL =
     nodeEnv === 'production' || nodeEnv === 'testing'
