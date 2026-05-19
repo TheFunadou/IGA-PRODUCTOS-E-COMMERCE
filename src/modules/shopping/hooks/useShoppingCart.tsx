@@ -26,6 +26,7 @@ interface UseShoppingCartProps {
     isAuth: boolean;
     authCustomer?: { uuid: string } | null;
     showTriggerAlert: (type: "Successfull" | "Error", message: string, options?: { duration: number }) => void;
+    destination?: string;
 }
 
 interface UseShoppingCartReturn {
@@ -63,6 +64,7 @@ export const useShoppingCart = ({
     isAuth,
     authCustomer,
     showTriggerAlert,
+    destination,
 }: UseShoppingCartProps): UseShoppingCartReturn => {
 
     const queryClient = useQueryClient();
@@ -72,7 +74,10 @@ export const useShoppingCart = ({
             ? authCustomer.uuid
             : "guest-client";
 
-    const queryKey = shoppingCartQKs.loadShoppingCart(clientUUID);
+    const baseQueryKey = shoppingCartQKs.loadShoppingCart(clientUUID);
+    const queryKey = destination
+        ? [...baseQueryKey, { destination }]
+        : baseQueryKey;
 
     const {
         data,
@@ -80,12 +85,13 @@ export const useShoppingCart = ({
         isError,
     } = useQuery<LoadShoppingCartI>({
         queryKey,
-        queryFn: loadShoppingCart,
+        queryFn: () => loadShoppingCart(destination),
         staleTime: 1000 * 60 * 3,
         gcTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
         enabled: !!clientUUID,
         refetchInterval: 3 * 60 * 1000,
+        placeholderData: (previousData) => previousData,
     });
 
 
@@ -118,7 +124,7 @@ export const useShoppingCart = ({
     };
 
     const invalidate = () => {
-        queryClient.invalidateQueries({ queryKey });
+        queryClient.invalidateQueries({ queryKey: baseQueryKey });
     };
 
     const updateQtyMutation = useMutation<

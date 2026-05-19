@@ -33,6 +33,7 @@ import {
 import { MdShoppingBag, MdCheckBox } from "react-icons/md";
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import type { ProductVersionCardI } from "../../products/ProductTypes";
+import { FaBagShopping } from "react-icons/fa6";
 
 interface GuestCheckoutFormProps {
     onSave: (data: GuestCreateOrderFormType) => void;
@@ -490,6 +491,7 @@ interface OrderSummaryProps {
     shippingCost: string;
     boxQty: number;
     discount: string;
+    applicableOffers?: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
     total: string;
     selectedProductsCount: number;
     couponCode: string | null;
@@ -500,12 +502,13 @@ interface OrderSummaryProps {
     orderLoading: boolean;
     theme: string;
     error: string | null;
+    hasDestination: boolean;
 }
 
 const OrderSummaryPanel = ({
-    subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
+    subtotalBeforeIva, iva, shippingCost, boxQty, discount, applicableOffers = [], total,
     selectedProductsCount, couponCode, onCouponChange,
-    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error
+    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error, hasDestination
 }: OrderSummaryProps) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
@@ -517,38 +520,64 @@ const OrderSummaryPanel = ({
                 <div className="flex flex-col gap-2.5">
                     <div className="flex items-center justify-between text-sm">
                         <div>
-                            <span className="text-base-content/60">Subtotal ({selectedProductsCount} {selectedProductsCount === 1 ? "producto" : "productos"})</span>
-                            <p className="text-xs text-base-content/60">Antes de impuestos</p>
+                            <div className="flex items-center gap-1">
+                                <FaBagShopping className="text-primary" />
+                                <span className="text-base-content/60">Subtotal ({selectedProductsCount} {selectedProductsCount === 1 ? "producto" : "productos"})</span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">Antes de impuestos y descuentos</p>
                         </div>
-                        <span className="font-medium">${subtotalBeforeIva}</span>
+                        <span className="font-medium">+ ${subtotalBeforeIva}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm rounded-lg bg-base-200 px-3 py-2">
+                    <div className="flex items-center justify-between text-sm">
                         <div>
-                            <span className="flex items-center gap-1.5 text-base-content/70">
-                                <FaShippingFast className="text-primary text-sm" />
-                                Envío ({boxQty} {boxQty === 1 ? "caja" : "cajas"})
-                            </span>
-                            <p className="text-xs text-base-content/60">Antes de impuestos</p>
+                            <div className="flex items-center gap-1">
+                                <FaShippingFast className="text-primary" />
+                                <span className="text-base-content/60">Envío ({boxQty} {boxQty === 1 ? "caja" : "cajas"})</span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">{hasDestination ? "Antes de impuestos y descuentos" : "Requiere código postal"}</p>
                         </div>
-                        <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${shippingCost}</span>
+                        {hasDestination ? (
+                            <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${shippingCost}</span>
+                        ) : (
+                            <span className="text-xs text-base-content/40 italic">Por calcular</span>
+                        )}
                     </div>
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-base-content/60">IVA (16%)</span>
                         <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${iva}</span>
                     </div>
-                    {parseFloat(discount) > 0 && (
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-primary font-bold flex items-center gap-1.5">
-                                <FaTag className="text-xs" />
-                                Descuento
-                            </span>
-                            <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${discount}</span>
+
+                    {/* Breakdown of offers */}
+                    {applicableOffers.length > 0 ? (
+                        <div className="flex flex-col gap-2 pt-1">
+                            {applicableOffers.map((off, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
+                                    <span className="flex items-center gap-1.5 text-primary font-bold">
+                                        <FaTag className="text-xs" />
+                                        <p>Descuento</p>
+                                    </span>
+                                    <span className="font-bold text-primary flex items-center gap-0.5">
+                                        <BiMinus className="text-xs" />
+                                        ${off.discount}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
+                    ) : (
+                        parseFloat(discount) > 0 && (
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-primary font-bold flex items-center gap-1.5">
+                                    <FaTag className="text-xs" />
+                                    Descuento
+                                </span>
+                                <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${discount}</span>
+                            </div>
+                        )
                     )}
                 </div>
 
                 <div className="border-t border-base-300 pt-3 flex items-center justify-between">
-                    <span className="text-sm sm:text-base font-bold text-base-content">Total estimado</span>
+                    <span className="text-sm sm:text-base font-bold text-base-content">Total {!hasDestination && "parcial"}</span>
                     <span className="text-lg sm:text-xl font-extrabold text-primary">
                         ${total}
                     </span>
@@ -637,19 +666,26 @@ const ShoppingCartResumeV2 = () => {
     const { showTriggerAlert } = useTriggerAlert();
     const location = useLocation();
 
-    const handleCart = useHandleShoppingCart({
-        isAuth,
-        authCustomer,
-        showTriggerAlert: (type, message, options) =>
-            showTriggerAlert(type, message, options),
-    });
-
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
     const [paymentProvider, setPaymentProvider] = useState<PaymentProvidersType>(null);
     const [showGuestForm, setShowGuestForm] = useState<boolean>(false);
     const [couponCode, setCouponCode] = useState<string | null>(null);
     const [guestAddressForm, setGuestAddressForm] = useState<GuestCreateOrderFormType | null>(null);
     const [showGuestFormEdit, setShowGuestFormEdit] = useState<boolean>(false);
+
+    const destination = useMemo(() => {
+        if (isAuth && selectedAddress) return selectedAddress.zipCode;
+        if (!isAuth && guestAddressForm) return guestAddressForm.zipCode;
+        return undefined;
+    }, [isAuth, selectedAddress, guestAddressForm]);
+
+    const handleCart = useHandleShoppingCart({
+        isAuth,
+        authCustomer,
+        showTriggerAlert: (type, message, options) =>
+            showTriggerAlert(type, message, options),
+        destination,
+    });
 
     const guestAdvertisementModal = useRef<HTMLDialogElement>(null);
     const addressesModal = useRef<HTMLDialogElement>(null);
@@ -671,11 +707,11 @@ const ShoppingCartResumeV2 = () => {
     }, [handleCart.data]);
 
     useEffect(() => {
-        if (handleCart.isLoading) return;
+        if (handleCart.isLoading || handleCart.isError) return;
         if (!handleCart.data?.shoppingCart || handleCart.data.shoppingCart.length === 0 || selectedProducts.length < 1) {
             navigate("/carrito-de-compras");
         }
-    }, [handleCart.isLoading, handleCart.data, selectedProducts, navigate]);
+    }, [handleCart.isLoading, handleCart.isError, handleCart.data, selectedProducts, navigate]);
 
     useEffect(() => {
         if (order) navigate("/pagar-productos");
@@ -758,6 +794,7 @@ const ShoppingCartResumeV2 = () => {
         shippingCost: handleCart.data?.resume?.shippingCostBeforeTaxes || "0.00",
         boxQty: handleCart.data?.resume?.boxesCount || 0,
         discount: handleCart.data?.resume?.discount || "0.00",
+        applicableOffers: handleCart.data?.resume?.applicableOffers || [],
         total: handleCart.data?.resume?.total || "0.00",
         selectedProductsCount: selectedProducts.length,
         couponCode,
@@ -767,7 +804,8 @@ const ShoppingCartResumeV2 = () => {
         onCreateOrder: handleCreateOrder,
         orderLoading: orderLoading ?? false,
         theme: theme!,
-        error
+        error,
+        hasDestination: !!destination,
     };
 
     return (

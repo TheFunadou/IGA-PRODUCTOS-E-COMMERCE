@@ -52,7 +52,8 @@ export const saveShoppingCart = async (): Promise<ShoppingCartI[]> => {
 };
 
 
-export const loadShoppingCart = async (): Promise<LoadShoppingCartI> => {
-    const { data } = await api.get<LoadShoppingCartI>(`/shopping-cart/v2/load`);
+export const loadShoppingCart = async (destination?: string): Promise<LoadShoppingCartI> => {
+    const params = destination ? { destination } : {};
+    const { data } = await api.get<LoadShoppingCartI>(`/shopping-cart/v2/load`, { params });
     return data;
 };

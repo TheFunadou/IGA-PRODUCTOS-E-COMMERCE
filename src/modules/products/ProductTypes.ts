@@ -96,7 +96,14 @@ export interface ProductVersionCardI {
     stock: number
     images: { url: string, mainImage: boolean }[]
     rating: number
-    offer: { isOffer: boolean, discount: number }
+    offer: {
+        isOffer: boolean,
+        discount: number,
+        applicableOffers?: {
+            discount: number,
+            type: "PERCENTAGE" | "COUPON"
+        }[]
+    }
     parents: { sku: string, colorCode: string }[]
 };
 
@@ -120,7 +127,14 @@ export interface SafeParentDetailedI extends Omit<ParentBaseI, "id"> {
     imageUrl: string;
     unitPrice: string;
     finalPrice: string;
-    offer: { isOffer: boolean, discount: number };
+    offer: {
+        isOffer: boolean,
+        discount: number,
+        applicableOffers?: {
+            discount: number,
+            type: "PERCENTAGE" | "COUPON"
+        }[]
+    };
 };
 
 export interface ProductVersionDetailI {
@@ -137,7 +151,14 @@ export interface ProductVersionDetailI {
     stock: number;
     images: { url: string, mainImage: boolean }[];
     rating: number;
-    offer: { isOffer: boolean, discount: number };
+    offer: {
+        isOffer: boolean,
+        discount: number,
+        applicableOffers?: {
+            discount: number,
+            type: "PERCENTAGE" | "COUPON"
+        }[]
+    };
     parents: SafeParentDetailedI[];
     details: {
         techSheetUrl: string;

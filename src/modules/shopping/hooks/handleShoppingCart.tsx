@@ -8,6 +8,7 @@ interface UseHandleShoppingCartProps {
     isAuth: boolean;
     authCustomer?: { uuid: string } | null;
     showTriggerAlert: (type: "Successfull" | "Error", message: string, options?: { duration: number }) => void;
+    destination?: string;
 }
 
 /**
@@ -19,11 +20,13 @@ export const useHandleShoppingCart = ({
     isAuth,
     authCustomer,
     showTriggerAlert,
+    destination,
 }: UseHandleShoppingCartProps) => {
     const cart = useShoppingCart({
         isAuth,
         authCustomer,
         showTriggerAlert,
+        destination,
     });
 
     // Debounce estándar para acciones de UI (evitar spam de clics)

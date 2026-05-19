@@ -122,7 +122,11 @@ export interface OrderCheckoutItemI {
     unitPrice: string;
     finalPrice: string;
     quantity: number;
-    offer: { isOffer: boolean, discount: number };
+    offer: {
+        isOffer: boolean;
+        discount: number;
+        applicableOffers: { discount: number, type: "PERCENTAGE" | "COUPON", appliedCouponCode: string | null }[];
+    };
     subtotal: string;
     images: { url: string, mainImage: boolean }[];
 };

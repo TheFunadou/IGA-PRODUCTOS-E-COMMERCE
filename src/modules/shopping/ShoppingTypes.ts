@@ -20,11 +20,14 @@ export interface ShoppingCartI {
 export interface ShoppingCartResumeI {
     itemsSubtotal: string;
     itemsSubtotalBeforeTaxes: string;
+    shippingCost: string;
     shippingCostBeforeTaxes: string;
     boxesCount: number;
     iva: string;
     subtotal: string;
     discount: string;
+    applicableOffers: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
+    insuranceAmount: string;
     total: string;
 };
 

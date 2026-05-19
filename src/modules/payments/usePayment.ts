@@ -97,12 +97,21 @@ export const usePollingPaymentApprovedDetailV2 = (args: { orderUUID: string }) =
         refetchOnWindowFocus: false,
         enabled: !!orderUUID,
         refetchInterval: (query) => {
-            if (query.state.error) return false;
+            // Si hay error (distinto de 404), paramos. Si es 404, React Query reintentará según la config de 'retry'
+            if (query.state.error && (query.state.error as any)?.response?.status !== 404) return false;
+            
             const status = query.state.data?.status;
-            if (!status) return 3000;
+            // Si el estado es PENDING o no hay datos (pero no hay error fatal), seguimos polleando
+            if (!status || status === "PENDING" || status === "IN_PROCESS") return 3000;
+            
             return status === "APPROVED" ? false : 3000;
         },
-        retry: false,
+        retry: (failureCount, error) => {
+            // Reintentamos hasta 5 veces si es un 404 (orden aún no creada)
+            if ((error as any)?.response?.status === 404 && failureCount < 5) return true;
+            return false;
+        },
+        retryDelay: 2000,
     });
 };
 

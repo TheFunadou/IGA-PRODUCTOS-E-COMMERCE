@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { FaFire } from "react-icons/fa";
 import { formatPrice, makeSlug } from "../../products/Helpers";
@@ -25,6 +25,12 @@ const discountText = (discount?: number | null) => {
 };
 
 const CheckoutOrderItemV2 = ({ data }: Props) => {
+
+
+    useEffect(() => {
+        console.log(data)
+    }, [data]);
+
     const images = useMemo(() => {
         if (!data.images || data.images.length === 0) return [NotFoundSVG];
         return [...data.images]
@@ -92,15 +98,18 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
                             >
                                 {data.name}
                             </Link>
-                            {data.offer.isOffer && (
-                                <span className={clsx(
-                                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0",
-                                    discountBg(data.offer.discount)
-                                )}>
-                                    <FaFire className="text-[10px]" />
-                                    {data.offer.discount}% OFF
-                                </span>
-                            )}
+
+                            {
+                                data.offer.applicableOffers.map((offer, index) => (
+                                    <span key={index} className={clsx(
+                                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0",
+                                        discountBg(offer.discount)
+                                    )}>
+                                        <FaFire className="text-[10px]" />
+                                        {offer.discount}% OFF {offer.type === "COUPON" && offer.appliedCouponCode}
+                                    </span>
+                                ))
+                            }
                         </div>
                     </div>
 
@@ -147,7 +156,7 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
 
                     {/* Qty + Prices */}
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mt-1">
-                        
+
                         {/* Quantity (Read-only) */}
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-base-content/50 uppercase">Cantidad</span>
@@ -158,7 +167,7 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
 
                         {/* Prices */}
                         <div className="flex gap-4 sm:gap-6 items-end">
-                            
+
                             {/* Unit Price */}
                             <div className="flex flex-col items-start sm:items-end">
                                 <span className="text-[10px] sm:text-xs text-base-content/40 uppercase mb-0.5">

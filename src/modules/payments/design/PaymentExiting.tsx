@@ -362,11 +362,17 @@ const PaymentExitingV2 = () => {
     }
 
     /* ── Guard: cargando / polling ── */
-    if (isLoading || !data || !data.order) {
+    // Si todavía no tenemos la orden aprobada o el backend reporta PENDING, mostramos skeleton
+    if (isLoading || !data || data.status === "PENDING" || !data.order) {
         return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
     }
 
-    if (data.status !== "APPROVED") throw new Error("Error al obtener el estatus de la orden de compra");
+    // Si llegamos aquí, data.status debería ser APPROVED (según la lógica del hook)
+    // Si no lo es, pero tenemos la orden, podríamos mostrarla pero con una advertencia, 
+    // pero lo ideal es seguir en skeleton hasta que sea APPROVED.
+    if (data.status !== "APPROVED") {
+        return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
 
     const { order } = data;
     const { shipping, items, paymentResume, buyer, paymentDetails } = order;

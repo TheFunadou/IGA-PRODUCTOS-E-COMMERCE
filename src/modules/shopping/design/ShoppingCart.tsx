@@ -6,7 +6,7 @@ import {
     MdOutlineRemoveShoppingCart,
     MdShoppingBag,
 } from "react-icons/md";
-import { FaShippingFast, FaShoppingCart, FaHeart, FaLock } from "react-icons/fa";
+import { FaShippingFast, FaShoppingCart, FaHeart, FaLock, FaTag } from "react-icons/fa";
 // Hooks y Store
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
@@ -21,34 +21,40 @@ import type { OrderCreatedType } from "../../orders/OrdersTypes";
 import { usePaymentStore } from "../states/paymentStore";
 import ProductVersionCardV2 from "../../products/components/ProductVersionCard";
 import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
+import { BiMinus, BiPlus } from "react-icons/bi";
+import { FaBagShopping } from "react-icons/fa6";
 
 // ── Subcomponente: Resumen de Pedido ─────────────────────────────────────────
 interface OrderSummaryProps {
-    checkedCount?: number;
-    subtotalBeforeTaxes?: string;
-    shippingCostBeforeTaxes?: string;
-    iva?: string;
-    discount?: string;
-    total?: string;
-    boxesQty?: number;
+    selectedProductsCount: number;
+    subtotalBeforeIva: string;
+    shippingCost: string;
+    iva: string;
+    discount: string;
+    applicableOffers?: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
+    total: string;
+    boxQty: number;
     pendingOrder: boolean;
     order?: OrderCreatedType | null;
     onCheckout: () => void;
     onPendingPayment: () => void;
+    hasDestination?: boolean;
 }
 
 const OrderSummary = ({
-    checkedCount,
-    subtotalBeforeTaxes,
-    shippingCostBeforeTaxes,
+    selectedProductsCount,
+    subtotalBeforeIva,
+    shippingCost,
     iva,
     discount,
+    applicableOffers = [],
     total,
-    boxesQty,
+    boxQty,
     pendingOrder,
     order,
     onCheckout,
     onPendingPayment,
+    hasDestination = false,
 }: OrderSummaryProps) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
@@ -58,54 +64,87 @@ const OrderSummary = ({
                     Resumen del pedido
                 </h2>
             </div>
-            <div className="p-4 flex flex-col gap-3">
-                {/* Subtotal */}
-                <div className="flex items-center justify-between text-sm sm:text-base">
-                    <div>
-                        <span className="text-base-content/60">
-                            Subtotal ({checkedCount} {checkedCount === 1 ? "producto" : "productos"})
-                        </span>
-                        <p className="text-xs text-base-content/60">Antes de impuestos</p>
+            <div className="p-4 flex flex-col gap-4">
+                <div className="flex flex-col gap-2.5">
+                    {/* Subtotal */}
+                    <div className="flex items-center justify-between text-sm">
+                        <div>
+                            <div className="flex items-center gap-1">
+                                <FaBagShopping className="text-primary" />
+                                <span className="text-base-content/60">
+                                    Subtotal ({selectedProductsCount} {selectedProductsCount === 1 ? "producto" : "productos"})
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">Antes de impuestos y descuentos</p>
+                        </div>
+                        <span className="font-medium">+ ${subtotalBeforeIva}</span>
                     </div>
-                    <span className="font-semibold text-base-content">
-                        ${subtotalBeforeTaxes}
-                    </span>
-                </div>
-                {/* Envío */}
-                <div className="flex items-center justify-between text-sm sm:text-base rounded-xl bg-base-200 px-3 py-2.5">
-                    <div>
-                        <span className="flex items-center gap-2 text-base-content/70">
-                            <FaShippingFast className="text-primary text-base sm:text-lg flex-shrink-0" />
-                            Envío ({boxesQty} {boxesQty === 1 ? "caja" : "cajas"})
-                        </span>
-                        <p className="text-xs text-base-content/60">Antes de impuestos</p>
+
+                    {/* Envío */}
+                    <div className="flex items-center justify-between text-sm">
+                        <div>
+                            <div className="flex items-center gap-1">
+                                <FaShippingFast className="text-primary" />
+                                <span className="text-base-content/60">
+                                    Envío ({boxQty} {boxQty === 1 ? "caja" : "cajas"})
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">
+                                {hasDestination ? "Antes de impuestos y descuentos" : "Requiere código postal"}
+                            </p>
+                        </div>
+                        {hasDestination ? (
+                            <span className="font-medium flex items-center gap-0.5">
+                                <BiPlus className="text-xs" />${shippingCost}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-base-content/40 italic">Por calcular</span>
+                        )}
                     </div>
-                    <span className="font-semibold text-base-content">
-                        ${shippingCostBeforeTaxes}
-                    </span>
-                </div>
-                <div className="flex items-center justify-between text-sm sm:text-base rounded-xl bg-base-200 px-3 py-2.5">
-                    <span className="flex items-center gap-2 text-base-content/70">
-                        IVA
-                    </span>
-                    <span className="font-semibold text-base-content">
-                        ${iva}
-                    </span>
-                </div>
-                {discount && parseFloat(discount) > 0 && (
-                    <div className="flex items-center justify-between text-sm sm:text-base rounded-xl bg-base-200 px-3 py-2.5">
-                        <span className="flex items-center gap-2 text-base-content/70">
-                            Descuento
-                        </span>
-                        <span className="font-semibold text-base-content">
-                            ${discount}
+
+                    {/* IVA */}
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-base-content/60">IVA (16%)</span>
+                        <span className="font-medium flex items-center gap-0.5">
+                            <BiPlus className="text-xs" />${iva}
                         </span>
                     </div>
-                )}
+
+                    {/* Breakdown of offers */}
+                    {applicableOffers.length > 0 ? (
+                        <div className="flex flex-col gap-2 pt-1">
+                            {applicableOffers.map((off, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
+                                    <span className="flex items-center gap-1.5 text-primary font-bold">
+                                        <FaTag className="text-xs" />
+                                        <p>Descuento</p>
+                                    </span>
+                                    <span className="font-bold text-primary flex items-center gap-0.5">
+                                        <BiMinus className="text-xs" />
+                                        ${off.discount}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        parseFloat(discount) > 0 && (
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-primary font-bold flex items-center gap-1.5">
+                                    <FaTag className="text-xs" />
+                                    Descuento
+                                </span>
+                                <span className="text-primary font-bold flex items-center gap-0.5">
+                                    <BiMinus className="text-xs" />${discount}
+                                </span>
+                            </div>
+                        )
+                    )}
+                </div>
+
                 {/* Total */}
                 <div className="border-t border-base-300 pt-3 flex items-center justify-between">
                     <span className="text-sm sm:text-base font-bold text-base-content">
-                        Total estimado
+                        Total {!hasDestination && "parcial"}
                     </span>
                     <span className="text-lg sm:text-xl font-extrabold text-primary">
                         ${total}
@@ -126,14 +165,14 @@ const OrderSummary = ({
                         type="button"
                         className="w-full btn btn-primary font-bold mt-1 gap-2"
                         onClick={onCheckout}
-                        disabled={checkedCount === 0}
+                        disabled={selectedProductsCount === 0}
                     >
                         <FaLock className="text-sm" />
                         Proceder al pago
                     </button>
                 )}
                 <p className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1">
-                    <FaLock className="text-[8px]" /> Pago seguro
+                    <FaLock className="text-[8px]" /> Pago seguro y encriptado
                 </p>
             </div>
         </div>
@@ -180,17 +219,19 @@ const ShoppingCartV2 = () => {
     }, [order]);
 
     const summaryProps: OrderSummaryProps = {
-        checkedCount: handleCart.data?.shoppingCart.length,
-        subtotalBeforeTaxes: handleCart.data?.resume?.itemsSubtotalBeforeTaxes,
-        shippingCostBeforeTaxes: handleCart.data?.resume?.shippingCostBeforeTaxes,
-        iva: handleCart.data?.resume?.iva,
-        discount: handleCart.data?.resume?.discount,
-        total: handleCart.data?.resume?.total,
-        boxesQty: handleCart.data?.resume?.boxesCount,
+        selectedProductsCount: handleCart.data?.shoppingCart.length || 0,
+        subtotalBeforeIva: handleCart.data?.resume?.itemsSubtotalBeforeTaxes || "0.00",
+        shippingCost: handleCart.data?.resume?.shippingCostBeforeTaxes || "0.00",
+        iva: handleCart.data?.resume?.iva || "0.00",
+        discount: handleCart.data?.resume?.discount || "0.00",
+        applicableOffers: handleCart.data?.resume?.applicableOffers || [],
+        total: handleCart.data?.resume?.total || "0.00",
+        boxQty: handleCart.data?.resume?.boxesCount || 0,
         pendingOrder,
         order,
         onCheckout: () => navigate("/resumen-de-carrito"),
         onPendingPayment: () => navigate("/pagar-productos"),
+        hasDestination: false,
     };
 
     return (

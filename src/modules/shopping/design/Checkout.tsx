@@ -16,6 +16,7 @@ import {
     FaTag,
     FaExclamationTriangle,
 } from "react-icons/fa";
+import { FaBagShopping } from "react-icons/fa6";
 import { MdShoppingBag, MdPayment } from "react-icons/md";
 import { SiMercadopago } from "react-icons/si";
 import CheckoutOrderItemV2 from "../components/CheckoutOrderItem";
@@ -204,27 +205,32 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                 <div className="flex flex-col gap-2.5">
                     {/* Items Subtotal Before Taxes */}
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-base-content/60">
-                            Subtotal
-                            <span className="block text-[10px] text-base-content/40">Antes de impuestos</span>
-                        </span>
-                        <span className="font-medium flex items-center gap-0.5">
-                            <BiPlus className="text-xs" />
-                            ${data?.resume && formatPrice(data.resume.itemsSubtotalBeforeTaxes, "es-MX")}
+                        <div>
+                            <div className="flex items-center gap-1">
+                                <FaBagShopping className="text-primary" />
+                                <span className="text-base-content/60">
+                                    Subtotal ({data?.items.length} {data?.items.length === 1 ? "producto" : "productos"})
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">Antes de impuestos y descuentos</p>
+                        </div>
+                        <span className="font-medium">
+                            + ${data?.resume && formatPrice(data.resume.itemsSubtotalBeforeTaxes, "es-MX")}
                         </span>
                     </div>
 
                     {/* Shipping */}
-                    <div className="flex items-center justify-between text-sm rounded-lg bg-base-200 px-3 py-2">
+                    <div className="flex items-center justify-between text-sm">
                         <div>
-                            <span className="flex items-center gap-1.5 text-base-content/70">
-                                <FaShippingFast className="text-primary text-sm" />
-                                Envío ({data?.resume && (
-                                    data.resume.boxesCount > 1 ? `${data.resume.boxesCount} cajas` : `${data.resume.boxesCount} caja`
-                                )})
-                            </span>
-
-                            <p className="text-[10px] text-base-content/40">Antes de impuestos</p>
+                            <div className="flex items-center gap-1">
+                                <FaShippingFast className="text-primary" />
+                                <span className="text-base-content/60">
+                                    Envío ({data?.resume && (
+                                        data.resume.boxesCount > 1 ? `${data.resume.boxesCount} cajas` : `${data.resume.boxesCount} caja`
+                                    )})
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-base-content/60">Antes de impuestos y descuentos</p>
                         </div>
                         <span className="font-medium flex items-center gap-0.5">
                             <BiPlus className="text-xs" />
@@ -241,18 +247,35 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                         </span>
                     </div>
 
-                    {/* Discount */}
-                    {data?.resume && parseFloat(data.resume.discount) > 0 && (
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-primary font-bold flex items-center gap-1.5">
-                                <FaTag className="text-xs" />
-                                Descuento
-                            </span>
-                            <span className="text-primary font-bold flex items-center gap-0.5">
-                                <BiMinus className="text-xs" />
-                                ${formatPrice(data.resume.discount, "es-MX")}
-                            </span>
+                    {/* Breakdown of offers */}
+                    {data?.resume?.applicableOffers && data.resume.applicableOffers.length > 0 ? (
+                        <div className="flex flex-col gap-2 pt-1">
+                            {data.resume.applicableOffers.map((off, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
+                                    <span className="flex items-center gap-1.5 text-primary font-bold">
+                                        <FaTag className="text-xs" />
+                                        {off.type === "PERCENTAGE" ? "Descuento directo" : "Descuento por cupón"}
+                                    </span>
+                                    <span className="font-bold text-primary flex items-center gap-0.5">
+                                        <BiMinus className="text-xs" />
+                                        ${off.discount}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
+                    ) : (
+                        data?.resume && parseFloat(data.resume.discount) > 0 && (
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-primary font-bold flex items-center gap-1.5">
+                                    <FaTag className="text-xs" />
+                                    Descuento
+                                </span>
+                                <span className="text-primary font-bold flex items-center gap-0.5">
+                                    <BiMinus className="text-xs" />
+                                    ${formatPrice(data.resume.discount, "es-MX")}
+                                </span>
+                            </div>
+                        )
                     )}
                 </div>
 
