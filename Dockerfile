@@ -69,7 +69,12 @@ ENV VITE_RECAPTCHA_SITE_KEY=$VITE_RECAPTCHA_SITE_KEY
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 # Build producción
-RUN pnpm build
+RUN echo "=== DIAGNOSTICO DE COMPILACION ===" && \
+    echo "VITE_NODE_ENV: '$VITE_NODE_ENV'" && \
+    echo "VITE_BACKEND_URL: '$VITE_BACKEND_URL'" && \
+    echo "=================================" && \
+    pnpm build
+
 
 
 
