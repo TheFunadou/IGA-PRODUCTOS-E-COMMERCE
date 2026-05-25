@@ -91,7 +91,7 @@ const WholesaleBadge = ({ qty, unitPrice }: { qty: number; unitPrice: string }) 
     const saving = (price * qty * discount).toFixed(2);
     return (
         <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            <FaArrowTrendUp className="text-primary flex-shrink-0" />
+            <FaArrowTrendUp className="text-primary shrink-0" />
             <p className="text-xs text-primary font-semibold">
                 Comprando {qty} uds. ahorras ~${saving} MXN ({(discount * 100).toFixed(0)}% vol.)
             </p>
@@ -109,7 +109,7 @@ const TrustBadges = () => (
             { icon: FaHeadset, label: "Soporte dedicado", sub: "Asesor disponible" },
         ].map(({ icon: Icon, label, sub }, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-base-100 border border-base-200 hover:bg-base-200/50 hover:shadow-sm transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     <Icon className="text-primary text-lg" />
                 </div>
                 <div>
@@ -164,8 +164,7 @@ interface PurchaseCardProps {
 }
 
 const PurchaseCard = ({
-    unitPrice, unitPriceWithDiscount, isOffer, discount,
-    shippingCost, boxesQty, stock,
+    unitPrice, unitPriceWithDiscount, isOffer, discount, stock,
     productQty, selectProductQty, stockError, isFavorite,
     onQtySelect, onQtySet, onQtyLimit,
     onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock
@@ -174,7 +173,7 @@ const PurchaseCard = ({
         {/* Header precio */}
         <div className={clsx(
             "px-6 pt-6 pb-5 border-b border-base-200 relative overflow-hidden",
-            isOffer && "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"
+            isOffer && "bg-linear-to-br from-primary/10 via-primary/5 to-transparent"
         )}>
             {isOffer && <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />}
             {isOffer ? (
@@ -214,10 +213,10 @@ const PurchaseCard = ({
 
         <div className="p-6 flex flex-col gap-5">
             {/* Envío */}
-            <div className="flex items-center justify-between py-3.5 px-4 bg-base-200/50 rounded-2xl border border-base-200">
+            {/* <div className="flex items-center justify-between py-3.5 px-4 bg-base-200/50 rounded-2xl border border-base-200">
                 <div className="flex items-center gap-3">
                     <div className="p-2bg-primary/10 rounded-xl">
-                        <FaTruck className="text-primary text-base flex-shrink-0" />
+                        <FaTruck className="text-primary text-base shrink-0" />
                     </div>
                     <div>
                         <p className="text-xs font-bold text-base-content">Envío estimado</p>
@@ -227,7 +226,7 @@ const PurchaseCard = ({
                 <p className="text-sm font-bold text-base-content bg-white py-1 px-2.5 rounded-lg shadow-sm border border-base-200">
                     ${formatPrice(shippingCost.toString(), "es-MX")}
                 </p>
-            </div>
+            </div> */}
 
             {/* Cantidad */}
             <div className="flex flex-col gap-2">
@@ -573,7 +572,7 @@ const ProductVersionDetailV2 = () => {
                                             type="button"
                                             onClick={() => setImage(img.url)}
                                             className={clsx(
-                                                "w-[76px] h-[76px] sm:w-[88px] sm:h-[88px] flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-white",
+                                                "w-[76px] h-[76px] sm:w-[88px] sm:h-[88px] shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-white",
                                                 img.url === image
                                                     ? "border-primary shadow-md ring-2 ring-primary/20 ring-offset-2 scale-105"
                                                     : "border-base-200 hover:border-primary/50 opacity-70 hover:opacity-100 hover:scale-105"
@@ -706,7 +705,7 @@ const ProductVersionDetailV2 = () => {
                                                 <div className="flex flex-col items-center w-full px-1">
                                                     <div className="flex items-center gap-1.5 mb-1.5 w-full justify-center">
                                                         <div
-                                                            className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm border border-base-300"
+                                                            className="w-3 h-3 rounded-full shrink-0 shadow-sm border border-base-300"
                                                             style={{ backgroundColor: version.colorCode }}
                                                         />
                                                     </div>
@@ -739,7 +738,7 @@ const ProductVersionDetailV2 = () => {
                                     <FaWarehouse className="text-[150px] text-primary" />
                                 </div>
                                 <div className="flex items-center gap-3 relative z-10">
-                                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                                         <FaWarehouse className="text-primary text-xl" />
                                     </div>
                                     <p className="text-base font-extrabold text-base-content leading-tight">¿Compras de volúmen?</p>
@@ -790,7 +789,7 @@ const ProductVersionDetailV2 = () => {
                                     </button>
                                 ))}
                             </div>
-                            <div className="pt-8 pb-4 text-[15px] leading-relaxed text-base-content/80 min-h-[16rem]">
+                            <div className="pt-8 pb-4 text-[15px] leading-relaxed text-base-content/80 min-h-64">
                                 {tabs[activeTab].content ? (
                                     <div className="prose prose-sm max-w-none text-base-content/80 font-medium">
                                         {tabs[activeTab].content.split('\n').map((paragraph, idx) => (
@@ -911,7 +910,7 @@ const ProductVersionDetailV2 = () => {
                                         <div key={i} className="rounded-3xl border border-base-200 bg-base-100 p-6 flex flex-col gap-4 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary border-2 border-primary/20">
+                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary border-2 border-primary/20">
                                                         <FaCircleUser className="text-lg" />
                                                     </div>
                                                     <div className="flex flex-col">
@@ -947,7 +946,7 @@ const ProductVersionDetailV2 = () => {
                             <div className="mt-8">
                                 {isAuth && !data.details.isReviewed && (
                                     <div className="rounded-3xl bg-base-100 border border-base-200 shadow-xl p-8 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary to-primary" />
+                                        <div className="absolute top-0 left-0 w-full h-1.5 bg-linear-to-r from-primary via-secondary to-primary" />
                                         <div className="mb-6">
                                             <h3 className="text-xl font-black text-base-content">Escribir una opinión</h3>
                                             <p className="text-sm text-base-content/60 font-medium mt-1">Comparte tu experiencia para ayudar a otros clientes</p>
@@ -1049,7 +1048,7 @@ const ProductVersionDetailV2 = () => {
                                     key={`${i}-${item.sku}`}
                                     versionData={item}
                                     transparent={false}
-                                    className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]"
+                                    className="shrink-0 w-[240px] sm:w-[260px] md:w-[280px]"
                                 />
                             ))}
                         </OverflowXComponent>
