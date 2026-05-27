@@ -155,7 +155,7 @@ const ShopV2 = () => {
                 <div className="flex flex-col lg:flex-row gap-8">
 
                     {/* ── SIDEBAR ── */}
-                    <div className="hidden lg:block w-full lg:w-64 xl:w-72 flex-shrink-0 relative">
+                    <div className="hidden lg:block w-full lg:w-64 xl:w-72 shrink-0 relative">
                         <div className="w-full bg-base-100 rounded-2xl border border-base-300 p-5 sticky top-30">
 
                             {/* Categorías */}
@@ -197,7 +197,7 @@ const ShopV2 = () => {
                                         )}
                                         onClick={handleSetClear}
                                     >
-                                        <FaStore className="text-xs flex-shrink-0" />
+                                        <FaStore className="text-xs shrink-0" />
                                         Toda la tienda
                                     </button>
 
@@ -215,7 +215,7 @@ const ShopV2 = () => {
                                             >
                                                 {category.name}
                                                 <IoIosArrowDown className={clsx(
-                                                    "text-xs flex-shrink-0 transition-transform duration-200",
+                                                    "text-xs shrink-0 transition-transform duration-200",
                                                     selectedCategory && category.uuid === selectedCategory.uuid
                                                         ? "rotate-180 text-primary"
                                                         : "text-base-content/40"
@@ -395,7 +395,7 @@ const ShopV2 = () => {
                             <div>
                                 <div className="flex items-center gap-3">
                                     {!selectedCategory && (
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                                             <FaShop className="text-primary text-lg sm:text-xl" />
                                         </div>
                                     )}
