@@ -36,6 +36,7 @@ const CheckoutV2 = () => {
     if (data && data.items.length === 0) navigate("/carrito-de-compras");
 
     const handleCanceled = async () => {
+        console.log("Cancelando orden...")
         await cancelOrderMutation.mutateAsync();
         await cancelOrder().then(() => {
             return navigate("/carrito-de-compras");
@@ -79,7 +80,7 @@ const CheckoutV2 = () => {
             {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                         <MdPayment className="text-primary text-lg sm:text-xl" />
                     </div>
                     <div>
@@ -167,7 +168,7 @@ const CheckoutV2 = () => {
                 </div>
 
                 {/* ── Right Column ── */}
-                <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+                <div className="w-full lg:w-72 xl:w-80 shrink-0">
                     <PaymentSummaryPanel order={order} data={data} />
                 </div>
             </section>
@@ -309,7 +310,7 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                                 "flex items-center gap-3 p-3 rounded-xl border",
                                 "border-primary/40 bg-primary/5"
                             )}>
-                                <SiMercadopago className="text-2xl text-primary flex-shrink-0" />
+                                <SiMercadopago className="text-2xl text-primary shrink-0" />
                                 <div>
                                     <p className="text-sm font-bold text-base-content">Mercado Pago</p>
                                     <p className="text-[10px] text-base-content/50">Crédito, débito, OXXO, MSI y más</p>

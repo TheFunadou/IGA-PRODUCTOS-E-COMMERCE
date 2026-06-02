@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { FaFire } from "react-icons/fa";
 import { formatPrice, makeSlug } from "../../products/Helpers";
@@ -26,11 +26,6 @@ const discountText = (discount?: number | null) => {
 
 const CheckoutOrderItemV2 = ({ data }: Props) => {
 
-
-    useEffect(() => {
-        console.log(data)
-    }, [data]);
-
     const images = useMemo(() => {
         if (!data.images || data.images.length === 0) return [NotFoundSVG];
         return [...data.images]
@@ -52,7 +47,7 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
             <div className="flex gap-4 sm:gap-5">
 
                 {/* ── Image ── */}
-                <Link to={productUrl} className="flex-shrink-0 group">
+                <Link to={productUrl} className="shrink-0 group">
                     <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-xl overflow-hidden border border-base-300 group-hover:border-primary/50 transition-colors duration-200 aspect-square group/images relative">
                         {/* Mobile version (single image) */}
                         <img
@@ -102,7 +97,7 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
                             {
                                 data.offer.applicableOffers.map((offer, index) => (
                                     <span key={index} className={clsx(
-                                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0",
+                                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold shrink-0",
                                         discountBg(offer.discount)
                                     )}>
                                         <FaFire className="text-[10px]" />
@@ -141,7 +136,7 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
                             <span
-                                className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-base-300 flex-shrink-0 shadow-sm"
+                                className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-base-300 shrink-0 shadow-sm"
                                 style={{ backgroundColor: data.color.code }}
                             />
                             <span className="text-xs sm:text-sm text-base-content/60 font-medium whitespace-nowrap">
