@@ -29,6 +29,7 @@ import { useAuthStore } from "../../auth/states/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
 import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
+import { trackPurchase } from "../../analytics/MetaEvents";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -243,6 +244,7 @@ const PaymentExitingV2 = () => {
     const orderUUID = query.get("external_reference");
 
     const pollAttemptsRef = useRef(0);
+    const hasTrackedPurchaseRef = useRef(false);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
 
@@ -276,6 +278,11 @@ const PaymentExitingV2 = () => {
 
     useEffect(() => {
         if (!data?.order) return;
+
+        if (data.status === "APPROVED" && !hasTrackedPurchaseRef.current) {
+            trackPurchase(data.order);
+            hasTrackedPurchaseRef.current = true;
+        }
 
         if (
             data.status === "APPROVED" &&

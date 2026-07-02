@@ -13,6 +13,7 @@ import { TbShoppingCartDown } from "react-icons/tb";
 import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+import { trackAddToCart } from "../../analytics/MetaEvents";
 
 type Props = {
     versionData: ProductVersionCardI;
@@ -86,6 +87,7 @@ const ProductVersionCardV2 = ({ versionData, className, imageLoading, transparen
     };
 
     const handleAddItem = () => {
+        trackAddToCart(versionData, 1);
         updateQtyItem({
             isChecked: true,
             item: {

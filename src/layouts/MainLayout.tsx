@@ -15,7 +15,7 @@ const MainLayout = () => {
     const [loading, setLoading] = useState(false);
     const { isAuth, logout, getProfile, authCustomer } = useAuthStore();
     const { order } = usePaymentStore();
-    const { cookieConsent, setCookieConsent } = useCookieStore();
+    const { consentStatus, setConsentStatus } = useCookieStore();
     const { setTheme, theme } = useThemeStore();
     const navigate = useNavigate();
 
@@ -30,8 +30,8 @@ const MainLayout = () => {
         }
     };
 
-    const handleSetConsent = (consent: boolean) => {
-        setCookieConsent(consent);
+    const handleSetConsent = (status: "accepted" | "rejected") => {
+        setConsentStatus(status);
     };
 
     const handleLinkOrder = async ({ orderUUID }: { orderUUID: string }) => {
@@ -70,7 +70,7 @@ const MainLayout = () => {
             <main className="w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat">
                 <Outlet />
             </main>
-            {!cookieConsent && <CookieConsent onSetConsent={handleSetConsent} />}
+            {consentStatus === null && <CookieConsent onSetConsent={handleSetConsent} />}
             <MainFooter />
             <DrawerMobileMenu onClose={() => setShowMobileSubmenu(false)} isOpen={showMobileSubmenu} onLogout={handleLogout} />
         </div>

@@ -21,6 +21,8 @@ import { MdShoppingBag, MdPayment } from "react-icons/md";
 import { SiMercadopago } from "react-icons/si";
 import CheckoutOrderItemV2 from "../components/CheckoutOrderItem";
 import type { CheckoutOrderI, OrderCreatedType } from "../../orders/OrdersTypes";
+import { trackInitiateCheckout } from "../../analytics/MetaEvents";
+import { useEffect } from "react";
 
 const CheckoutV2 = () => {
     document.title = "Iga Productos | Resumen de pago";
@@ -32,6 +34,14 @@ const CheckoutV2 = () => {
 
     const cancelOrderMutation = useCancelOrder({ orderUUID: order.orderUUID, type: "ABANDONED" });
     const { data, isLoading, error, refetch } = useFetchCheckoutOrderV2({ orderUUID: order.orderUUID });
+    const hasTrackedRef = useRef(false);
+
+    useEffect(() => {
+        if (data && data.items.length > 0 && !hasTrackedRef.current) {
+            trackInitiateCheckout(parseFloat(data.resume.total), data.items.length);
+            hasTrackedRef.current = true;
+        }
+    }, [data]);
 
     if (data && data.items.length === 0) navigate("/carrito-de-compras");
 

@@ -11,6 +11,7 @@ import { stringStrengthEvaluator } from "../helpers"
 import clsx from "clsx"
 import { useAuthStore } from "../states/authStore"
 import { useSendVerificationToken, useRegisterCustomer, useResendVerificationToken } from "../useAuth"
+import { trackCompleteRegistration } from "../../analytics/MetaEvents"
 
 type VerificationFormType = { verificationToken: string; };
 const COUNTDOWN_SECONDS = 5 * 60;
@@ -153,6 +154,7 @@ const CreateAccount = () => {
         if (!formData) return;
         try {
             await registerMutation.mutateAsync({ dto: formData, verificationToken });
+            trackCompleteRegistration();
             navigate("/iniciar-sesion");
         } catch { /* manejado por hook */ }
     };

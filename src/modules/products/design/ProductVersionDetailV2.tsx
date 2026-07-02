@@ -34,6 +34,7 @@ import ProductVersionImageGallery from "../components/ProductVersionImageGallery
 import { showModal } from "../../../global/GlobalHelpers";
 import { useFetchProductVersionCardsV2, useFetchProductVersionDetailV2 } from "../hooks/useFetchProductVersionCards";
 import ProductVersionCardV2 from "../components/ProductVersionCard";
+import { trackViewContent, trackAddToWishlist, trackAddToCart } from "../../analytics/MetaEvents";
 
 // ── Helpers de descuento ──────────────────────────────────────────────────────
 const discountColorBg = (discount?: number | null) => {
@@ -369,6 +370,7 @@ const ProductVersionDetailV2 = () => {
 
     useEffect(() => {
         if (!data) return;
+        trackViewContent(data);
         document.title = `Iga Productos | ${data.name}`;
 
         let sortedImages = [...data.images].sort((a, b) => a.mainImage === b.mainImage ? 0 : a.mainImage ? -1 : 1).map(img => img.url);
@@ -452,16 +454,26 @@ const ProductVersionDetailV2 = () => {
         onQtySelect: handleSelectProductQty,
         onQtySet: handleSetProductQty,
         onQtyLimit: handleQtyLimit,
-        onAddCart: () => data && updateQtyItem({
-            isChecked: true,
-            item: {
-                sku: data.sku,
-                productUUID: data.productUUID,
-            },
-            quantity: productQty
-        }),
+        onAddCart: () => {
+            if (data) {
+                trackAddToCart(data, productQty);
+                updateQtyItem({
+                    isChecked: true,
+                    item: {
+                        sku: data.sku,
+                        productUUID: data.productUUID,
+                    },
+                    quantity: productQty
+                });
+            }
+        },
         onBuyNow: () => data && navigate(`/pagar-ahora/${data.productUUID}/${data.sku}?quantity=${productQty}`),
-        onToggleFavorite: toggleFavorite,
+        onToggleFavorite: (e) => {
+            toggleFavorite(e);
+            if (!isFavorite && data) {
+                trackAddToWishlist(data);
+            }
+        },
         onShare: handleShareProduct,
         maxStock: data?.stock ?? 1,
     };

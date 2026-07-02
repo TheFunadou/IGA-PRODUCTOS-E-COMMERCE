@@ -6,6 +6,7 @@ import { BiMessageDetail } from "react-icons/bi";
 import { HiLightBulb, HiShieldCheck } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 import { useState } from "react";
+import { trackLead } from "../../analytics/MetaEvents";
 
 /* ── Shared design tokens (same as AboutIGA.tsx / Certifications.tsx) ── */
 const SectionBar = () => (
@@ -177,6 +178,7 @@ const Contact = () => {
                             <a
                                 href={`mailto:${CONTACT_EMAIL}`}
                                 className="btn btn-primary w-full gap-2 mt-auto"
+                                onClick={() => trackLead()}
                             >
                                 <MdEmail className="text-lg" />
                                 Enviar correo
@@ -217,14 +219,15 @@ const Contact = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="btn btn-success flex-1 gap-2 text-white"
+                                    onClick={() => trackLead()}
                                 >
                                     <FaWhatsapp className="text-lg" />
                                     WhatsApp
                                 </a>
                                 <a
-
                                     href={`tel:${CONTACT_PHONE}`}
                                     className="btn btn-outline btn-success flex-1 gap-2"
+                                    onClick={() => trackLead()}
                                 >
                                     <MdPhone className="text-lg" />
                                     Llamar

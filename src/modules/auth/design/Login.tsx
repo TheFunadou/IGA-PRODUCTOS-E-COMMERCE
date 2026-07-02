@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../states/authStore";
 import { GoogleLogin } from "@react-oauth/google";
 import clsx from "clsx";
+import { trackCompleteRegistration } from "../../analytics/MetaEvents";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
@@ -82,6 +83,7 @@ const Login = () => {
             const { credential } = credentialResponse;
             if (credential) {
                 await loginWithGoogle(credential);
+                trackCompleteRegistration();
             }
         } catch (err) {
             console.error("Error with Google Login", err);

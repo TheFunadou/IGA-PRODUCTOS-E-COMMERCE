@@ -62,8 +62,11 @@ const queryClient = new QueryClient({
 });
 
 
+import { usePageTracking } from "./modules/analytics/usePageTracking";
+
 // Wrapper para los providers
 function RootLayout() {
+  usePageTracking();
   return (
     <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>

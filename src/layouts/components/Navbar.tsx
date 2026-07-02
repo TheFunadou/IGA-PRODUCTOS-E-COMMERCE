@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { IoLogOutOutline } from "react-icons/io5";
 import { VscThreeBars } from "react-icons/vsc";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuthStore } from "../../modules/auth/states/authStore";
 import { useFetchSearchProductVersions } from "../../modules/products/hooks/useFetchProductVersionCards";
 import useDebounceInputString from "../../modules/products/hooks/useDebounce";
@@ -16,6 +16,7 @@ import ShopMenuPreview from "./ShopMenuPreview";
 import IgaLogo from "../../assets/logo/IGA-LOGO.webp";
 import { useTriggerAlert } from "../../modules/alerts/states/TriggerAlert";
 import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
+import { trackSearch } from "../../modules/analytics/MetaEvents";
 
 interface MainNavbarProps {
     onOpenMobileMenu: () => void;
@@ -46,6 +47,12 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
 
     useOutsideSearchClick(searchResultsRef, () => setShowSearchResults(false));
     useOutsideSearchClick(dropdownRef, () => setIsDropdownOpen(false));
+
+    useEffect(() => {
+        if (debouncedValue && searchedData) {
+            trackSearch(debouncedValue, searchedData.length);
+        }
+    }, [debouncedValue, searchedData]);
 
     const cancelHideTimeout = () => {
         if (hideTimeoutRef.current !== null) {
