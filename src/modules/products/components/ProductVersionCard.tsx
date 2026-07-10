@@ -161,7 +161,7 @@ const ProductVersionCardV2 = ({ versionData, className, imageLoading, transparen
                 </div>
 
                 {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/images:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/images:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 {/* Fire badge */}
                 {versionData.offer.isOffer && (
@@ -227,7 +227,7 @@ const ProductVersionCardV2 = ({ versionData, className, imageLoading, transparen
 
                 {/* Subcategories */}
                 {versionData.subcategories && versionData.subcategories.length > 0 && (
-                    <div className="flex flex-wrap gap-1 min-h-[1.25rem]">
+                    <div className="flex flex-wrap gap-1 min-h-5">
                         {versionData.subcategories.map((sub, i) => (
                             <span
                                 key={sub.uuid}

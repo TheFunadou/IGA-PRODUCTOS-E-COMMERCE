@@ -7,14 +7,23 @@ export const createViewContentEvent = (product: any) => ({
     currency: product.currency || 'MXN',
 });
 
-export const createAddToCartEvent = (product: any, quantity: number = 1) => ({
-    content_name: product.name || product.title,
-    content_ids: [product.id || product.sku],
-    content_type: 'product',
-    value: product.price * quantity,
-    currency: product.currency || 'MXN',
-    num_items: quantity,
-});
+export const createAddToCartEvent = (params: {
+    productName: string,
+    skuList: string[],
+    price: number,
+    currency: "MXN" | "USD",
+    quantity: number
+}) => {
+    const value = params.price * params.quantity;
+    return {
+        content_name: params.productName,
+        content_ids: params.skuList,
+        content_type: "product",
+        value,
+        currency: params.currency || "MXN",
+        num_items: params.quantity
+    }
+};
 
 export const createInitiateCheckoutEvent = (cartTotal: number, numItems: number) => ({
     value: cartTotal,
