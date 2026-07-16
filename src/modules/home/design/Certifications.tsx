@@ -11,7 +11,7 @@ import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plag
 import CertCorazaPlagoAMPDF from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.pdf";
 import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
 import CertPlagosurCPDF from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.pdf";
-import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.pdf";
+import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
 import TestReportPlagosurAMPDF from "../../../assets/certs/test-report-plagosur-am.pdf";
 
 /* ── Shared design tokens (same as AboutIGA.tsx) ─────────── */
