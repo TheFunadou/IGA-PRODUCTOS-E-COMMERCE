@@ -7,6 +7,9 @@ import { IoDocumentText } from "react-icons/io5";
 import clsx from "clsx";
 import Header1 from "../../../assets/headers/HEADER_1.webp";
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
+import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.jpg";
+import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
+import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
 
 /* ── Shared design tokens (same as AboutIGA.tsx) ─────────── */
 const SectionBar = () => (
@@ -28,7 +31,7 @@ const SectionSubtitle = ({
 }) => (
     <div className="bg-primary text-white w-fit px-2 rounded-xl">
         <p className="home-section-subtitle flex items-center gap-2">
-            {icon && <span className="text-xl flex-shrink-0">{icon}</span>}
+            {icon && <span className="text-xl shrink-0">{icon}</span>}
             {children}
         </p>
     </div>
@@ -104,20 +107,20 @@ const certifications: Cert[] = [
 
 const certImages = [
     {
-        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-coraza-y-plagosur-am-clase-e.pdf",
-        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-coraza-y-plagosur-am-clase-e.jpg",
+        url: CertCorazaPlagoAM,
+        image: CertCorazaPlagoAM,
         alt: "Certificado de conformidad de producto 1",
         label: "Certificado ANCE 1",
     },
     {
-        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-plagosur-c-coraza-a-i-clase-e.pdf",
-        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/certificacion-plagosur-c-coraza-a-i-clase-e.jpg",
+        url: CertPlagosurC,
+        image: CertPlagosurC,
         alt: "Certificado de conformidad de producto 2",
         label: "Certificado ANCE 2",
     },
     {
-        url: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/test-report-plagosur-am.pdf",
-        image: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/certificaciones/test-report-plagosur-am.jpg",
+        url: TestReportPlagosurAM,
+        image: TestReportPlagosurAM,
         alt: "Certificado de conformidad de producto 3",
         label: "Certificado ICS",
     },
@@ -179,7 +182,7 @@ const Certifications = () => {
                                     >
                                         <MdKeyboardArrowRight
                                             className={clsx(
-                                                "flex-shrink-0 transition-transform",
+                                                "shrink-0 transition-transform",
                                                 selected === cert.id ? "rotate-90 text-primary" : ""
                                             )}
                                         />
@@ -197,7 +200,7 @@ const Certifications = () => {
                                 </span>
                                 <p className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 mt-1">
                                     {current.title}
-                                    <BiSolidCertification className="text-primary flex-shrink-0" />
+                                    <BiSolidCertification className="text-primary shrink-0" />
                                 </p>
                                 <p className="text-base sm:text-lg leading-6 sm:leading-7 text-white text-justify mt-4">
                                     {current.description}
@@ -256,7 +259,7 @@ const Certifications = () => {
                                     />
                                 </figure>
                                 {/* Overlay on hover */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none">
+                                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-t from-black/60 to-transparent rounded-xl pointer-events-none">
                                     <span className="text-white text-sm font-semibold flex items-center gap-1">
                                         <MdOpenInNew /> Ver certificado
                                     </span>
