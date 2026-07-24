@@ -109,7 +109,7 @@ const MostPopularItemCard = ({
 
 const items: PopularItemData[] = [
     {
-        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/plagosur/ai/CAS1-AI-AI2-006-1.webp",
+        imageUrl: "https://proteccioninfinita.com/wp-content/igaproductos/cascos/plagosur/ai/CAS1-AI-AI2-006-1.webp",
         data: { sku: "CAS1-AI-006", name: "Casco de Seguridad Industrial Marca IGA Modelo Cachucha Plagosur, Ajuste de Intervalo, Clase E" },
         subcategories: [
             { name: "Casco de Seguridad Industrial", uuid: "gYGhgUO4GHBECXninMd9R" },
@@ -119,7 +119,7 @@ const items: PopularItemData[] = [
         ],
     },
     {
-        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/coraza/CAS2-AM1-001-1.webp",
+        imageUrl: "https://proteccioninfinita.com/wp-content/igaproductos/cascos/coraza/CAS2-AM1-001-1.webp",
         data: { sku: "CAS2-AM1-001", name: "Casco de Seguridad Industrial IGA tipo Coraza (Ala Ancha)" },
         subcategories: [
             { name: "Casco de Seguridad Industrial", uuid: "gYGhgUO4GHBECXninMd9R" },
@@ -129,7 +129,7 @@ const items: PopularItemData[] = [
         ],
     },
     {
-        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/hit/am/CAS3-AM2-004-1.webp",
+        imageUrl: "https://proteccioninfinita.com/wp-content/igaproductos/cascos/hit/am/CAS3-AM2-004-1.webp",
         data: { sku: "CAS3-AM2-004", name: "Casco de Seguridad Industrial Marca IGA Modelo Cachucha Hit, Ajuste de Matraca, Clase G" },
         subcategories: [
             { name: "Casco de Seguridad Industrial", uuid: "gYGhgUO4GHBECXninMd9R" },
@@ -139,7 +139,7 @@ const items: PopularItemData[] = [
         ],
     },
     {
-        imageUrl: "https://proyeccionempresarial.com.mx/wp-content/igaproductos/cascos/wings/CAS4-AM1-001-3.webp",
+        imageUrl: "https://proteccioninfinita.com/wp-content/igaproductos/cascos/wings/CAS4-AM1-001-1.webp",
         data: { sku: "CAS4-AM1-001", name: "Casco de Seguridad de Alturas Modelo Wings Ajuste de Matraca, Clase C" },
         subcategories: [
             { name: "Casco de Alturas", uuid: "a4d5fd82f46d4dbb" },
