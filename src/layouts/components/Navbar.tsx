@@ -17,6 +17,7 @@ import IgaLogo from "../../assets/logo/IGA-LOGO.webp";
 import { useTriggerAlert } from "../../modules/alerts/states/TriggerAlert";
 import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
 import { trackSearch } from "../../modules/analytics/MetaEvents";
+import { TbTruckDelivery } from "react-icons/tb";
 
 interface MainNavbarProps {
     onOpenMobileMenu: () => void;
@@ -162,7 +163,7 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                                 <button
                                     type="button"
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="border border-white/40 hover:border-white px-3 py-1 rounded-xl text-sm text-center transition-colors whitespace-nowrap max-w-[160px] truncate cursor-pointer"
+                                    className="border border-white/40 hover:border-white px-3 py-1 rounded-xl text-sm text-center transition-colors whitespace-nowrap max-w-40 truncate cursor-pointer"
                                 >
                                     {authCustomer.name.toUpperCase()} {authCustomer.last_name.toUpperCase()}
                                 </button>
@@ -210,7 +211,7 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                     )}
                     <Link to="/carrito-de-compras" className="relative shrink-0">
                         <MdOutlineShoppingCart className="text-2xl md:text-3xl" />
-                        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                        <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
                             {data && data.shoppingCart.length}
                         </span>
                     </Link>
@@ -284,6 +285,9 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                         ))}
                     </div>
                 )}
+            </div>
+            <div className="bg-success w-full p-1 flex items-center justify-center">
+                <p className="font-bold tracking-widest flex gap-2 items-center"><TbTruckDelivery size={24} /> Envíos a todo México</p>
             </div>
         </section>
     );

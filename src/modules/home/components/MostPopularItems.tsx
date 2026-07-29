@@ -43,11 +43,11 @@ const MostPopularItemCard = ({
             className="
                 group relative flex-shrink-0
                 w-56 md:w-96
-                rounded-2xl overflow-hidden
-                border border-base-300
+                rounded-xl overflow-hidden
+                border border-base-200
                 bg-base-100
                 shadow-sm
-                hover:shadow-xl hover:border-primary/40
+                hover:shadow-md hover:border-primary/40
                 hover:-translate-y-1
                 transition-all duration-300 ease-out
                 flex flex-col
@@ -67,31 +67,31 @@ const MostPopularItemCard = ({
                         group-hover:scale-105
                     "
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </figure>
 
             {/* Body */}
-            <div className="flex flex-col gap-2 px-3 pt-3 pb-4 flex-1">
-                {/* SKU badge */}
-                <div className="badge badge-primary tracking-widest text-[10px]">
+            <div className="flex flex-col gap-2 p-3 flex-1">
+                {/* SKU */}
+                <span className="text-[10px] font-mono text-base-content/40 tracking-wider">
                     {data.sku}
-                </div>
+                </span>
 
                 {/* Product name */}
                 <p className="text-sm font-medium leading-snug line-clamp-2 text-base-content">
                     {data.name}
                 </p>
 
-                {/* Subcategory badges */}
+                {/* Subcategory pills */}
                 <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
                     {subcategories.map((sub, index) => (
                         <span
                             key={sub.uuid}
                             onClick={() => handleNavigate(index)}
                             className="
-                                badge badge-outline
-                                text-[10px] cursor-pointer
-                                hover:badge-primary
+                                inline-flex items-center px-2.5 py-0.5
+                                rounded-full border border-base-200
+                                text-[10px] font-medium cursor-pointer
+                                hover:border-primary/40 hover:text-primary
                                 transition-all duration-200
                             "
                         >
@@ -102,7 +102,7 @@ const MostPopularItemCard = ({
             </div>
 
             {/* Accent line on hover */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
         </article>
     );
 };

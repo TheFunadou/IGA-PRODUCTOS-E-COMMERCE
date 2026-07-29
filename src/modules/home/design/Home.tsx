@@ -12,9 +12,10 @@ import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import Marquee from "react-fast-marquee";
 import CategoriesSummary from "../components/CategoriesSummary";
-import { FaBox, FaImage, FaVideo } from "react-icons/fa6";
+import { FaBox, FaImage, FaVideo, FaTriangleExclamation } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
+import type { ElementType } from "react";
 import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
 import Hero from "../components/Hero";
 import { paymentMethodsImages } from "../helpers";
@@ -83,72 +84,75 @@ const Home = () => {
         }
     });
 
-    const SectionBar = () => {
-        return (
-            <div className="bg-primary px-10 py-1 w-fit rounded-xl shadow-lg"></div>
-        );
-    };
+    const SectionHeader = ({ title, subtitle, icon: Icon }: { title: string; subtitle?: string; icon?: ElementType }) => (
+        <div className="flex flex-col gap-1 mb-6">
+            <div className="flex items-center gap-3">
+                <div className="w-1 h-5 bg-primary rounded-full shrink-0" />
+                <h2 className="text-xl sm:text-2xl font-black text-base-content">{title}</h2>
+            </div>
+            {subtitle && (
+                <p className="flex items-center gap-2 text-sm text-base-content/60 ml-4">
+                    {Icon && <Icon className="text-primary text-base shrink-0" />}
+                    {subtitle}
+                </p>
+            )}
+        </div>
+    );
 
-
+    const sectionClasses = "py-12 md:py-16 scroll-mt-24";
 
     return (
-        <div >
+        <div>
             <Hero />
-            <div className=" md:mt-30 space-y-5 md:space-y-10">
-                <section className="home-section">
-                    <SectionBar />
-                    <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300">Conoce nuestros cascos mas populares</h1>
-                    <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                        <p className="home-section-subtitle"> <FaBox className="text-2xl" /> Los siempre confiables para tu seguridad</p>
-                    </div>
+            <div className="flex flex-col">
+                <section className={clsx(sectionClasses, "border-t border-base-200/50")}>
+                    <SectionHeader
+                        title="Conoce nuestros cascos más populares"
+                        subtitle="Los siempre confiables para tu seguridad"
+                        icon={FaBox}
+                    />
                     <MostPopularItems />
                 </section>
-                <section className="home-section">
-                    <SectionBar />
-                    <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300">Categorias principales</h1>
-                    <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                        <p className="home-section-subtitle"> <FaBox className="text-2xl" /> Desliza para conocer las categorias de articulos que tenemos para ti</p>
-                    </div>
+                <section className={clsx(sectionClasses, "bg-base-200/20 border-t border-base-200/50")}>
+                    <SectionHeader
+                        title="Categorías principales"
+                        subtitle="Desliza para conocer las categorías de artículos que tenemos para ti"
+                        icon={FaBox}
+                    />
                     <CategoriesSummary />
                 </section>
-                <section className="home-section">
-                    <SectionBar />
-                    <h1 className="px-2 py-1 w-fit rounded-xl bg-base-300 border border-base-300">Formas de pago</h1>
-                    <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                        <p className="home-section-subtitle"> <PiHandbag className="text-2xl" /> Nos ajustamos a tu comodidad</p>
-                    </div>
+                <section className={clsx(sectionClasses, "border-t border-base-200/50")}>
+                    <SectionHeader
+                        title="Formas de pago"
+                        subtitle="Nos ajustamos a tu comodidad"
+                        icon={PiHandbag}
+                    />
                     <Marquee className="w-full" gradient={false} speed={80} direction="left">
-                        <div className="flex gap-5 md:gap-15 items-center justify-center">
-                            {[...paymentMethodsImages, ...paymentMethodsImages].map((img, index) => (
-                                <figure key={index} className="w-25 md:w-60 p-5 filter">
-                                    <img className="w-full object-cover" src={img.image_url} alt={img.description} loading="lazy" />
-                                </figure>
-                            ))}
-                        </div>
-                    </Marquee>
-                    <Marquee className="w-full" gradient={false} speed={80} direction="right">
-                        <div className="flex gap-5 md:gap-15 items-center justify-center">
-                            {[...paymentMethodsImages, ...paymentMethodsImages].map((img, index) => (
-                                <figure key={index} className="w-25 md:w-60 p-5 filter">
-                                    <img className="w-full object-cover" src={img.image_url} alt={img.description} loading="lazy" />
+                        <div className="flex gap-5 md:gap-10 items-center justify-center">
+                            {paymentMethodsImages.map((img, index) => (
+                                <figure key={index} className="w-28 md:w-48 p-4 rounded-xl bg-base-100 border border-base-200">
+                                    <img className="w-full object-contain" src={img.image_url} alt={img.description} loading="lazy" />
                                 </figure>
                             ))}
                         </div>
                     </Marquee>
                 </section>
-                <section className="home-section">
-                    <SectionBar />
-                    <h1 className="px-2 py-1 w-fit rounded-xl bg-base-300 border border-base-300">Conoce nuestra marca</h1>
-                    <div className="flex flex-col gap-5 md:gap-10">
+                <section className={clsx(sectionClasses, "bg-base-200/20 border-t border-base-200/50")}>
+                    <SectionHeader
+                        title="Conoce nuestra marca"
+                    />
+                    <div className="flex flex-col gap-8 md:gap-12">
                         <div>
-                            <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                                <p className="home-section-subtitle"> <FaVideo className="text-2xl" /> Desliza para ver videos que quizas te puedan interesar</p>
-                            </div>
-                            <OverflowXComponent className="hidden lg:flex gap-5 items-center mt-2 md:mt-5">
+                            <SectionHeader
+                                title="Videos"
+                                subtitle="Desliza para ver videos que quizás te puedan interesar"
+                                icon={FaVideo}
+                            />
+                            <OverflowXComponent className="flex gap-5 items-center">
                                 {sampleVideos.map((video, index) => (
-                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">
-                                        <p className="text-base md:text-lg font-medium line-clamp-1 mb-2">{video.title}</p>
-                                        <div className="w-full h-64 md:h-72 rounded-md overflow-hidden bg-base-300 flex items-center justify-center">
+                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0 rounded-xl border border-base-200 bg-base-100 shadow-sm overflow-hidden">
+                                        <p className="text-sm md:text-base font-semibold line-clamp-1 px-3 pt-3 text-base-content">{video.title}</p>
+                                        <div className="w-full h-56 md:h-64 overflow-hidden bg-base-300 flex items-center justify-center">
                                             <iframe
                                                 src={video.videoUrl}
                                                 style={{ border: 'none', overflow: 'hidden' }}
@@ -162,51 +166,34 @@ const Home = () => {
                                     </div>
                                 ))}
                             </OverflowXComponent>
-                            <div className="lg:hidden flex gap-5 overflow-x-scroll">
-                                {sampleVideos.map((video, index) => (
-                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0">
-                                        <p className="text-base md:text-lg font-medium line-clamp-1 mb-2">{video.title}</p>
-                                        <div className="w-full h-64 md:h-72 rounded-md overflow-hidden bg-black flex items-center justify-center">
-                                            <iframe
-                                                src={video.videoUrl}
-                                                style={{ border: 'none', overflow: 'hidden' }}
-                                                scrolling="no"
-                                                frameBorder="0"
-                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                                                allowFullScreen
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                         <div>
-                            <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                                <p className="home-section-subtitle"> <FaImage className="text-2xl" /> Participaciones en exposiciones nacionales e internacionales</p>
-                            </div>
-                            <Marquee className="w-full mt-2 md:mt-0" gradient={false} speed={80}>
+                            <SectionHeader
+                                title="Exposiciones"
+                                subtitle="Participaciones en exposiciones nacionales e internacionales"
+                                icon={FaImage}
+                            />
+                            <Marquee className="w-full" gradient={false} speed={80}>
                                 <div className="flex gap-5 md:gap-10 items-center justify-center">
                                     {[...imageGallery, ...imageGallery].map((img, index) => (
-                                        <figure key={index} className="w-40 h-40 md:w-100 md:h-100 md:p-5 filter">
-                                            <img className="w-full h-full object-cover object-center rounded-xl " src={img.url} alt={img.description} loading="lazy" />
+                                        <figure key={index} className="w-36 h-36 md:w-56 md:h-56 p-2 md:p-3 rounded-xl bg-base-100 border border-base-200">
+                                            <img className="w-full h-full object-cover object-center rounded-lg" src={img.url} alt={img.description} loading="lazy" />
                                         </figure>
                                     ))}
                                 </div>
                             </Marquee>
-
                         </div>
                     </div>
                 </section>
-                <section className="home-section">
-                    <SectionBar />
-                    <h1 className="px-2 py-1 w-fit rounded-xl bg-base-300 border border-base-300">Productos que te pueden interesar</h1>
-                    <div className="bg-primary text-white w-fit px-2 rounded-xl ">
-                        <p className="home-section-subtitle"> <BiPackage className="text-2xl" />Conoce la selección de productos que tenemos para ti</p>
-                    </div>
+                <section className={clsx(sectionClasses, "border-t border-base-200/50")}>
+                    <SectionHeader
+                        title="Productos que te pueden interesar"
+                        subtitle="Conoce la selección de productos que tenemos para ti"
+                        icon={BiPackage}
+                    />
 
                     {isLoading && !error && !ads && (
-                        <div className="w-full flex flex-wrap gap-10 mt-5">
+                        <div className="w-full flex flex-wrap gap-6 mt-2">
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
                             <ProductVersionCardSkeleton />
@@ -214,14 +201,15 @@ const Home = () => {
                         </div>
                     )}
                     {!isLoading && !ads && error && (
-                        <div className="py-5">
-                            <p className="text-2xl">Ocurrio un error inesperado</p>
-                            <p className="text-error py-5 text-lg">{getErrorMessage(error)}</p>
-                            <button type="button" className="btn btn-primary mt-5" onClick={() => refetch()}>Reintentar?</button>
+                        <div className="flex flex-col items-center gap-4 py-12 text-center">
+                            <FaTriangleExclamation className="text-4xl text-error/60" />
+                            <p className="text-lg font-bold text-base-content">Ocurrió un error inesperado</p>
+                            <p className="text-error text-sm max-w-md">{getErrorMessage(error)}</p>
+                            <button type="button" className="btn btn-primary mt-1" onClick={() => refetch()}>Reintentar</button>
                         </div>
                     )}
                     {!isLoading && !error && ads && (
-                        <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mt-5">
+                        <div className="w-full grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                             {ads.data.map((data, index) => (
                                 <ProductVersionCardV2 key={index} className={clsx("rounded-xl p-2", theme === "ligth" ? "bg-base-100" : "bg-transparent")} versionData={data} imageLoading="lazy" />
                             ))}
@@ -229,7 +217,6 @@ const Home = () => {
                     )}
                 </section>
             </div>
-
         </div>
     );
 };

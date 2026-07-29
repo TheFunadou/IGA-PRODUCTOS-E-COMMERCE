@@ -37,17 +37,11 @@ import ProductVersionCardV2 from "../components/ProductVersionCard";
 import { trackViewContent, trackAddToWishlist, trackAddToCart } from "../../analytics/MetaEvents";
 
 // ── Helpers de descuento ──────────────────────────────────────────────────────
-const discountColorBg = (discount?: number | null) => {
-    if (!discount) return "";
-    if (discount < 50) return "bg-error";
-    if (discount < 65) return "bg-success";
+const discountColorBg = (_discount?: number | null) => {
     return "bg-primary";
 };
 
-const discountColorText = (discount?: number | null) => {
-    if (!discount) return "text-base-content";
-    if (discount < 50) return "text-error";
-    if (discount < 65) return "text-success";
+const discountColorText = (_discount?: number | null) => {
     return "text-primary";
 };
 
@@ -109,8 +103,8 @@ const TrustBadges = () => (
             { icon: FaFileInvoiceDollar, label: "Facturación", sub: "CFDI inmediato" },
             { icon: FaHeadset, label: "Soporte dedicado", sub: "Asesor disponible" },
         ].map(({ icon: Icon, label, sub }, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-base-100 border border-base-200 hover:bg-base-200/50 hover:shadow-sm transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-100 border border-base-200 hover:bg-base-200/50 transition-all duration-200">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Icon className="text-primary text-lg" />
                 </div>
                 <div>
@@ -124,7 +118,7 @@ const TrustBadges = () => (
 
 // ── QuickSpecsTable ───────────────────────────────────────────────────────────
 const QuickSpecsTable = ({ specs }: { specs: { label: string; value: string }[] }) => (
-    <div className="rounded-2xl border border-base-200 overflow-hidden bg-base-100 shadow-sm">
+    <div className="rounded-xl border border-base-200 overflow-hidden bg-base-100">
         <div className="px-5 py-3 bg-base-200/50 border-b border-base-200">
             <p className="text-sm font-bold text-base-content flex items-center gap-2">
                 <FaClipboardCheck className="text-primary" /> Especificaciones rápidas
@@ -132,7 +126,7 @@ const QuickSpecsTable = ({ specs }: { specs: { label: string; value: string }[] 
         </div>
         <div className="divide-y divide-base-200">
             {specs.map(({ label, value }, i) => (
-                <div key={i} className="flex items-center px-5 py-2.5 hover:bg-base-200/30 transition-colors">
+                <div key={i} className="flex items-center px-5 py-2.5">
                     <span className="w-2/5 text-[11px] font-bold text-base-content/50 uppercase tracking-widest">{label}</span>
                     <span className="w-3/5 text-sm text-base-content font-semibold">{value}</span>
                 </div>
@@ -170,13 +164,12 @@ const PurchaseCard = ({
     onQtySelect, onQtySet, onQtyLimit,
     onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock
 }: PurchaseCardProps) => (
-    <div className="w-full rounded-3xl border border-base-200 bg-base-100 shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+    <div className="w-full rounded-2xl border border-base-200 bg-base-100 shadow-xl overflow-hidden">
         {/* Header precio */}
         <div className={clsx(
-            "px-6 pt-6 pb-5 border-b border-base-200 relative overflow-hidden",
-            isOffer && "bg-linear-to-br from-primary/10 via-primary/5 to-transparent"
+            "px-6 pt-6 pb-5 border-b border-base-200",
+            isOffer && "bg-primary/[0.03]"
         )}>
-            {isOffer && <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />}
             {isOffer ? (
                 <div className="flex flex-col gap-1.5 relative z-10">
                     <div className="flex items-center gap-2">
@@ -235,7 +228,7 @@ const PurchaseCard = ({
                     <FaBoxOpen className="text-primary" /> Cantidad
                 </label>
                 <select
-                    className="select select-bordered w-full font-bold bg-base-200/20 focus:bg-base-100"
+                    className="select select-bordered w-full font-bold bg-base-100"
                     onChange={(e) => { onQtySelect(e.target.value); onQtySet(e.target.value); }}
                     value={selectProductQty}
                 >
@@ -282,7 +275,7 @@ const PurchaseCard = ({
                 </button>
                 <button
                     type="button"
-                    className="w-full btn bg-blue-950 hover:bg-blue-900 text-white font-bold tracking-wide shadow-md hover:shadow-lg transition-all rounded-xl h-12 border-0"
+                    className="w-full btn btn-outline btn-primary font-bold tracking-wide shadow-md hover:shadow-lg transition-all rounded-xl h-12"
                     onClick={onBuyNow}
                 >
                     Comprar ahora
@@ -292,7 +285,7 @@ const PurchaseCard = ({
             <div className="divider my-0 text-[10px] font-bold text-base-content/30 uppercase tracking-widest">o</div>
 
             {/* Acciones secundarias */}
-            <div className="flex items-center justify-around bg-base-200/40 p-2 rounded-2xl border border-base-200">
+            <div className="flex items-center justify-around bg-base-200/40 p-2 rounded-xl border border-base-200">
                 <button
                     type="button"
                     className="flex flex-col items-center gap-1.5 p-2 flex-1 rounded-xl text-xs font-bold hover:bg-base-100 transition-colors active:scale-95"
@@ -509,9 +502,9 @@ const ProductVersionDetailV2 = () => {
     const categorySlug = data.category.name.toLowerCase();
 
     return (
-        <div className="w-full bg-base-100 min-h-screen pb-16 rounded-3xl">
+        <div className="w-full bg-base-100 min-h-screen pb-16 rounded-2xl">
             {/* Breadcrumb Section */}
-            <div className="bg-base-200/60 border-b border-base-200 backdrop-blur-sm sticky top-0 z-20 rounded-3xl">
+            <div className="bg-base-100/80 border-b border-base-200 backdrop-blur-sm sticky top-0 z-20 rounded-2xl">
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
                     <div className="breadcrumbs text-xs font-bold text-base-content/50 uppercase tracking-wider">
                         <ul>
@@ -551,7 +544,7 @@ const ProductVersionDetailV2 = () => {
                     {/* ── Galería ── */}
                     <div className="w-full lg:w-[38%] xl:w-[42%]">
                         <div className="lg:sticky lg:top-20 flex flex-col gap-4 z-40">
-                            <div className="relative w-full rounded-3xl">
+                            <div className="relative w-full rounded-2xl">
                                 {data.offer?.isOffer && (
                                     <div className={clsx(
                                         "absolute top-5 left-5 z-10 px-4 py-2 rounded-full flex gap-2 items-center shadow-lg backdrop-blur-md",
@@ -662,7 +655,7 @@ const ProductVersionDetailV2 = () => {
 
                         {/* Color y presentaciones */}
                         <div className="flex flex-col gap-5 mt-2 lg:mt-0">
-                            <div className="flex items-center justify-between gap-3 bg-base-200/30 p-4 rounded-2xl border border-base-200">
+                            <div className="flex items-center justify-between gap-3 bg-base-200/30 p-4 rounded-xl border border-base-200">
                                 <div className="flex flex-col gap-1.5">
                                     <span className="text-[10px] font-bold text-base-content/50 uppercase tracking-widest">Color Actual</span>
                                     <div className="flex items-center gap-2.5">
@@ -745,10 +738,7 @@ const ProductVersionDetailV2 = () => {
                             <PurchaseCard {...purchaseCardProps} />
 
                             {/* Pedido especial banner */}
-                            <div className="rounded-3xl border border-primary/20 bg-primary/5 p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden group hover:border-primary/40 transition-colors">
-                                <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500">
-                                    <FaWarehouse className="text-[150px] text-primary" />
-                                </div>
+                            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 flex flex-col gap-4 relative group hover:border-primary/40 transition-colors">
                                 <div className="flex items-center gap-3 relative z-10">
                                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                                         <FaWarehouse className="text-primary text-xl" />
@@ -774,7 +764,7 @@ const ProductVersionDetailV2 = () => {
                 </div>
 
                 {/* ══ MÁS INFORMACIÓN (Tabs) ════════════════════════════════════════════════ */}
-                <div className="w-full py-12 border-t border-base-200 mt-6 border-b">
+                <div className="w-full py-10 border-t border-base-200 mt-6 border-b">
                     <div className="w-full flex flex-col lg:flex-row gap-12">
                         {/* Tabs técnicos */}
                         <div className="w-full lg:w-[60%]">
@@ -809,7 +799,7 @@ const ProductVersionDetailV2 = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center h-48 bg-base-200/30 rounded-2xl border border-dashed border-base-300 text-base-content/40 gap-4">
+                                    <div className="flex flex-col items-center justify-center h-48 bg-base-200/30 rounded-xl border border-dashed border-base-300 text-base-content/40 gap-4">
                                         <FaClipboardCheck className="text-5xl opacity-30" />
                                         <p className="font-bold text-sm tracking-wide">No hay información disponible de {tabs[activeTab].label.toLowerCase()}</p>
                                     </div>
@@ -825,8 +815,8 @@ const ProductVersionDetailV2 = () => {
                             {certifications.length > 0 && certifications[0] !== "" ? (
                                 <div className="grid grid-cols-1 gap-4">
                                     {certifications.map((cer, i) => (
-                                        <div key={i} className="flex items-center gap-4 p-4 lg:p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow group">
-                                            <div className="bg-success/10 p-2.5 rounded-full text-success group-hover:bg-success group-hover:text-white transition-colors">
+                                        <div key={i} className="flex items-center gap-4 p-4 lg:p-5 rounded-xl bg-base-100 border border-base-200 group">
+                                            <div className="bg-primary/10 p-2.5 rounded-full text-primary">
                                                 <FaCircleCheck className="text-lg" />
                                             </div>
                                             <span className="text-[15px] font-bold text-base-content/80 leading-tight">{cer.trim()}</span>
@@ -834,7 +824,7 @@ const ProductVersionDetailV2 = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="h-48 flex items-center justify-center p-8 border border-dashed border-base-300 rounded-2xl bg-base-200/30 text-center">
+                                <div className="h-48 flex items-center justify-center p-8 border border-dashed border-base-300 rounded-xl bg-base-200/30 text-center">
                                     <p className="text-sm font-bold text-base-content/40">Este producto no cuenta con certificaciones adicionales especificadas en este momento.</p>
                                 </div>
                             )}
@@ -850,8 +840,7 @@ const ProductVersionDetailV2 = () => {
                     <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                         {/* Resumen */}
                         <div className="w-full lg:w-[320px] shrink-0">
-                            <div className="rounded-3xl bg-base-100 border border-base-200 p-8 flex flex-col gap-6 shadow-xl relative overflow-hidden">
-                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
+                            <div className="rounded-xl bg-base-100 border border-base-200 p-8 flex flex-col gap-6 shadow-sm relative overflow-hidden">
                                 {reviewsResumeLoading && (
                                     <div className="flex items-center justify-center h-48 gap-3 text-sm font-bold text-base-content/50 uppercase tracking-widest">
                                         <span className="loading loading-spinner loading-md text-primary" /> Analizando...
@@ -899,13 +888,13 @@ const ProductVersionDetailV2 = () => {
                             {reviewsLoading && (
                                 <div className="flex flex-col gap-4">
                                     {[1, 2].map(i => (
-                                        <div key={i} className="h-32 bg-base-200 animate-pulse rounded-2xl"></div>
+                                        <div key={i} className="h-32 bg-base-200 animate-pulse rounded-xl"></div>
                                     ))}
                                 </div>
                             )}
 
                             {reviews && reviews.reviews.length === 0 && (
-                                <div className="rounded-3xl border-2 border-dashed border-base-200 p-10 text-center bg-base-100/50 flex flex-col items-center gap-4">
+                                <div className="rounded-xl border-2 border-dashed border-base-200 p-10 text-center bg-base-100/50 flex flex-col items-center gap-4">
                                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                                         <FaStar className="text-3xl text-primary opacity-50" />
                                     </div>
@@ -919,7 +908,7 @@ const ProductVersionDetailV2 = () => {
                             {reviews && reviews.reviews.length > 0 && (
                                 <div className="flex flex-col gap-5">
                                     {reviews.reviews.map((review, i) => (
-                                        <div key={i} className="rounded-3xl border border-base-200 bg-base-100 p-6 flex flex-col gap-4 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                                        <div key={i} className="rounded-xl border border-base-200 bg-base-100 p-6 flex flex-col gap-4 hover:border-primary/20 transition-all duration-200">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary border-2 border-primary/20">
@@ -957,8 +946,7 @@ const ProductVersionDetailV2 = () => {
                             {/* Formulario */}
                             <div className="mt-8">
                                 {isAuth && !data.details.isReviewed && (
-                                    <div className="rounded-3xl bg-base-100 border border-base-200 shadow-xl p-8 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1.5 bg-linear-to-r from-primary via-secondary to-primary" />
+                                    <div className="rounded-xl bg-base-100 border border-base-200 p-8">
                                         <div className="mb-6">
                                             <h3 className="text-xl font-black text-base-content">Escribir una opinión</h3>
                                             <p className="text-sm text-base-content/60 font-medium mt-1">Comparte tu experiencia para ayudar a otros clientes</p>
@@ -1016,7 +1004,7 @@ const ProductVersionDetailV2 = () => {
                                 )}
 
                                 {!isAuth && (
-                                    <div className="rounded-3xl bg-base-200/50 border border-base-200 p-8 text-center flex flex-col items-center justify-center h-48">
+                                    <div className="rounded-xl bg-base-200/50 border border-base-200 p-8 text-center flex flex-col items-center justify-center h-48">
                                         <div className="bg-white p-3 rounded-full shadow-sm mb-3">
                                             <FaCircleUser className="text-3xl text-primary" />
                                         </div>

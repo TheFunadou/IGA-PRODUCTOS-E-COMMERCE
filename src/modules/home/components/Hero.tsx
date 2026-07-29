@@ -62,22 +62,16 @@ export default function Hero() {
                 <rect width="100%" height="100%" filter="url(#hero-grain)" />
             </svg>
 
-            {/* ── MOBILE background image (< md) ── */}
-            <div className="absolute inset-0 z-[1] md:hidden">
-                <img
-                    src={HeroIMG}
-                    alt=""
-                    className="w-full h-full object-cover object-center"
-                    style={{ opacity: isDark ? 0.15 : 0.1 }}
-                />
-                <div
-                    className={[
-                        "absolute inset-0",
-                        isDark
-                            ? "bg-gradient-to-br from-[#030d24]/90 via-[#030d24]/75 to-[#030d24]/60"
-                            : "bg-gradient-to-br from-white/95 via-white/85 to-white/70",
-                    ].join(" ")}
-                />
+            {/* ── MOBILE color-block layout (< md) ── */}
+            <div className="absolute inset-0 z-[1] md:hidden overflow-hidden">
+                <div className="absolute bottom-0 left-0 right-0 h-[45%] bg-primary/10" />
+                <div className="absolute -bottom-5 -right-5 w-[75%] h-[50%] opacity-[0.07]">
+                    <img
+                        src={HeroIMG}
+                        alt=""
+                        className="w-full h-full object-cover object-bottom"
+                    />
+                </div>
             </div>
 
             {/* ── DESKTOP navy diagonal panel (md+) ── */}
@@ -226,6 +220,27 @@ export default function Hero() {
                         Calidad probada y cumplimiento normativo 100% Hecho en México.
                     </strong>
                 </p>
+
+                {/* ── FEATURE CHIPS (mobile inline) ── */}
+                <div
+                    className="md:hidden flex flex-wrap gap-2 mb-5"
+                    style={enter(0.24)}
+                >
+                    {chips.map((c) => (
+                        <span
+                            key={c.label}
+                            className={[
+                                "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider",
+                                isDark
+                                    ? "bg-white/8 text-white/70 border border-white/12"
+                                    : "bg-white text-primary border border-primary/20",
+                            ].join(" ")}
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                            {c.label}
+                        </span>
+                    ))}
+                </div>
 
                 {/* ── TRUST BADGES ── */}
                 <div

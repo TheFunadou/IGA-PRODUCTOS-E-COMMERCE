@@ -28,9 +28,20 @@ const CategoriesSummary = () => {
                 {[...Array(4)].map((_, i) => (
                     <div
                         key={i}
-                        className="skeleton flex-shrink-0 w-56 md:w-80 h-72 md:h-96 rounded-2xl"
+                        className="flex-shrink-0 w-56 md:w-80 rounded-xl overflow-hidden border border-base-200 bg-base-100"
                         style={{ animationDelay: `${i * 120}ms` }}
-                    />
+                    >
+                        <div className="skeleton h-48 md:h-60 rounded-none" />
+                        <div className="grid grid-cols-3 gap-1 p-2">
+                            <div className="skeleton rounded-lg aspect-square" />
+                            <div className="skeleton rounded-lg aspect-square" />
+                            <div className="skeleton rounded-lg aspect-square" />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 p-3">
+                            <div className="skeleton h-5 w-24 rounded-md" />
+                            <div className="skeleton h-6 w-16 rounded-lg" />
+                        </div>
+                    </div>
                 ))}
             </div>
         );
@@ -50,11 +61,11 @@ const CategoriesSummary = () => {
                         className="
                             group relative flex-shrink-0
                             w-56 md:w-80
-                            rounded-2xl overflow-hidden
-                            border border-base-300
+                            rounded-xl overflow-hidden
+                            border border-base-200
                             bg-base-100
                             shadow-sm
-                            hover:shadow-xl hover:border-primary/40
+                            hover:shadow-md hover:border-primary/40
                             hover:-translate-y-1
                             transition-all duration-300 ease-out
                             flex flex-col
@@ -82,14 +93,12 @@ const CategoriesSummary = () => {
                                         group-hover:scale-105
                                     "
                                 />
-                                {/* Gradient bottom fade */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </figure>
                         )}
 
                         {/* ── Secondary grid ── */}
                         {rest.length > 0 && (
-                            <div className="grid grid-cols-3 gap-1 px-2 pt-2">
+                            <div className="grid grid-cols-3 gap-1.5 p-2">
                                 {rest.slice(0, 3).map((pv, i) => (
                                     <figure
                                         key={`${pv.sku}-${i}`}
@@ -137,10 +146,10 @@ const CategoriesSummary = () => {
                                 to={`/tienda?category=${category.categoryName.toLowerCase()}&page=1`}
                                 className="
                                     flex-shrink-0
-                                    text-[10px] md:text-xs font-semibold uppercase tracking-wide
-                                    text-primary border border-primary/40
-                                    px-2.5 py-1 rounded-full
-                                    hover:bg-primary hover:text-white
+                                    text-xs font-semibold
+                                    text-base-content/60 border border-base-200
+                                    px-3 py-1 rounded-lg
+                                    hover:bg-primary hover:text-white hover:border-primary
                                     transition-all duration-200
                                     whitespace-nowrap
                                 "
@@ -150,7 +159,7 @@ const CategoriesSummary = () => {
                         </div>
 
                         {/* Accent line on hover */}
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+                        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
                     </article>
                 );
             })}

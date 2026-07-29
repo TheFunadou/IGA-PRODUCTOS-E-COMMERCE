@@ -43,7 +43,7 @@ export const OverflowXComponent: React.FC<OverflowXComponentProps> = ({
             {showLeftArrow && (
                 <button
                     onClick={() => scroll('left')}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-primary shadow-lg rounded-full p-2 hover:bg-info"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-primary shadow-lg rounded-full p-2 hover:bg-primary-focus"
                     aria-label="Scroll left"
                 >
                     <FaArrowLeft className="w-7 h-7 text-white" />
@@ -62,7 +62,7 @@ export const OverflowXComponent: React.FC<OverflowXComponentProps> = ({
             {showRightArrow && (
                 <button
                     onClick={() => scroll('right')}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-primary shadow-lg rounded-full p-2 hover:bg-info"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-primary shadow-lg rounded-full p-2 hover:bg-primary-focus"
                     aria-label="Scroll right"
                 >
                     <FaArrowRight className="w-7 h-7 text-white" />
