@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../modules/auth/states/authStore";
-import { 
-    FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser, 
+import {
+    FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser,
     FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter
 } from "react-icons/fa6";
 import { BiLogOut, BiEnvelope } from "react-icons/bi";
@@ -80,8 +80,8 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                                     <p className="text-sm font-semibold text-base-content/80">
                                         Explora nuestra tienda e inicia sesión para comprar.
                                     </p>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className="btn btn-primary btn-sm rounded-xl font-bold w-fit shadow-lg shadow-primary/20"
                                         onClick={() => handleNav("/iniciar-sesion")}
                                     >
@@ -93,10 +93,10 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
 
                         {/* Menus usando ui daisy menu */}
                         <ul className="menu menu-md px-4 py-6 w-full text-base-content gap-1 [&_li>a]:rounded-xl [&_li>a]:py-3 [&_details>summary]:rounded-xl [&_details>summary]:py-3 font-bold">
-                            
+
                             <li><a onClick={() => handleNav("/")}><FaHome className="text-base-content/50 text-lg" /> Inicio</a></li>
                             <li><a onClick={() => handleNav("/tienda")}><FaShop className="text-primary text-lg" /> Tienda</a></li>
-                            
+
                             {isAuth && authCustomer && (
                                 <>
                                     <div className="divider my-2 text-xs font-black text-base-content/30 uppercase tracking-widest text-left items-start before:h-[1px] after:h-[1px]">Mi Cuenta</div>
@@ -108,7 +108,7 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                             )}
 
                             <div className="divider my-2 text-xs font-black text-base-content/30 uppercase tracking-widest text-left items-start before:h-[1px] after:h-[1px]">Empresa</div>
-                            
+
                             <li>
                                 <details>
                                     <summary><FaBuilding className="text-base-content/50" /> Nosotros</summary>
@@ -127,7 +127,7 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                                     <ul className="ml-5 border-l-2 border-base-200 mt-2 mb-2 gap-1 font-semibold text-sm">
                                         <li><a onClick={() => handleNav("/contacto")}><FaPhone className="text-xs opacity-50" /> Contacto</a></li>
                                         <li><a onClick={() => handleNav("/preguntas-frecuentes")}><FaCircleQuestion className="text-xs opacity-50" /> Preguntas frecuentes</a></li>
-                                        <li><a href="mailto:atencionacliente@igaproductos.com.mx" target="_blank"><BiEnvelope className="text-xs opacity-50" /> Soporte a compras</a></li>
+                                        <li><a href="mailto:atencionacliente@igaproductos.com" target="_blank"><BiEnvelope className="text-xs opacity-50" /> Soporte a compras</a></li>
                                         <li><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank"><FaWhatsapp className="text-xs text-success" /> Contacta a un experto</a></li>
                                         <div className="divider my-1 opacity-20"></div>
                                         <li><a onClick={() => handleNav("/politica-de-privacidad")}><FaShieldHalved className="text-xs opacity-50" /> Política de privacidad</a></li>
@@ -157,9 +157,9 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                     {/* Footer del Drawer */}
                     {isAuth && (
                         <div className="sticky bottom-0 bg-base-100 p-4 border-t border-base-300 z-10">
-                            <button 
-                                type="button" 
-                                className="btn btn-error btn-outline w-full rounded-2xl h-12 font-bold" 
+                            <button
+                                type="button"
+                                className="btn btn-error btn-outline w-full rounded-2xl h-12 font-bold"
                                 onClick={onLogout}
                             >
                                 <BiLogOut className="text-xl" /> Cerrar Sesión

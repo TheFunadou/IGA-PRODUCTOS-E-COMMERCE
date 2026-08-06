@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import IgaLogo from "../../assets/logo/IGA-LOGO.webp"
 const NotFoundPage = () => {
     return (
         <div className="w-full min-h-screen bg-slate-900 flex flex-col">
@@ -9,7 +9,7 @@ const NotFoundPage = () => {
 
             <div className="flex-1 w-full flex flex-col gap-5 items-center justify-center">
                 <figure>
-                    <img src="https://igaproductos.com.mx/wp-content/themes/igaproductos/images/igaproductos.png" alt="Logo Iga Productos" />
+                    <img src={IgaLogo} alt="Logo Iga Productos" />
                 </figure>
                 <p className="text-4xl font-bold text-white">Ocurrió un error inesperado</p>
             </div>

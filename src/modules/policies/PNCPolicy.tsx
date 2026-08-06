@@ -76,16 +76,16 @@ const PNCPolicy = () => {
                             Ir al formulario de contacto
                         </a>
                         <a
-                            href="mailto:atencionacliente@igaproductos.com.mx"
+                            href="mailto:atencionacliente@igaproductos.com"
                             className="inline-flex items-center justify-center gap-2 border border-primary text-primary text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary hover:text-white transition-all duration-150"
                         >
-                            ✉ atencionacliente@igaproductos.com.mx
+                            ✉ atencionacliente@igaproductos.com
                         </a>
                     </div>
                     <p className="mt-3 text-xs text-base-content/50 not-prose">
                         Enviar copia a:{" "}
-                        <a href="mailto:administracion@igaproductos.com.mx" className="text-primary hover:underline">
-                            administracion@igaproductos.com.mx
+                        <a href="mailto:administracion@igaproductos.com" className="text-primary hover:underline">
+                            administracion@igaproductos.com
                         </a>
                     </p>
                 </PolicySection>

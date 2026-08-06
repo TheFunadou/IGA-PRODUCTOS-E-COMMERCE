@@ -295,7 +295,7 @@ const FrecuentQuestions = () => {
                             </FAQItem>
 
                             <FAQItem question="¿Cómo inicio una reclamación por garantía?">
-                                Puedes contactarnos a través del <Link to="/contacto" className="text-primary font-bold hover:underline">Formulario de Contacto</Link> o enviar un correo con los detalles de la incidencia y fotos del producto a <strong>atencionacliente@igaproductos.com.mx</strong>.
+                                Puedes contactarnos a través del <Link to="/contacto" className="text-primary font-bold hover:underline">Formulario de Contacto</Link> o enviar un correo con los detalles de la incidencia y fotos del producto a <strong>atencionacliente@igaproductos.com</strong>.
                             </FAQItem>
                         </div>
                     </div>

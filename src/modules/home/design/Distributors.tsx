@@ -16,7 +16,7 @@ const Distributors = () => {
                             <p className="text-xl font-bold">Únete a los distribuidores autorizado de Iga Productos</p>
                             <p>Ser distribuidor autorizado de IGA Productos te abre las puertas a un mundo de oportunidades en el sector de seguridad industrial</p>
                             <p>Contactanos a: </p>
-                            <a href="mailto:atencionacliente@igaproductos.com.mx" className="underline">atencionacliente@igaproductos.com.mx</a>
+                            <a href="mailto:atencionacliente@igaproductos.com" className="underline">atencionacliente@igaproductos.com</a>
                         </section>
                     </div>
                     <div className="w-1/2  flex items-end">

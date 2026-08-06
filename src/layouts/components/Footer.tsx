@@ -44,7 +44,7 @@ const Footer = () => {
                             <h3 className="text-lg font-black uppercase tracking-wider">Servicio al Cliente</h3>
                             <ul className="flex flex-col gap-3 text-sm font-medium opacity-70 [&_a:hover]:opacity-100 [&_a]:transition-opacity">
                                 <li><Link to={"/preguntas-frecuentes"}>Preguntas Frecuentes</Link></li>
-                                <li><a href="mailto:atencionacliente@igaproductos.com.mx" target="_blank" rel="noreferrer">Soporte a Compras</a></li>
+                                <li><a href="mailto:atencionacliente@igaproductos.com" target="_blank" rel="noreferrer">Soporte a Compras</a></li>
                                 <li><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank" rel="noreferrer">Asesoría con Expertos</a></li>
                             </ul>
                         </div>

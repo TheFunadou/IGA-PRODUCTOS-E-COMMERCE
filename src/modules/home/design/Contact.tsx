@@ -33,7 +33,7 @@ const SectionSubtitle = ({
 );
 /* ─────────────────────────────────────────────────────────── */
 
-const CONTACT_EMAIL = "atencionaclientes@igaproductos.com.mx";
+const CONTACT_EMAIL = "atencionaclientes@igaproductos.com";
 const CONTACT_PHONE = "+529211963246";
 const CONTACT_PHONE_DISPLAY = "+52 921 196 3246";
 const WHATSAPP_URL = `https://wa.me/529211963246`;
