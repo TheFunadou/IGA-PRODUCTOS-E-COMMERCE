@@ -8,11 +8,10 @@ import clsx from "clsx";
 import Header1 from "../../../assets/headers/HEADER_1.webp";
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
 import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.jpg";
-import CertCorazaPlagoAMPDF from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.pdf";
 import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
-import CertPlagosurCPDF from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.pdf";
 import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
 import TestReportPlagosurAMPDF from "../../../assets/certs/test-report-plagosur-am.pdf";
+import CertAnceCorazaPlagosur from "../../../assets/certs/igaproductos-certificado-ance.pdf"
 
 /* ── Shared design tokens (same as AboutIGA.tsx) ─────────── */
 const SectionBar = () => (
@@ -110,13 +109,13 @@ const certifications: Cert[] = [
 
 const certImages = [
     {
-        url: CertCorazaPlagoAMPDF,
+        url: CertAnceCorazaPlagosur,
         image: CertCorazaPlagoAM,
         alt: "Certificado de conformidad de producto 1",
         label: "Certificado ANCE 1",
     },
     {
-        url: CertPlagosurCPDF,
+        url: CertAnceCorazaPlagosur,
         image: CertPlagosurC,
         alt: "Certificado de conformidad de producto 2",
         label: "Certificado ANCE 2",
