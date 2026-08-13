@@ -252,6 +252,7 @@ const Certifications = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+                                download="igaproductos-certificado-ance.pdf"
                             >
                                 <figure className="w-full">
                                     <img
