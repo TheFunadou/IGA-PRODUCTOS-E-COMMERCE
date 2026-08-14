@@ -1,6 +1,7 @@
 import MainNavbar from "./components/Navbar";
 import MainFooter from "./components/Footer";
-import { useEffect, useState } from "react";
+import PageLoader from "../global/components/PageLoader";
+import { Suspense, useEffect, useState } from "react";
 import { useThemeStore } from "./states/themeStore";
 import { useAuthStore } from "../modules/auth/states/authStore";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -68,7 +69,9 @@ const MainLayout = () => {
                 </div>
             )}
             <main className="w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat">
-                <Outlet />
+                <Suspense fallback={<PageLoader />}>
+                    <Outlet />
+                </Suspense>
             </main>
             {consentStatus === null && <CookieConsent onSetConsent={handleSetConsent} />}
             <MainFooter />
