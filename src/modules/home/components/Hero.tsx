@@ -88,6 +88,7 @@ export default function Hero() {
                 <img
                     src={HeroIMG}
                     alt="Equipo de Protección Personal IGA"
+                    fetchPriority="high"
                     className="absolute inset-0 w-full h-full object-cover object-bottom"
                     style={{
                         opacity: isDark ? 0.72 : 1,

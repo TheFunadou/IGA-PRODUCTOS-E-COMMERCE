@@ -84,7 +84,11 @@ RUN echo "=== DIAGNOSTICO DE COMPILACION ===" && \
 FROM nginx:stable-alpine AS runner
 
 # Instalar curl para healthchecks/debug opcional
-RUN apk add --no-cache curl
+# y el módulo brotli para compresión de JS/CSS/HTML
+RUN sed -i 's/^#\(.*\/community\)/\1/' /etc/apk/repositories && \
+    apk add --no-cache curl nginx-mod-http-brotli && \
+    (grep -q "ngx_http_brotli_filter_module" /etc/nginx/nginx.conf || \
+    sed -i '1i load_module /usr/lib/nginx/modules/ngx_http_brotli_filter_module.so;\nload_module /usr/lib/nginx/modules/ngx_http_brotli_static_module.so;' /etc/nginx/nginx.conf)
 
 # Eliminar sitio default
 RUN rm -rf /usr/share/nginx/html/*

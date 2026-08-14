@@ -19,11 +19,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useThemeStore } from "./layouts/states/themeStore"
 import ScrollToTop from "./global/components/ScrollToTop"
 
-import { GoogleOAuthProvider } from "@react-oauth/google";
-
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
-
 import { usePageTracking } from "./modules/analytics/usePageTracking";
+
+// Wrapper lazy: los providers de Google solo se cargan en /iniciar-sesion
+const AuthProviders = lazy(() => import("./modules/auth/components/AuthProviders"));
 
 // ── Lazy routes (code-splitting) ──────────────────────────────────────────────
 const Home = lazy(() => import("./modules/home/design/Home"))
@@ -88,19 +87,15 @@ function QueryDevTools() {
 function RootLayout() {
     usePageTracking();
     return (
-        <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
-            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-                <QueryClientProvider client={queryClient}>
-                    <QueryDevTools />
-                    <ThemeProvider>
-                        <TriggerAlertProvider>
-                            <ScrollToTop />
-                            <Outlet />
-                        </TriggerAlertProvider>
-                    </ThemeProvider>
-                </QueryClientProvider>
-            </GoogleOAuthProvider>
-        </GoogleReCaptchaProvider>
+        <QueryClientProvider client={queryClient}>
+            <QueryDevTools />
+            <ThemeProvider>
+                <TriggerAlertProvider>
+                    <ScrollToTop />
+                    <Outlet />
+                </TriggerAlertProvider>
+            </ThemeProvider>
+        </QueryClientProvider>
     )
 }
 
@@ -125,7 +120,7 @@ const router = createBrowserRouter([
                     },
 
                     // Auth
-                    { path: "/iniciar-sesion", element: <Login /> },
+                    { path: "/iniciar-sesion", element: <AuthProviders><Login /></AuthProviders> },
                     { path: "/nueva-cuenta", element: <CreateAccount /> },
                     { path: "/restablecer-contraseña", element: <RestorePassword /> },
 
