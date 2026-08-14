@@ -63,6 +63,7 @@ const queryClient = new QueryClient({
 
 
 import { usePageTracking } from "./modules/analytics/usePageTracking";
+import AnceCert from "./modules/home/design/AnceCert"
 
 // Wrapper para los providers
 function RootLayout() {
@@ -147,6 +148,10 @@ const router = createBrowserRouter([
           { path: "/terminos-y-condiciones", element: <TermsAndConditions /> },
           { path: "/wp-content/uploads/2025/09/CERT_CORAZA_Y_PLAGOSUR_A_M_CLASE_E-.pdf", element: <QRRedirectCorazaPlago /> },
           { path: "/wp-content/uploads/2025/09/CERT_PLAGOSUR_C_CORAZA_A_I_CLASE_E_.pdf", element: <QRRedirectPlagoCorazaAI /> },
+
+
+          //Certs
+          { path: "/certificados/ance", element: <AnceCert /> }
 
         ]
       },
