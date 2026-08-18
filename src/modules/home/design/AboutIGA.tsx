@@ -59,7 +59,7 @@ const AboutIGA = () => {
     const [select, setSelect] = useState<"mision" | "vision" | "policy" | "value">("mision");
 
     const cfeLogo =
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Comisi%C3%B3n_Federal_de_Electricidad_%28logo%29_.svg/2560px-Comisi%C3%B3n_Federal_de_Electricidad_%28logo%29_.svg.png";
+        "https://images.seeklogo.com/logo-png/40/1/cfe-logo-png_seeklogo-409153.png";
     const pemexLogo =
         "https://upload.wikimedia.org/wikipedia/commons/9/99/Logo_Petr%C3%B3leos_Mexicanos.svg";
     const asaLogo =

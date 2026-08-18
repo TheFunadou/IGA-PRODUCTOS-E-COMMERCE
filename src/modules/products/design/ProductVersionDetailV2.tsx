@@ -15,7 +15,7 @@ import {
     FaCircleUser, FaFire, FaBoxOpen, FaTruck,
     FaShieldHalved, FaClipboardCheck,
     FaBoxesPacking, FaHeadset,
-    FaCircleCheck, FaTriangleExclamation, FaArrowTrendUp,
+    FaCircleCheck, FaTriangleExclamation,
     FaFileInvoiceDollar, FaWarehouse, FaStar
 } from "react-icons/fa6";
 import { useAuthStore } from "../../auth/states/authStore";
@@ -78,19 +78,20 @@ const StockIndicator = ({ stock }: { stock: number }) => {
 };
 
 // ── WholesaleBadge ────────────────────────────────────────────────────────────
-const WholesaleBadge = ({ qty, unitPrice }: { qty: number; unitPrice: string }) => {
+const WholesaleBadge = ({ qty, productName, sku }: { qty: number; productName: string; sku: string }) => {
     if (qty < 10) return null;
-    const price = parseFloat(unitPrice.replace(/,/g, ""));
-    const discount = qty >= 100 ? 0.08 : qty >= 50 ? 0.05 : qty >= 10 ? 0.03 : 0;
-    if (discount === 0) return null;
-    const saving = (price * qty * discount).toFixed(2);
     return (
-        <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
-            <FaArrowTrendUp className="text-primary shrink-0" />
+        <a
+            href={`https://wa.me/529211963246/?text=Hola, me gustaría solicitar una cotización para el producto ${productName} con SKU ${sku} (cantidad: ${qty} piezas)`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20 hover:bg-primary/15 transition-colors"
+        >
+            <FaHeadset className="text-primary shrink-0" />
             <p className="text-xs text-primary font-semibold">
-                Comprando {qty} uds. ahorras ~${saving} MXN ({(discount * 100).toFixed(0)}% vol.)
+                ¿Cotización especializada? Contacta a un asesor de ventas
             </p>
-        </div>
+        </a>
     );
 };
 
@@ -156,13 +157,15 @@ interface PurchaseCardProps {
     onToggleFavorite: (e: React.MouseEvent) => void;
     onShare: () => void;
     maxStock: number;
+    productName: string;
+    sku: string;
 }
 
 const PurchaseCard = ({
     unitPrice, unitPriceWithDiscount, isOffer, discount, stock,
     productQty, selectProductQty, stockError, isFavorite,
     onQtySelect, onQtySet, onQtyLimit,
-    onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock
+    onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock, productName, sku
 }: PurchaseCardProps) => (
     <div className="w-full rounded-2xl border border-base-200 bg-base-100 shadow-xl overflow-hidden">
         {/* Header precio */}
@@ -250,7 +253,7 @@ const PurchaseCard = ({
                         )}
                     </div>
                 )}
-                <WholesaleBadge qty={productQty} unitPrice={unitPrice} />
+                <WholesaleBadge qty={productQty} productName={productName} sku={sku} />
             </div>
 
             {/* Total estimado */}
@@ -469,6 +472,8 @@ const ProductVersionDetailV2 = () => {
         },
         onShare: handleShareProduct,
         maxStock: data?.stock ?? 1,
+        productName: data?.name ?? "",
+        sku: data?.sku ?? "",
     };
 
     if (isLoading) return <ProductDetailSkeleton />;
@@ -746,7 +751,7 @@ const ProductVersionDetailV2 = () => {
                                     <p className="text-base font-extrabold text-base-content leading-tight">¿Compras de volúmen?</p>
                                 </div>
                                 <p className="text-xs text-base-content/70 leading-relaxed font-semibold relative z-10">
-                                    Mejores precios en compras mayores a <span className="text-primary font-bold">{stock} piezas</span> o compras recurrentes.
+                                    Si necesitas una cotización más especializada o compras recurrentes, contacta a un asesor de ventas.
                                 </p>
                                 <a
                                     href={`https://wa.me/529211963246/?text=Hola, me gustaría solicitar una cotización para el producto ${data.name} con SKU ${data.sku}`}

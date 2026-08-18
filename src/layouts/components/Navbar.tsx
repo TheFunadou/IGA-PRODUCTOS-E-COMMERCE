@@ -286,8 +286,8 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                     </div>
                 )}
             </div>
-            <div className="bg-success w-full p-1 flex items-center justify-center">
-                <p className="font-bold tracking-widest flex gap-2 items-center"><TbTruckDelivery size={24} /> Envíos a todo México</p>
+            <div className="bg-success w-full md:p-1 flex items-center justify-center">
+                <p className="font-bold tracking-widest flex gap-2 items-center text-xs md:text-base"><TbTruckDelivery className="text-lg md:text-xl xl:text-2xl" /> ENVIOS A TODO MÉXICO - COMPRA AHORA</p>
             </div>
         </section>
     );

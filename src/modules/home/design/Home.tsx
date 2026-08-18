@@ -17,7 +17,7 @@ import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
 import type { ElementType } from "react";
 import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
-import Hero from "../components/Hero";
+import Hero from "../components/hero/HeroV2";
 import { paymentMethodsImages } from "../helpers";
 import MostPopularItems from "../components/MostPopularItems";
 import ProductVersionCardV2 from "../../products/components/ProductVersionCard";
