@@ -1,4 +1,3 @@
-import type { ProductVersionCardI } from "../products/ProductTypes";
 import { track } from "./MetaEvent";
 import { MetaEventObject } from "./MetaEventsTypes";
 import {
@@ -19,7 +18,10 @@ export const trackSearch = (query: string, resultsCount: number = 0) =>
 export const trackAddToWishlist = (product: any) =>
     track(MetaEventObject.AddFav, createViewContentEvent(product));
 
-export const trackAddToCart = (product: ProductVersionCardI, quantity: number = 1) =>
+export const trackAddToCart = (
+    product: { name: string; sku: string; finalPrice: string },
+    quantity: number = 1
+) =>
     track(MetaEventObject.AddToCart, createAddToCartEvent({
         productName: product.name,
         skuList: [product.sku],

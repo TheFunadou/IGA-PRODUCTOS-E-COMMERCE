@@ -2,18 +2,21 @@ import { useState } from "react";
 
 interface Props {
     onRatingChange: (rating?: number) => void;
+    /** Valor controlado opcional (sincronizado con estado externo). */
+    value?: number;
 }
 
-const ShopRatingFilter = ({ onRatingChange }: Props) => {
-    const [rating, setRating] = useState<number | undefined>(undefined);
+const ShopRatingFilter = ({ onRatingChange, value }: Props) => {
+    const [internalRating, setInternalRating] = useState<number | undefined>(undefined);
+    const rating = value !== undefined ? value : internalRating;
 
-    const handleRating = (value: number) => {
-        setRating(value);
-        onRatingChange(value);
+    const handleRating = (starValue: number) => {
+        setInternalRating(starValue);
+        onRatingChange(starValue);
     };
 
     const handleClear = () => {
-        setRating(undefined);
+        setInternalRating(undefined);
         onRatingChange(undefined);
     };
 

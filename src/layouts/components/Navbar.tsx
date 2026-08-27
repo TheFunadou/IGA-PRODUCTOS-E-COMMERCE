@@ -1,23 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaClock, FaTrash, FaX } from "react-icons/fa6";
-import { FaSearch } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { IoLogOutOutline } from "react-icons/io5";
 import { VscThreeBars } from "react-icons/vsc";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useAuthStore } from "../../modules/auth/states/authStore";
-import { useFetchSearchProductVersions } from "../../modules/products/hooks/useFetchProductVersionCards";
-import useDebounceInputString from "../../modules/products/hooks/useDebounce";
 import { useOutsideSearchClick } from "../../modules/products/hooks/useOutsideSearchClick";
-import { makeSlug } from "../../modules/products/Helpers";
-import { useSearchHistoryStore } from "../states/searchCachedStore";
 import ThemeController from "../../modules/home/components/ThemeController";
 import ShopMenuPreview from "./ShopMenuPreview";
 import IgaLogo from "../../assets/logo/IGA-LOGO.webp";
 import { useTriggerAlert } from "../../modules/alerts/states/TriggerAlert";
 import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
-import { trackSearch } from "../../modules/analytics/MetaEvents";
-import { TbTruckDelivery } from "react-icons/tb";
+import NavbarSearch from "./NavbarSearch";
+import NavbarBanner from "./NavbarBanner";
 
 interface MainNavbarProps {
     onOpenMobileMenu: () => void;
@@ -26,16 +20,9 @@ interface MainNavbarProps {
 }
 
 const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) => {
-    const { searches: searchHistory, addSearch, clearSearches } = useSearchHistoryStore();
-    const [isInputSearchActive, setIsInputSearchActive] = useState(false);
-    const [inputSearch, setInputSearch] = useState("");
-    const [showSearchResults, setShowSearchResults] = useState(false);
     const [showShopMenuPreview, setShowShopMenuPreview] = useState(false);
-    const { debouncedValue, debouncedLoading } = useDebounceInputString(inputSearch, 300);
-    const searchResultsRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const { data: searchedData } = useFetchSearchProductVersions(debouncedValue);
     const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
     const { data } = useHandleShoppingCart({
@@ -46,14 +33,7 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
     const hideTimeoutRef = useRef<number | null>(null);
     const navigate = useNavigate();
 
-    useOutsideSearchClick(searchResultsRef, () => setShowSearchResults(false));
     useOutsideSearchClick(dropdownRef, () => setIsDropdownOpen(false));
-
-    useEffect(() => {
-        if (debouncedValue && searchedData) {
-            trackSearch(debouncedValue, searchedData.length);
-        }
-    }, [debouncedValue, searchedData]);
 
     const cancelHideTimeout = () => {
         if (hideTimeoutRef.current !== null) {
@@ -72,86 +52,17 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
         setShowShopMenuPreview(true);
     };
 
-    const handleSearchNavigate = (args: { category: string; productName: string; color: string; sku: string }) => {
-        addSearch(args.productName.toUpperCase());
-        navigate(`/tienda/${args.category.toLowerCase()}/${makeSlug(args.productName)}/${args.sku.toLowerCase()}`);
-    };
-
-    const onMouseDownSearchHistory = (args: { e: React.MouseEvent; search: string }) => {
-        args.e.preventDefault();
-        setInputSearch(args.search);
-        setShowSearchResults(true);
-    };
-
-    const onClearSearchHistory = (args: { e: React.MouseEvent }) => {
-        args.e.preventDefault();
-        clearSearches();
-    };
-
     return (
         <section className="sticky top-0 z-50 w-full">
+            <NavbarBanner />
             {/* ── Barra principal ── */}
-            <nav className="w-full flex items-center gap-3 px-4 py-3 md:px-8 lg:px-10 bg-blue-950 text-white">
+            <nav className="w-full flex items-center gap-3 px-4 py-2 md:px-8 lg:px-10 bg-blue-950 text-white border-t border-white/10">
                 {/* Logo */}
                 <button type="button" className="shrink-0 w-28 md:w-36 lg:w-40 cursor-pointer" onClick={() => navigate("/")}>
                     <img src={IgaLogo} alt="IGA Productos Logo" className="w-full object-contain" />
                 </button>
                 {/* Buscador desktop */}
-                <div className="hidden lg:flex flex-1 relative">
-                    <div className="flex items-center w-full gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 focus-within:border-white/60 transition-colors">
-                        {debouncedLoading
-                            ? <span className="loading loading-dots loading-xs text-white shrink-0" />
-                            : <FaSearch className="text-white/50 text-sm shrink-0" />
-                        }
-                        <input
-                            type="text"
-                            className="flex-1 bg-transparent text-white placeholder-white/40 text-sm outline-none min-w-0"
-                            placeholder="Buscar productos..."
-                            value={inputSearch}
-                            onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true); }}
-                            onFocus={() => setIsInputSearchActive(true)}
-                            onBlur={() => setIsInputSearchActive(false)}
-                            onKeyDown={(e) => e.stopPropagation()}
-                        />
-                        {inputSearch.length > 0 && (
-                            <button
-                                type="button"
-                                onMouseDown={(e) => { e.preventDefault(); setInputSearch(""); setShowSearchResults(false); }}
-                                className="text-white/40 hover:text-white text-xs shrink-0"
-                            >
-                                <FaX />
-                            </button>
-                        )}
-                    </div>
-                    {/* Dropdown historial */}
-                    {searchHistory.length > 0 && isInputSearchActive && inputSearch.length === 0 && (
-                        <div className="absolute top-full mt-2 w-full bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden" ref={searchResultsRef}>
-                            <div className="flex items-center justify-between px-4 py-2 border-b border-base-200">
-                                <span className="text-xs font-semibold uppercase text-base-content/40">Búsquedas recientes</span>
-                                <button type="button" onMouseDown={(e) => onClearSearchHistory({ e })} className="flex items-center gap-1 text-xs text-error hover:underline">
-                                    <FaTrash size={10} /> Limpiar
-                                </button>
-                            </div>
-                            {searchHistory.map((data, index) => (
-                                <button key={`${index}-${data}`} type="button" onMouseDown={(e) => onMouseDownSearchHistory({ e, search: data })} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 text-left transition-colors">
-                                    <FaClock size={14} className="text-base-content/30 shrink-0" />
-                                    <span className="text-sm text-base-content">{data}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                    {/* Dropdown resultados */}
-                    {showSearchResults && searchedData && searchedData.length > 0 && (
-                        <div className="absolute top-full mt-2 w-full bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden" ref={searchResultsRef}>
-                            {searchedData.map((data, index) => (
-                                <button key={`${index}-${data.sku}`} type="button" onClick={() => handleSearchNavigate({ category: data.category, productName: data.product_name, color: data.color, sku: data.sku })} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 text-left transition-colors">
-                                    <FaSearch className="text-primary text-xs shrink-0" />
-                                    <span className="text-sm text-base-content font-medium line-clamp-1">{data.product_name.toUpperCase()} — {data.color.toUpperCase()}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                <NavbarSearch variant="desktop" />
                 {/* Acciones derecha */}
                 <div className="flex items-center gap-3 md:gap-4 lg:gap-6 ml-auto shrink-0">
                     <ThemeController />
@@ -239,55 +150,8 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
                 </a>
             </div>
             {/* ── Barra mobile: buscador ── */}
-            <div className="lg:hidden w-full bg-blue-950 border-t border-white/10 px-4 py-2.5 relative">
-                <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 focus-within:border-white/50 transition-colors">
-                    {debouncedLoading
-                        ? <span className="loading loading-dots loading-xs text-white shrink-0" />
-                        : <FaSearch className="text-white/50 text-sm shrink-0" />
-                    }
-                    <input
-                        type="text"
-                        className="flex-1 bg-transparent text-white placeholder-white/40 text-sm outline-none min-w-0 font-normal"
-                        placeholder="Buscar productos..."
-                        value={inputSearch}
-                        onChange={(e) => { setInputSearch(e.target.value); setShowSearchResults(true); }}
-                        onFocus={() => setIsInputSearchActive(true)}
-                        onBlur={() => setIsInputSearchActive(false)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                    />
-                    {inputSearch.length > 0 && (
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); setInputSearch(""); setShowSearchResults(false); }} className="text-white/40 hover:text-white text-xs shrink-0 p-1">✕</button>
-                    )}
-                </div>
-                {showSearchResults && searchedData && searchedData.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mx-4 bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden" ref={searchResultsRef}>
-                        {searchedData.map((data, index) => (
-                            <button key={`${index}-${data.sku}`} type="button" onClick={() => navigate(`/tienda/${data.category.toLowerCase()}/${makeSlug(data.product_name)}/${data.sku.toLowerCase()}`)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-base-200 text-left transition-colors border-b border-base-100 last:border-0">
-                                <FaSearch className="text-primary text-xs shrink-0" />
-                                <span className="text-sm text-base-content font-medium line-clamp-1">{data.product_name} — {data.color}</span>
-                            </button>
-                        ))}
-                    </div>
-                )}
-                {searchHistory.length > 0 && isInputSearchActive && inputSearch.length === 0 && (
-                    <div className="absolute top-full left-0 right-0 mx-4 bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden" ref={searchResultsRef}>
-                        <div className="flex items-center justify-between px-4 py-2 border-b border-base-200">
-                            <span className="text-xs font-semibold uppercase text-base-content/40">Recientes</span>
-                            <button type="button" onMouseDown={(e) => onClearSearchHistory({ e })} className="flex items-center gap-1 text-xs text-error hover:underline">
-                                <FaTrash size={10} /> Limpiar
-                            </button>
-                        </div>
-                        {searchHistory.map((data, index) => (
-                            <button key={`${index}-${data}`} type="button" onMouseDown={(e) => onMouseDownSearchHistory({ e, search: data })} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-base-200 text-left transition-colors">
-                                <FaClock size={14} className="text-base-content/30 shrink-0" />
-                                <span className="text-sm text-base-content">{data}</span>
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
-            <div className="bg-success w-full md:p-1 flex items-center justify-center">
-                <p className="font-bold tracking-widest flex gap-2 items-center text-xs md:text-base"><TbTruckDelivery className="text-lg md:text-xl xl:text-2xl" /> ENVIOS A TODO MÉXICO - COMPRA AHORA</p>
+            <div className="lg:hidden w-full bg-blue-950 border-t border-white/10 px-4 py-2.5">
+                <NavbarSearch variant="mobile" />
             </div>
         </section>
     );

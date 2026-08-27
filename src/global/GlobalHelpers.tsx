@@ -14,6 +14,31 @@ export const closeModal = (modal: HTMLDialogElement | null) => {
 };
 
 /**
+ * Smooth-scroll to a section within the current page
+ *
+ * @param id - Id of the target section element
+ *
+ * @example
+ * ```typescript
+ * smoothScrollToSection("reseñas");
+ * ```
+ */
+export const smoothScrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+};
+
+const WHATSAPP_PHONE = "529211963246";
+
+/**
+ * Link de contacto por WhatsApp con mensaje prellenado opcional
+ *
+ * @param message - Texto que se enviará en el chat (se codifica automáticamente)
+ */
+export const getWhatsAppLink = (message?: string) =>
+  `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}${message ? `&text=${encodeURIComponent(message)}` : ""}`;
+
+/**
  * Build a consistent query
  * 
  * @param entity - Name of the entity

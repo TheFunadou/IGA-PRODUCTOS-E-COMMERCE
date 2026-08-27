@@ -26,15 +26,21 @@ const AuthProviders = lazy(() => import("./modules/auth/components/AuthProviders
 
 // ── Lazy routes (code-splitting) ──────────────────────────────────────────────
 const Home = lazy(() => import("./modules/home/design/Home"))
+const HomeV2 = lazy(() => import("./modules/home/design/Home/HomeV2"))
 const Login = lazy(() => import("./modules/auth/design/Login"))
+const LoginV3 = lazy(() => import("./modules/auth/design/LoginV3"))
 const CreateAccount = lazy(() => import("./modules/auth/design/CreateAccount"))
 const RestorePassword = lazy(() => import("./modules/auth/design/RestorePassword"))
 const CustomerAddresses = lazy(() => import("./modules/customers/design/CustomerAddresses"))
 const ShopV2 = lazy(() => import("./modules/shop/design/Shop"))
+const ShopV3 = lazy(() => import("./modules/shop/design/shop/ShopV3"))
 const ProductVersionDetailV2 = lazy(() => import("./modules/products/design/ProductVersionDetailV2"))
+const ProductVersionDetailV3 = lazy(() => import("./modules/products/design/ProductVersionDetailV3"))
 const ShoppingCartV2 = lazy(() => import("./modules/shopping/design/ShoppingCart"))
+const ShoppingCartV3 = lazy(() => import("./modules/shopping/design/ShoppingCartV3"))
 const ShoppingCartResumeV2 = lazy(() => import("./modules/shopping/design/ShoppingCartResume"))
 const CheckoutV2 = lazy(() => import("./modules/shopping/design/Checkout"))
+const CheckoutV3 = lazy(() => import("./modules/shopping/design/CheckoutV3"))
 const BuyNow = lazy(() => import("./modules/shopping/design/BuyNow"))
 const PaymentExitingV2 = lazy(() => import("./modules/payments/design/PaymentExiting"))
 const PaymentPendingV2 = lazy(() => import("./modules/payments/design/PaymentPending"))
@@ -121,18 +127,23 @@ const router = createBrowserRouter([
 
                     // Auth
                     { path: "/iniciar-sesion", element: <AuthProviders><Login /></AuthProviders> },
+                    { path: "/iniciar-sesion-v3", element: <AuthProviders><LoginV3 /></AuthProviders> },
                     { path: "/nueva-cuenta", element: <CreateAccount /> },
                     { path: "/restablecer-contraseña", element: <RestorePassword /> },
 
                     // Home
                     { path: "/", element: <Home /> },
+                    { path: "/homev2", element: <HomeV2 /> },
 
                     // Shop
                     { path: "/tienda", element: <ShopV2 /> },
+                    { path: "/tienda-v3", element: <ShopV3 /> },
                     { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
+                    { path: "/:categoria/:slug/:sku", element: <ProductVersionDetailV3 /> },
 
                     // Shopping Cart
                     { path: "/carrito-de-compras", element: <ShoppingCartV2 /> },
+                    { path: "/carrito-de-compras-v3", element: <ShoppingCartV3 /> },
 
                     // Orders
                     { path: "/mis-ordenes", element: <Orders /> },
@@ -142,7 +153,7 @@ const router = createBrowserRouter([
 
                     // Checkout
                     { path: "/resumen-de-carrito", element: <ShoppingCartResumeV2 /> },
-                    { path: "/pagar-productos", element: <CheckoutV2 /> },
+                    { path: "/pagar-productos", element: <CheckoutV3 /> },
                     { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNow /> },
                     { path: "/pagar-productos/pago-exitoso", element: <PaymentExitingV2 /> },
                     { path: "/pagar-productos/pago-pendiente", element: <PaymentPendingV2 /> },

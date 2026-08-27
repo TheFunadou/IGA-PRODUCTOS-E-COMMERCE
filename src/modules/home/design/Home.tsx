@@ -1,18 +1,10 @@
 import { getErrorMessage } from "../../../global/GlobalUtils";
 import ProductVersionCardSkeleton from "../../products/components/ProductVersionCardSkeleton";
-import IMG1 from "../../../assets/expo/IMG-1.webp";
-import IMG2 from "../../../assets/expo/IMG-2.webp";
-import IMG3 from "../../../assets/expo/IMG-3.webp";
-import IMG4 from "../../../assets/expo/IMG-4.webp";
-import IMG5 from "../../../assets/expo/IMG-5.webp";
-import IMG6 from "../../../assets/expo/IMG-6.webp";
-import IMG7 from "../../../assets/expo/IMG-7.webp";
-import IMG8 from "../../../assets/expo/IMG-8.webp";
 import clsx from "clsx";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import Marquee from "react-fast-marquee";
 import CategoriesSummary from "../components/CategoriesSummary";
-import { FaBox, FaImage, FaVideo, FaTriangleExclamation } from "react-icons/fa6";
+import { FaBox, FaTriangleExclamation } from "react-icons/fa6";
 import { PiHandbag } from "react-icons/pi";
 import { BiPackage } from "react-icons/bi";
 import type { ElementType } from "react";
@@ -21,54 +13,11 @@ import Hero from "../components/hero/HeroV2";
 import { paymentMethodsImages } from "../helpers";
 import MostPopularItems from "../components/MostPopularItems";
 import ProductVersionCardV2 from "../../products/components/ProductVersionCard";
-import { OverflowXComponent } from "../components/OverflowXComponent";
 
 const Home = () => {
 
     document.title = "Iga Productos | Fabricantes y vendedores de equipo de protección personal";
     const { theme } = useThemeStore();
-
-    const sampleVideos: { videoUrl: string, title: string }[] = [
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1943991622832390%2F&show_text=false&width=380&t=0",
-            title: "Fabricamos cascos certificados "
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1144234144137329%2F&show_text=false&width=380&t=0",
-            title: "¿Tu casco realmente te protege?"
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2003782983796640%2F&show_text=false&width=380&t=0",
-            title: "En Cascos IGA fabricamos cascos certificados bajo la NOM-115-STPS-2009, cumpliendo con los estándares más altos de protección"
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2FCascos.Iga%2Fvideos%2F1072011298391393%2F&show_text=false&width=380&t=0",
-            title: "Cascos Iga  en  su ultimo día de actividades en la Expoferre 2025."
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1226019325980440%2F&show_text=false&width=267&t=0",
-            title: "Banda de Sudor para Cascos"
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1369548547637737%2F&show_text=false&width=267&t=0",
-            title: "💛 Sabemos que cada jornada comienza con esfuerzo… y debe terminar con un abrazo."
-        },
-        {
-            videoUrl: "https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1245484200499156%2F&show_text=false&width=267&t=0",
-            title: "Conoce mas sobre nuestros cascos"
-        }
-    ];
-
-    const imageGallery: { index: number, url: string, description: string }[] = [
-        { index: 0, url: IMG1, description: "" },
-        { index: 1, url: IMG2, description: "" },
-        { index: 2, url: IMG3, description: "" },
-        { index: 3, url: IMG4, description: "" },
-        { index: 4, url: IMG5, description: "" },
-        { index: 5, url: IMG6, description: "" },
-        { index: 6, url: IMG7, description: "" },
-        { index: 7, url: IMG8, description: "" },
-    ];
 
     const MAX_PRODUCTS: number = 10;
 
@@ -136,54 +85,6 @@ const Home = () => {
                             ))}
                         </div>
                     </Marquee>
-                </section>
-                <section className={clsx(sectionClasses, "bg-base-200/20 border-t border-base-200/50")}>
-                    <SectionHeader
-                        title="Conoce nuestra marca"
-                    />
-                    <div className="flex flex-col gap-8 md:gap-12">
-                        <div>
-                            <SectionHeader
-                                title="Videos"
-                                subtitle="Desliza para ver videos que quizás te puedan interesar"
-                                icon={FaVideo}
-                            />
-                            <OverflowXComponent className="flex gap-5 items-center">
-                                {sampleVideos.map((video, index) => (
-                                    <div key={index} className="flex flex-col w-60 md:w-64 flex-shrink-0 rounded-xl border border-base-200 bg-base-100 shadow-sm overflow-hidden">
-                                        <p className="text-sm md:text-base font-semibold line-clamp-1 px-3 pt-3 text-base-content">{video.title}</p>
-                                        <div className="w-full h-56 md:h-64 overflow-hidden bg-base-300 flex items-center justify-center">
-                                            <iframe
-                                                src={video.videoUrl}
-                                                style={{ border: 'none', overflow: 'hidden' }}
-                                                scrolling="no"
-                                                frameBorder="0"
-                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                                                allowFullScreen
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </OverflowXComponent>
-                        </div>
-                        <div>
-                            <SectionHeader
-                                title="Exposiciones"
-                                subtitle="Participaciones en exposiciones nacionales e internacionales"
-                                icon={FaImage}
-                            />
-                            <Marquee className="w-full" gradient={false} speed={80}>
-                                <div className="flex gap-5 md:gap-10 items-center justify-center">
-                                    {[...imageGallery, ...imageGallery].map((img, index) => (
-                                        <figure key={index} className="w-36 h-36 md:w-56 md:h-56 p-2 md:p-3 rounded-xl bg-base-100 border border-base-200">
-                                            <img className="w-full h-full object-cover object-center rounded-lg" src={img.url} alt={img.description} loading="lazy" />
-                                        </figure>
-                                    ))}
-                                </div>
-                            </Marquee>
-                        </div>
-                    </div>
                 </section>
                 <section className={clsx(sectionClasses, "border-t border-base-200/50")}>
                     <SectionHeader

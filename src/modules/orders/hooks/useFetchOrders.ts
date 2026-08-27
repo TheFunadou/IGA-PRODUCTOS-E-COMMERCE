@@ -1,8 +1,8 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelOrder, getBuyNowItem, getCheckoutOrderV2, getOrders } from "../../orders/OrdersServices";
-import type { CheckoutOrderI, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
+import { cancelOrder, cancelGuestOrder, getBuyNowItem, getCheckoutOrderV2, getCheckoutOrderV3, getOrders } from "../../orders/OrdersServices";
+import type { CheckoutOrderI, CheckoutOrderIV3, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { LoadShoppingCartI, ShoppingCartI } from "../../shopping/ShoppingTypes";
@@ -38,6 +38,17 @@ export const useFetchCheckoutOrderV2 = (params: { orderUUID: string }) => {
     });
 };
 
+export const useFetchCheckoutOrderV3 = (params: { orderUUID: string }) => {
+    return useQuery<CheckoutOrderIV3>({
+        queryKey: ["order:checkout:v3", { orderUUID: params.orderUUID }],
+        queryFn: async () => await getCheckoutOrderV3({ orderUUID: params.orderUUID }),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: !!params.orderUUID,
+    });
+};
+
 export const useFetchOrderDetails = (args: { orderUUID: string }) => {
     const { orderUUID } = args;
 
@@ -63,6 +74,22 @@ export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "
         },
         onError: () => {
             showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden., intente nuevamente", { duration: 3000 });
+        }
+    });
+};
+
+export const useCancelGuestOrder = ({ orderUUID }: { orderUUID: string }) => {
+    const queryClient = useQueryClient();
+    const { showTriggerAlert } = useTriggerAlert();
+
+    return useMutation({
+        mutationFn: async () => await cancelGuestOrder({ orderUUID }),
+        onSuccess: (data) => {
+            showTriggerAlert("Successfull", data, { duration: 3000 });
+            queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
+        },
+        onError: () => {
+            showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden, intente nuevamente", { duration: 3000 });
         }
     });
 };

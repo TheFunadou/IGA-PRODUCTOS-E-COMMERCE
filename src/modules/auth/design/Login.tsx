@@ -304,7 +304,7 @@ const Login = () => {
                             Al continuar, aceptas la{" "}
                             <Link to="/politica-de-privacidad" className="text-slate-500 underline">política de privacidad</Link>
                             {" "}y los{" "}
-                            <Link to="/politica-de-privacidad" className="text-slate-500 underline">términos y condiciones</Link>
+                            <Link to="/terminos-y-condiciones" className="text-slate-500 underline">términos y condiciones</Link>
                             {" "}de IGA Productos.
                         </p>
                     </div>

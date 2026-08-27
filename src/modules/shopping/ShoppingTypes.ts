@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import type { GuestFormType } from "../customers/CustomerTypes";
-import type { ProductVersionCardI, ProductVersionCardType } from "../products/ProductTypes";
+import type { ProductVersionCardI, ProductVersionCardType, PV3CardData } from "../products/ProductTypes";
 export type ShoppingCartType = ProductVersionCardType & {
     isChecked: boolean;
     quantity: number;
@@ -33,6 +33,12 @@ export interface ShoppingCartResumeI {
 
 export interface LoadShoppingCartI {
     cards: ProductVersionCardI[],
+    shoppingCart: ShoppingCartI[],
+    resume?: ShoppingCartResumeI
+};
+
+export interface LoadShoppingCartV3I {
+    cards: PV3CardData[],
     shoppingCart: ShoppingCartI[],
     resume?: ShoppingCartResumeI
 };

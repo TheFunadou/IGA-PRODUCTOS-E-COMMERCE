@@ -131,10 +131,37 @@ export interface OrderCheckoutItemI {
     images: { url: string, mainImage: boolean }[];
 };
 
+export interface OrderCheckoutItemIV3 {
+    name: string;
+    category: string;
+    tags: string[];
+    sku: string;
+    color: { line: string, name: string, code: string };
+    unitPrice: string;
+    finalPrice: string;
+    quantity: number;
+    offer: {
+        isOffer: boolean;
+        discount: number;
+        applicableOffers: { discount: number, type: "PERCENTAGE" | "COUPON", appliedCouponCode: string | null }[];
+    };
+    subtotal: string;
+    images: { url: string, mainImage: boolean }[];
+};
+
 
 export interface CheckoutOrderI {
     orderUUID: string;
     items: OrderCheckoutItemI[];
+    resume: ShoppingCartResumeI;
+    couponCode: string | null;
+    externalId: string;
+    shippingAddress: NewAddressType[];
+};
+
+export interface CheckoutOrderIV3 {
+    orderUUID: string;
+    items: OrderCheckoutItemIV3[];
     resume: ShoppingCartResumeI;
     couponCode: string | null;
     externalId: string;

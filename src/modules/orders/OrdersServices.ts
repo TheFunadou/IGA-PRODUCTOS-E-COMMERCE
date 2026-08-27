@@ -1,4 +1,4 @@
-import type { CheckoutOrderI, GetOrdersSummaryI } from "./OrdersTypes";
+import type { CheckoutOrderI, CheckoutOrderIV3, GetOrdersSummaryI } from "./OrdersTypes";
 import api from "../../api/api.config";
 import type { LoadShoppingCartI, ShoppingCartI } from "../shopping/ShoppingTypes";
 
@@ -9,6 +9,11 @@ export const getOrders = async (params: { page: number, limit: number, orderBy: 
 
 export const getCheckoutOrderV2 = async ({ orderUUID }: { orderUUID: string }): Promise<CheckoutOrderI> => {
     const { data } = await api.get<CheckoutOrderI>(`/orders/checkout/v2/${orderUUID}`);
+    return data;
+};
+
+export const getCheckoutOrderV3 = async ({ orderUUID }: { orderUUID: string }): Promise<CheckoutOrderIV3> => {
+    const { data } = await api.get<CheckoutOrderIV3>(`/orders/checkout/v3/${orderUUID}`);
     return data;
 };
 
@@ -25,6 +30,11 @@ export const getBuyNowItem = async ({ item }: { item: ShoppingCartI }): Promise<
 
 export const cancelOrder = async ({ orderUUID, type }: { orderUUID: string, type: "CANCELLED" | "ABANDONED" }): Promise<string> => {
     const { data } = await api.post<string>(`/orders/cancel`, { orderUUID, type });
+    return data;
+};
+
+export const cancelGuestOrder = async ({ orderUUID }: { orderUUID: string }): Promise<string> => {
+    const { data } = await api.post<string>(`/orders/cancel-guest`, { orderUUID });
     return data;
 };
 

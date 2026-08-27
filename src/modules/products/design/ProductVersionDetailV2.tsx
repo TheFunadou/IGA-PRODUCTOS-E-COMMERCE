@@ -31,7 +31,7 @@ import PaginationComponent from "../../../global/components/PaginationComponent"
 import { OverflowXComponent } from "../../home/components/OverflowXComponent";
 import ImageZoomViewer from "../components/ImageZoomViewer";
 import ProductVersionImageGallery from "../components/ProductVersionImageGallery";
-import { showModal } from "../../../global/GlobalHelpers";
+import { showModal, smoothScrollToSection } from "../../../global/GlobalHelpers";
 import { useFetchProductVersionCardsV2, useFetchProductVersionDetailV2 } from "../hooks/useFetchProductVersionCards";
 import ProductVersionCardV2 from "../components/ProductVersionCard";
 import { trackViewContent, trackAddToWishlist, trackAddToCart } from "../../analytics/MetaEvents";
@@ -637,7 +637,7 @@ const ProductVersionDetailV2 = () => {
                                         </div>
                                         <span className="ml-2 text-sm font-extrabold text-base-content">{reviewsResume.ratingAverage.toFixed(1)}</span>
                                     </div>
-                                    <a href="#reseñas" className="text-[13px] font-bold text-primary hover:text-primary-focus transition-colors underline-offset-4 hover:underline">
+                                    <a href="#reseñas" onClick={(e) => { e.preventDefault(); smoothScrollToSection("reseñas"); }} className="text-[13px] font-bold text-primary hover:text-primary-focus transition-colors underline-offset-4 hover:underline">
                                         Leer {reviewsResume.totalReviews} {reviewsResume.totalReviews === 1 ? "opinión" : "opiniones"}
                                     </a>
                                 </div>
@@ -646,7 +646,7 @@ const ProductVersionDetailV2 = () => {
                                     <div className="flex items-center text-base-content/30">
                                         {[1, 2, 3, 4, 5].map((v) => <FaStar key={v} className="text-sm" />)}
                                     </div>
-                                    <a href="#reseñas" className="text-xs font-bold text-base-content/40 hover:text-primary transition-colors">
+                                    <a href="#reseñas" onClick={(e) => { e.preventDefault(); smoothScrollToSection("reseñas"); }} className="text-xs font-bold text-base-content/40 hover:text-primary transition-colors">
                                         Sé el primero en opinar
                                     </a>
                                 </div>
@@ -838,7 +838,7 @@ const ProductVersionDetailV2 = () => {
                 </div>
 
                 {/* ══ RESEÑAS Y OPINIONES ══════════════════════════════════════════════ */}
-                <div className="mt-12 mb-16" id="reseñas">
+                <div className="mt-12 mb-16 scroll-mt-24" id="reseñas">
                     <h2 className="text-3xl font-black text-base-content mb-8 flex items-center gap-3">
                         <FaStar className="text-yellow-400" /> Opiniones de nuestros clientes
                     </h2>

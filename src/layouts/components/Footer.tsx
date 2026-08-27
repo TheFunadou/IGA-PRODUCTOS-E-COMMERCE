@@ -2,15 +2,13 @@ import { Link } from "react-router-dom";
 import { FaFacebook, FaWhatsapp, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import { IoArrowUp } from "react-icons/io5";
 import PlasticosDelGolfoLogo from "../../assets/logo/plasticos-del-golfo.webp";
+import { smoothScrollToSection } from "../../global/GlobalHelpers";
 
 const Footer = () => {
 
     const smoothScrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+        smoothScrollToSection("top");
     };
 
     return (

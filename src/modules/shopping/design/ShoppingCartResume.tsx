@@ -24,10 +24,7 @@ import {
     FaShippingFast,
     FaUserAlt,
     FaTag,
-    FaGift,
-    FaStar,
     FaUserPlus,
-    FaShoppingBag,
     FaExclamationTriangle,
 } from "react-icons/fa";
 import { MdShoppingBag, MdCheckBox } from "react-icons/md";
@@ -447,29 +444,6 @@ const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
                     <div className="flex-1 h-px bg-base-300" />
                     <span className="text-xs text-base-content/40 font-medium">o</span>
                     <div className="flex-1 h-px bg-base-300" />
-                </div>
-
-                <div className="rounded-xl border border-warning/30 bg-warning/5 p-4">
-                    <div className="flex items-start gap-3">
-                        <FaGift className="text-warning text-lg flex-shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-sm font-bold text-base-content mb-1.5">
-                                ¡No te pierdas estos beneficios al registrarte!
-                            </p>
-                            <ul className="flex flex-col gap-1.5">
-                                {[
-                                    { icon: <FaStar className="text-warning text-xs" />, text: "Acumula puntos con cada compra y canjéalos por productos" },
-                                    { icon: <FaShoppingBag className="text-primary text-xs" />, text: "Guarda tus direcciones y agiliza futuros pedidos" },
-                                    { icon: <MdCheckBox className="text-info text-xs" />, text: "Historial completo de pedidos y seguimiento de envíos" },
-                                ].map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                        <span className="mt-0.5 flex-shrink-0">{item.icon}</span>
-                                        <span className="text-xs text-base-content/70">{item.text}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
                 </div>
 
                 <button

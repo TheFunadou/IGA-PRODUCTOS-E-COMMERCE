@@ -172,6 +172,54 @@ export interface ProductVersionDetailI {
     };
 }
 
+// ── Product Version Detail V3 (GET product-version/details/v3) ─────────────
+
+export type ProductResourceI = {
+    id: string;
+    description: string;
+    type: string;
+    resourceUrl: string;
+    updatedAt: Date | string;
+};
+
+export interface ProductVersionDetailV3I {
+    productUUID: string;
+    name: string;
+    category: { uuid: string, name: string };
+    sku: string;
+    codeBar?: string;
+    color: { line: string, name: string, code: string };
+    unitPrice: string;
+    finalPrice: string;
+    isFavorite: boolean;
+    stock: number;
+    images: { url: string, mainImage: boolean }[];
+    rating: number;
+    offer: {
+        isOffer: boolean,
+        discount: number,
+        applicableOffers?: {
+            discount: number,
+            type: "PERCENTAGE" | "COUPON"
+        }[]
+    };
+    parents: SafeParentDetailedI[];
+    tags: { id: string, name: string, tier: number, index: number }[];
+    resources: ProductResourceI[];
+    details: {
+        techSheetUrl: string;
+        description: string;
+        status: string;
+        specs: string;
+        applications: string;
+        recommendations: string;
+        certsDesc: string;
+        createdAt?: Date | string;
+        updatedAt?: Date | string;
+        isReviewed: boolean;
+    };
+}
+
 export type PVCardsResponseType = {
     data: ProductVersionCardType[];
     totalRecords: number;
@@ -182,13 +230,6 @@ export type PVCardsResponseTypeV2 = {
     data: ProductVersionCardI[];
     totalRecords: number;
     totalPages: number;
-};
-
-export type SearchedProductType = {
-    sku: string;
-    product_name: string;
-    category: string;
-    color: string;
 };
 
 export type colorLine = "Linea Basica" | "Linea Especial" | "Linea Flourescente";
@@ -249,4 +290,124 @@ export type PVReviewResumeType = {
     ratingResume: GetPVReviewRatingType[];
     ratingAverage: number;
     totalReviews: number;
+};
+
+// ── Product Version Cards V3 (POST product-version/search/v3) ──────────────
+
+export type PV3SortField =
+    | 'product_name'
+    | 'category'
+    | 'created_at'
+    | 'updated_at'
+    | 'sku'
+    | 'unit_price'
+    | 'stock'
+    | 'color_name'
+    | 'status';
+
+export type PV3Sort = Partial<Record<PV3SortField, 'asc' | 'desc'>>;
+
+export type PV3TagData = {
+    id: string;
+    name: string;
+    tier: number;
+    index: number;
+};
+
+export type PV3Image = {
+    url: string;
+    isMain: boolean;
+};
+
+export type PV3VersionData = {
+    id: string;
+    sku: string;
+    color_line: string;
+    color_name: string;
+    color_code: string;
+    status: string;
+    stock: number;
+    unit_price: string;
+    final_price: string;
+    rating: number;
+    offer: {
+        isOffer: boolean;
+        discount: number;
+        applicableOffers?: {
+            discount: number;
+            type: "PERCENTAGE" | "COUPON";
+        }[];
+    };
+    main_version: boolean;
+    image_url: string | null;
+    images: PV3Image[];
+    parents: { sku: string; color_code: string }[];
+    is_favorite: boolean;
+};
+
+export type PV3ProductData = {
+    id: string;
+    uuid: string;
+    product_name: string;
+    description: string;
+    category: { id: string; uuid: string; name: string };
+    subcategories: { id: string; uuid: string; description: string }[];
+    user: string;
+    tags: PV3TagData[];
+    created_at: string;
+    updated_at: string;
+};
+
+export type PV3CardData = {
+    product: PV3ProductData;
+    version: PV3VersionData;
+    created_at: string;
+    updated_at: string;
+};
+
+export type PV3Filters = {
+    name?: string;
+    search?: string;
+    categoryUuid?: string;
+    sku?: string[];
+    tagGroups?: { tier: number; tagIds: string[] }[];
+    tagName?: string[];
+    priceRange?: { min?: number; max?: number };
+    onlyInStock?: boolean;
+    onlyFavorites?: boolean;
+    onlyOffers?: boolean;
+    ratingRange?: number;
+    colorLine?: colorLine;
+};
+
+export type PV3Params = {
+    pagination?: { page?: number; limit?: number };
+    filters?: PV3Filters;
+    sort?: PV3Sort;
+};
+
+export type PV3Response = {
+    data: PV3CardData[];
+    totalRecords: number;
+    totalPages: number;
+    currentPage: number;
+};
+
+// ── Tags públicos (GET tags/public) ────────────────────────────────────────
+
+export type PublicCategoryTagItem = {
+    id: string;
+    name: string;
+    tagCategoryId: string;
+    tier: number;
+    index: number;
+};
+
+export type PublicTagsGroup = {
+    category: { id: string; name: string };
+    tags: PublicCategoryTagItem[];
+};
+
+export type PublicTagsResponseType = {
+    data: PublicTagsGroup[];
 };

@@ -1,5 +1,5 @@
 import api from "../../../api/api.config";
-import type { AddPVReviewType, GetProductVersionReviewsType, ProductVersionCardFilters, ProductVersionDetailI, ProductVersionDetailType, ProductVersionStockI, PVCardsResponseType, PVCardsResponseTypeV2, PVReviewResumeType, SearchCardsDTO, SearchedProductType } from "../ProductTypes"
+import type { AddPVReviewType, GetProductVersionReviewsType, ProductVersionCardFilters, ProductVersionDetailI, ProductVersionDetailType, ProductVersionDetailV3I, ProductVersionStockI, PVCardsResponseType, PVCardsResponseTypeV2, PVReviewResumeType, PV3Params, PV3Response, PublicTagsResponseType, SearchCardsDTO } from "../ProductTypes"
 
 export const searchProductVersionCards = async (params: ProductVersionCardFilters): Promise<PVCardsResponseType | null> => {
     const { data } = await api.post<PVCardsResponseType | null>("product-version/search", params);
@@ -8,6 +8,16 @@ export const searchProductVersionCards = async (params: ProductVersionCardFilter
 
 export const searchProductVersionCardsV2 = async (params: SearchCardsDTO): Promise<PVCardsResponseTypeV2 | null> => {
     const { data } = await api.post<PVCardsResponseTypeV2 | null>("product-version/search/v2", params);
+    return data;
+};
+
+export const searchProductVersionCardsV3 = async (params: PV3Params): Promise<PV3Response> => {
+    const { data } = await api.post<PV3Response>("product-version/search/v3", params);
+    return data;
+};
+
+export const getPublicCategoryTags = async (categoryUuid: string): Promise<PublicTagsResponseType> => {
+    const { data } = await api.get<PublicTagsResponseType>("tags/public", { params: { categoryUuid } });
     return data;
 };
 
@@ -21,14 +31,13 @@ export const getProductVersionDetail = async (sku: string): Promise<ProductVersi
     return data;
 };
 
-export const getStockBySKUList = async (skuList: string[]): Promise<ProductVersionStockI[]> => {
-    const { data } = await api.post<ProductVersionStockI[]>("product-version/stock", { skuList });
+export const getProductVersionDetailV3 = async (sku: string): Promise<ProductVersionDetailV3I> => {
+    const { data } = await api.get<ProductVersionDetailV3I>("product-version/details/v3/" + sku);
     return data;
 };
 
-
-export const listProductVersionsByName = async (input: string): Promise<SearchedProductType[]> => {
-    const { data } = await api.get<SearchedProductType[]>("product-version/list/" + input);
+export const getStockBySKUList = async (skuList: string[]): Promise<ProductVersionStockI[]> => {
+    const { data } = await api.post<ProductVersionStockI[]>("product-version/stock", { skuList });
     return data;
 };
 

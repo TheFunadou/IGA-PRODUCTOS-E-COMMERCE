@@ -1,0 +1,373 @@
+import { useNavigate } from "react-router-dom";
+import { formatPrice } from "../../products/Helpers";
+import { useRef } from "react";
+import MercadoPagoCheckoutPro from "../components/MercadoPagoCheckoutPro";
+import { usePaymentStore } from "../states/paymentStore";
+import { BiMinus, BiPlus } from "react-icons/bi";
+import clsx from "clsx";
+import { paymentProvider } from "../utils/ShoppingUtils";
+import CancelOrderForm from "../components/CancelOrderForm";
+import { showModal } from "../../../global/GlobalHelpers";
+import { useCancelOrder, useCancelGuestOrder, useFetchCheckoutOrderV3 } from "../../orders/hooks/useFetchOrders";
+import { useAuthStore } from "../../auth/states/authStore";
+import {
+    FaLock,
+    FaMapMarkerAlt,
+    FaShippingFast,
+    FaTag,
+    FaExclamationTriangle,
+    FaUserShield,
+} from "react-icons/fa";
+import { FaBagShopping } from "react-icons/fa6";
+import { MdShoppingBag, MdPayment } from "react-icons/md";
+import { SiMercadopago } from "react-icons/si";
+import CheckoutOrderItemV3 from "../components/CheckoutOrderItemV3";
+import type { CheckoutOrderIV3, OrderCreatedType } from "../../orders/OrdersTypes";
+import { trackInitiateCheckout } from "../../analytics/MetaEvents";
+import { useEffect } from "react";
+import TrustBadgesV3 from "../components/TrustBadgesV3";
+
+const CheckoutV3 = () => {
+    document.title = "Iga Productos | Resumen de pago";
+    const { order, cancelOrder } = usePaymentStore();
+    const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
+    const navigate = useNavigate();
+    const { isAuth } = useAuthStore();
+
+    if (!order) {
+        navigate("/carrito-de-compras");
+        return null;
+    }
+
+    const cancelOrderMutation = isAuth
+        ? useCancelOrder({ orderUUID: order.orderUUID, type: "ABANDONED" })
+        : useCancelGuestOrder({ orderUUID: order.orderUUID });
+    const { data, isLoading, error, refetch } = useFetchCheckoutOrderV3({ orderUUID: order.orderUUID });
+    const hasTrackedRef = useRef(false);
+
+    useEffect(() => {
+        if (data && data.items.length > 0 && !hasTrackedRef.current) {
+            trackInitiateCheckout(parseFloat(data.resume.total), data.items.length);
+            hasTrackedRef.current = true;
+        }
+    }, [data]);
+
+    if (data && data.items.length === 0) navigate("/carrito-de-compras");
+
+    const handleCanceled = async () => {
+        await cancelOrderMutation.mutateAsync();
+        await cancelOrder().then(() => {
+            return navigate("/carrito-de-compras");
+        });
+    };
+
+    // ── Loading state ────────────────────────────────────────────────────────
+    if (isLoading) {
+        return (
+            <div className="w-full flex justify-center items-center">
+                <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl min-h-64 flex flex-col justify-center">
+                    <div className="flex items-center gap-3">
+                        <span className="loading loading-spinner loading-md text-primary" />
+                        <p className="text-base sm:text-lg text-base-content/70">Cargando datos de la orden...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ── Error state ──────────────────────────────────────────────────────────
+    if (error) {
+        return (
+            <div className="w-full flex justify-center items-center">
+                <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl min-h-64 flex flex-col items-center justify-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-error/10 flex items-center justify-center">
+                        <FaExclamationTriangle className="text-error text-2xl" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-base sm:text-lg font-bold text-base-content">Error al cargar la orden</p>
+                        <p className="text-sm text-base-content/50 mt-1">No pudimos obtener los datos de tu orden de pago.</p>
+                    </div>
+                    <button type="button" className="btn btn-primary btn-sm sm:btn-md" onClick={() => refetch()}>
+                        Intentar de nuevo
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+
+    return (
+        <div className="w-full flex justify-center items-center">
+            <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl">
+
+                {/* ── Page Header ── */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <MdPayment className="text-primary text-lg sm:text-xl" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
+                                    Pago de productos
+                                </h1>
+                                {!isAuth && (
+                                    <div className="tooltip tooltip-bottom" data-tip="Estás navegando como invitado. Solo la información del pedido será persistida. Los articulos del carrito se persisten por tiempo limitado.">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-warning/50 text-warning-content text-xs font-bold tracking-widest uppercase cursor-help">
+                                            <FaUserShield className="text-[10px]" />
+                                            Invitado
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
+                                Folio: <span className="font-mono font-semibold text-base-content/70">{order.orderUUID}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-error btn-sm text-white gap-2 w-fit"
+                        onClick={() => showModal(cancelOrderRef.current)}
+                    >
+                        Abandonar orden
+                    </button>
+                </div>
+
+                {/* ── Main Layout ── */}
+                <section className="w-full flex flex-col lg:flex-row gap-5">
+
+                    {/* ── Left Column ── */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-5">
+
+                        {/* ── Address Section ── */}
+                        <div className="w-full rounded-2xl bg-base-100 border border-base-300">
+                            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
+                                <FaMapMarkerAlt className="text-primary text-sm" />
+                                <h2 className="text-sm font-bold text-base-content uppercase">Dirección de envío</h2>
+                            </div>
+                            <div className="p-4 sm:p-5">
+                                {data?.shippingAddress.map((address, index) => (
+                                    <div key={index} className="flex flex-col sm:flex-row sm:items-start gap-4">
+                                        <div className="flex-1">
+                                            <p className="text-base sm:text-lg font-extrabold text-base-content">
+                                                {address.recipientName} {address.recipientLastName}
+                                                <span className="ml-2 badge badge-sm badge-primary badge-outline">{address.addressType}</span>
+                                            </p>
+                                            <p className="text-sm text-base-content/70 mt-1">
+                                                {address.countryPhoneCode} {address.contactNumber}
+                                            </p>
+                                            <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
+                                                {`${address.streetName}, #${address.number}${address.aditionalNumber ? ` Int. ${address.aditionalNumber}` : ""}, ${address.neighborhood}, ${address.zipCode}, ${address.city}, ${address.state}, ${address.country}`}
+                                            </p>
+                                            {address.referencesOrComments && address.referencesOrComments !== "N/A" && (
+                                                <div className="mt-3 bg-base-200 rounded-xl p-3 border border-base-300">
+                                                    <p className="text-xs font-bold text-base-content/50 uppercase mb-1">Comentarios adicionales</p>
+                                                    <p className="text-sm text-base-content/70">{address.referencesOrComments}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ── Order Items ── */}
+                        <div className="w-full rounded-2xl bg-base-100 border border-base-300">
+                            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
+                                <MdShoppingBag className="text-primary text-sm" />
+                                <h2 className="text-sm font-bold text-base-content uppercase">Resumen de pedido</h2>
+                            </div>
+                            <div className="flex flex-col gap-3 p-3 sm:p-4">
+                                {data && data.items.length > 0 && data.items.map((item, index) => (
+                                    <CheckoutOrderItemV3 key={index} data={item} />
+                                ))}
+                            </div>
+                            {/* Subtotal footer */}
+                            <div className="px-4 py-3 bg-base-200 flex items-center justify-between">
+                                <span className="text-sm text-base-content/60">
+                                    Subtotal ({data?.items.length} {data?.items.length === 1 ? "producto" : "productos"})
+                                </span>
+                                <span className="text-base sm:text-lg font-extrabold text-base-content">
+                                    ${data && formatPrice(data.resume.itemsSubtotal, "es-MX")}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* ── Right Column ── */}
+                    <div className="w-full lg:w-80 xl:w-96 shrink-0 flex flex-col gap-4">
+                        <PaymentSummaryPanel order={order} data={data} />
+                        <TrustBadgesV3 />
+                    </div>
+                </section>
+
+                <CancelOrderForm ref={cancelOrderRef} onCanceled={handleCanceled} />
+            </div>
+        </div>
+    );
+};
+
+// ── Payment Summary Panel ────────────────────────────────────────────────────
+const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: CheckoutOrderIV3 }) => {
+    return (
+        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+
+            {/* Provider logo */}
+            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
+                <MdPayment className="text-primary text-sm" />
+                <h2 className="text-sm font-bold text-base-content uppercase">Método de pago</h2>
+            </div>
+            <div className="px-4 py-4 flex justify-center border-b border-base-300">
+                <figure className="w-28 sm:w-36">
+                    <img
+                        className="w-full object-contain"
+                        src={paymentProvider[order.paymentProvider].image_url}
+                        alt={paymentProvider[order.paymentProvider].description}
+                    />
+                </figure>
+            </div>
+
+            {/* Price breakdown */}
+            <div className="px-4 py-3 bg-base-200 border-b border-base-300">
+                <h2 className="text-sm font-bold text-base-content uppercase">Resumen de pago</h2>
+            </div>
+            <div className="p-4 flex flex-col gap-4">
+                <div className="flex flex-col gap-2.5">
+                    {/* Items Subtotal Before Taxes */}
+                    <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1">
+                            <FaBagShopping className="text-primary" />
+                            <span className="text-base-content/60">
+                                Subtotal ({data?.items.length} {data?.items.length === 1 ? "producto" : "productos"})
+                            </span>
+                            <div className="tooltip tooltip-right" data-tip="Precio unitario × cantidad, antes de impuestos y descuentos">
+                                <span className="w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-[8px] font-bold cursor-help">?</span>
+                            </div>
+                        </div>
+                        <span className="font-medium">
+                            + ${data?.resume && formatPrice(data.resume.itemsSubtotalBeforeTaxes, "es-MX")}
+                        </span>
+                    </div>
+
+                    {/* Shipping */}
+                    <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1">
+                            <FaShippingFast className="text-primary" />
+                            <span className="text-base-content/60">
+                                Envío ({data?.resume && (
+                                    data.resume.boxesCount > 1 ? `${data.resume.boxesCount} cajas` : `${data.resume.boxesCount} caja`
+                                )})
+                            </span>
+                            <div className="tooltip tooltip-right" data-tip="Costo de envío antes de impuestos. El IVA del envío se incluye en la línea de IVA">
+                                <span className="w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-[8px] font-bold cursor-help">?</span>
+                            </div>
+                        </div>
+                        <span className="font-medium flex items-center gap-0.5">
+                            <BiPlus className="text-xs" />
+                            ${data?.resume && formatPrice(data.resume.shippingCostBeforeTaxes, "es-MX")}
+                        </span>
+                    </div>
+
+                    {/* IVA */}
+                    <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1">
+                            <span className="text-base-content/60">IVA (16%)</span>
+                            <div className="tooltip tooltip-right" data-tip="Impuesto del 16% calculado sobre subtotal + envío. Los descuentos se aplican sobre precio + IVA">
+                                <span className="w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-[8px] font-bold cursor-help">?</span>
+                            </div>
+                        </div>
+                        <span className="font-medium flex items-center gap-0.5">
+                            <BiPlus className="text-xs" />
+                            ${data?.resume && formatPrice(data.resume.iva, "es-MX")}
+                        </span>
+                    </div>
+
+                    {/* Breakdown of offers */}
+                    {data?.resume?.applicableOffers && data.resume.applicableOffers.length > 0 ? (
+                        <div className="flex flex-col gap-2 pt-1">
+                            {data.resume.applicableOffers.map((off, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
+                                    <span className="flex items-center gap-1.5 text-primary font-bold">
+                                        <FaTag className="text-xs" />
+                                        {off.type === "PERCENTAGE" ? "Descuento directo" : "Descuento por cupón"}
+                                    </span>
+                                    <span className="font-bold text-primary flex items-center gap-0.5">
+                                        <BiMinus className="text-xs" />
+                                        ${off.discount}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        data?.resume && parseFloat(data.resume.discount) > 0 && (
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-primary font-bold flex items-center gap-1.5">
+                                    <FaTag className="text-xs" />
+                                    Descuento
+                                </span>
+                                <span className="text-primary font-bold flex items-center gap-0.5">
+                                    <BiMinus className="text-xs" />
+                                    ${formatPrice(data.resume.discount, "es-MX")}
+                                </span>
+                            </div>
+                        )
+                    )}
+                </div>
+
+                {/* Coupon Code Section */}
+                {data?.couponCode && (
+                    <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                        <div className="flex items-center gap-2">
+                            <FaTag className="text-primary text-xs" />
+                            <span className="text-xs font-bold text-base-content uppercase">Cupón aplicado</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-mono font-bold text-primary">{data.couponCode}</span>
+                            <span className="badge badge-primary badge-sm">ACTIVO</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Total */}
+                <div className="border-t border-base-300 pt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm sm:text-base font-bold text-base-content">Total a pagar</span>
+                        <div className="tooltip tooltip-bottom" data-tip="Total final a pagar incluyendo IVA y envío.">
+                            <span className="w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-[8px] font-bold cursor-help">?</span>
+                        </div>
+                    </div>
+                    <span className="text-lg sm:text-xl font-extrabold text-primary">
+                        ${data?.resume && formatPrice(data.resume.total, "es-MX")}
+                    </span>
+                </div>
+
+                {/* Payment CTA */}
+                <div className="flex flex-col gap-2 pt-1">
+                    {order.paymentProvider === "mercado_pago" && (
+                        <>
+                            <div className={clsx(
+                                "flex items-center gap-3 p-3 rounded-xl border",
+                                "border-primary/40 bg-primary/5"
+                            )}>
+                                <SiMercadopago className="text-2xl text-primary shrink-0" />
+                                <div>
+                                    <p className="text-sm font-bold text-base-content">Mercado Pago</p>
+                                    <p className="text-[10px] text-base-content/50">Crédito, débito, OXXO, MSI y más</p>
+                                </div>
+                            </div>
+                            <MercadoPagoCheckoutPro preferenceId={data?.externalId} />
+                        </>
+                    )}
+                </div>
+
+                <p className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1">
+                    <FaLock className="text-[8px]" /> Pago seguro y encriptado
+                </p>
+            </div>
+        </div>
+    );
+};
+
+export default CheckoutV3;

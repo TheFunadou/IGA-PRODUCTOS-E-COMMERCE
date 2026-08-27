@@ -47,25 +47,29 @@ export function getFormChanges<T extends Record<string, any>>(data: T, defaults:
 
 
 /**
- * Converts any string to kebab-case format, handling special characters, accents, and symbols
- * @param input - The input string example: "Safety Helmet (Blue) - 'Premium' 100%"
- * @returns A string in kebab-case format -> "safety-helmet-blue-premium-100"
+ * Converts any string to kebab-case format, handling special characters,
+ * accents, symbols, emojis and ampersands in a unicode-safe way
+ * @param input - The input string example: "Safety Helmet (Blue) & 'Premium' 100%"
+ * @returns A normalized kebab-case slug (max ~80 chars) -> "safety-helmet-blue-y-premium-100"
  * @example
  * makeSlug("Casco de Seguridad (Azul)") => "casco-de-seguridad-azul"
  * makeSlug("Product's Name - 50% Off!") => "products-name-50-off"
  * makeSlug("Café 'Especial' (México)") => "cafe-especial-mexico"
+ * makeSlug("Taladro & Destornillador ⚡ PRO") => "taladro-y-destornillador-pro"
  */
 export const makeSlug = (input: string): string => {
+    if (!input) return "";
     return input
+        .trim()
         .toLowerCase()                           // Convert to lowercase
         .normalize("NFD")                        // Normalize Unicode (separate accents)
         .replace(/[\u0300-\u036f]/g, "")        // Remove accent marks
-        .replace(/[()[\]{}'"`,;:!?¿¡]/g, "")    // Remove parentheses, brackets, quotes, punctuation
-        .replace(/[%&$#@*+=<>|\\\/~^]/g, "")    // Remove special symbols
-        .replace(/\s+/g, "-")                    // Replace spaces with hyphens
-        .replace(/[^a-z0-9-]/g, "")             // Remove any remaining non-alphanumeric characters (except hyphens)
-        .replace(/-+/g, "-")                     // Replace multiple consecutive hyphens with single hyphen
-        .replace(/^-+|-+$/g, "");               // Remove leading/trailing hyphens
+        .replace(/&/g, " y ")                    // Wordify ampersands
+        .replace(/['’`"“”]/g, "")               // Drop apostrophes/quotes (no word split)
+        .replace(/[^\p{L}\p{N}]+/gu, "-")       // Any non letter/number run -> single hyphen
+        .replace(/^-+|-+$/g, "")                // Remove leading/trailing hyphens
+        .slice(0, 80)                            // Cap length for clean URLs
+        .replace(/-+$/g, "");                   // Re-trim hyphens left by the cap
 };
 
 export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType | undefined, isFavorite: boolean = false): ProductVersionCardType => {
@@ -87,6 +91,24 @@ export const ProductDetailToProductCardFormat = (data: ProductVersionDetailType 
         discount: data.discount ?? 0,
         isFavorite: isFavorite ?? false,
     };
+};
+
+/**
+ * Convierte un link de Google Drive a su versión de previsualización embebible
+ * @example toDrivePreviewUrl("https://drive.google.com/file/d/ABC123/view") => "https://drive.google.com/file/d/ABC123/preview"
+ */
+export const toDrivePreviewUrl = (url: string): string => {
+    const fileId = extractLinkID(url);
+    return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
+};
+
+/**
+ * Convierte un link de Google Drive a descarga directa; URLs externas quedan intactas
+ * @example toDriveDownloadUrl("https://drive.google.com/file/d/ABC123/view") => "https://drive.google.com/uc?export=download&id=ABC123"
+ */
+export const toDriveDownloadUrl = (url: string): string => {
+    const fileId = extractLinkID(url);
+    return fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : url;
 };
 
 export const containsOffensiveLanguage = (text: string): boolean => {

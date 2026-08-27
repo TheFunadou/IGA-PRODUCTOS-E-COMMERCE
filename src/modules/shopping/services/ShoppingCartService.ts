@@ -1,5 +1,5 @@
 import api from "../../../api/api.config";
-import type { LoadShoppingCartI, SetItemDTO, ShoppingCartI } from "../ShoppingTypes";
+import type { LoadShoppingCartI, LoadShoppingCartV3I, SetItemDTO, ShoppingCartI } from "../ShoppingTypes";
 
 export const getShoppingCart = async (): Promise<ShoppingCartI[]> => {
     const { data } = await api.get<ShoppingCartI[]>(`/shopping-cart/v2`);
@@ -55,5 +55,11 @@ export const saveShoppingCart = async (): Promise<ShoppingCartI[]> => {
 export const loadShoppingCart = async (destination?: string): Promise<LoadShoppingCartI> => {
     const params = destination ? { destination } : {};
     const { data } = await api.get<LoadShoppingCartI>(`/shopping-cart/v2/load`, { params });
+    return data;
+};
+
+export const loadShoppingCartV3 = async (destination?: string): Promise<LoadShoppingCartV3I> => {
+    const params = destination ? { destination } : {};
+    const { data } = await api.get<LoadShoppingCartV3I>(`/shopping-cart/v3/load`, { params });
     return data;
 };

@@ -1,4 +1,5 @@
-import { useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 
 type Props = {
@@ -17,6 +18,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
     const [isHovering, setIsHovering] = useState(false);
     const [cursor, setCursor] = useState<Position>({ x: 0, y: 0 });
     const [zoomPos, setZoomPos] = useState<Position>({ x: 50, y: 50 });
+    const [containerRect, setContainerRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -31,6 +33,23 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
         const yPct = Math.min(Math.max((y / rect.height) * 100, 0), 100);
         setZoomPos({ x: xPct, y: yPct });
     }, []);
+
+    useEffect(() => {
+        if (!isHovering) { setContainerRect(null); return; }
+        const el = containerRef.current;
+        if (!el) return;
+        const update = () => {
+            const r = el.getBoundingClientRect();
+            setContainerRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+        };
+        update();
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", update);
+            window.removeEventListener("resize", update);
+        };
+    }, [isHovering]);
 
     return (
         <div className="relative w-full group" onClick={onClick}>
@@ -75,16 +94,16 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                 )}
             </div>
 
-            {/* ── PANEL ZOOM (Posicionado absolutamente a la derecha en LG+) ── */}
-            {isHovering && (
+            {/* ── PANEL ZOOM (Portal — escapes grid stacking context) ── */}
+            {isHovering && containerRect && createPortal(
                 <div
-                    className={clsx(
-                    "z-[500] overflow-hidden bg-white shadow-2xl rounded-3xl border border-primary/20 pointer-events-none",
-                        "absolute top-0 w-full aspect-square",
-                        "hidden lg:block lg:left-[calc(100%+1.5rem)]",
-                        "animate-in fade-in zoom-in-95 duration-300 ease-out",
-                        "before:absolute before:inset-0 before:ring-1 before:ring-inset before:ring-black/5"
-                    )}
+                    className="fixed z-[9999] overflow-hidden bg-white shadow-2xl rounded-3xl border border-primary/20 pointer-events-none"
+                    style={{
+                        top: containerRect.top,
+                        left: containerRect.left + containerRect.width + 24,
+                        width: containerRect.width,
+                        height: containerRect.height,
+                    }}
                 >
                     <div
                         className="w-full h-full"
@@ -95,7 +114,8 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
                             backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                         }}
                     />
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Indicador visual móvil/tablet */}
@@ -109,4 +129,4 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
     );
 };
 
-export default ImageZoomViewer;
+export default ImageZoomViewer;

@@ -1,52 +1,19 @@
 import { useState } from "react";
+import clsx from "clsx";
+import Header1 from "../../../assets/headers/HEADER_1.webp";
+import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.jpg";
+import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
+import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
+import TestReportPlagosurAMPDF from "../../../assets/certs/test-report-plagosur-am.pdf";
+import CertAnceCorazaPlagosur from "../../../assets/certs/igaproductos-certificado-ance.pdf";
 import { PiCertificateBold } from "react-icons/pi";
 import { BiSolidCertification } from "react-icons/bi";
 import { MdKeyboardArrowRight, MdOpenInNew } from "react-icons/md";
 import { HiShieldCheck } from "react-icons/hi2";
 import { IoDocumentText } from "react-icons/io5";
-import clsx from "clsx";
-import Header1 from "../../../assets/headers/HEADER_1.webp";
-import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
-import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.jpg";
-import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
-import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
-import TestReportPlagosurAMPDF from "../../../assets/certs/test-report-plagosur-am.pdf";
-import CertAnceCorazaPlagosur from "../../../assets/certs/igaproductos-certificado-ance.pdf"
+import { HomeSection, PageHero, SectionHeading, StampBadge } from "./shared";
 
-/* ── Shared design tokens (same as AboutIGA.tsx) ─────────── */
-const SectionBar = () => (
-    <div className="bg-primary px-10 py-1 w-fit rounded-xl shadow-lg" />
-);
-
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h1 className="px-2 py-1 w-fit rounded-xl border border-base-300 bg-base-300 text-2xl sm:text-3xl lg:text-4xl font-bold">
-        {children}
-    </h1>
-);
-
-const SectionSubtitle = ({
-    icon,
-    children,
-}: {
-    icon: React.ReactNode;
-    children: React.ReactNode;
-}) => (
-    <div className="bg-primary text-white w-fit px-2 rounded-xl">
-        <p className="home-section-subtitle flex items-center gap-2">
-            {icon && <span className="text-xl shrink-0">{icon}</span>}
-            {children}
-        </p>
-    </div>
-);
-/* ─────────────────────────────────────────────────────────── */
-
-type CertKey =
-    | "nom115"
-    | "nmx055"
-    | "cfe"
-    | "pemex"
-    | "ansi"
-    | "iso9001";
+type CertKey = "nom115" | "nmx055" | "cfe" | "pemex" | "ansi" | "iso9001";
 
 interface Cert {
     id: CertKey;
@@ -135,144 +102,129 @@ const Certifications = () => {
     const current = certifications.find((c) => c.id === selected)!;
 
     return (
-        <div className="w-full pt-6 sm:pt-10 pb-16 sm:pb-25 rounded-xl">
-            <div className="w-full flex flex-col gap-10 md:gap-14 animate-fade-in-up">
+        <div className="px-3 sm:px-5 lg:px-8 pt-4 sm:pt-6 pb-16 sm:pb-24 animate-fade-in-up flex flex-col">
+            <PageHero
+                image={Header1}
+                eyebrow="Plásticos del Golfo-Sur, S.A. de C.V."
+                title="Cumplimientos Normativos"
+                paragraphs={
+                    <p>
+                        Es una empresa 100% mexicana, certificada bajo la norma
+                        ISO 9001:2015; especializada en la producción,
+                        comercialización y distribución de lentes, barboquejos y
+                        cascos de seguridad industrial.
+                    </p>
+                }
+            />
 
-                {/* ── HERO HEADER ─────────────────────────────────────────── */}
-                <div
-                    className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-60 py-6 sm:py-10 md:py-15 flex flex-col lg:flex-row text-white rounded-xl bg-cover bg-center lg:bg-right"
-                    style={{ backgroundImage: `url(${Header1})` }}
-                >
-                    <div className="w-full lg:w-1/2 mb-6 lg:mb-0">
-                        <p className="text-2xl sm:text-3xl font-bold">Cumplimientos Normativos</p>
-                        <section className="text-base sm:text-lg leading-6 sm:leading-8 text-justify mt-3 sm:mt-5">
-                            <p>
-                                <strong>Plásticos del Golfo-Sur, S.A. de C.V.</strong> Es una
-                                empresa 100% mexicana, certificada bajo la norma ISO 9001:2015;
-                                especializada en la producción, comercialización y distribución
-                                de lentes, barboquejos y cascos de seguridad industrial.
-                            </p>
-                        </section>
-                    </div>
-                    <div className="w-full lg:w-1/2 flex items-center justify-center lg:items-end">
-                        <figure className="lg:ml-10 w-full sm:w-3/4 max-w-sm">
-                            <img src={IGALogo} alt="IGA productos Logo" className="w-full h-auto" />
-                        </figure>
-                    </div>
-                </div>
-
-                {/* ── NORMAS INTERACTIVAS ──────────────────────────────────── */}
-                <div className="home-section">
-                    <SectionBar />
-                    <SectionTitle>Conoce nuestros cumplimientos normativos</SectionTitle>
-                    <SectionSubtitle icon={<BiSolidCertification />}>
-                        Da clic en cada norma para obtener más información
-                    </SectionSubtitle>
-
-                    <div className="mt-5 flex flex-col lg:flex-row gap-5">
-                        {/* Selector list */}
-                        <div className="w-full lg:w-1/2 p-4 sm:p-5 bg-base-100 rounded-xl">
-                            <div className="flex flex-col gap-3 sm:gap-4 mt-2">
-                                {certifications.map((cert) => (
-                                    <button
-                                        key={cert.id}
-                                        onClick={() => setSelected(cert.id)}
-                                        className={clsx(
-                                            "flex items-center gap-2 cursor-pointer text-base sm:text-xl font-medium transition-colors text-left",
-                                            selected === cert.id ? "text-primary" : ""
-                                        )}
-                                    >
-                                        <MdKeyboardArrowRight
-                                            className={clsx(
-                                                "shrink-0 transition-transform",
-                                                selected === cert.id ? "rotate-90 text-primary" : ""
-                                            )}
-                                        />
-                                        {cert.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Detail panel */}
-                        <div className="w-full lg:w-1/2 bg-slate-900 rounded-xl px-6 sm:px-10 lg:px-12 py-6 flex flex-col justify-between gap-4">
-                            <div>
-                                <span className="text-xs sm:text-sm text-primary font-semibold uppercase tracking-widest">
-                                    {current.category}
-                                </span>
-                                <p className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 mt-1">
-                                    {current.title}
-                                    <BiSolidCertification className="text-primary shrink-0" />
-                                </p>
-                                <p className="text-base sm:text-lg leading-6 sm:leading-7 text-white text-justify mt-4">
-                                    {current.description}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── EMPRESA CERTIFICADA ──────────────────────────────────── */}
-                <div className="home-section">
-                    <SectionBar />
-                    <SectionTitle>Empresa Certificada</SectionTitle>
-                    <SectionSubtitle icon={<HiShieldCheck />}>
-                        Comprometidos con la calidad y la seguridad industrial
-                    </SectionSubtitle>
-
-                    <div className="mt-5 w-full bg-blue-950 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 py-10 px-6">
-                        <figure className="w-3/4 sm:w-1/3 max-w-xs">
-                            <img src={IGALogo} alt="IGA productos Logo" className="w-full h-auto" />
-                        </figure>
-                        <div className="flex flex-col items-center sm:items-start gap-2">
-                            <PiCertificateBold className="text-white text-6xl sm:text-7xl" />
-                            <p className="text-2xl sm:text-3xl lg:text-4xl font-medium text-white text-center sm:text-left">
-                                Empresa certificada
-                            </p>
-                            <p className="text-white/70 text-sm sm:text-base text-center sm:text-left max-w-xs">
-                                Avalada por organismos nacionales e internacionales de normalización
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── CERTIFICADOS OFICIALES ───────────────────────────────── */}
-                <div className="home-section">
-                    <SectionBar />
-                    <SectionTitle>Certificados Oficiales</SectionTitle>
-                    <SectionSubtitle icon={<IoDocumentText />}>
-                        Haz clic en cualquier certificado para ver el documento completo
-                    </SectionSubtitle>
-
-                    <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                        {certImages.map((img) => (
-                            <a
-                                key={img.label}
-                                href={img.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow"
-                                download="igaproductos-certificado-ance.pdf"
+            <HomeSection>
+                <SectionHeading
+                    title="Conoce nuestros cumplimientos normativos"
+                    subtitle="Selecciona una norma para obtener más información"
+                    icon={BiSolidCertification}
+                />
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
+                    <div className="w-full lg:w-[45%] flex flex-col gap-3">
+                        {certifications.map((cert) => (
+                            <button
+                                key={cert.id}
+                                type="button"
+                                onClick={() => setSelected(cert.id)}
+                                className={clsx(
+                                    "flex items-center justify-between gap-3 w-full px-4 py-3.5 rounded-xl cursor-pointer text-left text-sm sm:text-base font-semibold transition-all duration-300 border",
+                                    selected === cert.id
+                                        ? "bg-blue-950 text-white border-blue-950 shadow-lg shadow-blue-950/20"
+                                        : "bg-base-100 hover:border-primary/40 hover:shadow-sm border-base-200 text-base-content/75"
+                                )}
                             >
-                                <figure className="w-full">
-                                    <img
-                                        src={img.image}
-                                        alt={img.alt}
-                                        className="w-full h-auto rounded-xl group-hover:opacity-80 transition-opacity"
-                                    />
-                                </figure>
-                                {/* Overlay on hover */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-t from-black/60 to-transparent rounded-xl pointer-events-none">
-                                    <span className="text-white text-sm font-semibold flex items-center gap-1">
-                                        <MdOpenInNew /> Ver certificado
-                                    </span>
-                                </div>
-                            </a>
+                                <span className="min-w-0">{cert.label}</span>
+                                <MdKeyboardArrowRight
+                                    className={clsx(
+                                        "text-xl transition-transform shrink-0",
+                                        selected === cert.id ? "rotate-90" : "opacity-40"
+                                    )}
+                                />
+                            </button>
                         ))}
                     </div>
-                </div>
 
-            </div>
+                    <div className="w-full lg:w-[55%] relative bg-blue-950 rounded-2xl px-6 sm:px-10 py-7 sm:py-9 overflow-hidden shadow-md flex flex-col justify-center">
+                        <PiCertificateBold
+                            className="absolute -right-5 -bottom-6 text-white/5 pointer-events-none"
+                            aria-hidden="true"
+                            size={170}
+                        />
+                        <div key={current.id} className="animate-fade-in-up relative">
+                            <span className="text-[11px] sm:text-xs text-primary font-bold uppercase tracking-widest">
+                                {current.category}
+                            </span>
+                            <p className="text-2xl sm:text-3xl font-black text-white mt-1 leading-tight">
+                                {current.title}
+                            </p>
+                            <p className="text-sm sm:text-base leading-6 sm:leading-7 text-white/85 text-justify mt-4 max-w-prose">
+                                {current.description}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </HomeSection>
+
+            <HomeSection tinted>
+                <SectionHeading
+                    title="Empresa Certificada"
+                    subtitle="Comprometidos con la calidad y la seguridad industrial"
+                    icon={HiShieldCheck}
+                />
+                <div className="bg-blue-950 rounded-3xl px-6 sm:px-12 py-10 flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 shadow-md">
+                    <StampBadge icon={PiCertificateBold} className="text-white" />
+                    <div className="flex flex-col items-center sm:items-start gap-2 text-center sm:text-left">
+                        <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+                            Empresa certificada
+                        </p>
+                        <p className="text-white/70 text-sm sm:text-base max-w-sm">
+                            Avalada por organismos nacionales e internacionales
+                            de normalización
+                        </p>
+                    </div>
+                </div>
+            </HomeSection>
+
+            <HomeSection>
+                <SectionHeading
+                    title="Certificados Oficiales"
+                    subtitle="Haz clic en cualquier certificado para ver el documento completo"
+                    icon={IoDocumentText}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    {certImages.map((img) => (
+                        <a
+                            key={img.label}
+                            href={img.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download="igaproductos-certificado-ance.pdf"
+                            className="group relative rounded-2xl overflow-hidden border border-base-200 bg-base-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-primary"
+                        >
+                            <figure className="w-full overflow-hidden bg-base-200/40">
+                                <img
+                                    src={img.image}
+                                    alt={img.alt}
+                                    loading="lazy"
+                                    className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                                />
+                            </figure>
+                            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-base-200">
+                                <span className="text-sm font-bold text-base-content truncate">
+                                    {img.label}
+                                </span>
+                                <span className="flex items-center gap-1 text-primary text-xs font-semibold shrink-0">
+                                    <MdOpenInNew /> Ver PDF
+                                </span>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </HomeSection>
         </div>
     );
 };

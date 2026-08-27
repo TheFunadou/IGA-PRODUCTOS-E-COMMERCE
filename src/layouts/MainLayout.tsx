@@ -68,7 +68,7 @@ const MainLayout = () => {
                     </Link>
                 </div>
             )}
-            <main className="w-full px-2 lg:px-10 xl:px-10 pt-5 pb-10 bg-base-300 bg-gradient-to-t from-bg-base-300 to-blue-950 bg-[length:100%_500px] bg-no-repeat">
+            <main className="w-full pb-10 bg-base-100 bg-size-[100%_500px] bg-no-repeat">
                 <Suspense fallback={<PageLoader />}>
                     <Outlet />
                 </Suspense>
