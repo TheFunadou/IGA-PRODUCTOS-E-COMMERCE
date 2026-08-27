@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom"
+import { createBrowserRouter, RouterProvider, Outlet, Navigate, useParams } from "react-router-dom"
 import { lazy, Suspense, useEffect, useState } from "react"
 import type { ComponentType } from "react"
 import './App.css'
@@ -65,6 +65,9 @@ const QRRedirectCorazaPlago = lazy(() =>
 const QRRedirectPlagoCorazaAI = lazy(() =>
     import("./modules/products/components/QRRedirect").then((m) => ({ default: m.QRRedirectPlagoCorazaAI })))
 
+// Preserve V2/V3 lazy imports for rollback - evita errores noUnusedLocals
+void [Home, ShopV2, ShopV3, ProductVersionDetailV2, ShoppingCartV2, CheckoutV2]
+
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -87,6 +90,12 @@ function QueryDevTools() {
 
     if (!Devtools) return null;
     return <Devtools initialIsOpen={false} />;
+}
+
+// Redirect legacy product detail route (/:categoria/:slug/:sku) -> canónica /tienda/:categoria/:slug/:sku
+function ProductDetailRedirect() {
+    const { categoria, slug, sku } = useParams();
+    return <Navigate to={`/tienda/${categoria}/${slug}/${sku}`} replace />;
 }
 
 // Wrapper para los providers
@@ -132,18 +141,26 @@ const router = createBrowserRouter([
                     { path: "/restablecer-contraseña", element: <RestorePassword /> },
 
                     // Home
-                    { path: "/", element: <Home /> },
-                    { path: "/homev2", element: <HomeV2 /> },
+                    { path: "/", element: <HomeV2 /> },
+                    // ROLLBACK Home: { path: "/", element: <Home /> },
+                    // REMOVED /homev2 - ahora HomeV2 es la ruta raíz "/"
+                    // { path: "/homev2", element: <HomeV2 /> },
 
                     // Shop
-                    { path: "/tienda", element: <ShopV2 /> },
-                    { path: "/tienda-v3", element: <ShopV3 /> },
-                    { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
-                    { path: "/:categoria/:slug/:sku", element: <ProductVersionDetailV3 /> },
+                    // Tienda integrada en HomeV2 (ShopV3 embebido) - rutas standalone comentadas para preservar rollback
+                    // ROLLBACK: { path: "/tienda", element: <ShopV2 /> },
+                    // ROLLBACK: { path: "/tienda-v3", element: <ShopV3 /> },
+                    // { path: "/tienda", element: <ShopV2 /> },
+                    // { path: "/tienda-v3", element: <ShopV3 /> },
+                    { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV3 /> },
+                    // ROLLBACK ProductVersionDetail: { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
+                    // Redirect legacy V3 root route (sin /tienda) -> canónica con /tienda
+                    { path: "/:categoria/:slug/:sku", element: <ProductDetailRedirect /> },
 
                     // Shopping Cart
-                    { path: "/carrito-de-compras", element: <ShoppingCartV2 /> },
-                    { path: "/carrito-de-compras-v3", element: <ShoppingCartV3 /> },
+                    { path: "/carrito-de-compras", element: <ShoppingCartV3 /> },
+                    // ROLLBACK: { path: "/carrito-de-compras", element: <ShoppingCartV2 /> },
+                    // REMOVED: { path: "/carrito-de-compras-v3", element: <ShoppingCartV3 /> },
 
                     // Orders
                     { path: "/mis-ordenes", element: <Orders /> },
@@ -154,6 +171,7 @@ const router = createBrowserRouter([
                     // Checkout
                     { path: "/resumen-de-carrito", element: <ShoppingCartResumeV2 /> },
                     { path: "/pagar-productos", element: <CheckoutV3 /> },
+                    // ROLLBACK Checkout: { path: "/pagar-productos", element: <CheckoutV2 /> },
                     { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNow /> },
                     { path: "/pagar-productos/pago-exitoso", element: <PaymentExitingV2 /> },
                     { path: "/pagar-productos/pago-pendiente", element: <PaymentPendingV2 /> },

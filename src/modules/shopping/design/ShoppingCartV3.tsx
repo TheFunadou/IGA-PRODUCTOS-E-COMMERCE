@@ -172,7 +172,7 @@ const ShoppingCartV3 = () => {
                             <h2 className="text-xl font-bold text-base-content mb-1">Tu carrito está vacío</h2>
                             <p className="text-sm text-base-content/50">Agrega productos desde la tienda para comenzar</p>
                         </div>
-                        <Link to="/homev2#tienda" className="btn btn-primary gap-2">
+                        <Link to="/#tienda" className="btn btn-primary gap-2">
                             <FaShoppingBag className="text-sm" />
                             Ir a la tienda
                         </Link>

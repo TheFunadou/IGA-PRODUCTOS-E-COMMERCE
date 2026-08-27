@@ -128,12 +128,12 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
 
     const isDark = theme !== "ligth";
 
-    const detailUrl = `/${category}/${slug}/${sku}`;
+    const detailUrl = `/tienda/${category}/${slug}/${sku}`;
 
     const handleColorClick = (e: React.MouseEvent, parentSku: string) => {
         e.stopPropagation();
         e.preventDefault();
-        navigate(`/${category}/${slug}/${parentSku.toLowerCase()}`);
+        navigate(`/tienda/${category}/${slug}/${parentSku.toLowerCase()}`);
     };
 
     const handleAddItem = () => {

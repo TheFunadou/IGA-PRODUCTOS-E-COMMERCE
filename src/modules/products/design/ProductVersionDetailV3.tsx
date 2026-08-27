@@ -518,7 +518,7 @@ const ProductVersionDetailV3 = () => {
                 <h2 className="text-2xl font-black text-base-content mb-2">Página no encontrada</h2>
                 <p className="text-base-content/60 font-medium max-w-md mx-auto">Lo sentimos, no pudimos cargar la información de este producto o no existe. Por favor, verifica el enlace.</p>
             </div>
-            <button type="button" className="btn btn-primary font-bold px-8 mt-2 shadow-lg" onClick={() => navigate('/homev2')}>Ir al inicio</button>
+            <button type="button" className="btn btn-primary font-bold px-8 mt-2 shadow-lg" onClick={() => navigate('/')}>Ir al inicio</button>
         </div>
     );
 
@@ -529,14 +529,15 @@ const ProductVersionDetailV3 = () => {
                 <div className="max-w-[90rem] mx-auto px-2 sm:px-6 lg:px-8 h-11 flex items-center justify-between gap-3">
                     <nav className="flex items-center gap-1.5 w-full text-xs font-bold" aria-label="Breadcrumb">
                         <Link
-                            to="/homev2"
+                            to="/"
                             className="btn btn-ghost btn-xs sm:btn-sm gap-1.5 -ml-2 px-2 text-base-content/70 hover:text-primary"
                         >
                             <FaArrowLeft className="text-[10px]" /> Inicio
                         </Link>
                         <span className="text-base-content/30 select-none">/</span>
-                        <Link to="/tienda" className="hidden sm:inline text-base-content/50 hover:text-primary transition-colors">Tienda</Link>
-                        <span className="hidden sm:inline text-base-content/30 select-none">/</span>
+                        {/* Tienda integrada en Home (/#tienda) - link comentado, se preserva categoría */}
+                        {/* <Link to="/tienda" className="hidden sm:inline text-base-content/50 hover:text-primary transition-colors">Tienda</Link>
+                        <span className="hidden sm:inline text-base-content/30 select-none">/</span> */}
                         <Link
                             to={`/tienda?category=${categorySlug}&page=1`}
                             className="hidden md:inline text-base-content/50 hover:text-primary transition-colors w-fit truncate sm:overflow-visible sm:whitespace-normal sm:text-clip"
@@ -706,7 +707,7 @@ const ProductVersionDetailV3 = () => {
                                         return (
                                             <Link
                                                 key={version.sku}
-                                                to={`/${categorySlug}/${makeSlug(data.name)}/${version.sku.toLowerCase()}`}
+                                                to={`/tienda/${categorySlug}/${makeSlug(data.name)}/${version.sku.toLowerCase()}`}
                                                 title={version.sku}
                                                 className={clsx(
                                                     "relative flex flex-col items-center gap-1 p-2 rounded-2xl transition-all duration-300 overflow-hidden",

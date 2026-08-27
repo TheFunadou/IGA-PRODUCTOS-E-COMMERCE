@@ -7,7 +7,6 @@ import { closeModal, showModal } from "../../../global/GlobalHelpers";
 import AddressesModal from "./AddressesModal";
 import GuestCheckoutFormV3 from "./GuestCheckoutFormV3";
 import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
-import { icons } from "lucide-react";
 
 interface AddressSectionProps {
     isAuth: boolean;

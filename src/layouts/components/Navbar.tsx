@@ -52,6 +52,9 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
         setShowShopMenuPreview(true);
     };
 
+    // Preserve Tienda hover logic for rollback - evita noUnusedLocals
+    void [ShopMenuPreview, showShopMenuPreview, handleMouseEnter, scheduleHide, hideTimeoutRef, cancelHideTimeout];
+
     return (
         <section className="sticky top-0 z-50 w-full">
             <NavbarBanner />
@@ -135,10 +138,12 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
             <div className="hidden lg:flex w-full items-center justify-between bg-blue-950 border-t border-white/10 px-10 py-2 text-white text-sm font-semibold">
                 <div className="flex items-center gap-8">
                     <Link to="/" className="hover:text-white/70 transition-colors">Inicio</Link>
-                    <div onMouseEnter={handleMouseEnter} onMouseLeave={scheduleHide} className="relative flex items-center h-full">
+                    {/* COMENTADO FASE V3: Tienda integrada en Home (/#tienda) */}
+                    {/* ROLLBACK: Descomentar bloque siguiente para restaurar Tienda standalone */}
+                    {/* <div onMouseEnter={handleMouseEnter} onMouseLeave={scheduleHide} className="relative flex items-center h-full">
                         <Link to="/tienda" className="hover:text-white/70 transition-colors">Tienda</Link>
                         {showShopMenuPreview && <ShopMenuPreview onScheduleHide={scheduleHide} />}
-                    </div>
+                    </div> */}
                     <Link to="/acerca-de-iga" className="hover:text-white/70 transition-colors">Acerca de IGA</Link>
                     <Link to="/certificaciones" className="hover:text-white/70 transition-colors">Cumplimientos normativos</Link>
                     <Link to="/cobertura" className="hover:text-white/70 transition-colors">Cobertura</Link>

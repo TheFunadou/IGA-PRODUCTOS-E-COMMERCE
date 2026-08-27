@@ -4,6 +4,8 @@ import {
     FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser,
     FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter
 } from "react-icons/fa6";
+// Preserve FaShop for rollback
+void FaShop;
 import { BiLogOut, BiEnvelope } from "react-icons/bi";
 import { FaHome, FaInfoCircle } from "react-icons/fa";
 import { IoIosClose, IoIosMenu } from "react-icons/io";
@@ -95,7 +97,8 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                         <ul className="menu menu-md px-4 py-6 w-full text-base-content gap-1 [&_li>a]:rounded-xl [&_li>a]:py-3 [&_details>summary]:rounded-xl [&_details>summary]:py-3 font-bold">
 
                             <li><a onClick={() => handleNav("/")}><FaHome className="text-base-content/50 text-lg" /> Inicio</a></li>
-                            <li><a onClick={() => handleNav("/tienda")}><FaShop className="text-primary text-lg" /> Tienda</a></li>
+                            {/* COMENTADO FASE V3: Tienda integrada en Home (/#tienda) */}
+                            {/* ROLLBACK: <li><a onClick={() => handleNav("/tienda")}><FaShop className="text-primary text-lg" /> Tienda</a></li> */}
 
                             {isAuth && authCustomer && (
                                 <>
