@@ -9,7 +9,8 @@ import ThemeController from "../../modules/home/components/ThemeController";
 import ShopMenuPreview from "./ShopMenuPreview";
 import IgaLogo from "../../assets/logo/IGA-LOGO.webp";
 import { useTriggerAlert } from "../../modules/alerts/states/TriggerAlert";
-import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
+import { useHandleShoppingCartV3 } from "../../modules/shopping/hooks/handleShoppingCartV3";
+// ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../modules/shopping/hooks/handleShoppingCart";
 import NavbarSearch from "./NavbarSearch";
 import NavbarBanner from "./NavbarBanner";
 
@@ -25,7 +26,8 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
-    const { data } = useHandleShoppingCart({
+    // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
+    const { data } = useHandleShoppingCartV3({
         isAuth,
         authCustomer,
         showTriggerAlert: (type, message, options) => showTriggerAlert(type, message, options)

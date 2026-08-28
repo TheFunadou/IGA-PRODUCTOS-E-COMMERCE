@@ -11,7 +11,8 @@ import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import PdfViewerModal from "../components/PdfViewerModal";
 import { useFavorite } from "../hooks/useProductFavorites";
 import type { AddPVReviewType, ProductResourceI } from "../ProductTypes";
-import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
+import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
+// ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import {
     FaArrowLeft, FaArrowUpRightFromSquare, FaAward, FaBoxOpen,
     FaBoxesPacking, FaCircleCheck, FaCircleUser,
@@ -43,6 +44,14 @@ const WHATSAPP_NUMBER = "529211963246";
 
 // ── StockIndicator ────────────────────────────────────────────────────────────
 const StockIndicator = ({ stock }: { stock: number }) => {
+    if (stock <= 0) {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-base-300 text-base-content/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-base-content/40" />
+                Sin stock
+            </span>
+        );
+    }
     const level = stock > 100 ? "high" : stock > 20 ? "medium" : "low";
     return (
         <span className={clsx(
@@ -119,6 +128,24 @@ const VolumeQuoteBadge = ({ productName, sku }: { productName: string; sku: stri
     </a>
 );
 
+const OutOfStockInquiryBadge = ({ productName, sku }: { productName: string; sku: string }) => (
+    <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, me interesa el producto ${productName} (SKU ${sku}) que actualmente figura sin stock. Quisiera consultar disponibilidad próxima o la posibilidad de hacer una solicitud bajo pedido. ¿Podrían brindarme más información?`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 p-3.5 rounded-xl bg-warning/10 border border-warning/25 hover:bg-warning/15 transition-colors"
+    >
+        <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+            <FaBoxesPacking className="text-warning" />
+        </div>
+        <div className="min-w-0">
+            <p className="text-xs font-extrabold text-base-content leading-tight">¿Te interesa este producto y no tiene stock?</p>
+            <p className="text-[11px] font-medium text-base-content/70 leading-tight">Contáctanos para consultar disponibilidad próxima o hacer una solicitud bajo pedido</p>
+            <p className="text-[10px] font-semibold text-warning mt-0.5">Escríbenos por WhatsApp →</p>
+        </div>
+    </a>
+);
+
 // ── QuickSpecsList ────────────────────────────────────────────────────────────
 const QuickSpecsList = ({ specs }: { specs: { label: string; value: string }[] }) => (
     <dl className="rounded-xl border border-base-200 overflow-hidden">
@@ -182,7 +209,10 @@ const PurchaseCard = ({
     productQty, selectProductQty, stockError, isFavorite,
     onQtySelect, onQtySet, onQtyLimit,
     onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock, status
-}: PurchaseCardProps) => (
+}: PurchaseCardProps) => {
+    const isOutOfStock = stock <= 0;
+    const outOfStockTooltip = "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad";
+    return (
     <div className="w-full rounded-2xl border border-base-300 bg-base-100 shadow-xl overflow-hidden">
         <div className="px-5 pt-5 pb-4 border-b border-base-200 bg-base-200/30">
             {isOffer && (
@@ -228,11 +258,12 @@ const PurchaseCard = ({
                     className="select select-bordered select-sm w-full font-bold bg-base-100"
                     onChange={(e) => { onQtySelect(e.target.value); onQtySet(e.target.value); }}
                     value={selectProductQty}
+                    disabled={isOutOfStock}
                 >
                     {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} pieza{n > 1 ? "s" : ""}</option>)}
                     <option value="more">Más de 5 piezas...</option>
                 </select>
-                {selectProductQty === "more" && (
+                {selectProductQty === "more" && !isOutOfStock && (
                     <>
                         <input
                             type="number"
@@ -248,9 +279,14 @@ const PurchaseCard = ({
                         )}
                     </>
                 )}
+                {isOutOfStock && (
+                    <p className="text-warning text-[11px] flex items-center gap-1 font-bold">
+                        <FaTriangleExclamation /> Producto sin stock disponible
+                    </p>
+                )}
             </div>
 
-            {productQty > 1 && (
+            {productQty > 1 && !isOutOfStock && (
                 <div className="flex items-center justify-between px-3.5 py-2.5 bg-primary/5 rounded-xl border border-primary/10">
                     <span className="text-[11px] font-bold text-primary/80 uppercase tracking-widest">Total ({productQty} pzas)</span>
                     <span className="text-base font-black text-primary">
@@ -260,21 +296,40 @@ const PurchaseCard = ({
             )}
 
             <div className="flex flex-col gap-2.5">
-                <button
-                    type="button"
-                    className="btn btn-primary w-full rounded-xl h-12 font-bold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all"
-                    onClick={onAddCart}
-                    disabled={productQty > maxStock}
-                >
-                    <FaBoxesPacking className="text-lg" /> Agregar al carrito
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-outline btn-primary w-full rounded-xl h-12 font-bold"
-                    onClick={onBuyNow}
-                >
-                    Comprar ahora
-                </button>
+                <div className={clsx(isOutOfStock && "tooltip tooltip-top")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                    <button
+                        type="button"
+                        className={clsx(
+                            "btn w-full rounded-xl h-12 font-bold transition-all",
+                            isOutOfStock
+                                ? "btn-disabled bg-base-300 text-base-content/50 border-base-300 cursor-not-allowed"
+                                : "btn-primary shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
+                        )}
+                        onClick={onAddCart}
+                        disabled={isOutOfStock || productQty > maxStock}
+                        aria-disabled={isOutOfStock || productQty > maxStock}
+                        title={isOutOfStock ? outOfStockTooltip : undefined}
+                    >
+                        <FaBoxesPacking className="text-lg" /> {isOutOfStock ? "Sin stock" : "Agregar al carrito"}
+                    </button>
+                </div>
+                <div className={clsx(isOutOfStock && "tooltip tooltip-top")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                    <button
+                        type="button"
+                        className={clsx(
+                            "btn w-full rounded-xl h-12 font-bold",
+                            isOutOfStock
+                                ? "btn-disabled bg-base-200 text-base-content/50 border-base-300 cursor-not-allowed"
+                                : "btn-outline btn-primary"
+                        )}
+                        onClick={onBuyNow}
+                        disabled={isOutOfStock}
+                        aria-disabled={isOutOfStock}
+                        title={isOutOfStock ? outOfStockTooltip : undefined}
+                    >
+                        {isOutOfStock ? "Sin stock" : "Comprar ahora"}
+                    </button>
+                </div>
             </div>
 
             <div className="flex items-center justify-around p-1.5 rounded-xl bg-base-200/40 border border-base-200">
@@ -302,7 +357,8 @@ const PurchaseCard = ({
             </div>
         </div>
     </div>
-);
+    );
+};
 
 // ── Componente principal ───────────────────────────────────────────────────────
 const ProductVersionDetailV3 = () => {
@@ -333,7 +389,8 @@ const ProductVersionDetailV3 = () => {
 
     const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
-    const { updateQtyItem } = useHandleShoppingCart({
+    // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
+    const { updateQtyItem } = useHandleShoppingCartV3({
         isAuth,
         authCustomer: { uuid: authCustomer?.uuid || "" },
         showTriggerAlert,
@@ -484,19 +541,29 @@ const ProductVersionDetailV3 = () => {
         onQtySet: handleSetProductQty,
         onQtyLimit: handleQtyLimit,
         onAddCart: () => {
-            if (data) {
-                trackAddToCart(data, productQty);
-                updateQtyItem({
-                    isChecked: true,
-                    item: {
-                        sku: data.sku,
-                        productUUID: data.productUUID,
-                    },
-                    quantity: productQty
-                });
+            if (!data) return;
+            if (data.stock <= 0) {
+                showTriggerAlert("Message", "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
+                return;
             }
+            trackAddToCart(data, productQty);
+            updateQtyItem({
+                isChecked: true,
+                item: {
+                    sku: data.sku,
+                    productUUID: data.productUUID,
+                },
+                quantity: productQty
+            });
         },
-        onBuyNow: () => data && navigate(`/pagar-ahora/${data.productUUID}/${data.sku}?quantity=${productQty}`),
+        onBuyNow: () => {
+            if (!data) return;
+            if (data.stock <= 0) {
+                showTriggerAlert("Message", "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
+                return;
+            }
+            navigate(`/pagar-ahora/${data.productUUID}/${data.sku}?quantity=${productQty}`);
+        },
         onToggleFavorite: (e: React.MouseEvent) => {
             toggleFavorite(e);
             if (!isFavorite && data) {
@@ -753,6 +820,7 @@ const ProductVersionDetailV3 = () => {
                         <div className="hidden lg:flex flex-col gap-2.5">
                             <SupportBadge productName={data.name} sku={data.sku} />
                             <VolumeQuoteBadge productName={data.name} sku={data.sku} />
+                            {data.stock <= 0 && <OutOfStockInquiryBadge productName={data.name} sku={data.sku} />}
                         </div>
                     </div>
 
@@ -769,6 +837,11 @@ const ProductVersionDetailV3 = () => {
                     <SupportBadge productName={data.name} sku={data.sku} />
                     <VolumeQuoteBadge productName={data.name} sku={data.sku} />
                 </div>
+                {data.stock <= 0 && (
+                    <div className="lg:hidden mt-2.5">
+                        <OutOfStockInquiryBadge productName={data.name} sku={data.sku} />
+                    </div>
+                )}
 
                 {/* ══ DETALLES + RECURSOS ═══════════════════════════════════ */}
                 <TrustStrip />

@@ -11,6 +11,10 @@ import {
 } from "../services/ShoppingCartService";
 import { buildKey } from "../../../global/GlobalHelpers";
 
+/**
+ * Flujo V3 canónico (shopping-cart:load:v3) – Usar este para Navbar, ProductVersionCardV3, ProductVersionDetailV3 y ShoppingCartV3.
+ * Flujo V2 (shopping-cart:load) deprecado pero conservado en useShoppingCart.tsx para rollback.
+ */
 export const shoppingCartV3QKs = {
     loadShoppingCart: (clientUUID: string) => buildKey("shopping-cart:load:v3", { clientUUID })
 };

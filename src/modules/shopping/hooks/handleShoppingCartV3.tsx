@@ -1,3 +1,7 @@
+/**
+ * Flujo V3 canónico – Usado por Navbar, ProductVersionCardV3, ProductVersionDetailV3, ShoppingCartV3.
+ * Mantener desacoplado de handleShoppingCart (V2 deprecado).
+ */
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import type { ShoppingCartI } from "../ShoppingTypes";
 import { useShoppingCartV3 } from "./useShoppingCartV3";

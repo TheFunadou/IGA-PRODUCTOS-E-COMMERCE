@@ -10,7 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import clsx from "clsx";
 import { TbShoppingCartDown } from "react-icons/tb";
-import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
+import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
+// ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { trackAddToCart } from "../../analytics/MetaEvents";
@@ -28,7 +29,8 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     const { theme } = useThemeStore();
     const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
-    const { updateQtyItem } = useHandleShoppingCart({
+    // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
+    const { updateQtyItem } = useHandleShoppingCartV3({
         isAuth,
         authCustomer: { uuid: authCustomer?.uuid || "" },
         showTriggerAlert(type, message, options) {
@@ -136,7 +138,11 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
         navigate(`/tienda/${category}/${slug}/${parentSku.toLowerCase()}`);
     };
 
+    const isOutOfStock = version.stock <= 0;
+    const outOfStockTooltip = "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad";
+
     const handleAddItem = () => {
+        if (isOutOfStock) return;
         trackAddToCart(analyticsItem, 1);
         updateQtyItem({
             isChecked: true,
@@ -149,6 +155,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     };
 
     const handleSetBuyNow = () => {
+        if (isOutOfStock) return;
         navigate(`/pagar-ahora/${product.uuid}/${sku}?quantity=1`);
     };
 
@@ -352,39 +359,52 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     const actionsBlock = (
         <div className="flex gap-2 items-stretch pt-1 pb-1 w-full">
             {/* Buy now */}
-            <button
-                type="button"
-                onClick={() => { handleSetBuyNow() }}
-                aria-label="Comprar ahora"
-                className={clsx(
-                    "group/btn h-9 sm:h-10 rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97]",
-                    "inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm",
-                    "shadow-sm hover:shadow-md",
-                    "text-white bg-blue-950",
-                    "hover:bg-blue-900",
-                    isList ? "px-5" : "flex-1 px-3"
-                )}
-            >
-                <TbShoppingCartDown className="text-base transition-transform duration-300 group-hover/btn:-translate-y-0.5 sm:hidden" />
-                <span className="hidden sm:inline">Comprar ahora</span>
-            </button>
+            <div className={clsx(isOutOfStock && "tooltip tooltip-top flex-1", !isList && "flex-1")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                <button
+                    type="button"
+                    onClick={() => { handleSetBuyNow() }}
+                    aria-label="Comprar ahora"
+                    disabled={isOutOfStock}
+                    aria-disabled={isOutOfStock}
+                    title={isOutOfStock ? outOfStockTooltip : undefined}
+                    className={clsx(
+                        "group/btn h-9 sm:h-10 rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97]",
+                        "inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm w-full",
+                        "shadow-sm hover:shadow-md",
+                        isOutOfStock
+                            ? "bg-base-300 text-base-content/50 cursor-not-allowed shadow-none hover:shadow-none"
+                            : "text-white bg-blue-950 hover:bg-blue-900",
+                        isList ? "px-5" : "px-3"
+                    )}
+                >
+                    <TbShoppingCartDown className="text-base transition-transform duration-300 group-hover/btn:-translate-y-0.5 sm:hidden" />
+                    <span className="hidden sm:inline">Comprar ahora</span>
+                    <span className="sm:hidden">{isOutOfStock ? "Sin stock" : "Comprar"}</span>
+                </button>
+            </div>
 
             {/* Add to cart */}
-            <button
-                type="button"
-                onClick={() => handleAddItem()}
-                aria-label="Agregar al carrito"
-                className={clsx(
-                    "group/cart h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl font-bold",
-                    "inline-flex items-center justify-center gap-1 text-xs sm:text-sm",
-                    "bg-yellow-600 text-white",
-                    "shadow-sm hover:shadow-md hover:bg-yellow-700",
-                    "active:scale-[0.97] transition-all duration-300"
-                )}
-            >
-                <MdOutlineShoppingCart className="text-base transition-transform duration-300 group-hover/cart:-translate-x-0.5" />
-                <FaPlus className="text-[10px] transition-transform duration-300 group-hover/cart:rotate-90" />
-            </button>
+            <div className={clsx(isOutOfStock && "tooltip tooltip-top")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                <button
+                    type="button"
+                    onClick={() => handleAddItem()}
+                    aria-label="Agregar al carrito"
+                    disabled={isOutOfStock}
+                    aria-disabled={isOutOfStock}
+                    title={isOutOfStock ? outOfStockTooltip : undefined}
+                    className={clsx(
+                        "group/cart h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl font-bold",
+                        "inline-flex items-center justify-center gap-1 text-xs sm:text-sm",
+                        "shadow-sm active:scale-[0.97] transition-all duration-300",
+                        isOutOfStock
+                            ? "bg-base-300 text-base-content/50 cursor-not-allowed shadow-none hover:shadow-none"
+                            : "bg-yellow-600 text-white hover:shadow-md hover:bg-yellow-700"
+                    )}
+                >
+                    <MdOutlineShoppingCart className="text-base transition-transform duration-300 group-hover/cart:-translate-x-0.5" />
+                    <FaPlus className="text-[10px] transition-transform duration-300 group-hover/cart:rotate-90" />
+                </button>
+            </div>
         </div>
     );
 
@@ -414,8 +434,8 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
 
             <div className={clsx("mt-auto pt-1", !isList && "flex items-center")}>
                 {priceBlock}
-                {isList && version.stock <= 0 && (
-                    <span className="ml-auto text-[10px] font-semibold text-error/80 shrink-0">
+                {version.stock <= 0 && (
+                    <span className={clsx("text-[10px] font-semibold text-error/80 shrink-0", isList ? "ml-auto" : "ml-2")}>
                         Sin stock
                     </span>
                 )}

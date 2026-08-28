@@ -14,7 +14,10 @@ import {
 } from "../services/ShoppingCartService";
 import { buildKey } from "../../../global/GlobalHelpers";
 
-
+/**
+ * @deprecated QueryKeys V2 (shopping-cart:load) – Conservado para rollback.
+ * Para flujo V3 usar shoppingCartV3QKs (shopping-cart:load:v3) en useShoppingCartV3.tsx
+ */
 export const shoppingCartQKs = {
     shoppingCart: (clientUUID: string) => buildKey("shopping-cart", { clientUUID }),
     loadShoppingCart: (clientUUID: string) => buildKey("shopping-cart:load", { clientUUID })

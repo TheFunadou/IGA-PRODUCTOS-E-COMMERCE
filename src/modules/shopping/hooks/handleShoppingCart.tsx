@@ -1,4 +1,9 @@
-// useHandleShoppingCart.ts
+/**
+ * @deprecated Flujo V2 (shopping-cart:load) – Conservado para rollback.
+ * Para flujo V3 usar handleShoppingCartV3 (shopping-cart:load:v3).
+ * No eliminar – mantener desacoplado de V3. Ver src/modules/shopping/hooks/useShoppingCartV3.tsx
+ * ROLLBACK: cambiar imports de handleShoppingCartV3 -> handleShoppingCart
+ */
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
 import type { ShoppingCartI } from "../ShoppingTypes";
 import { useShoppingCart } from "./useShoppingCart";
