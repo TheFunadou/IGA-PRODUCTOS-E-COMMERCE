@@ -15,7 +15,7 @@ import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCart
 // ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import {
     FaArrowLeft, FaArrowUpRightFromSquare, FaAward, FaBoxOpen,
-    FaBoxesPacking, FaCircleCheck, FaCircleUser,
+    FaBoxesPacking, FaCircleCheck, FaCirclePause, FaCircleUser,
     FaFileInvoiceDollar, FaFileLines, FaHeadset,
     FaShieldHalved, FaStar, FaTag, FaTruck, FaTriangleExclamation,
     FaWarehouse
@@ -43,7 +43,15 @@ import { trackAddToCart, trackAddToWishlist, trackViewContent } from "../../anal
 const WHATSAPP_NUMBER = "529211963246";
 
 // ── StockIndicator ────────────────────────────────────────────────────────────
-const StockIndicator = ({ stock }: { stock: number }) => {
+const StockIndicator = ({ stock, isPaused = false }: { stock: number; isPaused?: boolean }) => {
+    if (isPaused) {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-info/15 text-info">
+                <span className="w-1.5 h-1.5 rounded-full bg-info" />
+                <FaCirclePause /> Pausado
+            </span>
+        );
+    }
     if (stock <= 0) {
         return (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-base-300 text-base-content/60">
@@ -68,7 +76,7 @@ const StockIndicator = ({ stock }: { stock: number }) => {
             )} />
             {level === "high" && `En stock (${stock} uds.)`}
             {level === "medium" && `Stock limitado (${stock} uds.)`}
-            {level === "low" && `¡Apurate, te las ganan! (${stock} uds.)`}
+            {level === "low" && `Stock bajo, ¡te quedan pocos! (${stock} uds.)`}
         </span>
     );
 };
@@ -146,6 +154,24 @@ const OutOfStockInquiryBadge = ({ productName, sku }: { productName: string; sku
     </a>
 );
 
+const PausedInquiryBadge = ({ productName, sku }: { productName: string; sku: string }) => (
+    <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, me interesa el producto ${productName} (SKU ${sku}). Sé que actualmente está pausado, pero quisiera saber si todavía lo puedo adquirir. ¿Podrían brindarme más información sobre su disponibilidad?`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 p-3.5 rounded-xl bg-info/10 border border-info/25 hover:bg-info/15 transition-colors"
+    >
+        <div className="w-9 h-9 rounded-lg bg-info/15 flex items-center justify-center shrink-0">
+            <FaCirclePause className="text-info" />
+        </div>
+        <div className="min-w-0">
+            <p className="text-xs font-extrabold text-base-content leading-tight">¿Te interesa este producto?</p>
+            <p className="text-[11px] font-medium text-base-content/70 leading-tight">Está pausado, pero si deseas adquirirlo contáctanos para consultar su disponibilidad</p>
+            <p className="text-[10px] font-semibold text-info mt-0.5">Escríbenos por WhatsApp →</p>
+        </div>
+    </a>
+);
+
 // ── QuickSpecsList ────────────────────────────────────────────────────────────
 const QuickSpecsList = ({ specs }: { specs: { label: string; value: string }[] }) => (
     <dl className="rounded-xl border border-base-200 overflow-hidden">
@@ -211,7 +237,12 @@ const PurchaseCard = ({
     onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock, status
 }: PurchaseCardProps) => {
     const isOutOfStock = stock <= 0;
+    const isPaused = /PAUSED|PAUSADO/i.test(status);
+    const isUnavailable = isPaused || isOutOfStock;
     const outOfStockTooltip = "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad";
+    const pausedTooltip = "Este producto está pausado, contáctanos para consultar su disponibilidad";
+    const unavailableTooltip = isPaused ? pausedTooltip : outOfStockTooltip;
+    const actionLabel = isPaused ? "Pausado" : "Sin stock";
     return (
     <div className="w-full rounded-2xl border border-base-300 bg-base-100 shadow-xl overflow-hidden">
         <div className="px-5 pt-5 pb-4 border-b border-base-200 bg-base-200/30">
@@ -236,15 +267,18 @@ const PurchaseCard = ({
             <div>
                 <span className={clsx(
                     "badge badge-sm font-bold gap-1 border-0",
-                    status === 'DISPONIBLE'
-                        ? "bg-success/15 text-success"
-                        : "bg-warning/15 text-warning"
+                    isPaused
+                        ? "bg-info/15 text-info"
+                        : status === 'DISPONIBLE'
+                            ? "bg-success/15 text-success"
+                            : "bg-warning/15 text-warning"
                 )}>
-                    <FaCircleCheck className="text-[10px]" /> {status}
+                    {isPaused ? <FaCirclePause className="text-[10px]" /> : <FaCircleCheck className="text-[10px]" />}
+                    {isPaused ? "Pausado" : status}
                 </span>
             </div>
             <div className="mt-2 flex items-center gap-2">
-                <StockIndicator stock={stock} />
+                <StockIndicator stock={stock} isPaused={isPaused} />
             </div>
         </div>
 
@@ -258,12 +292,12 @@ const PurchaseCard = ({
                     className="select select-bordered select-sm w-full font-bold bg-base-100"
                     onChange={(e) => { onQtySelect(e.target.value); onQtySet(e.target.value); }}
                     value={selectProductQty}
-                    disabled={isOutOfStock}
+                    disabled={isUnavailable}
                 >
                     {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} pieza{n > 1 ? "s" : ""}</option>)}
                     <option value="more">Más de 5 piezas...</option>
                 </select>
-                {selectProductQty === "more" && !isOutOfStock && (
+                {selectProductQty === "more" && !isUnavailable && (
                     <>
                         <input
                             type="number"
@@ -279,14 +313,14 @@ const PurchaseCard = ({
                         )}
                     </>
                 )}
-                {isOutOfStock && (
-                    <p className="text-warning text-[11px] flex items-center gap-1 font-bold">
-                        <FaTriangleExclamation /> Producto sin stock disponible
+                {isUnavailable && (
+                    <p className={clsx("text-[11px] flex items-center gap-1 font-bold", isPaused ? "text-info" : "text-warning")}>
+                        <FaTriangleExclamation /> {isPaused ? "Producto pausado, no disponible para compra" : "Producto sin stock disponible"}
                     </p>
                 )}
             </div>
 
-            {productQty > 1 && !isOutOfStock && (
+            {productQty > 1 && !isUnavailable && (
                 <div className="flex items-center justify-between px-3.5 py-2.5 bg-primary/5 rounded-xl border border-primary/10">
                     <span className="text-[11px] font-bold text-primary/80 uppercase tracking-widest">Total ({productQty} pzas)</span>
                     <span className="text-base font-black text-primary">
@@ -296,38 +330,38 @@ const PurchaseCard = ({
             )}
 
             <div className="flex flex-col gap-2.5">
-                <div className={clsx(isOutOfStock && "tooltip tooltip-top")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                <div className={clsx(isUnavailable && "tooltip tooltip-top")} data-tip={isUnavailable ? unavailableTooltip : undefined}>
                     <button
                         type="button"
                         className={clsx(
                             "btn w-full rounded-xl h-12 font-bold transition-all",
-                            isOutOfStock
+                            isUnavailable
                                 ? "btn-disabled bg-base-300 text-base-content/50 border-base-300 cursor-not-allowed"
                                 : "btn-primary shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
                         )}
                         onClick={onAddCart}
-                        disabled={isOutOfStock || productQty > maxStock}
-                        aria-disabled={isOutOfStock || productQty > maxStock}
-                        title={isOutOfStock ? outOfStockTooltip : undefined}
+                        disabled={isUnavailable || productQty > maxStock}
+                        aria-disabled={isUnavailable || productQty > maxStock}
+                        title={isUnavailable ? unavailableTooltip : undefined}
                     >
-                        <FaBoxesPacking className="text-lg" /> {isOutOfStock ? "Sin stock" : "Agregar al carrito"}
+                        <FaBoxesPacking className="text-lg" /> {isUnavailable ? actionLabel : "Agregar al carrito"}
                     </button>
                 </div>
-                <div className={clsx(isOutOfStock && "tooltip tooltip-top")} data-tip={isOutOfStock ? outOfStockTooltip : undefined}>
+                <div className={clsx(isUnavailable && "tooltip tooltip-top")} data-tip={isUnavailable ? unavailableTooltip : undefined}>
                     <button
                         type="button"
                         className={clsx(
                             "btn w-full rounded-xl h-12 font-bold",
-                            isOutOfStock
+                            isUnavailable
                                 ? "btn-disabled bg-base-200 text-base-content/50 border-base-300 cursor-not-allowed"
                                 : "btn-outline btn-primary"
                         )}
                         onClick={onBuyNow}
-                        disabled={isOutOfStock}
-                        aria-disabled={isOutOfStock}
-                        title={isOutOfStock ? outOfStockTooltip : undefined}
+                        disabled={isUnavailable}
+                        aria-disabled={isUnavailable}
+                        title={isUnavailable ? unavailableTooltip : undefined}
                     >
-                        {isOutOfStock ? "Sin stock" : "Comprar ahora"}
+                        {isUnavailable ? actionLabel : "Comprar ahora"}
                     </button>
                 </div>
             </div>
@@ -404,9 +438,6 @@ const ProductVersionDetailV3 = () => {
     const [selectedRating, setSelectedRating] = useState(1);
     const [reviewPage, setReviewPage] = useState(1);
     const [activeTab, setActiveTab] = useState(0);
-    const [expandedTab, setExpandedTab] = useState(false);
-
-    useEffect(() => { setExpandedTab(false); }, [activeTab]);
 
     const galleryModalRef = useRef<HTMLDialogElement>(null);
     const pdfModalRef = useRef<HTMLDialogElement>(null);
@@ -454,6 +485,7 @@ const ProductVersionDetailV3 = () => {
         [data]);
 
     const categorySlug = makeSlug(data?.category.name ?? "");
+    const productIsPaused = /PAUSED|PAUSADO/i.test(data?.details.status ?? "");
 
     useEffect(() => {
         if (!data) return;
@@ -542,8 +574,10 @@ const ProductVersionDetailV3 = () => {
         onQtyLimit: handleQtyLimit,
         onAddCart: () => {
             if (!data) return;
-            if (data.stock <= 0) {
-                showTriggerAlert("Message", "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
+            if (data.stock <= 0 || productIsPaused) {
+                showTriggerAlert("Message", productIsPaused
+                    ? "Este producto está pausado, contáctanos para consultar su disponibilidad"
+                    : "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
                 return;
             }
             trackAddToCart(data, productQty);
@@ -558,8 +592,10 @@ const ProductVersionDetailV3 = () => {
         },
         onBuyNow: () => {
             if (!data) return;
-            if (data.stock <= 0) {
-                showTriggerAlert("Message", "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
+            if (data.stock <= 0 || productIsPaused) {
+                showTriggerAlert("Message", productIsPaused
+                    ? "Este producto está pausado, contáctanos para consultar su disponibilidad"
+                    : "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
                 return;
             }
             navigate(`/pagar-ahora/${data.productUUID}/${data.sku}?quantity=${productQty}`);
@@ -820,7 +856,8 @@ const ProductVersionDetailV3 = () => {
                         <div className="hidden lg:flex flex-col gap-2.5">
                             <SupportBadge productName={data.name} sku={data.sku} />
                             <VolumeQuoteBadge productName={data.name} sku={data.sku} />
-                            {data.stock <= 0 && <OutOfStockInquiryBadge productName={data.name} sku={data.sku} />}
+                            {productIsPaused && <PausedInquiryBadge productName={data.name} sku={data.sku} />}
+                            {!productIsPaused && data.stock <= 0 && <OutOfStockInquiryBadge productName={data.name} sku={data.sku} />}
                         </div>
                     </div>
 
@@ -837,7 +874,12 @@ const ProductVersionDetailV3 = () => {
                     <SupportBadge productName={data.name} sku={data.sku} />
                     <VolumeQuoteBadge productName={data.name} sku={data.sku} />
                 </div>
-                {data.stock <= 0 && (
+                {productIsPaused && (
+                    <div className="lg:hidden mt-2.5">
+                        <PausedInquiryBadge productName={data.name} sku={data.sku} />
+                    </div>
+                )}
+                {!productIsPaused && data.stock <= 0 && (
                     <div className="lg:hidden mt-2.5">
                         <OutOfStockInquiryBadge productName={data.name} sku={data.sku} />
                     </div>
@@ -870,10 +912,7 @@ const ProductVersionDetailV3 = () => {
                                         </button>
                                     ))}
                                 </div>
-                                <div className={clsx(
-                                    "pt-5 transition-all duration-300 overflow-hidden",
-                                    !expandedTab && "max-h-64"
-                                )}>
+                                <div className="pt-5">
                                     <div className="prose prose-sm max-w-none text-base-content/80 text-justify">
                                         {availableTabs[Math.min(activeTab, availableTabs.length - 1)].content
                                             .split('\n')
@@ -883,13 +922,6 @@ const ProductVersionDetailV3 = () => {
                                             ))}
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost btn-xs font-bold text-primary mt-2 gap-1"
-                                    onClick={() => setExpandedTab(prev => !prev)}
-                                >
-                                    {expandedTab ? "Ver menos" : "Ver más"}
-                                </button>
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-36 bg-base-200/30 rounded-xl border border-dashed border-base-300 text-base-content/40 gap-3">

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../modules/auth/states/authStore";
 import {
     FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser,
-    FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter
+    FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter, FaShoppingCart
 } from "react-icons/fa6";
 // Preserve FaShop for rollback
 void FaShop;
@@ -135,6 +135,7 @@ const DrawerMobileMenu = ({ isOpen, onClose, onLogout }: Props) => {
                                         <div className="divider my-1 opacity-20"></div>
                                         <li><a onClick={() => handleNav("/politica-de-privacidad")}><FaShieldHalved className="text-xs opacity-50" /> Política de privacidad</a></li>
                                         <li><a onClick={() => handleNav("/politica-de-devolucion")}><FaBox className="text-xs opacity-50" /> Política de devolución</a></li>
+                                        <li><a onClick={() => handleNav("/politica-de-compras")}><FaShoppingCart className="text-xs opacity-50" /> Política de compras</a></li>
                                         <li><a onClick={() => handleNav("/terminos-y-condiciones")}><FaFileContract className="text-xs opacity-50" /> Términos y condiciones</a></li>
                                     </ul>
                                 </details>

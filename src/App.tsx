@@ -59,6 +59,7 @@ const FrecuentQuestions = lazy(() => import("./modules/home/design/FrecuentQuest
 const PrivacyPolicy = lazy(() => import("./modules/policies/PrivacyPolicy"))
 const PNCPolicy = lazy(() => import("./modules/policies/PNCPolicy"))
 const TermsAndConditions = lazy(() => import("./modules/policies/TermsAndConditions"))
+const PurchasePolicy = lazy(() => import("./modules/policies/PurchasePolicy"))
 const AnceCert = lazy(() => import("./modules/home/design/AnceCert"))
 const QRRedirectCorazaPlago = lazy(() =>
     import("./modules/products/components/QRRedirect").then((m) => ({ default: m.QRRedirectCorazaPlago })))
@@ -188,6 +189,7 @@ const router = createBrowserRouter([
                     // Policies
                     { path: "/politica-de-privacidad", element: <PrivacyPolicy /> },
                     { path: "/politica-de-devolucion", element: <PNCPolicy /> },
+                    { path: "/politica-de-compras", element: <PurchasePolicy /> },
                     { path: "/terminos-y-condiciones", element: <TermsAndConditions /> },
                     { path: "/wp-content/uploads/2025/09/CERT_CORAZA_Y_PLAGOSUR_A_M_CLASE_E-.pdf", element: <QRRedirectCorazaPlago /> },
                     { path: "/wp-content/uploads/2025/09/CERT_PLAGOSUR_C_CORAZA_A_I_CLASE_E_.pdf", element: <QRRedirectPlagoCorazaAI /> },

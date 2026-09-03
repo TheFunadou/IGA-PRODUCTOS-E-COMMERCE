@@ -187,6 +187,12 @@ const TermsAndConditions = () => {
                                 <p className="text-base-content/80 text-sm sm:text-base leading-7 sm:leading-8 text-justify mt-4">
                                     Estos términos rigen la relación comercial entre IGA Productos y sus usuarios, incluyendo la navegación, el uso de cuentas personales y el proceso de adquisición de productos a través de nuestra tienda en línea.
                                 </p>
+                                <div className="mt-4 rounded-xl bg-primary/5 border border-primary/15 px-4 py-3.5">
+                                    <p className="text-sm leading-7 text-base-content/80 text-justify">
+                                        <strong className="text-base-content">Aceptación de Política de Compras:</strong> Al aceptar estos Términos y Condiciones, el usuario declara haber leído y aceptado asimismo la{" "}
+                                        <Link to="/politica-de-compras" className="text-primary font-bold hover:underline">Política de Compras</Link>, que regula proceso de compra, precios, pagos, envíos, cancelaciones, devoluciones y facturación. Dicha Política forma parte integrante de estos Términos. En caso de contradicción, prevalece la disposición legal irrenunciable aplicable al consumidor.
+                                    </p>
+                                </div>
                                 <div className="mt-6 flex flex-wrap gap-3">
                                     {[
                                         { label: "Transacciones seguras", icon: <FaCheckCircle className="text-xs" /> },

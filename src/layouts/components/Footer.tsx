@@ -52,6 +52,7 @@ const Footer = () => {
                             <ul className="flex flex-col gap-3 text-sm font-medium opacity-70 [&_a:hover]:opacity-100 [&_a]:transition-opacity">
                                 <li><Link to={"/politica-de-privacidad"}>Política de Privacidad</Link></li>
                                 <li><Link to={"/politica-de-devolucion"}>Política de Devolución</Link></li>
+                                <li><Link to={"/politica-de-compras"}>Política de Compras</Link></li>
                                 <li><Link to={"/terminos-y-condiciones"}>Términos y Condiciones</Link></li>
                             </ul>
                         </div>

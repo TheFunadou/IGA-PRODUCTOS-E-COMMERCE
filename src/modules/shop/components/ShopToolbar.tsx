@@ -1,6 +1,7 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BiGridHorizontal, BiListUl } from "react-icons/bi";
 import { FaFilter } from "react-icons/fa6";
-import { ArrowUpDown, ChevronDown, Package } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Minus, Package, X } from "lucide-react";
 import clsx from "clsx";
 import type { PV3Sort, PV3SortField } from "../../products/ProductTypes";
 
@@ -38,12 +39,54 @@ const ShopToolbar = ({
     onViewModeChange,
     onOpenMobileFilters,
 }: ShopToolbarProps) => {
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
+
     const activeFields = SHOP_SORT_FIELDS.filter((f) => sorts[f.field]);
     const currentSortLabel =
         activeFields.length === 0
             ? "Ordenar"
             : `${activeFields[0].label}: ${sorts[activeFields[0].field] === "asc" ? activeFields[0].ascLabel : activeFields[0].descLabel}` +
             (activeFields.length > 1 ? ` (+${activeFields.length - 1})` : "");
+
+    const close = useCallback(() => setOpen(false), []);
+
+    /* Cerrar el menú al hacer clic/tap fuera del dropdown */
+    useEffect(() => {
+        if (!open) return;
+        const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                close();
+            }
+        };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") close();
+        };
+        document.addEventListener("mousedown", handlePointerDown);
+        document.addEventListener("touchstart", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handlePointerDown);
+            document.removeEventListener("touchstart", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [open, close]);
+
+    /* Ciclar dirección: desactivado → asc → desc → desactivado */
+    const cycleSort = (field: PV3SortField) => {
+        const current = sorts[field];
+        if (!current) onSortChange(field, "asc");
+        else if (current === "asc") onSortChange(field, "desc");
+        else onSortChange(field, undefined);
+    };
+
+    const DirectionIcon = ({ field }: { field: PV3SortField }) => {
+        const dir = sorts[field];
+        if (!dir) return <ArrowUpDown size={14} className="text-base-content/30" />;
+        return dir === "asc"
+            ? <ArrowUp size={14} className="text-primary" />
+            : <ArrowDown size={14} className="text-primary" />;
+    };
 
     return (
         <div className="w-full flex flex-wrap items-center gap-2 sm:gap-3 bg-base-100 px-3 sm:px-4 py-3 rounded-2xl border border-base-300">
@@ -67,47 +110,85 @@ const ShopToolbar = ({
 
             <div className="flex items-center gap-2 sm:gap-3 ml-auto">
                 {/* Ordenamiento */}
-                <div className="dropdown dropdown-end">
-                    <div
-                        tabIndex={0}
-                        role="button"
-                        className="btn btn-outline btn-sm gap-1.5 rounded-xl border-base-300 hover:border-primary/50 hover:bg-primary/5 normal-case"
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        type="button"
+                        aria-haspopup="menu"
+                        aria-expanded={open}
+                        onClick={() => setOpen((v) => !v)}
+                        className={clsx(
+                            "btn btn-outline btn-sm gap-1.5 rounded-xl border-base-300 normal-case",
+                            open && "border-primary/60 text-primary bg-primary/5"
+                        )}
                     >
                         <ArrowUpDown size={13} />
                         <span className="hidden sm:inline max-w-40 truncate">{currentSortLabel}</span>
-                        <ChevronDown size={12} />
-                    </div>
-                    <ul
-                        tabIndex={-1}
-                        className="dropdown-content z-30 p-2 shadow-lg bg-base-100 border border-base-300 rounded-xl w-72 max-h-[70vh] overflow-y-auto flex flex-col gap-0.5"
-                    >
-                        {SHOP_SORT_FIELDS.map((f) => {
-                            const dir = sorts[f.field];
-                            return (
-                                <li
-                                    key={f.field}
-                                    className={clsx(
-                                        "flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-lg transition-colors list-none",
-                                        dir ? "bg-primary/10" : "hover:bg-base-200/70"
-                                    )}
+                        <ChevronDown size={12} className={clsx("transition-transform", open && "rotate-180")} />
+                    </button>
+
+                    {open && (
+                        <div
+                            role="menu"
+                            aria-label="Ordenar productos"
+                            className="absolute right-0 z-30 p-2 shadow-lg bg-base-100 border border-base-300 rounded-xl w-72 max-h-[70vh] overflow-y-auto flex flex-col gap-0.5"
+                        >
+                            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-base-200 mb-1">
+                                <span className="text-[11px] font-bold text-base-content/50 uppercase tracking-widest">Ordenar por</span>
+                                <button
+                                    type="button"
+                                    onClick={close}
+                                    aria-label="Cerrar menú de orden"
+                                    className="btn btn-ghost btn-xs btn-circle hover:bg-base-200"
                                 >
-                                    <span className={clsx("text-sm truncate", dir ? "font-bold text-primary" : "text-base-content/80")}>
-                                        {f.label}:
-                                    </span>
-                                    <select
-                                        className="select select-xs select-bordered w-auto shrink-0 bg-base-100 font-medium text-base-content/80"
-                                        value={dir ?? ""}
-                                        onChange={(e) => onSortChange(f.field, (e.target.value || undefined) as "asc" | "desc" | undefined)}
-                                        aria-label={`Dirección de orden por ${f.label}`}
+                                    <X size={14} />
+                                </button>
+                            </div>
+
+                            {SHOP_SORT_FIELDS.map((f) => {
+                                const dir = sorts[f.field];
+                                return (
+                                    <button
+                                        key={f.field}
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => cycleSort(f.field)}
+                                        aria-pressed={!!dir}
+                                        className={clsx(
+                                            "flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg transition-colors text-left",
+                                            dir ? "bg-primary/10" : "hover:bg-base-200/70"
+                                        )}
                                     >
-                                        <option value="">—</option>
-                                        <option value="asc">{f.ascLabel}</option>
-                                        <option value="desc">{f.descLabel}</option>
-                                    </select>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                        <span className={clsx("text-sm truncate flex items-center gap-2", dir ? "font-bold text-primary" : "text-base-content/80")}>
+                                            {f.label}
+                                            {dir && (
+                                                <span className={clsx(
+                                                    "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+                                                    dir === "asc" ? "bg-primary/15 text-primary" : "bg-primary/15 text-primary"
+                                                )}>
+                                                    {dir === "asc" ? "↑ A-Z" : "↓ Z-A"}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <span className="shrink-0">
+                                            <DirectionIcon field={f.field} />
+                                        </span>
+                                    </button>
+                                );
+                            })}
+
+                            {activeFields.length > 0 && (
+                                <div className="border-t border-base-200 mt-1 pt-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => SHOP_SORT_FIELDS.forEach((f) => onSortChange(f.field, undefined))}
+                                        className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold text-error/80 hover:bg-error/10 flex items-center gap-1.5"
+                                    >
+                                        <Minus size={13} /> Quitar todos los ordenamientos
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Vista grid/lista */}
