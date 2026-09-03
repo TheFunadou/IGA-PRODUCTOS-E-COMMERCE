@@ -46,17 +46,17 @@ const WHATSAPP_NUMBER = "529211963246";
 const StockIndicator = ({ stock, isPaused = false }: { stock: number; isPaused?: boolean }) => {
     if (isPaused) {
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-info/15 text-info">
-                <span className="w-1.5 h-1.5 rounded-full bg-info" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-warning/15 text-warning">
+                <span className="w-1.5 h-1.5 rounded-full bg-warning" />
                 <FaCirclePause /> Pausado
             </span>
         );
     }
     if (stock <= 0) {
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-base-300 text-base-content/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-base-content/40" />
-                Sin stock
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-error/15 text-error">
+                <span className="w-1.5 h-1.5 rounded-full bg-error" />
+                Agotado
             </span>
         );
     }
@@ -141,15 +141,15 @@ const OutOfStockInquiryBadge = ({ productName, sku }: { productName: string; sku
         href={`https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, me interesa el producto ${productName} (SKU ${sku}) que actualmente figura sin stock. Quisiera consultar disponibilidad próxima o la posibilidad de hacer una solicitud bajo pedido. ¿Podrían brindarme más información?`)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3 p-3.5 rounded-xl bg-warning/10 border border-warning/25 hover:bg-warning/15 transition-colors"
+        className="flex items-center gap-3 p-3.5 rounded-xl bg-error/10 border border-error/25 hover:bg-error/15 transition-colors"
     >
-        <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-            <FaBoxesPacking className="text-warning" />
+        <div className="w-9 h-9 rounded-lg bg-error/15 flex items-center justify-center shrink-0">
+            <FaBoxesPacking className="text-error" />
         </div>
         <div className="min-w-0">
             <p className="text-xs font-extrabold text-base-content leading-tight">¿Te interesa este producto y no tiene stock?</p>
             <p className="text-[11px] font-medium text-base-content/70 leading-tight">Contáctanos para consultar disponibilidad próxima o hacer una solicitud bajo pedido</p>
-            <p className="text-[10px] font-semibold text-warning mt-0.5">Escríbenos por WhatsApp →</p>
+            <p className="text-[10px] font-semibold text-error mt-0.5">Escríbenos por WhatsApp →</p>
         </div>
     </a>
 );
@@ -159,15 +159,15 @@ const PausedInquiryBadge = ({ productName, sku }: { productName: string; sku: st
         href={`https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, me interesa el producto ${productName} (SKU ${sku}). Sé que actualmente está pausado, pero quisiera saber si todavía lo puedo adquirir. ¿Podrían brindarme más información sobre su disponibilidad?`)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3 p-3.5 rounded-xl bg-info/10 border border-info/25 hover:bg-info/15 transition-colors"
+        className="flex items-center gap-3 p-3.5 rounded-xl bg-warning/10 border border-warning/25 hover:bg-warning/15 transition-colors"
     >
-        <div className="w-9 h-9 rounded-lg bg-info/15 flex items-center justify-center shrink-0">
-            <FaCirclePause className="text-info" />
+        <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+            <FaCirclePause className="text-warning" />
         </div>
         <div className="min-w-0">
             <p className="text-xs font-extrabold text-base-content leading-tight">¿Te interesa este producto?</p>
             <p className="text-[11px] font-medium text-base-content/70 leading-tight">Está pausado, pero si deseas adquirirlo contáctanos para consultar su disponibilidad</p>
-            <p className="text-[10px] font-semibold text-info mt-0.5">Escríbenos por WhatsApp →</p>
+            <p className="text-[10px] font-semibold text-warning mt-0.5">Escríbenos por WhatsApp →</p>
         </div>
     </a>
 );
@@ -242,7 +242,7 @@ const PurchaseCard = ({
     const outOfStockTooltip = "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad";
     const pausedTooltip = "Este producto está pausado, contáctanos para consultar su disponibilidad";
     const unavailableTooltip = isPaused ? pausedTooltip : outOfStockTooltip;
-    const actionLabel = isPaused ? "Pausado" : "Sin stock";
+    const actionLabel = isPaused ? "Pausado" : "AGOTADO";
     return (
     <div className="w-full rounded-2xl border border-base-300 bg-base-100 shadow-xl overflow-hidden">
         <div className="px-5 pt-5 pb-4 border-b border-base-200 bg-base-200/30">
@@ -268,10 +268,10 @@ const PurchaseCard = ({
                 <span className={clsx(
                     "badge badge-sm font-bold gap-1 border-0",
                     isPaused
-                        ? "bg-info/15 text-info"
+                        ? "bg-warning/15 text-warning"
                         : status === 'DISPONIBLE'
                             ? "bg-success/15 text-success"
-                            : "bg-warning/15 text-warning"
+                            : "bg-error/15 text-error"
                 )}>
                     {isPaused ? <FaCirclePause className="text-[10px]" /> : <FaCircleCheck className="text-[10px]" />}
                     {isPaused ? "Pausado" : status}
@@ -314,7 +314,7 @@ const PurchaseCard = ({
                     </>
                 )}
                 {isUnavailable && (
-                    <p className={clsx("text-[11px] flex items-center gap-1 font-bold", isPaused ? "text-info" : "text-warning")}>
+                    <p className={clsx("text-[11px] flex items-center gap-1 font-bold", isPaused ? "text-warning" : "text-error")}>
                         <FaTriangleExclamation /> {isPaused ? "Producto pausado, no disponible para compra" : "Producto sin stock disponible"}
                     </p>
                 )}

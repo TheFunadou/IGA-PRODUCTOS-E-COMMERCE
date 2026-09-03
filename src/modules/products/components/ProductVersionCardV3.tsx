@@ -1,4 +1,4 @@
-import { FaCirclePause, FaFire, FaPlus } from "react-icons/fa6";
+import { FaCirclePause, FaFire, FaPlus, FaTriangleExclamation } from "react-icons/fa6";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import type { PV3CardData, ProductVersionCardI, ProductVersionCardType } from "../ProductTypes";
 import { useFavorite } from "../hooks/useProductFavorites";
@@ -23,11 +23,6 @@ type Props = {
 };
 
 const MAX_VISIBLE_TAGS = 4;
-
-const WHATSAPP_NUMBER = "529211963246";
-
-const pausedWhatsAppUrl = (productName: string, sku: string) =>
-    `https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, me interesa el producto ${productName} (SKU ${sku}). Sé que está pausado, pero quisiera saber si todavía lo puedo adquirir. ¿Me podrían apoyar?`)}`;
 
 const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading }: Props) => {
     const { theme } = useThemeStore();
@@ -145,9 +140,6 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     const isOutOfStock = version.stock <= 0;
     const isPaused = /PAUSED|PAUSADO/i.test(version.status ?? "");
     const isUnavailable = isPaused || isOutOfStock;
-    const outOfStockTooltip = "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad";
-    const pausedTooltip = "Este producto está pausado, contáctanos para consultar su disponibilidad";
-    const unavailableTooltip = isPaused ? pausedTooltip : outOfStockTooltip;
 
     const handleAddItem = () => {
         if (isUnavailable) return;
@@ -364,75 +356,56 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     );
 
     /* ── Acciones ── */
-    const actionsBlock = (
+    const actionsBlock = isUnavailable ? (
+        <div className="w-full pt-1 pb-1">
+            <span className={clsx(
+                "w-full inline-flex items-center justify-center gap-2 h-9 sm:h-10 rounded-xl font-bold text-xs sm:text-sm border",
+                isPaused
+                    ? "bg-warning/15 text-warning border-warning/25"
+                    : "bg-error/15 text-error border-error/25"
+            )}>
+                {isPaused ? <FaCirclePause className="shrink-0" /> : <FaTriangleExclamation className="shrink-0" />}
+                {isPaused ? "Pausado" : "AGOTADO"}
+            </span>
+        </div>
+    ) : (
         <div className="flex gap-2 items-stretch pt-1 pb-1 w-full">
             {/* Buy now */}
-            <div className={clsx(isUnavailable && "tooltip tooltip-top flex-1", !isList && "flex-1")} data-tip={isUnavailable ? unavailableTooltip : undefined}>
+            <div className={clsx(!isList && "flex-1")}>
                 <button
                     type="button"
                     onClick={() => { handleSetBuyNow() }}
                     aria-label="Comprar ahora"
-                    disabled={isUnavailable}
-                    aria-disabled={isUnavailable}
-                    title={isUnavailable ? unavailableTooltip : undefined}
                     className={clsx(
                         "group/btn h-9 sm:h-10 rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97]",
                         "inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm w-full",
                         "shadow-sm hover:shadow-md",
-                        isUnavailable
-                            ? "bg-base-300 text-base-content/50 cursor-not-allowed shadow-none hover:shadow-none"
-                            : "text-white bg-blue-950 hover:bg-blue-900",
+                        "text-white bg-blue-950 hover:bg-blue-900",
                         isList ? "px-5" : "px-3"
                     )}
                 >
                     <span className="hidden sm:inline">Comprar ahora</span>
-                    <span className="sm:hidden">{isPaused ? "Pausado" : isOutOfStock ? "Agotado" : "Comprar"}</span>
+                    <span className="sm:hidden">Comprar</span>
                 </button>
             </div>
 
-            {/* Add to cart: solo se muestra si el producto está disponible */}
-            {!isUnavailable && (
-                <div className="tooltip tooltip-top" data-tip="Agregar al carrito">
-                    <button
-                        type="button"
-                        onClick={() => handleAddItem()}
-                        aria-label="Agregar al carrito"
-                        disabled={isUnavailable}
-                        aria-disabled={isUnavailable}
-                        className={clsx(
-                            "group/cart h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl font-bold",
-                            "inline-flex items-center justify-center gap-1 text-xs sm:text-sm",
-                            "shadow-sm active:scale-[0.97] transition-all duration-300",
-                            isUnavailable
-                                ? "bg-base-300 text-base-content/50 cursor-not-allowed shadow-none hover:shadow-none"
-                                : "bg-yellow-600 text-white hover:shadow-md hover:bg-yellow-700"
-                        )}
-                    >
-                        <MdOutlineShoppingCart className="text-base transition-transform duration-300 group-hover/cart:-translate-x-0.5" />
-                        <FaPlus className="text-[10px] transition-transform duration-300 group-hover/cart:rotate-90" />
-                    </button>
-                </div>
-            )}
-
-            {/* Contacto WhatsApp cuando el producto no está disponible */}
-            {isUnavailable && (
-                <a
-                    href={pausedWhatsAppUrl(product.product_name, version.sku)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Consultar disponibilidad"
-                    title={unavailableTooltip}
+            {/* Add to cart */}
+            <div className="tooltip tooltip-top" data-tip="Agregar al carrito">
+                <button
+                    type="button"
+                    onClick={() => handleAddItem()}
+                    aria-label="Agregar al carrito"
                     className={clsx(
-                        "h-9 sm:h-10 rounded-xl font-bold text-xs sm:text-sm",
-                        "inline-flex items-center justify-center gap-1.5 px-3",
-                        "text-success bg-success/10 border border-success/25",
-                        "hover:bg-success/15 transition-all duration-300 active:scale-[0.97]"
+                        "group/cart h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl font-bold",
+                        "inline-flex items-center justify-center gap-1 text-xs sm:text-sm",
+                        "shadow-sm active:scale-[0.97] transition-all duration-300",
+                        "bg-yellow-600 text-white hover:shadow-md hover:bg-yellow-700"
                     )}
                 >
-                    <FaCirclePause className="text-sm shrink-0" />
-                    <span className="hidden sm:inline">Consultar</span>
-                </a>
-            )}
+                    <MdOutlineShoppingCart className="text-base transition-transform duration-300 group-hover/cart:-translate-x-0.5" />
+                    <FaPlus className="text-[10px] transition-transform duration-300 group-hover/cart:rotate-90" />
+                </button>
+            </div>
         </div>
     );
 
@@ -462,19 +435,6 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
 
             <div className={clsx("mt-auto pt-1", !isList && "flex items-center")}>
                 {priceBlock}
-                {isPaused && (
-                    <span className={clsx(
-                        "inline-flex items-center gap-1 text-[10px] font-semibold text-success/90 shrink-0",
-                        isList ? "ml-auto" : "ml-2"
-                    )}>
-                        <FaCirclePause className="text-[10px]" /> Pausado
-                    </span>
-                )}
-                {!isPaused && version.stock <= 0 && (
-                    <span className={clsx("text-[10px] font-semibold text-error/80 shrink-0", isList ? "ml-auto" : "ml-2")}>
-                        Agotado
-                    </span>
-                )}
             </div>
 
             {isList && colorsBlock}
