@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../modules/auth/states/authStore";
 import {
     FaBox, FaCertificate, FaCodeBranch, FaMap, FaPhone, FaShop, FaStar, FaUser,
-    FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter, FaShoppingCart
+    FaShieldHalved, FaFileContract, FaCircleQuestion, FaFacebook, FaWhatsapp, FaBuilding, FaMapLocationDot, FaInstagram, FaXTwitter
 } from "react-icons/fa6";
 // Preserve FaShop for rollback
 void FaShop;
 import { BiLogOut, BiEnvelope } from "react-icons/bi";
-import { FaHome, FaInfoCircle } from "react-icons/fa";
+import { FaHome, FaInfoCircle, FaShoppingCart } from "react-icons/fa";
 import { IoIosClose, IoIosMenu } from "react-icons/io";
 
 type Props = {

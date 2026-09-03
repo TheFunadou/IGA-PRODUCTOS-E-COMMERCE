@@ -7,12 +7,11 @@ import {
     FaShoppingCart,
     FaEnvelope,
     FaExternalLinkAlt,
-    FaShieldHalved,
     FaBoxOpen,
     FaGavel,
     FaTruck,
 } from "react-icons/fa";
-import { FaMoneyBillWave } from "react-icons/fa6";
+import { FaMoneyBillWave, FaShieldHalved } from "react-icons/fa6";
 
 // ── Nav item ───────────────────────────────────────────────
 function NavItem({
