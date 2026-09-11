@@ -73,7 +73,7 @@ export const MoreAbout = () => {
                             key={"card-3"}
                             imgUrl={ElectroProtection}
                             title="Protección electrica"
-                            tagNames={["Coraza (Ala ancha)"]}
+                            tagNames={["Clase E (Dielectrico)"]}
                         />
                     </div>
                 </section>

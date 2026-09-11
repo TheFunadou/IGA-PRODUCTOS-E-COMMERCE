@@ -19,6 +19,7 @@ interface OrderSummaryProps {
     isSubmitDisabled: boolean;
     pendingOrder?: boolean;
     onPendingPayment?: () => void;
+    onOpenAddress?: () => void;
 }
 
 const OrderSummary = ({
@@ -34,6 +35,7 @@ const OrderSummary = ({
     isSubmitDisabled,
     pendingOrder = false,
     onPendingPayment,
+    onOpenAddress,
 }: OrderSummaryProps) => (
     <div className="w-full rounded-2xl bg-base-100 border border-base-300">
         <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex gap-1 items-center">
@@ -66,6 +68,15 @@ const OrderSummary = ({
                     </div>
                     {destination ? (
                         <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${handleCart.data?.resume?.shippingCostBeforeTaxes || "0.00"}</span>
+                    ) : onOpenAddress ? (
+                        <button
+                            type="button"
+                            onClick={onOpenAddress}
+                            aria-label={isAuth ? "Seleccionar dirección de envío" : "Rellenar formulario de invitado"}
+                            className="text-xs text-base-content italic bg-warning/50 px-2 rounded-xl cursor-pointer hover:bg-warning/80 transition-colors"
+                        >
+                            {isAuth ? "Seleccionar dirección de envío" : "Rellenar formulario de invitado"}
+                        </button>
                     ) : (
                         <span className="text-xs text-base-content italic bg-warning/50 px-2 rounded-xl">{isAuth ? "Seleccionar dirección de envío" : "Rellenar formulario de envío"}</span>
                     )}

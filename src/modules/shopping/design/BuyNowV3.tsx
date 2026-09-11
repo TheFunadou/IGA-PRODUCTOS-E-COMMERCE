@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FaShoppingBag, FaUserShield } from "react-icons/fa";
 import { MdShoppingBag } from "react-icons/md";
@@ -41,6 +41,8 @@ const BuyNowV3 = () => {
     const [guestAddressForm, setGuestAddressForm] = useState<GuestCreateOrderFormType | null>(null);
     const [showGuestFormEdit, setShowGuestFormEdit] = useState<boolean>(false);
     const [localQuantity, setLocalQuantity] = useState(urlQuantity);
+
+    const addressSectionRef = useRef<HTMLDivElement>(null);
 
     const pendingOrder = useMemo(() => !!order, [order]);
 
@@ -216,6 +218,11 @@ const BuyNowV3 = () => {
         navigate("/pagar-productos");
     };
 
+    const handleOpenAddress = () => {
+        if (!isAuth) setShowGuestForm(true);
+        addressSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     const cardData = singleItem ? cardsMap.get(singleItem.item.sku.toLowerCase()) as PV3CardData | undefined : undefined;
 
     return (
@@ -248,17 +255,19 @@ const BuyNowV3 = () => {
                 <section className="w-full flex flex-col lg:flex-row gap-5">
                     {/* Left Column: Address → Payment → Product */}
                     <div className="flex-1 min-w-0 flex flex-col gap-5">
-                        <AddressSection
-                            isAuth={isAuth}
-                            selectedAddress={selectedAddress}
-                            onSetSelectedAddress={handleSetSelectedAddress}
-                            showGuestForm={showGuestForm}
-                            setShowGuestForm={setShowGuestForm}
-                            showGuestFormEdit={showGuestFormEdit}
-                            setShowGuestFormEdit={(v) => { clearErrorBadge(); setShowGuestFormEdit(v); }}
-                            guestAddressForm={guestAddressForm}
-                            handleGuestFormSave={handleGuestFormSave}
-                        />
+                        <div ref={addressSectionRef}>
+                            <AddressSection
+                                isAuth={isAuth}
+                                selectedAddress={selectedAddress}
+                                onSetSelectedAddress={handleSetSelectedAddress}
+                                showGuestForm={showGuestForm}
+                                setShowGuestForm={setShowGuestForm}
+                                showGuestFormEdit={showGuestFormEdit}
+                                setShowGuestFormEdit={(v) => { clearErrorBadge(); setShowGuestFormEdit(v); }}
+                                guestAddressForm={guestAddressForm}
+                                handleGuestFormSave={handleGuestFormSave}
+                            />
+                        </div>
                         {!pendingOrder && (
                             <PaymentMethod
                                 paymentProvider={paymentProvider}
@@ -307,6 +316,7 @@ const BuyNowV3 = () => {
                             isSubmitDisabled={pendingOrder ? false : isSubmitDisabled}
                             pendingOrder={pendingOrder}
                             onPendingPayment={handlePendingPayment}
+                            onOpenAddress={handleOpenAddress}
                         />
                         <TrustBadgesV3 />
                         <SideAdBanner />

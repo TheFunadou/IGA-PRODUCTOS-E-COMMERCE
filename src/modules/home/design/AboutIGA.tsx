@@ -10,6 +10,10 @@ import IMG5 from "../../../assets/expo/IMG-5.webp";
 import IMG6 from "../../../assets/expo/IMG-6.webp";
 import IMG7 from "../../../assets/expo/IMG-7.webp";
 import IMG8 from "../../../assets/expo/IMG-8.webp";
+import CfeLogo from "../../../assets/aboutiga/cfe-logo.webp"
+import PemexLogo from "../../../assets/aboutiga/pemex-logo.webp"
+import ComprasMxLogo from "../../../assets/aboutiga/comprasmx-logo.webp"
+
 import { BiCertification, BiTargetLock } from "react-icons/bi";
 import {
     MdKeyboardArrowRight,
@@ -168,19 +172,19 @@ const servicesList = [
 
 const licitacionesLogos = [
     {
-        url: "https://images.seeklogo.com/logo-png/40/1/cfe-logo-png_seeklogo-409153.png",
+        url: CfeLogo,
         alt: "CFE Logo",
-        width: "w-[80%]",
+        width: "w-full",
     },
     {
-        url: "https://upload.wikimedia.org/wikipedia/commons/9/99/Logo_Petr%C3%B3leos_Mexicanos.svg",
+        url: PemexLogo,
         alt: "Pemex Logo",
-        width: "w-[70%]",
+        width: "w-full",
     },
     {
-        url: "https://www.gob.mx/cms/uploads/image/file/917560/ASA_COLOR.png",
-        alt: "Aeropuertos y Servicios Auxiliares Logo",
-        width: "w-[60%] sm:w-[40%]",
+        url: ComprasMxLogo,
+        alt: "Compras Mx",
+        width: "w-full",
     },
 ];
 
