@@ -2,11 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cancelOrder, cancelGuestOrder, getBuyNowItem, getBuyNowItemV3, getCheckoutOrderV2, getCheckoutOrderV3, getOrders, getOrdersDashboardV3 } from "../../orders/OrdersServices";
-import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
+import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedI, PaymentDetailsExtendedV3I } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../../shopping/ShoppingTypes";
-import { getPaymentDetailsExtended } from "../../payments/services";
+import { getPaymentDetailsExtended, getPaymentDetailsExtendedV3 } from "../../payments/services";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { paymentQueryKeys } from "../../payments/usePayment";
 
@@ -74,6 +74,18 @@ export const useFetchOrderDetails = (args: { orderUUID: string }) => {
     });
 };
 
+export const useFetchOrderDetailsV3 = (args: { orderUUID: string }) => {
+    const { orderUUID } = args;
+
+    return useQuery<PaymentDetailsExtendedV3I>({
+        queryKey: [...paymentQueryKeys.getPaymentDetails({ orderUUID }), "v3"],
+        queryFn: () => getPaymentDetailsExtendedV3({ orderUUID }),
+        staleTime: 8 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+};
+
 
 export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "CANCELLED" | "ABANDONED" }) => {
     const queryClient = useQueryClient();
@@ -121,10 +133,10 @@ export const useFetchBuyNowItem = ({ item }: { item: ShoppingCartI }) => {
     });
 }
 
-export const useFetchBuyNowItemV3 = ({ item, destination }: { item: ShoppingCartI, destination?: string }) => {
+export const useFetchBuyNowItemV3 = ({ item, destination, city, state }: { item: ShoppingCartI, destination?: string, city?: string, state?: string }) => {
     return useQuery<LoadShoppingCartV3I>({
-        queryKey: ["buy-now:item:v3", { item, destination }],
-        queryFn: async () => await getBuyNowItemV3({ item, destination }),
+        queryKey: ["buy-now:item:v3", { item, destination, city, state }],
+        queryFn: async () => await getBuyNowItemV3({ item, destination, city, state }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

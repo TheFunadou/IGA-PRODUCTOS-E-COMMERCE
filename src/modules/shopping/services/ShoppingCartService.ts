@@ -58,8 +58,11 @@ export const loadShoppingCart = async (destination?: string): Promise<LoadShoppi
     return data;
 };
 
-export const loadShoppingCartV3 = async (destination?: string): Promise<LoadShoppingCartV3I> => {
-    const params = destination ? { destination } : {};
+export const loadShoppingCartV3 = async (destination?: string, city?: string, state?: string): Promise<LoadShoppingCartV3I> => {
+    const params: Record<string, string> = {};
+    if (destination) params.destination = destination;
+    if (city) params.city = city;
+    if (state) params.state = state;
     const { data } = await api.get<LoadShoppingCartV3I>(`/shopping-cart/v3/load`, { params });
     return data;
 };

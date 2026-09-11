@@ -160,6 +160,8 @@ export interface CheckoutOrderI {
     shippingAddress: NewAddressType[];
 };
 
+export type ShippingAddressV3 = NewAddressType & { id: string };
+
 export interface CheckoutOrderIV3 {
     orderUUID: string;
     items: OrderCheckoutItemIV3[];
@@ -167,7 +169,7 @@ export interface CheckoutOrderIV3 {
     couponCode: string | null;
     externalId: string;
     buyer?: { name: string; surname: string; email: string; phone?: string | null };
-    shippingAddress: NewAddressType[];
+    shippingAddress: ShippingAddressV3[];
 };
 
 export type GetLightOrderExtended = {
@@ -360,5 +362,19 @@ export interface ExtendedShippingI extends ShippingI {
 export interface PaymentDetailsExtendedI {
     order: OrderDescriptionI;
     shippings: ExtendedShippingI[];
+};
+
+export interface OrderDescriptionIV3 extends Omit<OrderDescriptionI, "items"> {
+    items: OrderCheckoutItemIV3[];
+};
+
+export interface PaymentShippingV3I {
+    shippingInfoId: string;
+    trackingNumber: string | null;
+};
+
+export interface PaymentDetailsExtendedV3I {
+    order: OrderDescriptionIV3;
+    shippings: PaymentShippingV3I[];
 };
 

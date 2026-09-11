@@ -174,17 +174,17 @@ const licitacionesLogos = [
     {
         url: CfeLogo,
         alt: "CFE Logo",
-        width: "w-full",
+        width: "w-40/100",
     },
     {
         url: PemexLogo,
         alt: "Pemex Logo",
-        width: "w-full",
+        width: "w-40/100",
     },
     {
         url: ComprasMxLogo,
         alt: "Compras Mx",
-        width: "w-full",
+        width: "w-40/100",
     },
 ];
 
@@ -307,7 +307,7 @@ const AboutIGA = () => {
                                 onClick={() => setSelect(key)}
                             >
                                 <span className="flex items-center gap-3 min-w-0">
-                                    <span className={clsx("text-xl shrink-0", select === key ? "text-primary" : "opacity-70")}>
+                                    <span className={clsx("text-xl shrink-0", select === key ? "text-white" : "opacity-70")}>
                                         {principles[key].icon}
                                     </span>
                                     {principles[key].title}
@@ -324,7 +324,7 @@ const AboutIGA = () => {
 
                     <div className="w-full lg:w-[62%] bg-blue-950 rounded-2xl px-6 sm:px-10 py-8 sm:py-10 flex flex-col justify-center gap-4 shadow-md">
                         <h3 className="text-2xl sm:text-3xl font-black flex items-center gap-3 text-white">
-                            <span className="text-primary">{principles[select].icon}</span>
+                            <span className="text-white">{principles[select].icon}</span>
                             {principles[select].title}
                         </h3>
                         <p
@@ -385,7 +385,7 @@ const AboutIGA = () => {
                                         src={logo.url}
                                         alt={logo.alt}
                                         loading="lazy"
-                                        className={clsx("h-auto object-contain max-h-16 mix-blend-multiply", logo.width)}
+                                        className={clsx("object-contain mix-blend-multiply", logo.width)}
                                     />
                                     <p className="text-[11px] font-bold text-base-content/50 uppercase mt-3 tracking-widest">
                                         Acreditado
@@ -470,20 +470,20 @@ const AboutIGA = () => {
                         Toca una imagen para ampliarla
                     </span>
                 </div>
-                <div className="columns-2 sm:columns-3 xl:columns-4 gap-3 md:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                     {expoGallery.map((image, index) => (
                         <button
                             key={index}
                             type="button"
                             onClick={() => openLightbox(image)}
                             aria-label={`Ampliar ${image.alt}`}
-                            className="group relative mb-3 md:mb-4 w-full cursor-zoom-in overflow-hidden rounded-xl border border-base-200 bg-base-100 shadow-sm focus-visible:outline-2 focus-visible:outline-primary"
+                            className="group relative aspect-square w-full cursor-zoom-in overflow-hidden rounded-xl border border-base-200 bg-base-100 shadow-sm focus-visible:outline-2 focus-visible:outline-primary"
                         >
                             <img
                                 src={image.url}
                                 alt={image.alt}
                                 loading="lazy"
-                                className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
                             <span className="absolute inset-0 grid place-items-center bg-blue-950/0 group-hover:bg-blue-950/25 transition-colors duration-300">
                                 <FaMagnifyingGlassPlus className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow" />

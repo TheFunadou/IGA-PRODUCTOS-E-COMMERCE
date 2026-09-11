@@ -24,6 +24,8 @@ interface UseShoppingCartV3Props {
     authCustomer?: { uuid: string } | null;
     showTriggerAlert: (type: "Successfull" | "Error", message: string, options?: { duration: number }) => void;
     destination?: string;
+    destinationCity?: string;
+    destinationState?: string;
 }
 
 interface UseShoppingCartV3Return {
@@ -53,6 +55,8 @@ export const useShoppingCartV3 = ({
     authCustomer,
     showTriggerAlert,
     destination,
+    destinationCity,
+    destinationState,
 }: UseShoppingCartV3Props): UseShoppingCartV3Return => {
 
     const queryClient = useQueryClient();
@@ -63,8 +67,15 @@ export const useShoppingCartV3 = ({
             : "guest-client";
 
     const baseQueryKey = shoppingCartV3QKs.loadShoppingCart(clientUUID);
-    const queryKey = destination
-        ? [...baseQueryKey, { destination }]
+
+    const hasDestination = !!(destination || destinationCity || destinationState);
+    const locationKey = {
+        destination,
+        city: destinationCity,
+        state: destinationState,
+    };
+    const queryKey = hasDestination
+        ? [...baseQueryKey, locationKey]
         : baseQueryKey;
 
     const {
@@ -73,7 +84,7 @@ export const useShoppingCartV3 = ({
         isError,
     } = useQuery<LoadShoppingCartV3I>({
         queryKey,
-        queryFn: () => loadShoppingCartV3(destination),
+        queryFn: () => loadShoppingCartV3(destination ?? undefined, destinationCity ?? undefined, destinationState ?? undefined),
         staleTime: 1000 * 60 * 3,
         gcTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,

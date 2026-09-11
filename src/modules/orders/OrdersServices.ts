@@ -33,15 +33,16 @@ export const getBuyNowItem = async ({ item }: { item: ShoppingCartI }): Promise<
     return data;
 };
 
-export const getBuyNowItemV3 = async ({ item, destination }: { item: ShoppingCartI, destination?: string }): Promise<LoadShoppingCartV3I> => {
-    const { data } = await api.get<LoadShoppingCartV3I>(`/orders/buy-now/v3`, {
-        params: {
-            sku: item.item.sku,
-            productUUID: item.item.productUUID,
-            quantity: item.quantity,
-            destinationPc: destination ?? undefined,
-        }
-    });
+export const getBuyNowItemV3 = async ({ item, destination, city, state }: { item: ShoppingCartI, destination?: string, city?: string, state?: string }): Promise<LoadShoppingCartV3I> => {
+    const params: Record<string, string> = {
+        sku: item.item.sku,
+        productUUID: item.item.productUUID,
+        quantity: item.quantity.toString(),
+    };
+    if (destination) params.destinationPc = destination;
+    if (city) params.city = city;
+    if (state) params.state = state;
+    const { data } = await api.get<LoadShoppingCartV3I>(`/orders/buy-now/v3`, { params });
     return data;
 };
 

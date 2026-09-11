@@ -136,7 +136,7 @@ const ProductVersionImageGallery = ({
                     <section className="flex flex-col-reverse sm:flex-row gap-3 md:gap-4 flex-1 min-w-0">
 
                         {/* Thumbnails */}
-                        <div className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden sm:max-h-[420px] md:max-h-[500px] lg:max-h-[580px] pb-1 sm:pb-0 sm:pr-1 flex-shrink-0">
+                        <div className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden sm:max-h-[420px] md:max-h-[500px] lg:max-h-[580px] pb-1 sm:pb-0 sm:pr-1 flex-shrink-0 [scrollbar-width:thin] [scrollbar-color:var(--color-primary)_var(--color-base-200)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-base-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary">
                             {images.map((img, i) => (
                                 <button
                                     key={i}

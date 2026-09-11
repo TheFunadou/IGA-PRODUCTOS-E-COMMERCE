@@ -11,6 +11,8 @@ interface UseHandleShoppingCartV3Props {
     authCustomer?: { uuid: string } | null;
     showTriggerAlert: (type: "Successfull" | "Error", message: string, options?: { duration: number }) => void;
     destination?: string;
+    destinationCity?: string;
+    destinationState?: string;
 }
 
 export const useHandleShoppingCartV3 = ({
@@ -18,12 +20,16 @@ export const useHandleShoppingCartV3 = ({
     authCustomer,
     showTriggerAlert,
     destination,
+    destinationCity,
+    destinationState,
 }: UseHandleShoppingCartV3Props) => {
     const cart = useShoppingCartV3({
         isAuth,
         authCustomer,
         showTriggerAlert,
         destination,
+        destinationCity,
+        destinationState,
     });
 
     const debouncedUpdateQtyItem = useDebounceCallback((item: ShoppingCartI) => {

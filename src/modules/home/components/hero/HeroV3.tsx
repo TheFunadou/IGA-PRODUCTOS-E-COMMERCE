@@ -10,14 +10,17 @@ Quedo atento a su pronta respuesta. Saludos cordiales.`;
 
 const HeroV3Web = () => {
     return (
-        <section className="relative min-h-160 2xl:min-h-180 overflow-hidden">
+        <section className="relative min-h-160 lg:min-h-140 xl:min-h-160 2xl:min-h-180 2xl:max-h-[860px] overflow-hidden">
 
             {/* Imagen */}
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-base-200">
                 <img
                     src={wallpeaper2}
                     alt="Iga Productos | Cascos de Seguridad"
-                    className="h-full w-full object-center lg:object-cover"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    className="h-full w-full object-cover object-right"
                 />
             </div>
 
@@ -85,10 +88,13 @@ const HeroV3Web = () => {
 const HeroV3Mobile = () => {
     return (
         <section className="relative min-h-[80vh] overflow-hidden">
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-base-200">
                 <img
                     src={wallpeaper2}
                     alt="Iga Productos | Cascos de Seguridad"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
                     className="h-full w-full object-cover object-right"
                 />
             </div>

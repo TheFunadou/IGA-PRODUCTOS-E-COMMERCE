@@ -180,7 +180,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
             onClick={() => navigate(detailUrl)}
             className={clsx(
                 "relative overflow-hidden cursor-pointer group/images",
-                isList ? "w-32 sm:w-44 shrink-0 aspect-square self-start" : "w-full aspect-square"
+                isList ? "w-32 sm:w-44 shrink-0 aspect-square self-start rounded-l-2xl" : "w-full aspect-square rounded-t-2xl"
             )}
         >
             {/* Mobile version (single image) */}
@@ -423,7 +423,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
             </div>
 
             {/* Add to cart */}
-            <div className="tooltip tooltip-top" data-tip="Agregar al carrito">
+            <div className="tooltip tooltip-top z-20" data-tip="Agregar al carrito">
                 <button
                     type="button"
                     onClick={() => handleAddItem()}
@@ -480,7 +480,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
 
     return (
         <div className={clsx(
-            "relative overflow-hidden border transition-all duration-300",
+            "relative border transition-all duration-300",
             isList ? "flex flex-row rounded-2xl" : "flex flex-col rounded-2xl w-full h-auto",
             "hover:shadow-xl",
             isList ? "hover:-translate-y-0.5" : "hover:-translate-y-1",

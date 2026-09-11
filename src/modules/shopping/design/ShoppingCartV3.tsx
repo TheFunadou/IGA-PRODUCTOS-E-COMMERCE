@@ -40,11 +40,15 @@ const ShoppingCartV3 = () => {
 
     const pendingOrder = useMemo(() => !!order, [order]);
 
-    const destination = useMemo(() => {
-        if (isAuth && selectedAddress) return selectedAddress.zipCode;
-        if (!isAuth && guestAddressForm) return guestAddressForm.zipCode;
+    const addressForShipping = useMemo(() => {
+        if (isAuth && selectedAddress) return selectedAddress;
+        if (!isAuth && guestAddressForm) return guestAddressForm;
         return null;
     }, [isAuth, selectedAddress, guestAddressForm]);
+
+    const destination = useMemo(() => addressForShipping?.zipCode ?? null, [addressForShipping]);
+    const destinationCity = useMemo(() => addressForShipping?.city ?? undefined, [addressForShipping]);
+    const destinationState = useMemo(() => addressForShipping?.state ?? undefined, [addressForShipping]);
 
     const isSubmitDisabled = useMemo(() => {
         if (orderLoading) return true;
@@ -59,6 +63,8 @@ const ShoppingCartV3 = () => {
         authCustomer,
         showTriggerAlert: (type, msg, opts) => showTriggerAlert(type, msg, opts),
         destination: destination ?? undefined,
+        destinationCity,
+        destinationState,
     });
 
     const { data: addresses } =

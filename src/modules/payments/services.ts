@@ -1,5 +1,5 @@
 import api from "../../api/api.config";
-import type { PaymentDetailsExtendedI } from "../orders/OrdersTypes";
+import type { PaymentDetailsExtendedI, PaymentDetailsExtendedV3I } from "../orders/OrdersTypes";
 import type { OrderStatusType } from "../shopping/ShoppingTypes";
 import type { GetPaidOrderDetails, GetPaymentDetailsQueryDTO, PaymentDetailsI } from "./types";
 
@@ -27,6 +27,11 @@ export const getPaymentDetails = async (args: { orderUUID: string, query: GetPay
 
 
 export const getPaymentDetailsExtended = async ({ orderUUID }: { orderUUID: string }): Promise<PaymentDetailsExtendedI> => {
-    const { data } = await api.get<PaymentDetailsExtendedI>(`/payment/details/client/extended/${orderUUID}`);
+    const { data } = await api.get<PaymentDetailsExtendedI>(`/payment/details/client/extended/${orderUUID}?enablePolling=false`);
+    return data;
+};
+
+export const getPaymentDetailsExtendedV3 = async ({ orderUUID }: { orderUUID: string }): Promise<PaymentDetailsExtendedV3I> => {
+    const { data } = await api.get<PaymentDetailsExtendedV3I>(`/payment/details/client/extended-v3/${orderUUID}?enablePolling=false`);
     return data;
 };

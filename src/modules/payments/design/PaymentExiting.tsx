@@ -33,6 +33,7 @@ import CheckoutOrderItemV3 from "../../shopping/components/CheckoutOrderItemV3";
 import RecentlyViewed from "../../shopping/components/RecentlyViewed";
 import FavoritesSectionV3 from "../../shopping/components/FavoritesSectionV3";
 import { trackPurchase } from "../../analytics/MetaEvents";
+import { getOrderPaymentTotals, parseFmt } from "../../orders/utils/paymentSummary";
 import type { OrderCheckoutItemIV3 } from "../../orders/OrdersTypes";
 
 /* ─────────────────────────────────────────────
@@ -40,9 +41,6 @@ import type { OrderCheckoutItemIV3 } from "../../orders/OrdersTypes";
  ───────────────────────────────────────────── */
 
 const MAX_POLL_ATTEMPTS = 10;
-
-const parseFmt = (value?: string | null): number =>
-    parseFloat((value ?? "0").replace(/[^0-9.-]/g, "")) || 0;
 
 /* ─────────────────────────────────────────────
    Helpers de UI (lenguaje V3)
@@ -401,12 +399,8 @@ const PaymentExitingV2 = () => {
 
     const fmt = (n: number) => formatPrice(n.toString(), "es-MX");
 
-    const orderTotal = parseFmt(paymentResume.total);
-    const totalPaid = paymentDetails.reduce(
-        (acc, det) => acc + parseFmt(det.paidAmount),
-        0,
-    );
-    const hasFinancing = Math.abs(totalPaid - orderTotal) > 0.005;
+    const { orderTotal, totalPaid, hasFinancing, interest } =
+        getOrderPaymentTotals(order);
 
     const purchasedSkus = items.map((item) => item.sku);
 
@@ -436,7 +430,7 @@ const PaymentExitingV2 = () => {
                     <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
                         <Badge label={formatOrderStatus[data.status]} color="success" />
                         <p className="text-xs font-mono text-base-content/40 break-all max-w-xs text-right">
-                            Folio: {order.orderUUID}
+                            Número de pedido: {order.orderUUID}
                         </p>
                         <p className="text-xs text-base-content/40">
                             {formatDate(order.createdAt, "es-MX")}
@@ -509,7 +503,7 @@ const PaymentExitingV2 = () => {
 
                     {/* ── Main: Comprador + Envío + Artículos ── */}
                     <div className="flex-1 min-w-0 flex flex-col gap-5">
-                        <SectionCard icon={<FaUser />} title="Datos del comprador">
+                        <SectionCard icon={<FaUser />} title="Datos de contacto">
                             <div className="bg-primary/5 rounded-xl p-3 space-y-3">
                                 <InfoRow
                                     label="Nombre completo"
@@ -569,7 +563,6 @@ const PaymentExitingV2 = () => {
                                             label="País"
                                             value={`${shipping.country} · CP ${shipping.zipCode}`}
                                         />
-                                        <InfoRow label="Tipo de dirección" value={shipping.addressType} />
                                     </div>
 
                                     {shipping.referencesOrComments && (
@@ -602,7 +595,7 @@ const PaymentExitingV2 = () => {
                     <div className="w-full lg:w-80 xl:w-96 shrink-0 flex flex-col gap-4">
                         <SectionCard
                             icon={<FaReceipt />}
-                            title="Resumen de pago"
+                            title="Resumen de tu compra"
                         >
                             <div className="space-y-3">
                                 <SummaryLine
@@ -625,6 +618,13 @@ const PaymentExitingV2 = () => {
                                         value={`$${paymentResume.shippingCostBeforeTaxes}`}
                                     />
                                 )}
+                                {hasFinancing && (
+                                    <SummaryLine
+                                        label="Interés de financiamiento"
+                                        value={`$${fmt(interest)}`}
+                                        sub="Comisión por pagar a meses"
+                                    />
+                                )}
                                 <SummaryLine
                                     label="Total"
                                     value={`$${fmt(orderTotal)}`}
@@ -634,7 +634,7 @@ const PaymentExitingV2 = () => {
                                     <SummaryLine
                                         label="Total cobrado"
                                         value={`$${fmt(totalPaid)}`}
-                                        sub="Incluye intereses de financiamiento"
+                                        sub="Monto total que se cobra a tu tarjeta"
                                         large
                                     />
                                 )}
@@ -661,7 +661,7 @@ const PaymentExitingV2 = () => {
 
                         <SectionCard
                             icon={<FaCreditCard />}
-                            title="Detalles de la transacción"
+                            title="Pago"
                         >
                             <div className="flex items-center gap-4 mb-5">
                                 <figure className="h-10">
@@ -676,7 +676,7 @@ const PaymentExitingV2 = () => {
                                         {paymentProvider[order.paymentProvider].description}
                                     </p>
                                     <p className="text-xs text-base-content/50">
-                                        Transacción procesada de forma segura
+                                        Pago procesado de forma segura
                                     </p>
                                 </div>
                             </div>
@@ -684,7 +684,7 @@ const PaymentExitingV2 = () => {
                             {hasFinancing && (
                                 <p className="text-xs text-warning bg-warning/10 rounded-xl px-3 py-2 mb-4 flex items-center gap-1.5">
                                     <FaExclamationTriangle className="text-warning flex-shrink-0" />
-                                    El pago incluye intereses de financiamiento por ${fmt(totalPaid - orderTotal)}.
+                                    El pago incluye intereses de financiamiento por ${fmt(interest)}.
                                 </p>
                             )}
 
@@ -708,7 +708,7 @@ const PaymentExitingV2 = () => {
                                                 <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
                                                 <InfoRow label="Tipo" value={det.paymentClass} />
                                                 <InfoRow
-                                                    label="Cargos"
+                                                    label="Pagos"
                                                     value={
                                                         det.installments > 1
                                                             ? `${det.installments} mensualidades de $${fmt(monthly)}`
