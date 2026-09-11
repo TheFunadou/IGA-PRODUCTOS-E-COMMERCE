@@ -1,10 +1,10 @@
 import { FaCheckCircle } from "react-icons/fa";
-import wallpeaper2 from "../../../../assets/hero/wallpeaperhero-2.webp";
+import wallpeaper2 from "../../../../assets/hero/wallpeaperherocoraza.webp";
 import { scrollToTienda } from "../../../shop/utils/scrollToTienda";
 import { getWhatsAppLink } from "../../../../global/GlobalHelpers";
 import { useMediaQuery } from "../../../../global/hooks/useMediaQuery";
 
-const HERO_QUOTE_MESSAGE = `Hola, buen día. Vengo del sitio web de IGA Productos y me interesa cotizar cascos por volumen. ¿Me podrían apoyar con una cotización?
+const HERO_QUOTE_MESSAGE = `Hola, buen día. Vengo del sitio web de Iga Productos y me interesa cotizar cascos por volumen. ¿Me podrían apoyar con una cotización?
 
 Quedo atento a su pronta respuesta. Saludos cordiales.`;
 

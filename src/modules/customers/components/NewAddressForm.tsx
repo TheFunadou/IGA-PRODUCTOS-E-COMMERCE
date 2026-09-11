@@ -1,10 +1,11 @@
-import { useEffect, useState, type RefObject } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json"
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { NewAddressType } from "../CustomerTypes";
 import { useAddAddress } from "../hooks/useCustomer";
 import { formatAxiosError } from "../../../api/helpers";
+import { useSepomexZipCodes } from "../../../global/sepomex/useSepomexZipCodes";
 import {
     FaMapMarkerAlt,
     FaUserAlt,
@@ -77,8 +78,25 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
         phoneCode: "+52",
     };
 
+    const findCountryByESName = (nameES: string): CountriesPhoneCodeType | undefined => {
+        const found = CountriesAreaCodesJSON.find((data) => data.nameES === nameES);
+        return found
+            ? {
+                nameES: found.nameES,
+                nameEN: found.nameEN,
+                iso2: found.iso2,
+                iso3: found.iso3,
+                phoneCode: `+${found.phoneCode}`,
+            }
+            : undefined;
+    };
+
     const [country, setCountry] = useState<CountriesPhoneCodeType>(defaultCountry);
     const [currentCountry, setCurrentCountry] = useState<string>(
+        "https://flagsapi.com/MX/flat/64.png"
+    );
+    const [addressCountry, setAddressCountry] = useState<CountriesPhoneCodeType>(defaultCountry);
+    const [addressCountryFlag, setAddressCountryFlag] = useState<string>(
         "https://flagsapi.com/MX/flat/64.png"
     );
     const [addressType, setAddressType] = useState<string>("Casa");
@@ -90,6 +108,8 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
         formState: { errors },
         setValue,
         reset,
+        watch,
+        clearErrors,
     } = useForm<NewAddressType>({
         defaultValues: { defaultAddress: false, floor: undefined, addressType: "Casa" },
     });
@@ -101,6 +121,7 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
             await addAddress.mutateAsync(data);
             reset();
             setCountry(defaultCountry);
+            setAddressCountry(defaultCountry);
             onCreated();
         } catch (err) {
             setError(formatAxiosError(err));
@@ -114,6 +135,99 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
             shouldDirty: true,
         });
     }, [country]);
+
+    useEffect(() => {
+        setAddressCountryFlag(`https://flagsapi.com/${addressCountry.iso2}/flat/64.png`);
+    }, [addressCountry]);
+
+    const watchedZipCode = watch("zipCode");
+    const isMexico = addressCountry.iso2 === "MX";
+
+    const { data: sepomexData, isFetching: sepomexFetching, isError: sepomexError } =
+        useSepomexZipCodes({
+            zipCode: watchedZipCode,
+            enabled: isMexico,
+        });
+
+    const colonias = useMemo(() => {
+        if (!sepomexData) return [];
+        return Array.from(
+            new Set(
+                sepomexData.zip_codes.map((entry) => entry.d_asenta.trim()).filter(Boolean)
+            )
+        );
+    }, [sepomexData]);
+
+    const lastZipRef = useRef<string>("");
+    useEffect(() => {
+        if (lastZipRef.current === watchedZipCode) return;
+        lastZipRef.current = watchedZipCode;
+        if (!isMexico) return;
+        setValue("state", "", { shouldValidate: false });
+        setValue("city", "", { shouldValidate: false });
+        setValue("locality", "", { shouldValidate: false });
+        setValue("neighborhood", "", { shouldValidate: false });
+    }, [watchedZipCode, isMexico, setValue]);
+
+    useEffect(() => {
+        if (!sepomexData || sepomexData.zip_codes.length === 0) return;
+        const first = sepomexData.zip_codes[0];
+        setValue("state", first.d_estado.trim(), { shouldValidate: true });
+        setValue("city", first.d_ciudad?.trim() || first.d_mnpio.trim(), { shouldValidate: true });
+        setValue("locality", first.d_mnpio.trim(), { shouldValidate: true });
+    }, [sepomexData, setValue]);
+
+    useEffect(() => {
+        if (!sepomexData) return;
+        if (colonias.length === 1) {
+            setValue("neighborhood", colonias[0], { shouldValidate: true });
+        } else if (colonias.length > 1) {
+            setValue("neighborhood", "", { shouldValidate: true });
+        }
+    }, [sepomexData, colonias, setValue]);
+
+    const showColoniaSelect = isMexico && !!sepomexData && !sepomexFetching && colonias.length >= 2;
+    const showZipError = isMexico && watchedZipCode?.length >= 5 && sepomexError;
+
+    const cpSearchable = /^\d{5}$/.test(watchedZipCode || "");
+    const autocompleteReady =
+        isMexico &&
+        cpSearchable &&
+        !sepomexFetching &&
+        (!!sepomexData || sepomexError);
+    const addressLocked = isMexico && !autocompleteReady;
+
+    useEffect(() => {
+        if (isMexico && addressLocked) {
+            setValue("state", "", { shouldValidate: false });
+            setValue("city", "", { shouldValidate: false });
+            setValue("locality", "", { shouldValidate: false });
+            setValue("neighborhood", "", { shouldValidate: false });
+            clearErrors(["state", "city", "locality", "neighborhood"]);
+        }
+    }, [isMexico, addressLocked, setValue, clearErrors]);
+
+    const countryField = register("country", {
+        required: "El país es requerido",
+        maxLength: { value: 40, message: "Máximo 40 caracteres" },
+        pattern: {
+            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+            message: "Solo letras y espacios",
+        },
+    });
+
+    const neighborhoodField = register("neighborhood", {
+        required: "La colonia o fraccionamiento es requerida",
+        maxLength: { value: 60, message: "Máximo 60 caracteres" },
+        pattern: {
+            value: /^(?=.{2,60}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
+            message: "Solo letras, números, espacios y puntuación básica",
+        },
+    });
+    const handleNeighborhoodChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        neighborhoodField.onChange(e);
+        setValue("neighborhood", e.target.value, { shouldValidate: true });
+    };
 
     const isApartment = addressType === "Departamento";
 
@@ -272,21 +386,37 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                 <label htmlFor="country" className="text-xs text-base-content/60">
                                     País *
                                 </label>
-                                <input
-                                    id="country"
-                                    type="text"
-                                    placeholder="México"
-                                    autoComplete="country-name"
-                                    className={inputCls(!!errors.country)}
-                                    {...register("country", {
-                                        required: "El país es requerido",
-                                        maxLength: { value: 40, message: "Máximo 40 caracteres" },
-                                        pattern: {
-                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                            message: "Solo letras y espacios",
-                                        },
-                                    })}
-                                />
+                                <div className="flex gap-2 items-center">
+                                    <figure className="w-8 sm:w-10 flex-shrink-0">
+                                        <img
+                                            src={addressCountryFlag}
+                                            alt={addressCountry.nameES}
+                                            className="w-full h-auto"
+                                        />
+                                    </figure>
+                                    <select
+                                        id="country"
+                                        {...countryField}
+                                        value={addressCountry.nameES}
+                                        onChange={(e) => {
+                                            const selected = findCountryByESName(e.target.value);
+                                            if (selected) {
+                                                setAddressCountry(selected);
+                                            }
+                                            countryField.onChange(e);
+                                        }}
+                                        className={clsx(
+                                            "flex-1 select select-sm sm:select-md text-sm border rounded-lg bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition",
+                                            errors.country ? "border-error" : "border-base-300"
+                                        )}
+                                    >
+                                        {CountriesAreaCodesJSON.map((data, index) => (
+                                            <option key={index} value={data.nameES}>
+                                                {data.nameES}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <FieldError message={errors.country?.message} />
                             </div>
 
@@ -300,13 +430,14 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="Veracruz"
                                     autoComplete="address-level1"
-                                    className={inputCls(!!errors.state)}
+                                    disabled={addressLocked}
+                                    className={clsx(inputCls(!!errors.state), "disabled:opacity-60 disabled:cursor-not-allowed")}
                                     {...register("state", {
                                         required: "El estado es requerido",
                                         maxLength: { value: 40, message: "Máximo 40 caracteres" },
                                         pattern: {
-                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                            message: "Solo letras y espacios",
+                                            value: /^(?=.{2,40}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
+                                            message: "Solo letras, números, espacios y puntuación básica",
                                         },
                                     })}
                                 />
@@ -323,13 +454,14 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="Coatzacoalcos"
                                     autoComplete="address-level2"
-                                    className={inputCls(!!errors.city)}
+                                    disabled={addressLocked}
+                                    className={clsx(inputCls(!!errors.city), "disabled:opacity-60 disabled:cursor-not-allowed")}
                                     {...register("city", {
                                         required: "La ciudad es requerida",
                                         maxLength: { value: 50, message: "Máximo 50 caracteres" },
                                         pattern: {
-                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                            message: "Solo letras y espacios",
+                                            value: /^(?=.{2,50}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
+                                            message: "Solo letras, números, espacios y puntuación básica",
                                         },
                                     })}
                                 />
@@ -346,13 +478,14 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                     type="text"
                                     placeholder="Centro"
                                     autoComplete="address-level3"
-                                    className={inputCls(!!errors.locality)}
+                                    disabled={addressLocked}
+                                    className={clsx(inputCls(!!errors.locality), "disabled:opacity-60 disabled:cursor-not-allowed")}
                                     {...register("locality", {
                                         required: "La localidad es requerida",
                                         maxLength: { value: 50, message: "Máximo 50 caracteres" },
                                         pattern: {
-                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                            message: "Solo letras y espacios",
+                                            value: /^(?=.{2,50}$)(?=.*\p{L})[\p{L}\p{N}\s.'-]+$/u,
+                                            message: "Solo letras, números, espacios y puntuación básica",
                                         },
                                     })}
                                 />
@@ -387,22 +520,47 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                 <label htmlFor="neighborhood" className="text-xs text-base-content/60">
                                     Colonia / Fraccionamiento *
                                 </label>
-                                <input
-                                    id="neighborhood"
-                                    type="text"
-                                    placeholder="Colonia del Valle, Fraccionamiento Las Palmas…"
-                                    autoComplete="address-level4"
-                                    className={inputCls(!!errors.neighborhood)}
-                                    {...register("neighborhood", {
-                                        required: "La colonia o fraccionamiento es requerida",
-                                        maxLength: { value: 60, message: "Máximo 60 caracteres" },
-                                        pattern: {
-                                            value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
-                                            message: "Solo letras y espacios",
-                                        },
-                                    })}
-                                />
-                                <FieldError message={errors.neighborhood?.message} />
+                                {showColoniaSelect ? (
+                                    <select
+                                        id="neighborhood"
+                                        disabled={addressLocked}
+                                        {...neighborhoodField}
+                                        onChange={handleNeighborhoodChange}
+                                        className={clsx(
+                                            "select select-sm sm:select-md w-full text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 transition disabled:opacity-60 disabled:cursor-not-allowed",
+                                            errors.neighborhood
+                                                ? "border-warning"
+                                                : "bg-base-200 border-base-300"
+                                        )}
+                                    >
+                                        <option value="">Selecciona tu colonia</option>
+                                        {colonias.map((colonia) => (
+                                            <option key={colonia} value={colonia}>
+                                                {colonia}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <input
+                                        id="neighborhood"
+                                        type="text"
+                                        placeholder="Colonia del Valle, Fraccionamiento Las Palmas…"
+                                        autoComplete="address-level4"
+                                        disabled={addressLocked}
+                                        className={clsx(inputCls(!!errors.neighborhood), "disabled:opacity-60 disabled:cursor-not-allowed")}
+                                        {...neighborhoodField}
+                                        onChange={handleNeighborhoodChange}
+                                    />
+                                )}
+                                {errors.neighborhood && (
+                                    <p className={clsx(
+                                        "text-xs mt-1 flex items-center gap-1",
+                                        showColoniaSelect ? "text-warning" : "text-error"
+                                    )}>
+                                        <FaExclamationTriangle className="text-[10px] flex-shrink-0" />
+                                        {errors.neighborhood.message}
+                                    </p>
+                                )}
                             </div>
 
                             {/* CP */}
@@ -410,24 +568,40 @@ const NewAddressForm = ({ ref, onCreated }: Props) => {
                                 <label htmlFor="zip_code" className="text-xs text-base-content/60">
                                     Código postal *
                                 </label>
-                                <input
-                                    id="zip_code"
-                                    type="text"
-                                    placeholder="96400"
-                                    autoComplete="postal-code"
-                                    inputMode="numeric"
-                                    className={inputCls(!!errors.zipCode)}
-                                    {...register("zipCode", {
-                                        required: "El código postal es requerido",
-                                        minLength: { value: 3, message: "Mínimo 3 caracteres" },
-                                        maxLength: { value: 10, message: "Máximo 10 caracteres" },
-                                        pattern: {
-                                            value: /^(?!.*-.*-)[0-9-]+$/,
-                                            message: "Solo números y guiones",
-                                        },
-                                    })}
-                                />
+                                <div className={clsx("relative", isMexico && "flex items-center gap-2")}>
+                                    <input
+                                        id="zip_code"
+                                        type="text"
+                                        placeholder="96400"
+                                        autoComplete="postal-code"
+                                        inputMode="numeric"
+                                        className={inputCls(!!errors.zipCode)}
+                                        {...register("zipCode", {
+                                            required: "El código postal es requerido",
+                                            minLength: { value: isMexico ? 5 : 3, message: isMexico ? "Debe tener 5 dígitos" : "Mínimo 3 caracteres" },
+                                            maxLength: { value: isMexico ? 5 : 10, message: isMexico ? "Debe tener 5 dígitos" : "Máximo 10 caracteres" },
+                                            pattern: {
+                                                value: isMexico ? /^\d{5}$/ : /^(?!.*-.*-)[0-9-]+$/,
+                                                message: isMexico ? "El código postal de México debe tener 5 dígitos" : "Solo números y guiones",
+                                            },
+                                        })}
+                                    />
+                                    {isMexico && sepomexFetching && (
+                                        <span className="loading loading-spinner loading-xs text-primary flex-shrink-0" aria-label="Buscando código postal" />
+                                    )}
+                                </div>
                                 <FieldError message={errors.zipCode?.message} />
+                                {showZipError && (
+                                    <p className="flex items-center gap-1 text-warning text-xs mt-1">
+                                        <FaExclamationTriangle className="text-[10px] flex-shrink-0" />
+                                        No encontramos tu código postal, captura tus datos manualmente.
+                                    </p>
+                                )}
+                                {isMexico && sepomexData && sepomexData.zip_codes.length > 0 && !sepomexFetching && (
+                                    <p className="text-success text-xs mt-1">
+                                        Autocompletamos tus datos con tu código postal.
+                                    </p>
+                                )}
                             </div>
 
                             {/* Tipo de dirección — pill selector */}

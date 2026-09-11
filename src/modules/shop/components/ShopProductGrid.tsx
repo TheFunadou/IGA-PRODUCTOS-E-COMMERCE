@@ -1,7 +1,9 @@
 import clsx from "clsx";
-import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
+// ROLLBACK V3: para volver al diseño anterior, cambiar import a:
+// import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
 import ProductVersionCardV3Skeleton from "../../products/components/ProductVersionCardV3Skeleton";
 import type { PV3CardData } from "../../products/ProductTypes";
+import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
 
 interface ShopProductGridProps {
     products: PV3CardData[];

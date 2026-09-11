@@ -23,6 +23,7 @@ import ProductVersionCardV2 from "../../products/components/ProductVersionCard";
 import { useFetchProductVersionCardsV2 } from "../../products/hooks/useFetchProductVersionCards";
 import { BiMinus, BiPlus } from "react-icons/bi";
 import { FaBagShopping } from "react-icons/fa6";
+import { formatPrice } from "../../products/Helpers";
 
 // ── Subcomponente: Resumen de Pedido ─────────────────────────────────────────
 interface OrderSummaryProps {
@@ -31,6 +32,7 @@ interface OrderSummaryProps {
     shippingCost: string;
     iva: string;
     discount: string;
+    automaticDiscount: string;
     applicableOffers?: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
     total: string;
     boxQty: number;
@@ -47,7 +49,7 @@ const OrderSummary = ({
     shippingCost,
     iva,
     discount,
-    applicableOffers = [],
+    automaticDiscount,
     total,
     boxQty,
     pendingOrder,
@@ -110,34 +112,16 @@ const OrderSummary = ({
                         </span>
                     </div>
 
-                    {/* Breakdown of offers */}
-                    {applicableOffers.length > 0 ? (
-                        <div className="flex flex-col gap-2 pt-1">
-                            {applicableOffers.map((off, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
-                                    <span className="flex items-center gap-1.5 text-primary font-bold">
-                                        <FaTag className="text-xs" />
-                                        <p>Descuento</p>
-                                    </span>
-                                    <span className="font-bold text-primary flex items-center gap-0.5">
-                                        <BiMinus className="text-xs" />
-                                        ${off.discount}
-                                    </span>
-                                </div>
-                            ))}
+                    {/* Descuento acumulado (ofertas/cupón + mayoreo) */}
+                    {(parseFloat(discount) + parseFloat(automaticDiscount)) > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-primary font-bold flex items-center gap-1.5">
+                                <FaTag className="text-xs" />Descuento
+                            </span>
+                            <span className="text-primary font-bold flex items-center gap-0.5">
+                                <BiMinus className="text-xs" />${formatPrice((parseFloat(discount.replace(/,/g, "")) + parseFloat(automaticDiscount.replace(/,/g, ""))).toString(), "es-MX")}
+                            </span>
                         </div>
-                    ) : (
-                        parseFloat(discount) > 0 && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-primary font-bold flex items-center gap-1.5">
-                                    <FaTag className="text-xs" />
-                                    Descuento
-                                </span>
-                                <span className="text-primary font-bold flex items-center gap-0.5">
-                                    <BiMinus className="text-xs" />${discount}
-                                </span>
-                            </div>
-                        )
                     )}
                 </div>
 
@@ -224,6 +208,7 @@ const ShoppingCartV2 = () => {
         shippingCost: handleCart.data?.resume?.shippingCostBeforeTaxes || "0.00",
         iva: handleCart.data?.resume?.iva || "0.00",
         discount: handleCart.data?.resume?.discount || "0.00",
+        automaticDiscount: handleCart.data?.resume?.automaticDiscount || "0.00",
         applicableOffers: handleCart.data?.resume?.applicableOffers || [],
         total: handleCart.data?.resume?.total || "0.00",
         boxQty: handleCart.data?.resume?.boxesCount || 0,

@@ -47,7 +47,7 @@ const PNCPolicy = () => {
                     </div>
                     <div className="bg-blue-950 rounded-xl px-5 sm:px-8 py-6 sm:py-8">
                         <p className="text-white/90 text-sm sm:text-base leading-7 sm:leading-8 text-justify">
-                            En <strong className="text-white">IGA Productos</strong>, valoramos la satisfacción de nuestros clientes y nos esforzamos por ofrecer productos de alta calidad que cumplan con sus expectativas. Por lo tanto, hemos desarrollado una política de devolución para apoyar a nuestros clientes en caso de que se presente alguna de las situaciones descritas a continuación.
+                            En <strong className="text-white">Iga Productos</strong>, valoramos la satisfacción de nuestros clientes y nos esforzamos por ofrecer productos de alta calidad que cumplan con sus expectativas. Por lo tanto, hemos desarrollado una política de devolución para apoyar a nuestros clientes en caso de que se presente alguna de las situaciones descritas a continuación.
                         </p>
                         <p className="text-white/90 text-sm sm:text-base leading-7 sm:leading-8 text-justify mt-4">
                             A continuación, se detallan los términos y condiciones de esta política aplicable a productos catalogados como <strong className="text-white">No Conformes (PNC)</strong>.
@@ -96,7 +96,7 @@ const PNCPolicy = () => {
                         La garantía será válida únicamente cuando la mercancía y/o el artículo adquirido presente <strong>defectos de fábrica</strong> y/o <strong>daños severos, visibles e imputables</strong> al manejo en almacén o durante su traslado por parte de la paquetería.
                     </p>
                     <p className="mt-4">
-                        En estos casos, <strong>IGA Productos</strong> se reserva el derecho de cancelación de la operación conforme a los criterios internos de evaluación del producto.
+                        En estos casos, <strong>Iga Productos</strong> se reserva el derecho de cancelación de la operación conforme a los criterios internos de evaluación del producto.
                     </p>
                     <div className="mt-5 not-prose">
                         <div className="border-l-4 border-primary pl-4">
@@ -116,7 +116,7 @@ const PNCPolicy = () => {
                 {/* ── DEVOLUCIÓN ──────────────────────────────────── */}
                 <PolicySection id="devolucion" title="Devolución">
                     <p>
-                        <strong>IGA Productos</strong> podrá recibir mercancía como devolución únicamente proporcionando la siguiente información. En caso de no contar con estos datos, la mercancía <strong>no será aceptada</strong>.
+                        <strong>Iga Productos</strong> podrá recibir mercancía como devolución únicamente proporcionando la siguiente información. En caso de no contar con estos datos, la mercancía <strong>no será aceptada</strong>.
                     </p>
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 not-prose">
                         {[
@@ -143,7 +143,7 @@ const PNCPolicy = () => {
                 {/* ── EXCEPCIONES ─────────────────────────────────── */}
                 <PolicySection id="excepciones" title="Casos no cubiertos">
                     <p>
-                        Con el objetivo de mantener la integridad del proceso de devolución, <strong>IGA Productos</strong> no aceptará devoluciones en los siguientes casos:
+                        Con el objetivo de mantener la integridad del proceso de devolución, <strong>Iga Productos</strong> no aceptará devoluciones en los siguientes casos:
                     </p>
                     <div className="mt-5 not-prose space-y-3">
                         {[

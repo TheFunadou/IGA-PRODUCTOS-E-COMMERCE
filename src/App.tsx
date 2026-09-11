@@ -41,7 +41,8 @@ const ShoppingCartV3 = lazy(() => import("./modules/shopping/design/ShoppingCart
 const ShoppingCartResumeV2 = lazy(() => import("./modules/shopping/design/ShoppingCartResume"))
 const CheckoutV2 = lazy(() => import("./modules/shopping/design/Checkout"))
 const CheckoutV3 = lazy(() => import("./modules/shopping/design/CheckoutV3"))
-const BuyNow = lazy(() => import("./modules/shopping/design/BuyNow"))
+// ROLLBACK BuyNow: const BuyNow = lazy(() => import("./modules/shopping/design/BuyNow"))
+const BuyNowV3 = lazy(() => import("./modules/shopping/design/BuyNowV3"))
 const PaymentExitingV2 = lazy(() => import("./modules/payments/design/PaymentExiting"))
 const PaymentPendingV2 = lazy(() => import("./modules/payments/design/PaymentPending"))
 const PaymentErrorV2 = lazy(() => import("./modules/payments/design/PaymentError"))
@@ -173,7 +174,8 @@ const router = createBrowserRouter([
                     { path: "/resumen-de-carrito", element: <ShoppingCartResumeV2 /> },
                     { path: "/pagar-productos", element: <CheckoutV3 /> },
                     // ROLLBACK Checkout: { path: "/pagar-productos", element: <CheckoutV2 /> },
-                    { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNow /> },
+                    { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNowV3 /> },
+                    // ROLLBACK BuyNow: { path: "/pagar-ahora/:product-uuid/:sku", element: <BuyNow /> },
                     { path: "/pagar-productos/pago-exitoso", element: <PaymentExitingV2 /> },
                     { path: "/pagar-productos/pago-pendiente", element: <PaymentPendingV2 /> },
                     { path: "/pagar-productos/pago-fallido", element: <PaymentErrorV2 /> },

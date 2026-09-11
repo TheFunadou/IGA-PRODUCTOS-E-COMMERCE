@@ -1,17 +1,18 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cancelOrder, cancelGuestOrder, getBuyNowItem, getCheckoutOrderV2, getCheckoutOrderV3, getOrders } from "../../orders/OrdersServices";
-import type { CheckoutOrderI, CheckoutOrderIV3, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
+import { cancelOrder, cancelGuestOrder, getBuyNowItem, getBuyNowItemV3, getCheckoutOrderV2, getCheckoutOrderV3, getOrders, getOrdersDashboardV3 } from "../../orders/OrdersServices";
+import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedI } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
-import type { LoadShoppingCartI, ShoppingCartI } from "../../shopping/ShoppingTypes";
+import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../../shopping/ShoppingTypes";
 import { getPaymentDetailsExtended } from "../../payments/services";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { paymentQueryKeys } from "../../payments/usePayment";
 
 export const customerQueryKeys = {
     getOrders: (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => buildKey("customer:orders", { params }),
+    getOrdersDashboardV3: (dto: CustomerOrdersDashboardInputI) => buildKey("customer:orders:dashboard:v3", dto),
 };
 
 export const useFetchOrders = (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => {
@@ -24,6 +25,18 @@ export const useFetchOrders = (params: { pagination: { page: number, limit: numb
         refetchOnWindowFocus: false,
         enabled: !!authCustomer
     })
+};
+
+export const useCustomerOrdersDashboard = (dto: CustomerOrdersDashboardInputI) => {
+    const { authCustomer } = useAuthStore();
+    return useQuery<GetCustomerOrdersDashboardI>({
+        queryKey: customerQueryKeys.getOrdersDashboardV3(dto),
+        queryFn: async () => await getOrdersDashboardV3(dto),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: !!authCustomer,
+    });
 };
 
 
@@ -71,6 +84,7 @@ export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "
         onSuccess: (data) => {
             showTriggerAlert("Successfull", data, { duration: 3000 });
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
+            queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });
         },
         onError: () => {
             showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden., intente nuevamente", { duration: 3000 });
@@ -87,6 +101,7 @@ export const useCancelGuestOrder = ({ orderUUID }: { orderUUID: string }) => {
         onSuccess: (data) => {
             showTriggerAlert("Successfull", data, { duration: 3000 });
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
+            queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });
         },
         onError: () => {
             showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden, intente nuevamente", { duration: 3000 });
@@ -99,6 +114,17 @@ export const useFetchBuyNowItem = ({ item }: { item: ShoppingCartI }) => {
     return useQuery<LoadShoppingCartI>({
         queryKey: ["buy-now:item", { item }],
         queryFn: async () => await getBuyNowItem({ item }),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: !!item,
+    });
+}
+
+export const useFetchBuyNowItemV3 = ({ item, destination }: { item: ShoppingCartI, destination?: string }) => {
+    return useQuery<LoadShoppingCartV3I>({
+        queryKey: ["buy-now:item:v3", { item, destination }],
+        queryFn: async () => await getBuyNowItemV3({ item, destination }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

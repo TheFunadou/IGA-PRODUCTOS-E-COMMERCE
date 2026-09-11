@@ -225,7 +225,7 @@ const sampleVideos: { videoUrl: string; title: string }[] = [
 const expoGallery = [IMG1, IMG2, IMG3, IMG4, IMG5, IMG6, IMG7, IMG8].map(
     (url, index) => ({
         url,
-        alt: `Participación de IGA Productos en exposición (${index + 1})`,
+        alt: `Participación de Iga Productos en exposición (${index + 1})`,
     })
 );
 
@@ -555,7 +555,7 @@ const AboutIGA = () => {
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="strict-origin-when-cross-origin"
-                        title="Ubicación de IGA Productos"
+                        title="Ubicación de Iga Productos"
                         className="w-full h-full"
                     />
                 </div>

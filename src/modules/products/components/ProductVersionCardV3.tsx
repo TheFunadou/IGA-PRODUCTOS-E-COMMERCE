@@ -39,6 +39,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     const [images, setImages] = useState<string[]>([]);
     const [unitPrice, setUnitPrice] = useState<string[]>([]);
     const [finalPriceFormatted, setFinalPriceFormatted] = useState<string[]>([]);
+    const [favoriteBump, setFavoriteBump] = useState(0);
     const navigate = useNavigate();
 
     const isList = viewMode === "list";
@@ -167,6 +168,11 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
     const parentsToShow = sortedParents.slice(0, 5);
     const extraParentsCount = sortedParents.length > 5 ? sortedParents.length - 5 : 0;
 
+    const handleFavoriteBump = (e: React.MouseEvent) => {
+        toggleFavorite(e);
+        setFavoriteBump((n) => n + 1);
+    };
+
     /* ── Imagen ── */
     const imageBlock = (
         <div
@@ -234,7 +240,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
             {isAuth && (
                 <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); toggleFavorite(e); }}
+                    onClick={handleFavoriteBump}
                     aria-label={isFavorite ? "Desmarcar favorito" : "Marcar como favorito"}
                     className={clsx(
                         "absolute bottom-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-200 z-10",
@@ -242,33 +248,40 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
                         isDark ? "bg-black/40 hover:bg-black/60" : "bg-white/60 hover:bg-white/90"
                     )}
                 >
-                    {isFavorite
-                        ? <IoMdHeart className="text-primary text-xl sm:text-2xl" />
-                        : <IoIosHeartEmpty className="text-primary text-xl sm:text-2xl" />
-                    }
+                    <span key={favoriteBump} className={clsx("inline-flex", favoriteBump > 0 && "heart-pop")}>
+                        {isFavorite
+                            ? <IoMdHeart className="text-primary text-xl sm:text-2xl" />
+                            : <IoIosHeartEmpty className="text-primary text-xl sm:text-2xl" />
+                        }
+                    </span>
                 </button>
             )}
         </div>
     );
 
-    /* ── Rating ── */
-    const ratingBlock = version.rating > 0 && (
-        <div className="flex items-center gap-1.5 mt-0.5">
-            <div className="rating rating-xs rating-half pointer-events-none">
-                <input type="radio" name={`rating-${sku}`} className="rating-hidden" />
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v, i) => (
-                    <input key={i} type="radio" name={`rating-${sku}`}
-                        className={clsx("mask mask-star-2 bg-primary", i % 2 === 0 ? "mask-half-1" : "mask-half-2")}
-                        defaultChecked={version.rating > v * 10 - 10 && version.rating <= v * 10}
-                    />
-                ))}
-            </div>
+    /* ── Rating ──
+       Comentado en V3 por decisión de diseño. Para restaurar, descomentar el bloque
+       y volver a renderizar {ratingBlock} en contentBlock.
+    const ratingBlock = (
+        <div className="flex items-center gap-1.5 mt-0.5 h-[18px]">
+            {version.rating > 0 && (
+                <div className="rating rating-xs rating-half pointer-events-none">
+                    <input type="radio" name={`rating-${sku}`} className="rating-hidden" />
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v, i) => (
+                        <input key={i} type="radio" name={`rating-${sku}`}
+                            className={clsx("mask mask-star-2 bg-primary", i % 2 === 0 ? "mask-half-1" : "mask-half-2")}
+                            defaultChecked={version.rating > v * 10 - 10 && version.rating <= v * 10}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
+    */
 
-    /* ── Tags readonly ── */
-    const tagsBlock = visibleTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 min-h-5">
+    /* ── Tags readonly (altura fija de 2 renglones, consistente con/sin etiquetas) ── */
+    const tagsBlock = (
+        <div className="flex flex-wrap content-start gap-1 h-[30px] sm:h-[34px] overflow-hidden">
             {visibleTags.map((tag) => (
                 <span
                     key={tag.id}
@@ -296,29 +309,34 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
         </div>
     );
 
-    /* ── Colores ── */
-    const colorsBlock = version.parents && version.parents.length > 0 && (
-        <div className="flex items-center gap-1.5 mt-1">
-            {parentsToShow.map((parent) => (
-                <button
-                    key={parent.sku}
-                    type="button"
-                    onClick={(e) => handleColorClick(e, parent.sku)}
-                    className={clsx(
-                        "w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
-                        sku === parent.sku.toLowerCase() && "ring-1 ring-primary ring-offset-1 scale-110"
+    /* ── Colores (altura reservada aunque no haya variantes) ── */
+    const hasColors = version.parents && version.parents.length > 0;
+    const colorsBlock = (
+        <div className="flex items-center gap-1.5 mt-1 h-[16px]">
+            {hasColors && (
+                <>
+                    {parentsToShow.map((parent) => (
+                        <button
+                            key={parent.sku}
+                            type="button"
+                            onClick={(e) => handleColorClick(e, parent.sku)}
+                            className={clsx(
+                                "w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
+                                sku === parent.sku.toLowerCase() && "ring-1 ring-primary ring-offset-1 scale-110"
+                            )}
+                            style={{ backgroundColor: parent.color_code }}
+                            title={parent.sku}
+                        />
+                    ))}
+                    {extraParentsCount > 0 && (
+                        <span
+                            className="text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
+                            onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
+                        >
+                            + {extraParentsCount} más...
+                        </span>
                     )}
-                    style={{ backgroundColor: parent.color_code }}
-                    title={parent.sku}
-                />
-            ))}
-            {extraParentsCount > 0 && (
-                <span
-                    className="text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
-                    onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
-                >
-                    + {extraParentsCount} más...
-                </span>
+                </>
             )}
         </div>
     );
@@ -351,6 +369,21 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
                 )}>
                     ${unitPrice[0]}<span className="text-xs sm:text-sm font-semibold">.{unitPrice[1] || '00'}</span>
                 </p>
+            )}
+        </div>
+    );
+
+    /* ── Disponibilidad (solo status DISPONIBLE y disponible) ── */
+    const isDisponible = !isUnavailable && /DISPONIBLE/i.test(version.status ?? "");
+    const statusBlock = (
+        <div className="flex items-center h-[9px] sm:h-[10px]">
+            {isDisponible && (
+                <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-success shrink-0" />
+                    <span className="text-[9px] sm:text-[10px] font-bold text-success uppercase tracking-wide leading-none">
+                        Disponible
+                    </span>
+                </div>
             )}
         </div>
     );
@@ -421,7 +454,7 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
                 onClick={() => navigate(detailUrl)}
                 aria-label="Ver producto"
                 className={clsx(
-                    "font-bold line-clamp-2 text-left leading-tight transition-colors duration-200 text-xs sm:text-sm w-fit max-w-full",
+                    "font-bold line-clamp-2 text-left leading-tight transition-colors duration-200 text-xs sm:text-sm w-fit max-w-full h-[30px] sm:h-[35px]",
                     "hover:text-primary hover:underline underline-offset-2",
                     isDark ? "text-white" : "text-gray-900"
                 )}
@@ -429,13 +462,15 @@ const ProductVersionCardV3 = ({ data, viewMode = "grid", className, imageLoading
                 {product.product_name.toUpperCase()}
             </button>
 
-            {ratingBlock}
+            {/* {ratingBlock} */}
             {tagsBlock}
             {!isList && colorsBlock}
 
             <div className={clsx("mt-auto pt-1", !isList && "flex items-center")}>
                 {priceBlock}
             </div>
+
+            {statusBlock}
 
             {isList && colorsBlock}
 

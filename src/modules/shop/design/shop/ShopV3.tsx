@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaShop } from "react-icons/fa6";
+import { useSearchParams } from "react-router-dom";
 import { useShopNavigation } from "../../hooks/useShopNavigation";
 import { useShopFilters } from "../../hooks/useShopFilters";
 import { useShopProducts } from "../../hooks/useShopProducts";
@@ -17,6 +17,7 @@ import { useShopExternalTagsStore } from "../../states/shopExternalTagsStore";
 import { useCartTagStore } from "../../../shopping/stores/cartTagStore";
 import PaginationComponent from "../../../../global/components/PaginationComponent";
 import { useAuthStore } from "../../../auth/states/authStore";
+import { FaBoxOpen } from "react-icons/fa";
 
 const VIEW_MODE_KEY = "shop:viewMode:v1";
 type ViewMode = "grid" | "list";
@@ -49,6 +50,8 @@ export const ShopV3 = () => {
 
     const navigation = useShopNavigation();
     const filters = useShopFilters();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoryParam = searchParams.get("category");
 
     /* ── Etiquetas de la categoría seleccionada ── */
     const { data: publicTags, isLoading: tagsLoading } = useFetchPublicCategoryTags(
@@ -199,6 +202,25 @@ export const ShopV3 = () => {
         scrollToTienda();
     }, [filters.debouncedTagIds]);
 
+    /* ── Categoría solicitada desde fuera (cart → home con ?category=uuid) ──
+       Selecciona la categoría, renderiza sus tags en el sidebar y hace scroll a la tienda. */
+    useEffect(() => {
+        if (!categoryParam) return;
+        if (!navigation.categories || navigation.categories.length === 0) return;
+
+        const category =
+            navigation.categories.find((c) => c.uuid === categoryParam) ??
+            navigation.categories.find(
+                (c) => c.name.toLowerCase() === categoryParam.toLowerCase()
+            );
+
+        if (!category) return;
+        navigation.selectCategory(category);
+        scrollToTienda();
+        setSearchParams({}, { replace: true });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categoryParam, navigation.categories]);
+
     /* ── Track tag names for cart recommendations ── */
     const addCartTags = useCartTagStore((s) => s.addTags);
 
@@ -249,9 +271,20 @@ export const ShopV3 = () => {
 
     return (
         <div id="tienda" className="px-4 py-8 sm:px-8 lg:px-20 lg:py-14 scroll-mt-24">
-            <h1 className="text-center text-3xl sm:text-4xl lg:text-5xl font-black text-blue-950 mb-8">
-                Tienda de Productos
-            </h1>
+            {/* Title */}
+            <div className="mb-8">
+                <h1 className="text-start text-3xl sm:text-4xl lg:text-5xl font-black text-blue-950">
+                    Tienda de Productos
+                </h1>
+                <h5 className="mt-2 text-base-content/50 text-xl">Selecciona los productos que necesita tu equipo</h5>
+                <div className="flex gap-2 items-center text-base-content/60 mt-2">
+                    <FaBoxOpen />
+                    <p className="text-bae font-semibold">
+                        {products.totalRecords} resultado{products.totalRecords !== 1 ? "s" : ""} encontrado{products.totalRecords !== 1 ? "s" : ""}
+                    </p>
+                </div>
+            </div>
+
 
             <div className="w-full min-h-screen rounded-3xl">
                 <div className="flex flex-col lg:flex-row gap-6 xl:gap-8">
@@ -260,53 +293,32 @@ export const ShopV3 = () => {
 
                     {/* ── MAIN CONTENT ── */}
                     <div className="flex-1 min-w-0 flex flex-col gap-5">
-                        {/* Header */}
-                        <div>
-                            <p className="text-xs text-base-content/40 uppercase tracking-widest mb-1">
-                                Tienda{navigation.selectedCategory ? ` / ${navigation.selectedCategory.name}` : ""}
-                            </p>
-                            <div className="flex items-center gap-3">
-                                {!navigation.selectedCategory && (
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-950/10 flex items-center justify-center shrink-0">
-                                        <FaShop className="text-blue-950 text-lg sm:text-xl" />
-                                    </div>
-                                )}
-                                <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight text-base-content">
-                                    {navigation.selectedCategory?.name ?? "Ver todos los productos"}
-                                </h2>
-                            </div>
-
-                            {/* Badges de filtros y etiquetas aplicadas */}
-                            <div className="mt-3">
-                                <ShopAppliedFilters
-                                    favoriteCheck={filters.favoriteCheck}
-                                    offerCheck={filters.offerCheck}
-                                    stockCheck={filters.stockCheck}
-                                    ratingFilter={filters.ratingFilter}
-                                    colorLineFilter={filters.colorLineFilter}
-                                    priceRange={filters.priceRange}
-                                    skuFilter={filters.skuFilter}
-                                    activeSorts={activeSorts}
-                                    pendingTagNames={pendingTagNames}
-                                    tagNameFilter={filters.tagNameFilter}
-                                    onRemoveFilter={handleRemoveFilter}
-                                    onRemoveSort={handleRemoveSort}
-                                    onRemoveTag={handleRemoveTag}
-                                    onRemoveTagName={filters.removeTagName}
-                                    onClearAll={handleClearAll}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Toolbar */}
+                        {/* Toolbar + badges de filtros y etiquetas aplicadas */}
                         <ShopToolbar
-                            totalRecords={products.totalRecords}
                             sorts={filters.sorts}
                             onSortChange={filters.setSortDirection}
                             viewMode={viewMode}
                             onViewModeChange={handleToggleView}
                             onOpenMobileFilters={() => setShowMobileFilters(true)}
-                        />
+                        >
+                            <ShopAppliedFilters
+                                favoriteCheck={filters.favoriteCheck}
+                                offerCheck={filters.offerCheck}
+                                stockCheck={filters.stockCheck}
+                                ratingFilter={filters.ratingFilter}
+                                colorLineFilter={filters.colorLineFilter}
+                                priceRange={filters.priceRange}
+                                skuFilter={filters.skuFilter}
+                                activeSorts={activeSorts}
+                                pendingTagNames={pendingTagNames}
+                                tagNameFilter={filters.tagNameFilter}
+                                onRemoveFilter={handleRemoveFilter}
+                                onRemoveSort={handleRemoveSort}
+                                onRemoveTag={handleRemoveTag}
+                                onRemoveTagName={filters.removeTagName}
+                                onClearAll={handleClearAll}
+                            />
+                        </ShopToolbar>
 
                         {/* Resultados */}
                         <section className="relative flex flex-col items-center gap-4">

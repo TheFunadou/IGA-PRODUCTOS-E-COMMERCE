@@ -33,6 +33,8 @@ export interface PaymentDescriptionI {
     paymentClass: PaymentClassType;
     paymentMethod: PaymentMethodType;
     paidAmount: string;
+    customerInstallmentAmount: string;
+    feeAmount?: string | null;
     installments: number;
     paymentStatus: OrderStatusType
 };

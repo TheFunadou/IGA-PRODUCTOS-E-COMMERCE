@@ -5,7 +5,7 @@ import { MdCheckBox } from "react-icons/md";
 import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
 import { closeModal, showModal } from "../../../global/GlobalHelpers";
 import AddressesModal from "./AddressesModal";
-import GuestCheckoutFormV3 from "./GuestCheckoutFormV3";
+import GuestCheckoutAutocompleteFormV3 from "./GuestCheckoutAutocompleteFormV3";
 import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 
 interface AddressSectionProps {
@@ -228,7 +228,7 @@ const AddressSection = ({
                 </button>
             </div>
             <div className="p-4 sm:p-5">
-                <GuestCheckoutFormV3 onSave={handleGuestFormSave} guestAddress={guestAddressForm} />
+                <GuestCheckoutAutocompleteFormV3 onSave={handleGuestFormSave} guestAddress={guestAddressForm} />
             </div>
         </div>
     );

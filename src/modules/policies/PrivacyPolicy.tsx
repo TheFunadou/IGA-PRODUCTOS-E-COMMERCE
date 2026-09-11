@@ -184,7 +184,7 @@ const PrivacyPolicy = () => {
                             </div>
                             <div className="bg-base-200 border border-base-300 rounded-2xl px-5 sm:px-8 py-6 sm:py-8">
                                 <p className="text-base-content/80 text-sm sm:text-base leading-7 sm:leading-8 text-justify">
-                                    En IGA Productos, la privacidad de su información es nuestra prioridad. Los datos personales que recabamos sobre usted son utilizados para verificar su identidad, administrar y procesar los pedidos de productos que solicita con nosotros, y cumplir con las obligaciones legales derivadas de nuestro servicio comercial.
+                                    En Iga Productos, la privacidad de su información es nuestra prioridad. Los datos personales que recabamos sobre usted son utilizados para verificar su identidad, administrar y procesar los pedidos de productos que solicita con nosotros, y cumplir con las obligaciones legales derivadas de nuestro servicio comercial.
                                 </p>
                                 <p className="text-base-content/80 text-sm sm:text-base leading-7 sm:leading-8 text-justify mt-4">
                                     Nos comprometemos a no comercializar ni lucrar con sus datos personales hacia terceros. La información proporcionada se utiliza exclusivamente para la mejora de su experiencia y la gestión operativa de nuestra plataforma.
@@ -372,7 +372,7 @@ const PrivacyPolicy = () => {
                                     <p className="text-sm">
                                         Para las transacciones económicas, utilizamos el servicio de <strong>Mercado Pago Checkout Pro</strong>.
                                         Al realizar un pago, sus datos financieros son procesados de forma segura por Mercado Pago.
-                                        IGA Productos únicamente conserva información de referencia (últimos 4 dígitos, emisor y entidad bancaria)
+                                        Iga Productos únicamente conserva información de referencia (últimos 4 dígitos, emisor y entidad bancaria)
                                         para el seguimiento de su pedido (solo en usuarios registrados), sin almacenar datos sensibles de su tarjeta.
                                         Puede consultar las políticas aplicables en el sitio oficial de{" "}
                                         <a

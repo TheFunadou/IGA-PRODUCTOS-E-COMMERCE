@@ -1,11 +1,11 @@
-import HeroIMG from "../../../../assets/hero/HeroImgV2.webp";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
 import { GiMexico } from "react-icons/gi";
 import { FaTruckFast } from "react-icons/fa6";
 import { SlEarphones } from "react-icons/sl";
 import { getWhatsAppLink } from "../../../../global/GlobalHelpers";
+import BannerImg from "../../../../assets/home/helmetsbanner.webp"
 
-const BANNER_WA_MESSAGE = `Hola, buen día. Vengo del sitio web de IGA Productos y necesito atención especializada. ¿Podrían asignarme a un asesor?
+const BANNER_WA_MESSAGE = `Hola, buen día. Vengo del sitio web de Iga Productos y necesito atención especializada. ¿Podrían asignarme a un asesor?
 
 Espero su pronta respuesta. Saludos cordiales.`;
 
@@ -14,7 +14,7 @@ export const Banner1 = () => {
         <div>
             <div className="bg-blue-950 flex items-center justify-center py-10 px-5 lg:px-0">
                 <div className="w-full lg:w-80/100 text-white flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-5">
-                    <img className="w-full max-w-md lg:max-w-none lg:w-55/100" src={HeroIMG} alt="Imagen de Cascos Iga" />
+                    <img className="w-full max-w-md lg:max-w-none lg:w-55/100" src={BannerImg} alt="Imagen de Cascos Iga" />
                     <div className="w-full lg:w-45/100 text-center lg:text-left">
                         <h1 className="text-3xl sm:text-4xl lg:text-6xl">¿Necesitas equipar a todo tu equipo?</h1>
                         <p
@@ -26,7 +26,7 @@ export const Banner1 = () => {
                             href={getWhatsAppLink(BANNER_WA_MESSAGE)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn btn-warning btn-md sm:btn-lg lg:btn-xl mt-5"
+                            className="btn btn-warning btn-md sm:btn-lg lg:btn-xl mt-5 text-blue-950"
                         >
                             QUIERO UN CASCO IGA
                         </a>

@@ -346,7 +346,7 @@ const RestorePassword = () => {
                     {/* Logo */}
                     <img
                         src={IGALogo}
-                        alt="IGA Productos"
+                        alt="Iga Productos"
                         className="relative z-10 w-50 sm:w-16 md:w-25 lg:w-35"
                     />
 

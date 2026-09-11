@@ -258,35 +258,17 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                         </span>
                     </div>
 
-                    {/* Breakdown of offers */}
-                    {data?.resume?.applicableOffers && data.resume.applicableOffers.length > 0 ? (
-                        <div className="flex flex-col gap-2 pt-1">
-                            {data.resume.applicableOffers.map((off, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
-                                    <span className="flex items-center gap-1.5 text-primary font-bold">
-                                        <FaTag className="text-xs" />
-                                        {off.type === "PERCENTAGE" ? "Descuento directo" : "Descuento por cupón"}
-                                    </span>
-                                    <span className="font-bold text-primary flex items-center gap-0.5">
-                                        <BiMinus className="text-xs" />
-                                        ${off.discount}
-                                    </span>
-                                </div>
-                            ))}
+                    {/* Descuento acumulado (ofertas/cupón + mayoreo) */}
+                    {data?.resume && (parseFloat(data.resume.discount) + parseFloat(data.resume.automaticDiscount ?? "0")) > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-primary font-bold flex items-center gap-1.5">
+                                <FaTag className="text-xs" />Descuento
+                            </span>
+                            <span className="text-primary font-bold flex items-center gap-0.5">
+                                <BiMinus className="text-xs" />
+                                ${formatPrice((parseFloat(data.resume.discount.replace(/,/g, "")) + parseFloat((data.resume.automaticDiscount ?? "0").replace(/,/g, ""))).toString(), "es-MX")}
+                            </span>
                         </div>
-                    ) : (
-                        data?.resume && parseFloat(data.resume.discount) > 0 && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-primary font-bold flex items-center gap-1.5">
-                                    <FaTag className="text-xs" />
-                                    Descuento
-                                </span>
-                                <span className="text-primary font-bold flex items-center gap-0.5">
-                                    <BiMinus className="text-xs" />
-                                    ${formatPrice(data.resume.discount, "es-MX")}
-                                </span>
-                            </div>
-                        )
                     )}
                 </div>
 

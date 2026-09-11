@@ -1,320 +1,283 @@
-import { FaBox, FaShoppingBag, FaChevronDown, FaChevronUp, FaExternalLinkAlt } from "react-icons/fa";
-import { useFetchOrders } from "../hooks/useFetchOrders";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { startTransition, useEffect, useMemo, useState } from "react";
+import { FaBox, FaShoppingBag, FaSignInAlt, FaRedoAlt } from "react-icons/fa";
+import { Link, useSearchParams } from "react-router-dom";
 import { formatAxiosError } from "../../../api/helpers";
-import { formatDate, formatPrice } from "../../products/Helpers";
 import PaginationComponent from "../../../global/components/PaginationComponent";
-import OrderSkeleton from "../components/OrdersSkeleton";
-import { formatOrderStatus, paymentProvider } from "../../shopping/utils/ShoppingUtils";
-import clsx from "clsx";
-import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
-import { useState } from "react";
+import { useAuthStore } from "../../auth/states/authStore";
+import { useCustomerOrdersDashboard } from "../hooks/useFetchOrders";
+import type { OrderStatusType } from "../../shopping/ShoppingTypes";
+import {
+    ORDER_DASHBOARD_SORT_FIELDS,
+    ORDERS_DASHBOARD_DEFAULT_STATE,
+    type CustomerOrdersDashboardInputI,
+    type CustomerOrdersDashboardFilterI,
+    type CustomerOrdersDashboardSortI,
+    type OrderDashboardSortField,
+    type OrderDashboardView,
+    type OrdersDashboardQueryState,
+} from "../OrdersTypes";
+import OrdersToolbar from "../components/OrdersToolbar";
+import OrdersSidebar from "../components/OrdersSidebar";
+import OrderDashboardCard from "../components/OrderDashboardCard";
+import OrderGridCard from "../components/OrderGridCard";
+import OrdersDashboardSkeleton from "../components/OrdersDashboardSkeleton";
 
-/* ─────────────────────────────────────────────
-   Helper: color de badge por status de orden
-   (Reutilizado y mejorado según Checkout design)
-───────────────────────────────────────────── */
+const MAX_LIMIT_ROWS = 10;
 
-const orderStatusBadge = (status: string) => {
-    switch (status) {
-        case "APPROVED": return "bg-success/10 text-success border-success/20";
-        case "PENDING": return "bg-warning/10 text-warning border-warning/20";
-        case "REJECTED":
-        case "CANCELLED": return "bg-error/10 text-error border-error/20";
-        case "IN_PROCESS": return "bg-info/10 text-info border-info/20";
-        case "REFUNDED": return "bg-base-300 text-base-content/50 border-base-content/10";
-        default: return "bg-base-200 text-base-content/70 border-base-content/10";
-    }
+const parseState = (params: URLSearchParams): OrdersDashboardQueryState => {
+    const sortField = params.get("sortField") as OrderDashboardSortField | null;
+    return {
+        page: Number(params.get("page")) || 1,
+        view: (params.get("view") as OrderDashboardView) ?? "list",
+        sortField: ORDER_DASHBOARD_SORT_FIELDS.some((f) => f.value === sortField)
+            ? (sortField as OrderDashboardSortField)
+            : "purchaseDate",
+        sortDir: params.get("sortDir") === "asc" ? "asc" : "desc",
+        folio: params.get("folio") ?? "",
+        status: (params.get("status") as OrderStatusType | "ALL") ?? "ALL",
+        from: params.get("from") ?? "",
+        to: params.get("to") ?? "",
+    };
 };
 
-/* ─────────────────────────────────────────────
-   Main component
-───────────────────────────────────────────── */
+const buildFilters = ({ folio, status, from, to }: OrdersDashboardQueryState): CustomerOrdersDashboardFilterI | undefined => {
+    const filters: CustomerOrdersDashboardFilterI = {};
+    if (folio.trim()) filters.folio = folio.trim();
+    if (status !== "ALL") filters.status = status;
+    if (from && to) filters.dateRange = { gte: from, lte: to };
+    return Object.keys(filters).length > 0 ? filters : undefined;
+};
+
+const buildSort = ({ sortField, sortDir }: OrdersDashboardQueryState): CustomerOrdersDashboardSortI | undefined => ({
+    [sortField]: sortDir,
+});
+
+const serializeState = (state: OrdersDashboardQueryState): URLSearchParams => {
+    const params = new URLSearchParams();
+    if (state.page > 1) params.set("page", String(state.page));
+    if (state.view !== "list") params.set("view", state.view);
+    if (state.sortField !== "purchaseDate") params.set("sortField", state.sortField);
+    if (state.sortDir !== "desc") params.set("sortDir", state.sortDir);
+    if (state.folio.trim()) params.set("folio", state.folio.trim());
+    if (state.status !== "ALL") params.set("status", state.status);
+    if (state.from) params.set("from", state.from);
+    if (state.to) params.set("to", state.to);
+    return params;
+};
 
 const Orders = () => {
-    document.title = "Iga Productos | Mis órdenes";
-
-    const MAX_LIMIT_ROWS = 10;
+    const { authCustomer } = useAuthStore();
     const [searchParams, setSearchParams] = useSearchParams();
-    const pageParam = searchParams.get("page");
-    const orderByParam = searchParams.get("orderBy") as "recent" | "oldest" | null;
-    const currentOrderBy = orderByParam || "recent";
-    const currentPage = Number(pageParam) || 1;
-    const navigate = useNavigate();
+    const [initialState] = useState<OrdersDashboardQueryState>(() => parseState(searchParams));
+    const [state, setState] = useState<OrdersDashboardQueryState>(initialState);
+    const [activeOrderUuid, setActiveOrderUuid] = useState<string | null>(null);
 
-    // Estado para gestionar que ordenes están expandidas
-    const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+    useEffect(() => {
+        document.title = "Iga Productos | Mis órdenes";
+    }, []);
 
-    const { data, isLoading, error, refetch } = useFetchOrders({
-        pagination: { page: currentPage, limit: MAX_LIMIT_ROWS },
-        orderBy: currentOrderBy,
-    });
+    useEffect(() => {
+        setActiveOrderUuid(null);
+    }, [state.page, state.view, state.sortField, state.sortDir, state.folio, state.status, state.from, state.to]);
 
-    const handlePageChange = (page: number) => {
-        setSearchParams({ page: page.toString(), orderBy: currentOrderBy });
+    const updateState = (patch: Partial<OrdersDashboardQueryState>) => {
+        startTransition(() => {
+            const next = { ...state, ...patch, page: "page" in patch && patch.page !== undefined ? patch.page : patch.folio !== undefined || patch.status !== undefined || patch.from !== undefined || patch.to !== undefined || patch.sortField !== undefined || patch.sortDir !== undefined ? 1 : state.page };
+            setState(next);
+            setSearchParams(serializeState(next));
+        });
     };
 
-    const handleOrderByChange = (newOrderBy: "recent" | "oldest") => {
-        setSearchParams({ page: "1", orderBy: newOrderBy });
+    const resetFilters = () => {
+        startTransition(() => {
+            const next = { ...ORDERS_DASHBOARD_DEFAULT_STATE, view: state.view };
+            setState(next);
+            setSearchParams(serializeState(next));
+        });
     };
 
-    const toggleOrderExpansion = (uuid: string) => {
-        const newExpanded = new Set(expandedOrders);
-        if (newExpanded.has(uuid)) {
-            newExpanded.delete(uuid);
-        } else {
-            newExpanded.add(uuid);
-        }
-        setExpandedOrders(newExpanded);
+    const handlePageChange = (page: number) => updateState({ page });
+
+    const dto = useMemo<CustomerOrdersDashboardInputI>(() => ({
+        pagination: { page: state.page, limit: MAX_LIMIT_ROWS },
+        filters: buildFilters(state),
+        sort: buildSort(state),
+    }), [state]);
+
+    const { data, isLoading, error, refetch, isFetching } = useCustomerOrdersDashboard(dto);
+
+    const handleToggleActive = (uuid: string) => {
+        setActiveOrderUuid((current) => (current === uuid ? null : uuid));
     };
 
-    return (
-        <div className="w-full px-3 sm:px-5 md:px-6 py-6 md:py-10 rounded-2xl bg-base-200 min-h-screen">
-
-            {/* ── Header ── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 shadow-sm border border-primary/5">
-                        <FaBox className="text-primary text-xl shadow-sm" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl sm:text-4xl font-extrabold text-base-content tracking-tight">
-                            Mis órdenes
-                        </h1>
-                        <p className="text-xs sm:text-sm text-base-content/50 font-medium">
-                            Gestiona y revisa el historial de tus compras
-                        </p>
-                    </div>
-                </div>
-
-                {/* Filtro Ordenar */}
-                <div className="flex items-center gap-2 bg-base-100 p-1.5 rounded-xl border border-base-300 w-full sm:w-auto shadow-sm">
-                    <span className="text-[10px] font-bold uppercase text-base-content/40 ml-2 hidden sm:block">Ordenar por:</span>
-                    <select
-                        className="select select-sm bg-transparent border-none focus:outline-none w-full sm:w-auto text-xs font-bold uppercase"
-                        value={currentOrderBy}
-                        onChange={(e) => handleOrderByChange(e.target.value as "recent" | "oldest")}
-                    >
-                        <option value="recent">Más recientes</option>
-                        <option value="oldest">Más antiguas</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* ── Loading ── */}
-            {isLoading && !error && !data && (
-                <div className="flex flex-col gap-6">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <OrderSkeleton key={index} />
+    const renderCards = () => {
+        if (!data || data.data.length === 0) return null;
+        if (state.view === "grid") {
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {data.data.map((order) => (
+                        <OrderGridCard
+                            key={order.uuid}
+                            order={order}
+                            isActive={activeOrderUuid === order.uuid}
+                            onToggleActive={() => handleToggleActive(order.uuid)}
+                        />
                     ))}
                 </div>
-            )}
+            );
+        }
+        return (
+            <div className="flex flex-col gap-5">
+                {data.data.map((order) => (
+                    <OrderDashboardCard
+                        key={order.uuid}
+                        order={order}
+                        isActive={activeOrderUuid === order.uuid}
+                        onToggleActive={() => handleToggleActive(order.uuid)}
+                    />
+                ))}
+            </div>
+        );
+    };
 
-            {/* ── Error ── */}
-            {!isLoading && !data && error && (
-                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden shadow-lg">
-                    <div className="px-4 py-3 bg-error/5 border-b border-error/10 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center">
-                            <FaBox className="text-error text-lg" />
-                        </div>
-                        <h2 className="font-bold text-error text-sm uppercase">
-                            Error al cargar tus pedidos
-                        </h2>
+    const showSkeleton = isLoading && !data;
+    const showError = !isLoading && !data && !!error;
+    const showEmpty = !isLoading && !error && !!data && data.data.length === 0;
+    const showContent = !isLoading && !error && !!data && data.data.length > 0;
+
+    return (
+        <div className="w-full flex justify-center items-center px-2 sm:px-3 md:px-4 py-6 md:py-10">
+            <div className="w-full md:w-80/100 flex flex-col gap-5">
+                <div className="flex w-full items-center gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shadow-sm">
+                        <FaBox className="text-primary text-lg sm:text-xl" />
                     </div>
-                    <div className="p-8 flex flex-col items-center gap-4">
-                        <p className="text-sm text-base-content/70 max-w-md text-center">
-                            {formatAxiosError(error)}
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
+                            Mis órdenes
+                        </h1>
+                        <p className="text-sm sm:text-base text-base-content/60 mt-1.5 font-medium">
+                            Revisa y gestiona el historial de tus compras
                         </p>
-                        <button
-                            className="btn btn-primary btn-sm px-6 gap-2 font-bold"
-                            onClick={() => refetch()}
-                        >
-                            Intentar de nuevo
-                        </button>
                     </div>
                 </div>
-            )}
 
-            {/* ── Empty state ── */}
-            {!isLoading && !error && data && data.data.length === 0 && (
-                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden shadow-sm">
-                    <div className="flex flex-col items-center justify-center gap-6 py-24 px-6 text-center">
-                        <div className="w-20 h-20 rounded-3xl bg-base-200 flex items-center justify-center border border-base-300/50 shadow-inner">
-                            <FaBox className="text-4xl text-base-content/20" />
+                {!authCustomer ? (
+                    <div className="w-full rounded-3xl bg-base-100 border border-base-300 overflow-hidden shadow-sm">
+                        <div className="flex flex-col items-center justify-center gap-6 py-20 px-6 text-center">
+                            <div className="w-20 h-20 rounded-3xl bg-base-200 flex items-center justify-center border border-base-300/50 shadow-inner">
+                                <FaSignInAlt className="text-4xl text-base-content/20" />
+                            </div>
+                            <div className="max-w-sm">
+                                <p className="text-xl font-bold text-base-content">Inicia sesión para ver tus órdenes</p>
+                                <p className="text-sm text-base-content/50 mt-2 leading-relaxed">
+                                    Necesitas una cuenta para consultar el historial de tus compras y solicitar facturas.
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                <Link to="/iniciar-sesion" className="btn btn-primary btn-md gap-3 font-bold px-8 shadow-md">
+                                    <FaSignInAlt className="text-lg" />
+                                    Iniciar sesión
+                                </Link>
+                                <Link to="/tienda" className="btn btn-outline btn-md gap-3 font-bold px-6">
+                                    <FaShoppingBag className="text-lg" />
+                                    Ir a la tienda
+                                </Link>
+                            </div>
                         </div>
-                        <div className="max-w-xs">
-                            <p className="text-xl font-bold text-base-content">
-                                Aún no tienes órdenes
-                            </p>
-                            <p className="text-sm text-base-content/50 mt-2 leading-relaxed">
-                                Parece que todavía no has realizado ninguna compra en nuestra tienda.
-                            </p>
-                        </div>
-                        <Link to="/tienda" className="btn btn-primary btn-md gap-3 font-bold px-8 shadow-md">
-                            <FaShoppingBag className="text-lg" />
-                            Comenzar a comprar
-                        </Link>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="w-full flex flex-col lg:flex-row gap-5">
+                        <div className="flex-1 min-w-0 flex flex-col gap-5">
+                            <OrdersToolbar
+                                state={state}
+                                totalRecords={data?.totalRecords ?? null}
+                                onPatch={updateState}
+                                onReset={resetFilters}
+                            />
 
-            {/* ── Lista de órdenes ── */}
-            {!isLoading && !error && data && data.data.length > 0 && (
-                <div className="flex flex-col gap-6">
-                    {data.data.map((order) => {
-                        const isExpanded = expandedOrders.has(order.uuid);
-                        const itemsToShow = isExpanded ? order.items : [order.items[0]];
-                        const remainingItems = order.items.length - 1;
+                            {isFetching && data && (
+                                <div className="flex justify-center">
+                                    <span className="loading loading-spinner loading-sm text-primary" />
+                                </div>
+                            )}
 
-                        return (
-                            <div
-                                key={order.uuid}
-                                className="w-full rounded-3xl bg-base-100 border border-base-300 hover:border-primary/30 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md"
-                            >
-                                {/* ── Header del Folio (Destacado) ── */}
-                                <div className="px-5 py-4 bg-base-200/50 border-b border-base-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold uppercase text-base-content/40 tracking-wider">Folio de compra</span>
-                                            <span className="text-sm font-mono font-extrabold text-base-content uppercase tracking-widest bg-base-100 px-3 py-1 rounded-lg border border-base-300 shadow-sm">
-                                                {order.uuid}
-                                            </span>
+                            {showSkeleton && <OrdersDashboardSkeleton view={state.view} />}
+
+                            {showError && (
+                                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden shadow-lg">
+                                    <div className="px-4 py-3 bg-error/5 border-b border-error/10 flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center">
+                                            <FaBox className="text-error text-lg" />
                                         </div>
-                                        <div className="h-8 w-px bg-base-300 hidden sm:block" />
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold uppercase text-base-content/40 tracking-wider">Estatus de orden</span>
-                                            <span className={clsx(
-                                                "inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase border",
-                                                orderStatusBadge(order.status)
-                                            )}>
-                                                {formatOrderStatus[order.status]}
-                                            </span>
-                                        </div>
+                                        <h2 className="font-bold text-error text-sm uppercase">
+                                            Error al cargar tus pedidos
+                                        </h2>
                                     </div>
-
-                                    <div className="flex items-center gap-2 flex-wrap">
+                                    <div className="p-8 flex flex-col items-center gap-4">
+                                        <p className="text-sm text-base-content/70 max-w-md text-center">
+                                            {formatAxiosError(error)}
+                                        </p>
                                         <button
-                                            onClick={() => navigate(`/mis-ordenes/detalle/${order.uuid}`)}
-                                            className="btn btn-primary btn-sm gap-2 font-bold shadow-sm"
+                                            className="btn btn-primary btn-sm px-6 gap-2 font-bold"
+                                            onClick={() => refetch()}
                                         >
-                                            Ver detalle
-                                            <FaExternalLinkAlt className="text-[10px]" />
+                                            <FaRedoAlt className="text-xs" />
+                                            Intentar de nuevo
                                         </button>
                                     </div>
                                 </div>
+                            )}
 
-                                {/* ── Body con Ítems ── */}
-                                <div className="p-5 flex flex-col gap-5">
-                                    
-                                    {/* Items Container */}
-                                    <div className="flex flex-col gap-3">
-                                        {itemsToShow.map((item, idx) => (
-                                            <CheckoutOrderItemV2 key={`${order.uuid}-item-${idx}`} data={item} />
-                                        ))}
-
-                                        {/* Toggle Expand Button */}
-                                        {remainingItems > 0 && (
-                                            <div className="flex justify-center mt-1">
-                                                <button
-                                                    onClick={() => toggleOrderExpansion(order.uuid)}
-                                                    className="btn btn-ghost btn-sm hover:bg-primary/5 text-primary gap-2 font-bold transition-all"
-                                                >
-                                                    {isExpanded ? (
-                                                        <>
-                                                            <FaChevronUp className="text-xs" />
-                                                            Ocultar productos
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FaChevronDown className="text-xs" />
-                                                            Mostrar {remainingItems} producto{remainingItems !== 1 ? "s" : ""} más...
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Divider */}
-                                    <div className="h-px bg-base-200" />
-
-                                    {/* ── Footer Information Row ── */}
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-end">
-                                        
-                                        {/* Método de Pago */}
-                                        <div className="flex flex-col gap-1.5 min-w-0">
-                                            <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest px-1">
-                                                Método de pago
-                                            </p>
-                                            <div className="flex items-center gap-2.5 bg-base-200/50 p-2 rounded-2xl border border-base-300/50 group overflow-hidden">
-                                                <figure className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm border border-base-200 group-hover:scale-110 transition-transform flex-shrink-0">
-                                                    <img
-                                                        className="w-full h-full object-contain"
-                                                        src={paymentProvider[order.paymentProvider].image_url}
-                                                        alt={paymentProvider[order.paymentProvider].description}
-                                                    />
-                                                </figure>
-                                                <span className="text-xs sm:text-sm font-bold text-base-content truncate">
-                                                    {paymentProvider[order.paymentProvider].description}
-                                                </span>
-                                            </div>
+                            {showEmpty && (
+                                <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden shadow-sm">
+                                    <div className="flex flex-col items-center justify-center gap-6 py-24 px-6 text-center">
+                                        <div className="w-20 h-20 rounded-3xl bg-base-200 flex items-center justify-center border border-base-300/50 shadow-inner">
+                                            <FaBox className="text-4xl text-base-content/20" />
                                         </div>
-
-                                        {/* Fecha y Actualización */}
-                                        <div className="flex flex-col gap-1 px-1">
-                                            <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">
-                                                Última actualización
+                                        <div className="max-w-xs">
+                                            <p className="text-xl font-bold text-base-content">
+                                                {data && (data.totalRecords === 0 ? "Aún no tienes órdenes" : "Sin resultados")}
                                             </p>
-                                            <p className="text-xs sm:text-sm font-bold text-base-content flex items-center gap-1.5">
-                                                {formatDate(order.updatedAt, "es-MX")}
-                                            </p>
-                                            <p className="text-[10px] text-base-content/40 italic">
-                                                Creado el {formatDate(order.createdAt, "es-MX")}
+                                            <p className="text-sm text-base-content/50 mt-2 leading-relaxed">
+                                                {data && data.totalRecords === 0
+                                                    ? "Parece que todavía no has realizado ninguna compra en nuestra tienda."
+                                                    : "Ajusta tus filtros o realiza una nueva búsqueda."}
                                             </p>
                                         </div>
-
-                                        {/* Detalle placeholder or other info */}
-                                        <div className="hidden md:flex flex-col gap-1 px-1">
-                                            <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">
-                                                Ítems totales
-                                            </p>
-                                            <p className="text-sm font-bold text-base-content">
-                                                {order.items.length} {order.items.length === 1 ? "Producto" : "Productos"}
-                                            </p>
-                                        </div>
-
-                                        {/* Total (Destacado) */}
-                                        <div className="flex flex-col items-end gap-0.5 justify-self-end">
-                                            <span className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">Total pagado</span>
-                                            <span className="text-2xl sm:text-3xl font-black text-primary tracking-tight">
-                                                ${formatPrice(order.totalAmount, "es-MX")}
-                                            </span>
-                                        </div>
+                                        <Link to="/tienda" className="btn btn-primary btn-md gap-3 font-bold px-8 shadow-md">
+                                            <FaShoppingBag className="text-lg" />
+                                            Comenzar a comprar
+                                        </Link>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            )}
 
-                    {/* ── Paginación ── */}
-                    {data.totalPages > 1 && (
-                        <div className="flex flex-col items-center sm:items-start gap-4 mt-4 py-8 border-t border-base-300">
-                            <div className="flex flex-col sm:flex-row items-center gap-6">
-                                <PaginationComponent
-                                    currentPage={currentPage}
-                                    onPageChange={handlePageChange}
-                                    totalPages={data.totalPages}
-                                />
-                                <div className="px-4 py-1.5 bg-base-100 rounded-full border border-base-300 shadow-sm">
-                                    <p className="text-xs font-bold text-base-content/40 uppercase">
-                                        Página <span className="text-base-content">{currentPage}</span> de <span className="text-base-content">{data.totalPages}</span>
-                                    </p>
+                            {showContent && (
+                                <div className="flex flex-col gap-5">
+                                    {renderCards()}
+                                    {data!.totalPages > 1 && (
+                                        <div className="flex flex-col items-center sm:items-start gap-4 mt-2 py-6 border-t border-base-300">
+                                            <PaginationComponent
+                                                currentPage={state.page}
+                                                onPageChange={handlePageChange}
+                                                totalPages={data!.totalPages}
+                                            />
+                                            <p className="text-xs font-bold text-base-content/40 uppercase">
+                                                Página <span className="text-base-content">{state.page}</span> de <span className="text-base-content">{data!.totalPages}</span>
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            )}
+
+                        <div className="w-full lg:w-80 xl:w-96 shrink-0">
+                            <OrdersSidebar pageOrders={data?.data ?? []} totalRecords={data?.totalRecords ?? null} />
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

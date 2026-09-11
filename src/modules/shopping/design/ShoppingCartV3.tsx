@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaShoppingBag, FaUserShield } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaUserShield } from "react-icons/fa";
 import { MdShoppingBag } from "react-icons/md";
 import { useAuthStore } from "../../auth/states/authStore";
 import { usePaymentStore } from "../states/paymentStore";
@@ -10,8 +10,12 @@ import { useFetchCustomerAddresses } from "../../customers/hooks/useCustomer";
 import AddressSection from "../components/AddressSection";
 import PaymentMethod from "../components/PaymentMethod";
 import CartItems from "../components/CartItems";
+import RecentlyViewed from "../components/RecentlyViewed";
+import FavoritesSectionV3 from "../components/FavoritesSectionV3";
 import OrderSummary from "../components/OrderSummary";
 import TrustBadgesV3 from "../components/TrustBadgesV3";
+import SideAdBanner from "../components/SideAdBanner";
+import EmptyCartV3 from "../components/EmptyCartV3";
 import type { PV3CardData } from "../../products/ProductTypes";
 import type { PaymentProvidersType } from "../ShoppingTypes";
 import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
@@ -22,7 +26,7 @@ const ShoppingCartV3 = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuth, authCustomer } = useAuthStore();
-    const { order, createOrder, isLoading: orderLoading, error, clearError } = usePaymentStore();
+    const { order, createOrder, isLoading: orderLoading, error, clearError, clearErrorBadge, duplicateGuestEmail } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
 
     const [selectedAddress, setSelectedAddress] = useState<CustomerAddressType | null>(null);
@@ -44,8 +48,9 @@ const ShoppingCartV3 = () => {
         if (orderLoading) return true;
         if (!paymentProvider) return true;
         if (isAuth) return !selectedAddress;
-        return !guestAddressForm || !guestAddressForm.consent;
-    }, [isAuth, orderLoading, paymentProvider, selectedAddress, guestAddressForm]);
+        return !guestAddressForm || !guestAddressForm.consent
+            || (!!duplicateGuestEmail && guestAddressForm.email === duplicateGuestEmail);
+    }, [isAuth, orderLoading, paymentProvider, selectedAddress, guestAddressForm, duplicateGuestEmail]);
 
     const handleCart = useHandleShoppingCartV3({
         isAuth,
@@ -84,6 +89,7 @@ const ShoppingCartV3 = () => {
     const handleGuestFormSave = (data: GuestCreateOrderFormType) => {
         setGuestAddressForm(data);
         setShowGuestFormEdit(false);
+        clearError();
     };
 
     const handlePreValidation = () => {
@@ -113,20 +119,28 @@ const ShoppingCartV3 = () => {
             return;
         }
         if (isAuth && selectedAddress) {
-            await createOrder({
+            const ok = await createOrder({
                 addressUUID: selectedAddress.uuid,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+                return;
+            }
             handleCart.clearCart();
             return;
         }
         if (!isAuth && guestAddressForm && guestAddressForm.consent) {
-            await createOrder({
+            const ok = await createOrder({
                 guestForm: guestAddressForm,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+                return;
+            }
             handleCart.clearCart();
             return;
         }
@@ -164,19 +178,7 @@ const ShoppingCartV3 = () => {
                 </div>
 
                 {allItems.length === 0 && !handleCart.isLoading ? (
-                    <div className="w-full flex flex-col items-center justify-center py-16 gap-4">
-                        <div className="w-24 h-24 rounded-full bg-base-300 flex items-center justify-center">
-                            <MdShoppingBag className="text-4xl text-base-content/30" />
-                        </div>
-                        <div className="text-center">
-                            <h2 className="text-xl font-bold text-base-content mb-1">Tu carrito está vacío</h2>
-                            <p className="text-sm text-base-content/50">Agrega productos desde la tienda para comenzar</p>
-                        </div>
-                        <Link to="/#tienda" className="btn btn-primary gap-2">
-                            <FaShoppingBag className="text-sm" />
-                            Ir a la tienda
-                        </Link>
-                    </div>
+                    <EmptyCartV3 />
                 ) : (
                     <section className="w-full flex flex-col lg:flex-row gap-5">
                         {/* Left Column: Address → Payment → Products */}
@@ -188,7 +190,7 @@ const ShoppingCartV3 = () => {
                                 showGuestForm={showGuestForm}
                                 setShowGuestForm={setShowGuestForm}
                                 showGuestFormEdit={showGuestFormEdit}
-                                setShowGuestFormEdit={setShowGuestFormEdit}
+                                setShowGuestFormEdit={(v) => { clearErrorBadge(); setShowGuestFormEdit(v); }}
                                 guestAddressForm={guestAddressForm}
                                 handleGuestFormSave={handleGuestFormSave}
                             />
@@ -204,6 +206,8 @@ const ShoppingCartV3 = () => {
                                 handleCart={handleCart}
                                 isAuth={isAuth}
                             />
+                            <RecentlyViewed excludeSkus={allItems.map((item) => item.item.sku)} />
+                            <FavoritesSectionV3 />
                         </div>
 
                         {/* Right Column: Summary + Trust Badges */}
@@ -223,6 +227,7 @@ const ShoppingCartV3 = () => {
                                 onPendingPayment={handlePendingPayment}
                             />
                             <TrustBadgesV3 />
+                            <SideAdBanner />
                         </div>
                     </section>
                 )}

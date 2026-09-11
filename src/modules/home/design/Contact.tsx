@@ -95,7 +95,7 @@ const Contact = () => {
         <div className="px-3 sm:px-5 lg:px-8 pt-4 sm:pt-6 pb-16 sm:pb-24 animate-fade-in-up flex flex-col">
             <PageHero
                 image={Header1}
-                eyebrow="IGA Productos"
+                eyebrow="Iga Productos"
                 title="Contacto"
                 paragraphs={
                     <>
@@ -334,7 +334,7 @@ const Contact = () => {
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="strict-origin-when-cross-origin"
-                        title="Ubicación de IGA Productos"
+                        title="Ubicación de Iga Productos"
                         className="w-full h-full"
                     />
                 </div>

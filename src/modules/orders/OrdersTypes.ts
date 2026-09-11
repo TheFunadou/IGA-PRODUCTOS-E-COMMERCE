@@ -147,6 +147,7 @@ export interface OrderCheckoutItemIV3 {
     };
     subtotal: string;
     images: { url: string, mainImage: boolean }[];
+    automaticDiscount?: { applied: boolean; percentage: number };
 };
 
 
@@ -165,6 +166,7 @@ export interface CheckoutOrderIV3 {
     resume: ShoppingCartResumeI;
     couponCode: string | null;
     externalId: string;
+    buyer?: { name: string; surname: string; email: string; phone?: string | null };
     shippingAddress: NewAddressType[];
 };
 
@@ -234,6 +236,80 @@ export interface GetOrdersSummaryI {
     totalPages: number;
     totalRecords: number;
     currentPage: number;
+};
+
+export type OrderDashboardView = "list" | "grid";
+export type OrderDashboardSortField = "folio" | "status" | "purchaseDate" | "lastUpdate";
+
+export interface CustomerOrdersDashboardFilterI {
+    folio?: string;
+    status?: OrderStatusType;
+    dateRange?: { gte?: string; lte?: string };
+};
+
+export interface CustomerOrdersDashboardSortI {
+    folio?: "asc" | "desc";
+    status?: "asc" | "desc";
+    purchaseDate?: "asc" | "desc";
+    lastUpdate?: "asc" | "desc";
+};
+
+export interface CustomerOrdersDashboardInputI {
+    pagination: { page: number; limit: number };
+    filters?: CustomerOrdersDashboardFilterI;
+    sort?: CustomerOrdersDashboardSortI;
+};
+
+export interface CustomerOrdersDashboardCardI {
+    uuid: string;
+    status: OrderStatusType;
+    paymentProvider: Exclude<PaymentProvidersType, null>;
+    totalAmount: string;
+    couponCode: string | null;
+    buyer: { name: string; surname: string; email: string; phone: string | null };
+    createdAt: Date;
+    updatedAt: Date;
+    shippingStatus: ShippingStatus | null;
+    itemsCount: number;
+    items: OrderCheckoutItemIV3[];
+    productThumbnails: string[];
+    remainingItems: number;
+};
+
+export interface GetCustomerOrdersDashboardI {
+    data: CustomerOrdersDashboardCardI[];
+    totalPages: number;
+    totalRecords: number;
+    currentPage: number;
+};
+
+export const ORDER_DASHBOARD_SORT_FIELDS: { value: OrderDashboardSortField, label: string }[] = [
+    { value: "purchaseDate", label: "Fecha de compra" },
+    { value: "lastUpdate", label: "Última actualización" },
+    { value: "folio", label: "Folio" },
+    { value: "status", label: "Estatus" },
+];
+
+export interface OrdersDashboardQueryState {
+    page: number;
+    view: OrderDashboardView;
+    sortField: OrderDashboardSortField;
+    sortDir: "asc" | "desc";
+    folio: string;
+    status: OrderStatusType | "ALL";
+    from: string;
+    to: string;
+};
+
+export const ORDERS_DASHBOARD_DEFAULT_STATE: OrdersDashboardQueryState = {
+    page: 1,
+    view: "list",
+    sortField: "purchaseDate",
+    sortDir: "desc",
+    folio: "",
+    status: "ALL",
+    from: "",
+    to: "",
 };
 
 

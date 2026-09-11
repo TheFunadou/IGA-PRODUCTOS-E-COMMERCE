@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FaBoxOpen, FaFilter, FaHeart, FaTag, FaStore } from "react-icons/fa6";
-import { ChevronDown, Star, Tag, X } from "lucide-react";
+import { FaBoxOpen, FaFilter, FaHeart, FaTag } from "react-icons/fa6";
+import { ChevronDown, Star, X } from "lucide-react";
 import clsx from "clsx";
+import ShopCategoryFilterList from "./ShopCategoryFilterList";
 import ShopRatingFilter from "./ShopRatingFilter";
 import { scrollToTienda } from "../utils/scrollToTienda";
 import type { CategoryType } from "../../categories/CategoriesTypes";
@@ -91,13 +92,12 @@ const ShopFiltersContent = ({
     priceRange,
     onClearPriceRange,
 }: ShopFiltersContentProps) => {
-    const [tagsOpen, setTagsOpen] = useState(true);
-    const [advFiltersOpen, setAdvFiltersOpen] = useState(false);
+    const [advFiltersOpen, setAdvFiltersOpen] = useState(true);
 
     /* ── Filtros avanzados por etapas (patrón del panel de administración):
           primero se selecciona el tipo y el valor, y solo al presionar
           "+ Agregar filtro" se aplica a la consulta ── */
-    const [advFilterType, setAdvFilterType] = useState<ShopAdvancedFilterType>(isAuth ? "favorites" : "offers");
+    const [advFilterType, setAdvFilterType] = useState<ShopAdvancedFilterType>("colorLine");
     const [advBoolValue, setAdvBoolValue] = useState(true);
     const [advRatingValue, setAdvRatingValue] = useState<number | undefined>(undefined);
     const [advColorValue, setAdvColorValue] = useState("");
@@ -189,7 +189,7 @@ const ShopFiltersContent = ({
                             checked={advBoolValue}
                             onChange={(e) => setAdvBoolValue(e.target.checked)}
                         />
-                        <span className="text-sm font-bold">Activar filtro</span>
+                        <span className="text-sm font-bold">Habilitar filtro</span>
                     </label>
                 );
             case "rating":
@@ -300,122 +300,23 @@ const ShopFiltersContent = ({
 
     return (
         <div className="flex flex-col divide-y divide-base-200">
-            {/* ── Categoría ── */}
+            {/* ── Categoría (listado con etiquetas anidadas) ── */}
             <div className="px-4 py-4">
-                <label className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <FaStore className="text-warning text-sm" />
-                    Categoría
-                </label>
-                <select
-                    className="select select-bordered select-sm w-full bg-base-100 font-medium text-base-content/80 text-sm"
-                    value={selectedCategory?.uuid ?? ""}
-                    onChange={(e) => {
-                        const uuid = e.target.value;
-                        if (!uuid) {
-                            onClearSelection();
-                            return;
-                        }
-                        const cat = categories?.find((c) => c.uuid === uuid);
-                        if (cat) onSelectCategory(cat);
-                    }}
-                >
-                    <option value="">Ver todos los productos</option>
-                    {categoriesLoading && <option disabled>Cargando...</option>}
-                    {categoriesError && (
-                        <option disabled>Error al cargar</option>
-                    )}
-                    {!categoriesLoading && !categoriesError && categories && categories.length === 0 && (
-                        <option disabled>Sin categorías</option>
-                    )}
-                    {categories?.map((cat) => (
-                        <option key={cat.uuid} value={cat.uuid}>
-                            {cat.name}
-                        </option>
-                    ))}
-                </select>
-                {categoriesError && (
-                    <button
-                        type="button"
-                        onClick={refetchCategories}
-                        className="text-xs text-primary underline underline-offset-2 mt-1.5 hover:opacity-70 transition-opacity"
-                    >
-                        Reintentar
-                    </button>
-                )}
+                <ShopCategoryFilterList
+                    categories={categories}
+                    categoriesLoading={categoriesLoading}
+                    categoriesError={categoriesError}
+                    refetchCategories={refetchCategories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={onSelectCategory}
+                    onClearSelection={onClearSelection}
+
+                    tagsByTier={tagsByTier}
+                    tagsLoading={tagsLoading}
+                    pendingTagIds={pendingTagIds}
+                    onToggleTag={onToggleTag}
+                />
             </div>
-
-            {/* ── Etiquetas (colapsable, solo con categoría seleccionada) ── */}
-            {selectedCategory && (
-                <div className="px-4 py-4">
-                    <button
-                        type="button"
-                        className="flex items-center justify-between w-full text-xs font-bold text-base-content/50 uppercase tracking-wider hover:text-primary transition-colors"
-                        onClick={() => setTagsOpen(!tagsOpen)}
-                    >
-                        <span className="flex items-center gap-2">
-                            <Tag size={12} />
-                            Etiquetas
-                            {pendingTagIds.length > 0 && (
-                                <span className="badge badge-primary badge-xs font-bold">
-                                    {pendingTagIds.length}
-                                </span>
-                            )}
-                        </span>
-                        <ChevronDown
-                            size={14}
-                            className={clsx(
-                                "transition-transform duration-200",
-                                tagsOpen && "rotate-180"
-                            )}
-                        />
-                    </button>
-
-                    {tagsOpen && (
-                        <div className="mt-3">
-                            {tagsLoading ? (
-                                <div className="flex items-center gap-2 py-2 text-xs text-base-content/40">
-                                    <span className="loading loading-spinner loading-xs text-primary" />
-                                    Cargando etiquetas...
-                                </div>
-                            ) : tagsByTier.length > 0 ? (
-                                <div className="flex flex-col">
-                                    {tagsByTier.map(([tier, tags]) => (
-                                        <div
-                                            key={tier}
-                                            className="flex flex-wrap gap-1.5 py-2 border-t border-base-200/60 first:border-t-0 first:pt-0"
-                                        >
-                                            {tags.map((tag) => {
-                                                const isSelected = pendingTagIds.includes(tag.id);
-                                                return (
-                                                    <button
-                                                        key={tag.id}
-                                                        type="button"
-                                                        onClick={() => onToggleTag(tag.id)}
-                                                        title={`Tier ${tier}`}
-                                                        className={clsx(
-                                                            "badge badge-sm cursor-pointer transition-all duration-150 gap-1",
-                                                            isSelected
-                                                                ? "bg-blue-950 border-blue-950 text-white hover:bg-blue-800"
-                                                                : "bg-base-100 text-base-content/80 border-base-300 hover:border-blue-950/40 hover:bg-blue-950/5 hover:text-blue-950"
-                                                        )}
-                                                    >
-                                                        <Tag size={9} />
-                                                        {tag.name}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-xs text-base-content/40 py-1">
-                                    No hay etiquetas para esta categoría
-                                </p>
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* ── Filtros avanzados (colapsable) ── */}
             <div className="px-4 py-4">

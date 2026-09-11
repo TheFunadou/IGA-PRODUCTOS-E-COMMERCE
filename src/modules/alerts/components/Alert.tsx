@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 type Props = {
     message: string;
-    type: "Succesfull" | "Message" | "Error";
+    type: "Succesfull" | "Message" | "Error" | "OrderError";
 };
 
 
@@ -13,7 +13,8 @@ const Alert = ({ type, message }: Props) => {
                 "alert toast shadow-lg toast-bottom toast-center duration-130 ease-in-out text-white mb-20",
                 type === "Succesfull" && "bg-blue-900",
                 type === "Message" && "bg-neutral",
-                type === "Error" && "bg-error"
+                type === "Error" && "bg-error",
+                type === "OrderError" && "bg-amber-700"
             )
         }>
             <p className="text-lg">{message}</p>

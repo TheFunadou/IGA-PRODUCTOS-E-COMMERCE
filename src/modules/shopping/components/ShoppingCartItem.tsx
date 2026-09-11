@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { FaFire } from "react-icons/fa";
+import { FaFire, FaTag } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { formatPrice, makeSlug } from "../../products/Helpers";
@@ -141,6 +141,12 @@ const ShoppingCartItemV2 = ({
                                 )}>
                                     <FaFire className="text-[10px]" />
                                     {cardData.offer.discount}% OFF
+                                </span>
+                            )}
+                            {quantity >= 60 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0 bg-primary">
+                                    <FaTag className="text-[10px]" />
+                                    -10% aplicado por mayoreo
                                 </span>
                             )}
                         </div>

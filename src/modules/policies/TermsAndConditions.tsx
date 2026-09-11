@@ -105,7 +105,7 @@ const TermsAndConditions = () => {
                             Términos y Condiciones
                         </h1>
                         <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
-                            Reglas de uso y condiciones comerciales de IGA Productos.
+                            Reglas de uso y condiciones comerciales de Iga Productos.
                         </p>
                     </div>
                 </div>
@@ -149,7 +149,7 @@ const TermsAndConditions = () => {
                                 Directorio
                             </p>
                             <p className="text-xs text-base-content/50 mb-4 leading-relaxed">
-                                Reglas de uso y condiciones comerciales de IGA Productos.
+                                Reglas de uso y condiciones comerciales de Iga Productos.
                             </p>
                             <ul className="flex flex-col gap-1">
                                 {sections.map(({ id, label }) => (
@@ -182,10 +182,10 @@ const TermsAndConditions = () => {
                             </div>
                             <div className="bg-base-200 border border-base-300 rounded-2xl px-5 sm:px-8 py-6 sm:py-8">
                                 <p className="text-base-content/80 text-sm sm:text-base leading-7 sm:leading-8 text-justify">
-                                    Bienvenido a IGA Productos. Al acceder y utilizar este sitio web, usted acepta cumplir y estar sujeto a los siguientes términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, le solicitamos abstenerse de utilizar nuestra plataforma.
+                                    Bienvenido a Iga Productos. Al acceder y utilizar este sitio web, usted acepta cumplir y estar sujeto a los siguientes términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, le solicitamos abstenerse de utilizar nuestra plataforma.
                                 </p>
                                 <p className="text-base-content/80 text-sm sm:text-base leading-7 sm:leading-8 text-justify mt-4">
-                                    Estos términos rigen la relación comercial entre IGA Productos y sus usuarios, incluyendo la navegación, el uso de cuentas personales y el proceso de adquisición de productos a través de nuestra tienda en línea.
+                                    Estos términos rigen la relación comercial entre Iga Productos y sus usuarios, incluyendo la navegación, el uso de cuentas personales y el proceso de adquisición de productos a través de nuestra tienda en línea.
                                 </p>
                                 <div className="mt-4 rounded-xl bg-primary/5 border border-primary/15 px-4 py-3.5">
                                     <p className="text-sm leading-7 text-base-content/80 text-justify">
@@ -217,7 +217,7 @@ const TermsAndConditions = () => {
                             <p><strong>Conducta del usuario:</strong></p>
                             <ul className="list-disc ml-5 mt-2 space-y-2">
                                 <li>No se permite el uso de la plataforma para fines ilícitos o fraudulentos.</li>
-                                <li>Los comentarios y reseñas deben ser respetuosos. IGA Productos se reserva el derecho de eliminar contenido ofensivo, spam o ataques personales.</li>
+                                <li>Los comentarios y reseñas deben ser respetuosos. Iga Productos se reserva el derecho de eliminar contenido ofensivo, spam o ataques personales.</li>
                                 <li>Queda prohibido cualquier intento de vulnerar la seguridad de nuestra API o servidores mediante inyección de código o ataques de denegación de servicio.</li>
                             </ul>
                         </PolicySection>
@@ -225,7 +225,7 @@ const TermsAndConditions = () => {
                         {/* PROPIEDAD INTELECTUAL */}
                         <PolicySection id="intellectual-property" title="Propiedad Intelectual">
                             <p>
-                                Todo el contenido presente en este sitio, incluyendo pero no limitado a textos, logotipos, imágenes, audios, descargas digitales y compilaciones de datos, es propiedad de <strong>IGA Productos</strong> o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual e industrial vigentes en México e internacionales.
+                                Todo el contenido presente en este sitio, incluyendo pero no limitado a textos, logotipos, imágenes, audios, descargas digitales y compilaciones de datos, es propiedad de <strong>Iga Productos</strong> o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual e industrial vigentes en México e internacionales.
                             </p>
                             <br />
                             <p>
@@ -240,7 +240,7 @@ const TermsAndConditions = () => {
                             </p>
                             <ul className="list-disc ml-5 mt-3 space-y-2">
                                 <li><strong>Precios:</strong> Todos los precios están expresados en pesos mexicanos (MXN) e incluyen los impuestos correspondientes, a menos que se indique lo contrario.</li>
-                                <li><strong>Confirmación:</strong> La recepción de un pedido no constituye la aceptación final del mismo. IGA Productos se reserva el derecho de cancelar órdenes por falta de stock o errores en el etiquetado de precios.</li>
+                                <li><strong>Confirmación:</strong> La recepción de un pedido no constituye la aceptación final del mismo. Iga Productos se reserva el derecho de cancelar órdenes por falta de stock o errores en el etiquetado de precios.</li>
                                 <li><strong>Seguridad de Pago:</strong> No almacenamos datos sensibles de tarjetas. Su información financiera viaja encriptada directamente hacia el procesador de pagos.</li>
                             </ul>
                         </PolicySection>
@@ -255,7 +255,7 @@ const TermsAndConditions = () => {
                             </p>
                             <br />
                             <p>
-                                Los tiempos de entrega son estimaciones y pueden variar según el destino y la logística externa. IGA Productos no se hace responsable por retrasos derivados de causas de fuerza mayor o problemas ajenos a nuestra operación interna. Usted recibirá una notificación con la información de seguimiento una vez que su pedido esté en camino.
+                                Los tiempos de entrega son estimaciones y pueden variar según el destino y la logística externa. Iga Productos no se hace responsable por retrasos derivados de causas de fuerza mayor o problemas ajenos a nuestra operación interna. Usted recibirá una notificación con la información de seguimiento una vez que su pedido esté en camino.
                             </p>
                         </PolicySection>
 
@@ -276,7 +276,7 @@ const TermsAndConditions = () => {
                         {/* LIMITACIÓN DE RESPONSABILIDAD */}
                         <PolicySection id="liability" title="Limitación de responsabilidad">
                             <p>
-                                IGA Productos no garantiza que el sitio web sea libre de errores o que el acceso al mismo sea ininterrumpido. No seremos responsables de daños directos, indirectos o incidentales derivados del uso de la página o de la imposibilidad de uso de la misma.
+                                Iga Productos no garantiza que el sitio web sea libre de errores o que el acceso al mismo sea ininterrumpido. No seremos responsables de daños directos, indirectos o incidentales derivados del uso de la página o de la imposibilidad de uso de la misma.
                             </p>
                             <br />
                             <p>

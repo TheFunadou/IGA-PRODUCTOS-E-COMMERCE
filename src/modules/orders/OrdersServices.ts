@@ -1,9 +1,14 @@
-import type { CheckoutOrderI, CheckoutOrderIV3, GetOrdersSummaryI } from "./OrdersTypes";
+import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI } from "./OrdersTypes";
 import api from "../../api/api.config";
-import type { LoadShoppingCartI, ShoppingCartI } from "../shopping/ShoppingTypes";
+import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../shopping/ShoppingTypes";
 
 export const getOrders = async (params: { page: number, limit: number, orderBy: "recent" | "oldest" }) => {
     const { data } = await api.get<GetOrdersSummaryI>(`/orders`, { params })
+    return data;
+};
+
+export const getOrdersDashboardV3 = async (dto: CustomerOrdersDashboardInputI): Promise<GetCustomerOrdersDashboardI> => {
+    const { data } = await api.post<GetCustomerOrdersDashboardI>(`/orders/dashboard-v3`, dto);
     return data;
 };
 
@@ -23,6 +28,18 @@ export const getBuyNowItem = async ({ item }: { item: ShoppingCartI }): Promise<
             sku: item.item.sku,
             productUUID: item.item.productUUID,
             quantity: item.quantity,
+        }
+    });
+    return data;
+};
+
+export const getBuyNowItemV3 = async ({ item, destination }: { item: ShoppingCartI, destination?: string }): Promise<LoadShoppingCartV3I> => {
+    const { data } = await api.get<LoadShoppingCartV3I>(`/orders/buy-now/v3`, {
+        params: {
+            sku: item.item.sku,
+            productUUID: item.item.productUUID,
+            quantity: item.quantity,
+            destinationPc: destination ?? undefined,
         }
     });
     return data;

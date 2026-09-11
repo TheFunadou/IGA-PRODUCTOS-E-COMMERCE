@@ -14,7 +14,7 @@ const Distributors = () => {
             <PageHero
                 image={Header2}
                 overlayClassName="absolute inset-0 bg-blue-950/85"
-                eyebrow="IGA Productos"
+                eyebrow="Iga Productos"
                 title="Distribuidores Autorizados"
                 paragraphs={
                     <>
@@ -23,7 +23,7 @@ const Distributors = () => {
                             Productos
                         </p>
                         <p>
-                            Ser distribuidor autorizado de IGA Productos te abre
+                            Ser distribuidor autorizado de Iga Productos te abre
                             las puertas a un mundo de oportunidades en el sector
                             de seguridad industrial.
                         </p>

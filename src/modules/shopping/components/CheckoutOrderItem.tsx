@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { FaFire } from "react-icons/fa";
+import { FaFire, FaTag } from "react-icons/fa";
 import { formatPrice, makeSlug } from "../../products/Helpers";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import type { OrderCheckoutItemI } from "../../orders/OrdersTypes";
@@ -105,6 +105,12 @@ const CheckoutOrderItemV2 = ({ data }: Props) => {
                                     </span>
                                 ))
                             }
+                            {data.quantity >= 60 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold shrink-0 bg-primary">
+                                    <FaTag className="text-[10px]" />
+                                    -10% aplicado por mayoreo
+                                </span>
+                            )}
                         </div>
                     </div>
 

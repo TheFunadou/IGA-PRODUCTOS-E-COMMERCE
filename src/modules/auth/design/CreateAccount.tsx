@@ -211,7 +211,7 @@ const CreateAccount = () => {
                     <div className="pointer-events-none absolute inset-0
                         bg-[radial-gradient(ellipse_40%_40%_at_85%_10%,rgba(59,130,246,0.18)_0%,transparent_55%)]" />
 
-                    <img src={IGALogo} alt="IGA Productos" className="relative z-10 w-50 sm:w-16 md:w-25 lg:w-35" />
+                    <img src={IGALogo} alt="Iga Productos" className="relative z-10 w-50 sm:w-16 md:w-25 lg:w-35" />
 
                     <h1 className="relative z-10
                         mt-4 md:mt-10
@@ -307,7 +307,7 @@ const CreateAccount = () => {
                                     <a href="/privacidad" className="text-slate-500 underline">política de privacidad</a>
                                     {" "}y los{" "}
                                     <a href="/terminos" className="text-slate-500 underline">términos y condiciones</a>
-                                    {" "}de IGA Productos.
+                                    {" "}de Iga Productos.
                                 </p>
                             </div>
                         </>

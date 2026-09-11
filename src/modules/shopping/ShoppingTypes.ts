@@ -27,6 +27,7 @@ export interface ShoppingCartResumeI {
     subtotal: string;
     discount: string;
     applicableOffers: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
+    automaticDiscount?: string;
     insuranceAmount: string;
     total: string;
 };
@@ -52,7 +53,7 @@ export type PaymentProvidersType = "mercado_pago" | "paypal" | null;
 export type PaymentProviders = "mercado_pago" | "paypal";
 export type PaymentMethodType = "visa" | "mastercard" | "oxxo" | "paycash" | "bancomer" | "clabe";
 export type PaymentClassType = "credit_card" | "debit_card" | "ticket" | "transfer";
-export type OrderStatusType = "APPROVED" | "PENDING" | "REJECTED" | "IN_PROCESS" | "REFUNDED" | "CANCELLED" | "AUTHORIZED" | "ABANDONED";
+export type OrderStatusType = "APPROVED" | "PENDING" | "REJECTED" | "IN_PROCESS" | "REFUNDED" | "CANCELLED" | "AUTHORIZED" | "ABANDONED" | "IN_MEDIATION" | "CHARGED_BACK" | "PARTIALLY_REFUNDED" | "CANCELLATION_REQUESTED";
 
 export interface PaymentProviderDetails {
     icon: JSX.Element;

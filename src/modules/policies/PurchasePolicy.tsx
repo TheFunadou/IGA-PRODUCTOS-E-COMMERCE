@@ -171,7 +171,7 @@ const PurchasePolicy = () => {
                                     Política de Compras
                                 </h1>
                                 <p className="text-sm text-white/70 mt-2 leading-relaxed max-w-2xl">
-                                    Condiciones aplicables a toda compra en <span className="text-white font-bold">igaproductos.com</span> — operado por <strong className="text-white">Plásticos del Golfo Sur, S.A. de C.V.</strong> (marca IGA Productos).
+                                    Condiciones aplicables a toda compra en <span className="text-white font-bold">igaproductos.com</span> — operado por <strong className="text-white">Plásticos del Golfo Sur, S.A. de C.V.</strong> (marca Iga Productos).
                                 </p>
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur">
@@ -280,7 +280,7 @@ const PurchasePolicy = () => {
 
                         {/* 1 */}
                         <PolicySection id="objeto" number="01" kicker="Finalidad" title="Objeto de la Política">
-                            <p>La Política regula las condiciones bajo las cuales el Comprador podrá adquirir productos de Plásticos del Golfo Sur vía IGA Productos, entre otros:</p>
+                            <p>La Política regula las condiciones bajo las cuales el Comprador podrá adquirir productos de Plásticos del Golfo Sur vía Iga Productos, entre otros:</p>
                             <ul className="list-disc ml-5 mt-3 space-y-1.5">
                                 <li>Proceso y modalidades de compra</li>
                                 <li>Precios, impuestos, disponibilidad</li>
@@ -488,7 +488,7 @@ const PurchasePolicy = () => {
 
                         <PolicySection id="identificacion" number="37" kicker="Contacto oficial" title="Datos de identificación y contacto">
                             <div className="space-y-3">
-                                <p><strong>Razón social:</strong> PLÁSTICOS DEL GOLFO SUR, S.A. DE C.V.<br /><strong>Marca:</strong> IGA Productos<br /><strong>Sitio:</strong> <a href="https://igaproductos.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">igaproductos.com</a></p>
+                                <p><strong>Razón social:</strong> PLÁSTICOS DEL GOLFO SUR, S.A. DE C.V.<br /><strong>Marca:</strong> Iga Productos<br /><strong>Sitio:</strong> <a href="https://igaproductos.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">igaproductos.com</a></p>
                                 <div className="grid sm:grid-cols-2 gap-3 not-prose">
                                     <a href="mailto:atencionaclientes@igaproductos.com" className="flex items-center gap-3 bg-primary/5 border border-primary/15 rounded-xl px-4 py-3 hover:bg-primary/10 transition">
                                         <FaEnvelope className="text-primary" />

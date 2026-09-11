@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BiGridHorizontal, BiListUl } from "react-icons/bi";
 import { FaFilter } from "react-icons/fa6";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Minus, Package, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, Minus, X } from "lucide-react";
 import clsx from "clsx";
 import type { PV3Sort, PV3SortField } from "../../products/ProductTypes";
 
@@ -23,21 +23,21 @@ export const SHOP_SORT_FIELDS: {
     ];
 
 interface ShopToolbarProps {
-    totalRecords: number;
     sorts: PV3Sort;
     onSortChange: (field: PV3SortField, dir: "asc" | "desc" | undefined) => void;
     viewMode: "grid" | "list";
     onViewModeChange: (mode: "grid" | "list") => void;
     onOpenMobileFilters: () => void;
+    children?: React.ReactNode;
 }
 
 const ShopToolbar = ({
-    totalRecords,
     sorts,
     onSortChange,
     viewMode,
     onViewModeChange,
     onOpenMobileFilters,
+    children,
 }: ShopToolbarProps) => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -45,7 +45,7 @@ const ShopToolbar = ({
     const activeFields = SHOP_SORT_FIELDS.filter((f) => sorts[f.field]);
     const currentSortLabel =
         activeFields.length === 0
-            ? "Ordenar"
+            ? "Ordenar por"
             : `${activeFields[0].label}: ${sorts[activeFields[0].field] === "asc" ? activeFields[0].ascLabel : activeFields[0].descLabel}` +
             (activeFields.length > 1 ? ` (+${activeFields.length - 1})` : "");
 
@@ -100,15 +100,12 @@ const ShopToolbar = ({
                 Filtros
             </button>
 
-            {/* Conteo de resultados */}
-            <p className="text-sm text-base-content/60 font-medium flex items-center gap-1.5 min-w-0">
-                <Package size={14} className="shrink-0 hidden sm:block" />
-                <span className="truncate">
-                    {totalRecords} producto{totalRecords !== 1 ? "s" : ""}
-                </span>
-            </p>
+            {/* Badges de etiquetas y filtros aplicados */}
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-1.5">
+                {children}
+            </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 {/* Ordenamiento */}
                 <div className="relative" ref={dropdownRef}>
                     <button

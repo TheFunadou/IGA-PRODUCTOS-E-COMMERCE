@@ -11,17 +11,18 @@ import { showModal } from "../../../global/GlobalHelpers";
 import { useCancelOrder, useCancelGuestOrder, useFetchCheckoutOrderV3 } from "../../orders/hooks/useFetchOrders";
 import { useAuthStore } from "../../auth/states/authStore";
 import {
-    FaLock,
     FaMapMarkerAlt,
     FaShippingFast,
     FaTag,
     FaExclamationTriangle,
+    FaUser,
     FaUserShield,
 } from "react-icons/fa";
 import { FaBagShopping } from "react-icons/fa6";
 import { MdShoppingBag, MdPayment } from "react-icons/md";
 import { SiMercadopago } from "react-icons/si";
 import CheckoutOrderItemV3 from "../components/CheckoutOrderItemV3";
+import CheckoutAdBanner from "../components/CheckoutAdBanner";
 import type { CheckoutOrderIV3, OrderCreatedType } from "../../orders/OrdersTypes";
 import { trackInitiateCheckout } from "../../analytics/MetaEvents";
 import { useEffect } from "react";
@@ -125,13 +126,6 @@ const CheckoutV3 = () => {
                             </p>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        className="btn btn-error btn-sm text-white gap-2 w-fit"
-                        onClick={() => showModal(cancelOrderRef.current)}
-                    >
-                        Abandonar orden
-                    </button>
                 </div>
 
                 {/* ── Main Layout ── */}
@@ -174,9 +168,18 @@ const CheckoutV3 = () => {
 
                         {/* ── Order Items ── */}
                         <div className="w-full rounded-2xl bg-base-100 border border-base-300">
-                            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
-                                <MdShoppingBag className="text-primary text-sm" />
-                                <h2 className="text-sm font-bold text-base-content uppercase">Resumen de pedido</h2>
+                            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    <MdShoppingBag className="text-primary text-sm" />
+                                    <h2 className="text-sm font-bold text-base-content uppercase">Resumen de pedido</h2>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn btn-error btn-sm text-white gap-2 w-fit rounded-3xl tracking-widest"
+                                    onClick={() => showModal(cancelOrderRef.current)}
+                                >
+                                    Abandonar orden
+                                </button>
                             </div>
                             <div className="flex flex-col gap-3 p-3 sm:p-4">
                                 {data && data.items.length > 0 && data.items.map((item, index) => (
@@ -193,6 +196,8 @@ const CheckoutV3 = () => {
                                 </span>
                             </div>
                         </div>
+
+                        <CheckoutAdBanner />
 
                     </div>
 
@@ -213,6 +218,29 @@ const CheckoutV3 = () => {
 const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: CheckoutOrderIV3 }) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+
+            {/* Buyer section */}
+            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
+                <FaUser className="text-primary text-sm" />
+                <h2 className="text-sm font-bold text-base-content uppercase">Datos del comprador</h2>
+            </div>
+            <div className="px-4 py-4 border-b border-base-300 flex flex-col gap-1">
+                <p className="text-base font-extrabold text-base-content">
+                    {data?.buyer ? `${data.buyer.name} ${data.buyer.surname}` : `${data?.shippingAddress[0]?.recipientName ?? ""} ${data?.shippingAddress[0]?.recipientLastName ?? ""}`}
+                </p>
+                {data?.buyer ? (
+                    <>
+                        <p className="text-sm text-base-content/70">{data.buyer.email}</p>
+                        {data.buyer.phone && <p className="text-sm text-base-content/70">{data.buyer.phone}</p>}
+                    </>
+                ) : (
+                    data?.shippingAddress[0] && (
+                        <p className="text-sm text-base-content/70">
+                            {data.shippingAddress[0].countryPhoneCode} {data.shippingAddress[0].contactNumber}
+                        </p>
+                    )
+                )}
+            </div>
 
             {/* Provider logo */}
             <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center gap-1.5">
@@ -284,35 +312,17 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                         </span>
                     </div>
 
-                    {/* Breakdown of offers */}
-                    {data?.resume?.applicableOffers && data.resume.applicableOffers.length > 0 ? (
-                        <div className="flex flex-col gap-2 pt-1">
-                            {data.resume.applicableOffers.map((off, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
-                                    <span className="flex items-center gap-1.5 text-primary font-bold">
-                                        <FaTag className="text-xs" />
-                                        {off.type === "PERCENTAGE" ? "Descuento directo" : "Descuento por cupón"}
-                                    </span>
-                                    <span className="font-bold text-primary flex items-center gap-0.5">
-                                        <BiMinus className="text-xs" />
-                                        ${off.discount}
-                                    </span>
-                                </div>
-                            ))}
+                    {/* Descuento acumulado (ofertas/cupón + mayoreo) */}
+                    {data?.resume && (parseFloat(data.resume.discount) + parseFloat(data.resume.automaticDiscount ?? "0")) > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-primary font-bold flex items-center gap-1.5">
+                                <FaTag className="text-xs" />Descuento
+                            </span>
+                            <span className="text-primary font-bold flex items-center gap-0.5">
+                                <BiMinus className="text-xs" />
+                                ${formatPrice((parseFloat(data.resume.discount.replace(/,/g, "")) + parseFloat((data.resume.automaticDiscount ?? "0").replace(/,/g, ""))).toString(), "es-MX")}
+                            </span>
                         </div>
-                    ) : (
-                        data?.resume && parseFloat(data.resume.discount) > 0 && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-primary font-bold flex items-center gap-1.5">
-                                    <FaTag className="text-xs" />
-                                    Descuento
-                                </span>
-                                <span className="text-primary font-bold flex items-center gap-0.5">
-                                    <BiMinus className="text-xs" />
-                                    ${formatPrice(data.resume.discount, "es-MX")}
-                                </span>
-                            </div>
-                        )
                     )}
                 </div>
 
@@ -362,9 +372,12 @@ const PaymentSummaryPanel = ({ order, data }: { order: OrderCreatedType; data?: 
                     )}
                 </div>
 
-                <p className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1">
-                    <FaLock className="text-[8px]" /> Pago seguro y encriptado
-                </p>
+                <a
+                    href="/politica-de-compras"
+                    className="text-center text-[10px] text-base-content/30 flex items-center justify-center gap-1 hover:text-primary/70 hover:underline transition-colors"
+                >
+                    Política de compra
+                </a>
             </div>
         </div>
     );

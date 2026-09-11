@@ -54,26 +54,26 @@ export const MoreAbout = () => {
                 <section>
                     <div>
                         <h1 className="text-blue-950 text-3xl sm:text-4xl lg:text-5xl text-center">Encuentra tu Casco Iga ideal</h1>
-                        <p className="text-center mt-2 text-primary text-lg lg:text-xl">Selecciona según tu tipo de operación</p>
+                        <p className="text-center mt-2 text-blue-950/60 text-lg lg:text-xl">Selecciona según tu tipo de operación</p>
                     </div>
                     <div className="mt-5 flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
                         <ChoseYourHelmet
                             key={"card-1"}
                             imgUrl={IndustryAndConstruction}
                             title="Industria y construcción"
-                            tagNames={["industria", "construccion"]}
+                            tagNames={["Cachucha Plagosur"]}
                         />
                         <ChoseYourHelmet
                             key={"card-2"}
                             imgUrl={WorkAtHeight}
                             title="Trabajos en altura"
-                            tagNames={["trabajos en alturas"]}
+                            tagNames={["Cascos de Alturas"]}
                         />
                         <ChoseYourHelmet
                             key={"card-3"}
                             imgUrl={ElectroProtection}
                             title="Protección electrica"
-                            tagNames={["Clase E (Dielectrico)"]}
+                            tagNames={["Coraza (Ala ancha)"]}
                         />
                     </div>
                 </section>

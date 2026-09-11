@@ -61,7 +61,11 @@ export const formatOrderStatus: Record<OrderStatusType, string> = {
     REJECTED: "Rechazada",
     CANCELLED: "Cancelada",
     AUTHORIZED: "Autorizada",
-    REFUNDED: "Rembolsada",
-    ABANDONED: "Abandonada"
+    REFUNDED: "Reembolsada",
+    ABANDONED: "Abandonada",
+    IN_MEDIATION: "En mediación",
+    CHARGED_BACK: "Contracargo",
+    PARTIALLY_REFUNDED: "Reembolso parcial",
+    CANCELLATION_REQUESTED: "Cancelación solicitada"
 };
 

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { FaFire } from "react-icons/fa";
-import { FiChevronLeft, FiTrash2 } from "react-icons/fi";
+import { FaFire, FaTag } from "react-icons/fa";
+import { FiTrash2 } from "react-icons/fi";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { formatPrice, makeSlug } from "../../products/Helpers";
 import type { ShoppingCartI } from "../ShoppingTypes";
@@ -16,6 +16,7 @@ type Props = {
     onRemoveItem: (sku: string) => void;
     onUpdateQty: (item: ShoppingCartI) => void;
     isAuth: boolean;
+    isBuyNow?: boolean;
 };
 
 const discountBg = (discount?: number | null) => {
@@ -39,6 +40,7 @@ const ShoppingCartItemV3 = ({
     onRemoveItem,
     onUpdateQty,
     isAuth,
+    isBuyNow = false,
 }: Props) => {
     const { product, version } = cardData;
     const sku = version.sku;
@@ -122,36 +124,42 @@ const ShoppingCartItemV3 = ({
                                     {version.offer.discount}% OFF
                                 </span>
                             )}
+                            {quantity >= 60 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold flex-shrink-0 bg-primary">
+                                    <FaTag className="text-[10px]" />
+                                    -10% aplicado por mayoreo
+                                </span>
+                            )}
                         </div>
-                        <button
-                            type="button"
-                            title="Eliminar del carrito"
-                            onClick={() => onRemoveItem(sku)}
-                            className="flex-shrink-0 p-1.5 rounded-lg text-base-content/30 hover:text-error hover:bg-error/10 transition-all duration-200 active:scale-90"
-                        >
-                            <FiTrash2 className="text-base sm:text-lg" />
-                        </button>
+                        {!isBuyNow && (
+                            <button
+                                type="button"
+                                title="Eliminar del carrito"
+                                onClick={() => onRemoveItem(sku)}
+                                className="flex-shrink-0 p-1.5 rounded-lg text-base-content/30 hover:text-error hover:bg-error/10 transition-all duration-200 active:scale-90"
+                            >
+                                <FiTrash2 className="text-base sm:text-lg" />
+                            </button>
+                        )}
                     </div>
 
-                    <div className="flex items-center gap-1 text-xs sm:text-sm mt-1">
-                        <span className="bg-base-200 rounded-lg px-2 sm:px-3 py-0.5">
-                            <Link
-                                to={`/tienda?category=${product.category.name.toLowerCase()}&page=1`}
-                                className="font-semibold text-base-content/70 hover:text-primary"
-                            >
-                                {product.category.name}
-                            </Link>
-                        </span>
-                        {tagNames.length > 0 && (
-                            <>
-                                <FiChevronLeft className="text-base-content/40 flex-shrink-0" />
-                                {tagNames.map((tag, i) => (
-                                    <span key={i} className="bg-base-200 text-base-content/50 rounded-lg px-2 py-0.5">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </>
-                        )}
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-base-content/50 mt-1">
+                        <Link
+                            to={`/?category=${encodeURIComponent(product.category.uuid)}`}
+                            className="inline-flex items-center px-2 py-0.5 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors"
+                        >
+                            {product.category.name}
+                        </Link>
+                        {tagNames.map((tag, i) => (
+                            <span key={i} className="inline-flex items-center gap-0.5">
+                                <span className="text-base-content/30">
+                                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-base-200 text-base-content/70 font-medium">
+                                    {tag}
+                                </span>
+                            </span>
+                        ))}
                     </div>
 
                     <div className="flex items-center gap-1.5">

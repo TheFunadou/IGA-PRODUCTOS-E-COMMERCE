@@ -39,6 +39,7 @@ import {
 import ProductVersionCardV3 from "../components/ProductVersionCardV3";
 import { useShopProducts } from "../../shop/hooks/useShopProducts";
 import { trackAddToCart, trackAddToWishlist, trackViewContent } from "../../analytics/MetaEvents";
+import { useRecentlyViewedStore, getTabSessionId } from "../../../global/states/recentlyViewedStore";
 
 const WHATSAPP_NUMBER = "529211963246";
 
@@ -121,9 +122,7 @@ const SupportBadge = ({ productName, sku }: { productName: string; sku: string }
 
 const VolumeQuoteBadge = ({ productName, sku }: { productName: string; sku: string }) => (
     <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}/?text=${encodeURIComponent(`Hola, requiero comprar el producto ${productName}, SKU ${sku}, en volúmenes grandes. ¿Podrían asesorarme con una cotización personalizada?`)}`}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={`mailto:atencionaclientes@igaproductos.com?subject=${encodeURIComponent(`Cotización en volumen: ${productName} (SKU ${sku})`)}&body=${encodeURIComponent(`Hola, requiero comprar el producto ${productName}, SKU ${sku}, en volúmenes grandes. ¿Podrían asesorarme con una cotización personalizada?`)}`}
         className="flex items-center gap-3 p-3.5 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
     >
         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -132,8 +131,21 @@ const VolumeQuoteBadge = ({ productName, sku }: { productName: string; sku: stri
         <div className="min-w-0">
             <p className="text-xs font-extrabold text-base-content leading-tight">¿Compras en volúmenes grandes?</p>
             <p className="text-[10px] font-semibold text-primary mt-0.5">Te asesoramos con una cotización</p>
+            <p className="text-[10px] font-medium text-base-content/50 mt-0.5 break-all">atencionaclientes@igaproductos.com</p>
         </div>
     </a>
+);
+
+const AutomaticDiscountBadge = () => (
+    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-primary/5 border border-primary/25">
+        <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+            <FaAward className="text-primary" />
+        </div>
+        <div className="min-w-0">
+            <p className="text-xs font-extrabold text-base-content leading-tight">Recibe 10% descuento por mayoreo</p>
+            <p className="text-[10px] font-semibold text-primary mt-0.5">en compras de 60 o más piezas de este producto</p>
+        </div>
+    </div>
 );
 
 const OutOfStockInquiryBadge = ({ productName, sku }: { productName: string; sku: string }) => (
@@ -423,6 +435,8 @@ const ProductVersionDetailV3 = () => {
 
     const { isAuth, authCustomer } = useAuthStore();
     const { showTriggerAlert } = useTriggerAlert();
+    const recentOwnerId = isAuth ? (authCustomer?.uuid ?? getTabSessionId()) : getTabSessionId();
+    const addRecentSku = useRecentlyViewedStore((state) => state.addSku);
     // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
     const { updateQtyItem } = useHandleShoppingCartV3({
         isAuth,
@@ -494,6 +508,11 @@ const ProductVersionDetailV3 = () => {
         setStock(data.stock);
         setValue("sku", data.sku);
     }, [data, setValue]);
+
+    useEffect(() => {
+        if (!data) return;
+        addRecentSku(data.sku.toUpperCase(), recentOwnerId);
+    }, [data, addRecentSku, recentOwnerId]);
 
     useEffect(() => {
         setImage(sortedImageUrls[0] ?? NotFoundSVG);
@@ -774,6 +793,9 @@ const ProductVersionDetailV3 = () => {
                         {/* Purchase card móvil */}
                         <div className="lg:hidden">
                             <PurchaseCard {...purchaseCardProps} />
+                            <div className="mt-2.5">
+                                <AutomaticDiscountBadge />
+                            </div>
                         </div>
 
                         {/* Color + ficha técnica */}
@@ -865,6 +887,7 @@ const ProductVersionDetailV3 = () => {
                     <div className="hidden lg:block lg:col-span-3">
                         <div className="sticky top-16 flex flex-col gap-4">
                             <PurchaseCard {...purchaseCardProps} />
+                            <AutomaticDiscountBadge />
                         </div>
                     </div>
                 </div>

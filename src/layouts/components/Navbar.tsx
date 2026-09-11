@@ -64,7 +64,7 @@ const Navbar = ({ onOpenMobileMenu, onLogout, logoutLoading }: MainNavbarProps) 
             <nav className="w-full flex items-center gap-3 px-4 py-2 md:px-8 lg:px-10 bg-blue-950 text-white border-t border-white/10">
                 {/* Logo */}
                 <button type="button" className="shrink-0 w-28 md:w-36 lg:w-40 cursor-pointer" onClick={() => navigate("/")}>
-                    <img src={IgaLogo} alt="IGA Productos Logo" className="w-full object-contain" />
+                    <img src={IgaLogo} alt="Iga Productos Logo" className="w-full object-contain" />
                 </button>
                 {/* Buscador desktop */}
                 <NavbarSearch variant="desktop" />

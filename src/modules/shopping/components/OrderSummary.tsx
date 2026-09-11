@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { FaTag, FaShippingFast, FaShoppingBag, FaClipboardList } from "react-icons/fa";
+import { FaTag, FaShippingFast, FaShoppingBag, FaClipboardList, FaExclamation } from "react-icons/fa";
 import { BiMinus, BiPlus } from "react-icons/bi";
+import { formatPrice } from "../../products/Helpers";
 import type { ShoppingCartI, ShoppingCartResumeI } from "../ShoppingTypes";
 
 interface OrderSummaryProps {
@@ -78,28 +79,13 @@ const OrderSummary = ({
                     </div>
                     <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${handleCart.data?.resume?.iva || "0.00"}</span>
                 </div>
-                {(handleCart.data?.resume?.applicableOffers?.length ?? 0) > 0 && (
-                    <div className="flex flex-col gap-2 pt-1">
-                        {handleCart.data?.resume?.applicableOffers?.map((off, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
-                                <span className="flex items-center gap-1.5 text-primary font-bold">
-                                    <FaTag className="text-xs" />
-                                    <p>Descuento</p>
-                                </span>
-                                <span className="font-bold text-primary flex items-center gap-0.5">
-                                    <BiMinus className="text-xs" />${off.discount}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {parseFloat(handleCart.data?.resume?.discount || "0") > 0 && (handleCart.data?.resume?.applicableOffers?.length ?? 0) === 0 && (
+                {(parseFloat(handleCart.data?.resume?.discount || "0") + parseFloat(handleCart.data?.resume?.automaticDiscount || "0")) > 0 && (
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-primary font-bold flex items-center gap-1.5">
                             <FaTag className="text-xs" />Descuento
                         </span>
                         <span className="text-primary font-bold flex items-center gap-0.5">
-                            <BiMinus className="text-xs" />${handleCart.data?.resume?.discount}
+                            <BiMinus className="text-xs" />${formatPrice((parseFloat(handleCart.data?.resume?.discount?.replace(/,/g, "") || "0") + parseFloat(handleCart.data?.resume?.automaticDiscount?.replace(/,/g, "") || "0")).toString(), "es-MX")}
                         </span>
                     </div>
                 )}
@@ -137,11 +123,10 @@ const OrderSummary = ({
             </div>
 
             <button
-                className={`w-full btn rounded-2xl font-bold gap-2 tracking-wide tooltip tooltip-bottom ${
-                    pendingOrder
+                className={`w-full btn rounded-2xl font-bold gap-2 tracking-wide tooltip tooltip-bottom ${pendingOrder
                         ? "bg-warning hover:bg-warning/90 text-white border-0"
                         : "btn-primary"
-                }`}
+                    }`}
                 data-tip={pendingOrder ? "Continúa con el pago de tu orden pendiente." : "Realiza las acciones indicadas para continuar."}
                 disabled={pendingOrder ? !onPendingPayment : isSubmitDisabled}
                 onClick={pendingOrder ? onPendingPayment : handleCreateOrder}
@@ -160,7 +145,7 @@ const OrderSummary = ({
 
             {error && (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm">
-                    <span className="text-lg flex-shrink-0">⚠️</span>
+                    <span className="text-lg flex-shrink-0"><FaExclamation /></span>
                     <span>{error}</span>
                 </div>
             )}

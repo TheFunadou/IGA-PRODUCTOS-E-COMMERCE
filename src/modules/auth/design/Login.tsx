@@ -153,7 +153,7 @@ const Login = () => {
                     {/* Logo */}
                     <img
                         src={IGALogo}
-                        alt="IGA Productos"
+                        alt="Iga Productos"
                         className="relative z-10 w-50 sm:w-16 md:w-25 lg:w-35"
                     />
 
@@ -305,7 +305,7 @@ const Login = () => {
                             <Link to="/politica-de-privacidad" className="text-slate-500 underline">política de privacidad</Link>
                             {" "}y los{" "}
                             <Link to="/terminos-y-condiciones" className="text-slate-500 underline">términos y condiciones</Link>
-                            {" "}de IGA Productos.
+                            {" "}de Iga Productos.
                         </p>
                     </div>
 

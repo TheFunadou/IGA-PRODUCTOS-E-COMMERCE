@@ -21,7 +21,7 @@ const Coverage = () => {
             <PageHero
                 image={Header2}
                 overlayClassName="absolute inset-0 bg-blue-950/85"
-                eyebrow="IGA Productos"
+                eyebrow="Iga Productos"
                 title="Cobertura"
                 paragraphs={
                     <>
@@ -89,7 +89,7 @@ const Coverage = () => {
                 <figure className="rounded-2xl overflow-hidden shadow-sm border border-base-200 bg-base-100">
                     <img
                         src={CoverageImg}
-                        alt="Zonas de cobertura nacional e internacional de IGA Productos"
+                        alt="Zonas de cobertura nacional e internacional de Iga Productos"
                         loading="lazy"
                         className="w-full h-auto"
                     />

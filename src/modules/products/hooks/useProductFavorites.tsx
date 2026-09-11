@@ -25,7 +25,12 @@ export function useFavorite({ sku, item, initialFavoriteState = false }: Props) 
     const executeFavoriteLogic = async (newState: boolean) => {
         setIsFavorite(newState);
         if (!sku || !item) return;
-        await mutationToggleFavorite.mutateAsync({ sku: sku, product: item });
+        try {
+            await mutationToggleFavorite.mutateAsync({ sku: sku, product: item });
+        } catch {
+            // Revertir el estado local si el servidor rechazó el cambio
+            setIsFavorite(!newState);
+        }
     };
 
     const debounceExecute = useDebounceCallback(executeFavoriteLogic, 400);
@@ -40,7 +45,7 @@ export function useFavorite({ sku, item, initialFavoriteState = false }: Props) 
             setIsFavorite(newState);
             debounceExecute(newState);
         } else {
-            debounceAlert;
+            debounceAlert();
         };
     };
 

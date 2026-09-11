@@ -12,6 +12,7 @@ import type { PaymentProvidersType, ShoppingCartI } from "../ShoppingTypes";
 import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
+import { formatPrice } from "../../products/Helpers";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useFetchBuyNowItem } from "../../orders/hooks/useFetchOrders";
 import { BiMinus, BiPlus } from "react-icons/bi";
@@ -495,6 +496,7 @@ interface OrderSummaryProps {
     shippingCost: string;
     boxQty: number;
     discount: string;
+    automaticDiscount: string;
     total: string;
     selectedProductsCount: number;
     couponCode: string | null;
@@ -508,7 +510,7 @@ interface OrderSummaryProps {
 }
 
 const OrderSummaryPanel = ({
-    subtotalBeforeIva, iva, shippingCost, boxQty, discount, total,
+    subtotalBeforeIva, iva, shippingCost, boxQty, discount, automaticDiscount, total,
     selectedProductsCount, couponCode, onCouponChange,
     paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error
 }: OrderSummaryProps) => {
@@ -541,13 +543,13 @@ const OrderSummaryPanel = ({
                         <span className="text-base-content/60">IVA (16%)</span>
                         <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${iva}</span>
                     </div>
-                    {parseFloat(discount) > 0 && (
+                    {(parseFloat(discount) + parseFloat(automaticDiscount)) > 0 && (
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-primary font-bold flex items-center gap-1.5">
                                 <FaTag className="text-xs" />
                                 Descuento
                             </span>
-                            <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${discount}</span>
+                            <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${formatPrice((parseFloat(discount.replace(/,/g, "")) + parseFloat(automaticDiscount.replace(/,/g, ""))).toString(), "es-MX")}</span>
                         </div>
                     )}
                 </div>
@@ -792,22 +794,28 @@ const BuyNow = () => {
         };
 
         if (isAuth && selectedAddress) {
-            await createOrder({
+            const ok = await createOrder({
                 buyNowItem,
                 addressUUID: selectedAddress.uuid,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+            }
             return;
         }
 
         if (!isAuth && guestAddressForm && guestAddressForm.consent) {
-            await createOrder({
+            const ok = await createOrder({
                 buyNowItem,
                 guestForm: guestAddressForm,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+            }
             return;
         }
     };
@@ -823,6 +831,7 @@ const BuyNow = () => {
         shippingCost: data.resume?.shippingCostBeforeTaxes || "0.00",
         boxQty: data.resume?.boxesCount || 0,
         discount: data.resume?.discount || "0.00",
+        automaticDiscount: data.resume?.automaticDiscount || "0.00",
         total: data.resume?.total || "0.00",
         selectedProductsCount: 1,
         couponCode,

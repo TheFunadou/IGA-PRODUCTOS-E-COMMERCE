@@ -108,7 +108,7 @@ const LoginV3 = () => {
                     <div className="relative z-10">
                         <img
                             src={IGALogo}
-                            alt="IGA Productos"
+                            alt="Iga Productos"
                             className="w-28 sm:w-32 lg:w-36 object-contain"
                         />
                         <h1 className="mt-6 lg:mt-10 text-xl sm:text-2xl lg:text-3xl font-extrabold text-base-content leading-snug tracking-tight">
@@ -236,7 +236,7 @@ const LoginV3 = () => {
                             <Link to="/politica-de-privacidad" className="text-base-content/60 underline hover:text-primary transition-colors">política de privacidad</Link>
                             {" "}y los{" "}
                             <Link to="/terminos-y-condiciones" className="text-base-content/60 underline hover:text-primary transition-colors">términos y condiciones</Link>
-                            {" "}de IGA Productos.
+                            {" "}de Iga Productos.
                         </p>
                         <p className="text-[11px] text-base-content/30 leading-tight">
                             Este sitio está protegido por reCAPTCHA y se aplican la{" "}

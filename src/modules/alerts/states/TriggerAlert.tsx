@@ -8,7 +8,7 @@ import Alert from "../components/Alert";
 import FavoriteAlert from "../components/FavoriteAlert";
 
 // Se tipa el customHook con las funciones y datos que contiene
-export type TriggerAlertType = "Successfull" | "Error" | "Message" | "Favorite" | null;
+export type TriggerAlertType = "Successfull" | "Error" | "Message" | "Favorite" | "OrderError" | null;
 
 type TriggerAlertContextType = {
     showTriggerAlert: (type: TriggerAlertType, message: string, options?: { favoriteType?: "add" | "remove", delay?: number, duration: number }) => void;
@@ -71,6 +71,7 @@ export const TriggerAlertProvider = ({ children }: { children: ReactNode }) => {
             {triggerAlertType === "Favorite" && (<FavoriteAlert message={message} type={favoriteType} />)}
             {triggerAlertType === "Message" && (<Alert type="Message" message={message} />)}
             {triggerAlertType === "Error" && (<Alert type="Error" message={message} />)}
+            {triggerAlertType === "OrderError" && (<Alert type="OrderError" message={message} />)}
 
         </TriggerAlertContext.Provider>
     );

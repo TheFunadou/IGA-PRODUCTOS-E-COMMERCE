@@ -4,7 +4,7 @@ import { createAddressService, deleteAddressService, getCustomerAddressesService
 import { buildKey } from "../../../global/GlobalHelpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useAuthStore } from "../../auth/states/authStore";
-import type { ProductVersionCardType, ProductVersionDetailType, PVCardsResponseType } from "../../products/ProductTypes";
+import type { ProductVersionCardType, ProductVersionDetailI, ProductVersionDetailV3I, PVCardsResponseType, PV3Params, PV3Response } from "../../products/ProductTypes";
 import { formatAxiosError } from "../../../api/helpers";
 import type { ModalProfileFormType } from "../design/CustomerPersonalInfo";
 
@@ -268,20 +268,59 @@ export function useToggleFavorite() {
                 }
             );
 
-            queryClient.setQueriesData<ProductVersionDetailType>(
+            queryClient.setQueriesData<ProductVersionDetailI | ProductVersionDetailV3I>(
                 {
-                    queryKey: ['product:product_version:detail'],
+                    queryKey: ['product:product_version:details'],
                     predicate: (query) => query.state.data !== undefined
                 },
                 (oldData) => {
                     if (!oldData) return oldData;
-                    if (oldData.product_version.sku === sku) {
+                    if (oldData.sku === sku) {
                         return {
                             ...oldData,
                             isFavorite: isAdding
                         }
                     };
                     return oldData;
+                }
+            );
+
+            queryClient.setQueriesData<PV3Response>(
+                {
+                    queryKey: ['product:version-cards:v3'],
+                    predicate: (query) => {
+                        const params = query.queryKey[1] as PV3Params | undefined;
+                        return params?.filters?.onlyFavorites !== true;
+                    }
+                },
+                (oldData) => {
+                    if (!oldData?.data) return oldData;
+                    return {
+                        ...oldData,
+                        data: oldData.data.map(card =>
+                            card.version.sku === sku
+                                ? { ...card, version: { ...card.version, is_favorite: isAdding } }
+                                : card
+                        )
+                    };
+                }
+            );
+
+            queryClient.setQueriesData<PV3Response>(
+                {
+                    queryKey: ['product:version-cards:v3'],
+                    predicate: (query) => {
+                        const params = query.queryKey[1] as PV3Params | undefined;
+                        return params?.filters?.onlyFavorites === true;
+                    }
+                },
+                (oldData) => {
+                    if (!oldData?.data || isAdding) return oldData;
+                    return {
+                        ...oldData,
+                        data: oldData.data.filter(card => card.version.sku !== sku),
+                        totalRecords: Math.max(0, (oldData.totalRecords ?? 0) - 1)
+                    };
                 }
             );
 
@@ -305,6 +344,11 @@ export function useToggleFavorite() {
             queryClient.invalidateQueries({
                 queryKey: customerQueryKeys.favorites(authCustomer?.uuid!),
                 refetchType: "none"
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ['product:version-cards:v3'],
+                refetchType: "all"
             });
         },
         onError: (error, _variables, context) => {

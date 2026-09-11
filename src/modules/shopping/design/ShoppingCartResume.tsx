@@ -13,6 +13,7 @@ import type { PaymentProvidersType } from "../ShoppingTypes";
 import type { CustomerAddressType, GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 import GuestAddressFormModal from "../components/GuestAddressFormModal";
 import clsx from "clsx";
+import { formatPrice } from "../../products/Helpers";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useHandleShoppingCart } from "../hooks/handleShoppingCart";
 import { BiMinus, BiPlus } from "react-icons/bi";
@@ -465,6 +466,7 @@ interface OrderSummaryProps {
     shippingCost: string;
     boxQty: number;
     discount: string;
+    automaticDiscount: string;
     applicableOffers?: { name: string; discount: string; type: "PERCENTAGE" | "COUPON" }[];
     total: string;
     selectedProductsCount: number;
@@ -477,12 +479,13 @@ interface OrderSummaryProps {
     theme: string;
     error: string | null;
     hasDestination: boolean;
+    isSubmitBlocked: boolean;
 }
 
 const OrderSummaryPanel = ({
-    subtotalBeforeIva, iva, shippingCost, boxQty, discount, applicableOffers = [], total,
+    subtotalBeforeIva, iva, shippingCost, boxQty, discount, automaticDiscount, total,
     selectedProductsCount, couponCode, onCouponChange,
-    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error, hasDestination
+    paymentProvider, onPaymentProviderChange, onCreateOrder, orderLoading, theme, error, hasDestination, isSubmitBlocked
 }: OrderSummaryProps) => {
     return (
         <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden sticky top-5">
@@ -521,32 +524,15 @@ const OrderSummaryPanel = ({
                         <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${iva}</span>
                     </div>
 
-                    {/* Breakdown of offers */}
-                    {applicableOffers.length > 0 ? (
-                        <div className="flex flex-col gap-2 pt-1">
-                            {applicableOffers.map((off, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-sm rounded-xl bg-primary/5 border border-primary/10 px-3 py-2">
-                                    <span className="flex items-center gap-1.5 text-primary font-bold">
-                                        <FaTag className="text-xs" />
-                                        <p>Descuento</p>
-                                    </span>
-                                    <span className="font-bold text-primary flex items-center gap-0.5">
-                                        <BiMinus className="text-xs" />
-                                        ${off.discount}
-                                    </span>
-                                </div>
-                            ))}
+                    {/* Descuento acumulado (ofertas/cupón + mayoreo) */}
+                    {(parseFloat(discount) + parseFloat(automaticDiscount)) > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-primary font-bold flex items-center gap-1.5">
+                                <FaTag className="text-xs" />
+                                Descuento
+                            </span>
+                            <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${formatPrice((parseFloat(discount.replace(/,/g, "")) + parseFloat(automaticDiscount.replace(/,/g, ""))).toString(), "es-MX")}</span>
                         </div>
-                    ) : (
-                        parseFloat(discount) > 0 && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-primary font-bold flex items-center gap-1.5">
-                                    <FaTag className="text-xs" />
-                                    Descuento
-                                </span>
-                                <span className="text-primary font-bold flex items-center gap-0.5"><BiMinus className="text-xs" />${discount}</span>
-                            </div>
-                        )
                     )}
                 </div>
 
@@ -604,7 +590,7 @@ const OrderSummaryPanel = ({
 
                 <button
                     className="w-full btn btn-primary font-bold gap-2 mt-1"
-                    disabled={paymentProvider === null || orderLoading}
+                    disabled={paymentProvider === null || orderLoading || isSubmitBlocked}
                     onClick={onCreateOrder}
                 >
                     {orderLoading ? (
@@ -636,7 +622,7 @@ const ShoppingCartResumeV2 = () => {
     const { theme } = useThemeStore();
     const navigate = useNavigate();
     const { isAuth, authCustomer } = useAuthStore();
-    const { order, createOrder, isLoading: orderLoading, error, clearError } = usePaymentStore();
+    const { order, createOrder, isLoading: orderLoading, error, clearError, clearErrorBadge, duplicateGuestEmail } = usePaymentStore();
     const { showTriggerAlert } = useTriggerAlert();
     const location = useLocation();
 
@@ -731,20 +717,26 @@ const ShoppingCartResumeV2 = () => {
         };
 
         if (isAuth && selectedAddress) {
-            await createOrder({
+            const ok = await createOrder({
                 addressUUID: selectedAddress.uuid,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+            }
             return;
         };
 
         if (!isAuth && guestAddressForm && guestAddressForm.consent) {
-            await createOrder({
+            const ok = await createOrder({
                 guestForm: guestAddressForm,
                 paymentProvider,
                 couponCode: couponCode || undefined,
             });
+            if (!ok) {
+                showTriggerAlert("OrderError", usePaymentStore.getState().error ?? "No pudimos procesar tu pago, intenta nuevamente.", { duration: 4000 });
+            }
             return;
         }
     };
@@ -752,6 +744,7 @@ const ShoppingCartResumeV2 = () => {
     const handleGuestFormSave = (data: GuestCreateOrderFormType) => {
         setGuestAddressForm(data);
         setShowGuestFormEdit(false);
+        clearError();
     };
 
     useEffect(() => {
@@ -768,6 +761,7 @@ const ShoppingCartResumeV2 = () => {
         shippingCost: handleCart.data?.resume?.shippingCostBeforeTaxes || "0.00",
         boxQty: handleCart.data?.resume?.boxesCount || 0,
         discount: handleCart.data?.resume?.discount || "0.00",
+        automaticDiscount: handleCart.data?.resume?.automaticDiscount || "0.00",
         applicableOffers: handleCart.data?.resume?.applicableOffers || [],
         total: handleCart.data?.resume?.total || "0.00",
         selectedProductsCount: selectedProducts.length,
@@ -780,6 +774,7 @@ const ShoppingCartResumeV2 = () => {
         theme: theme!,
         error,
         hasDestination: !!destination,
+        isSubmitBlocked: !!(duplicateGuestEmail && guestAddressForm?.email === duplicateGuestEmail),
     };
 
     return (
@@ -877,7 +872,7 @@ const ShoppingCartResumeV2 = () => {
                                     </h2>
                                     <button
                                         type="button"
-                                        onClick={() => setShowGuestFormEdit(true)}
+                                        onClick={() => { clearErrorBadge(); setShowGuestFormEdit(true); }}
                                         className="text-xs text-base-content/50 hover:text-primary transition-colors underline underline-offset-2"
                                     >
                                         Editar
