@@ -10,11 +10,11 @@ import clsx from "clsx";
 import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import PdfViewerModal from "../components/PdfViewerModal";
 import { useFavorite } from "../hooks/useProductFavorites";
-import type { AddPVReviewType, ProductResourceI } from "../ProductTypes";
+import type { AddPVReviewType } from "../ProductTypes";
 import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
 // ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import {
-    FaArrowLeft, FaArrowUpRightFromSquare, FaAward, FaBoxOpen,
+    FaArrowDownLong, FaArrowLeft, FaArrowUpRightFromSquare, FaAward, FaBoxOpen,
     FaBoxesPacking, FaCircleCheck, FaCirclePause, FaCircleUser,
     FaFileInvoiceDollar, FaFileLines, FaHeadset,
     FaShieldHalved, FaStar, FaTag, FaTruck, FaTriangleExclamation,
@@ -197,27 +197,6 @@ const QuickSpecsList = ({ specs }: { specs: { label: string; value: string }[] }
             </div>
         ))}
     </dl>
-);
-
-// ── ResourceRow (recursos que no son certificaciones) ────────────────────────
-const ResourceRow = ({ resource }: { resource: ProductResourceI }) => (
-    <div className="flex items-center gap-2.5 py-1.5 group/resource">
-        <FaFileLines className="text-base-content/40 text-sm shrink-0" />
-        <p className="text-xs font-semibold text-base-content/75 truncate flex-1 min-w-0" title={resource.description}>
-            {resource.description}
-        </p>
-        <span className="badge badge-ghost badge-xs shrink-0">{resource.type}</span>
-        <a
-            href={toDriveDownloadUrl(resource.resourceUrl)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-ghost btn-xs btn-circle shrink-0"
-            title="Descargar"
-            aria-label={`Descargar ${resource.description}`}
-        >
-            ↓
-        </a>
-    </div>
 );
 
 // ── PurchaseCard ──────────────────────────────────────────────────────────────
@@ -970,6 +949,28 @@ const ProductVersionDetailV3 = () => {
                             </button>
                         )}
 
+                        {otherResources.length > 0 && (
+                            <div className="flex flex-col gap-1.5">
+                                {otherResources.map(resource => (
+                                    <a
+                                        key={resource.id}
+                                        href={toDriveDownloadUrl(resource.resourceUrl)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-outline btn-primary btn-xs rounded-full font-bold gap-1.5 px-3 border-primary/30 hover:bg-primary hover:border-primary justify-between"
+                                        title={resource.description}
+                                        data-tip="Descargar recurso"
+                                    >
+                                        <span className="flex items-center gap-1.5 min-w-0">
+                                            <FaFileLines className="text-[10px] shrink-0" />
+                                            <span className="truncate">{resource.description}</span>
+                                        </span>
+                                        <FaArrowDownLong className="text-[10px] shrink-0" />
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+
                         {certificationResources.length > 0 && (
                             <div className="flex flex-col gap-2">
                                 {certificationResources.map(resource => (
@@ -993,19 +994,6 @@ const ProductVersionDetailV3 = () => {
                                     </a>
                                 ))}
                             </div>
-                        )}
-
-                        {otherResources.length > 0 && (
-                            <details className="collapse collapse-arrow bg-base-200/35 border border-base-200 rounded-xl">
-                                <summary className="collapse-title min-h-0 py-2.5 text-xs font-extrabold text-base-content/70 uppercase tracking-wider">
-                                    Documentos y recursos ({otherResources.length})
-                                </summary>
-                                <div className="collapse-content px-3 divide-y divide-base-200/70">
-                                    {otherResources.map(resource => (
-                                        <ResourceRow key={resource.id} resource={resource} />
-                                    ))}
-                                </div>
-                            </details>
                         )}
 
                         {!techSheetUrl && certificationResources.length === 0 && otherResources.length === 0 && (

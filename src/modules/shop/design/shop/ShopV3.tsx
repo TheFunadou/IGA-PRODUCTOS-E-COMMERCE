@@ -18,6 +18,8 @@ import { useCartTagStore } from "../../../shopping/stores/cartTagStore";
 import PaginationComponent from "../../../../global/components/PaginationComponent";
 import { useAuthStore } from "../../../auth/states/authStore";
 import { FaBoxOpen } from "react-icons/fa";
+import { useThemeStore } from "../../../../layouts/states/themeStore";
+import clsx from "clsx";
 
 const VIEW_MODE_KEY = "shop:viewMode:v1";
 type ViewMode = "grid" | "list";
@@ -47,6 +49,7 @@ export const ShopV3 = () => {
     const backToTopSentinelRef = useRef<HTMLDivElement | null>(null);
 
     const { isAuth } = useAuthStore();
+    const { theme } = useThemeStore();
 
     const navigation = useShopNavigation();
     const filters = useShopFilters();
@@ -273,7 +276,7 @@ export const ShopV3 = () => {
         <div id="tienda" className="px-4 py-8 sm:px-8 lg:px-20 lg:py-14 scroll-mt-24">
             {/* Title */}
             <div className="mb-8">
-                <h1 className="text-start text-3xl sm:text-4xl lg:text-5xl font-black text-blue-950">
+                <h1 className={clsx("text-start text-3xl sm:text-4xl lg:text-5xl font-black", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                     Tienda de Productos
                 </h1>
                 <h5 className="mt-2 text-base-content/50 text-xl">Selecciona los productos que necesita tu equipo</h5>

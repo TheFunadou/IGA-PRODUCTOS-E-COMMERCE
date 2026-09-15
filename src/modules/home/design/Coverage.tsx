@@ -5,6 +5,8 @@ import { HiGlobeAlt } from "react-icons/hi2";
 import { IoLocationSharp } from "react-icons/io5";
 import { FaBoxOpen, FaHandshake, FaIndustry } from "react-icons/fa6";
 import { HomeSection, PageHero, SectionHeading, HeroPill, StampBadge } from "./shared";
+import { useThemeStore } from "../../../layouts/states/themeStore";
+import clsx from "clsx";
 
 const coverageStats = [
     { label: "Estados con cobertura", value: "32", icon: <IoLocationSharp /> },
@@ -15,6 +17,7 @@ const coverageStats = [
 
 const Coverage = () => {
     document.title = "Iga Productos | Cobertura";
+    const { theme } = useThemeStore();
 
     return (
         <div className="px-3 sm:px-5 lg:px-8 pt-4 sm:pt-6 pb-16 sm:pb-24 animate-fade-in-up flex flex-col">
@@ -69,7 +72,7 @@ const Coverage = () => {
                             <span className="bg-primary/10 text-primary p-3 rounded-xl text-2xl">
                                 {stat.icon}
                             </span>
-                            <p className="font-black text-3xl sm:text-4xl leading-none text-blue-950">
+                            <p className={clsx("font-black text-3xl sm:text-4xl leading-none", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                                 {stat.value}
                             </p>
                             <p className="text-xs sm:text-sm leading-snug text-base-content/60">

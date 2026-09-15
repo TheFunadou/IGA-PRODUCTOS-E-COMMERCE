@@ -19,6 +19,8 @@ import { FaHandshake, FaHeadset, FaWhatsapp } from "react-icons/fa6";
 import type { ReactNode } from "react";
 import { trackLead } from "../../analytics/MetaEvents";
 import { HomeSection, PageHero, SectionHeading, HeroPill } from "./shared";
+import { useThemeStore } from "../../../layouts/states/themeStore";
+import clsx from "clsx";
 
 const CONTACT_EMAIL = "atencionaclientes@igaproductos.com";
 const CONTACT_PHONE = "+529211963246";
@@ -90,6 +92,7 @@ const messageFields: [string, string][] = [
 
 const Contact = () => {
     document.title = "Iga Productos | Contacto";
+    const { theme } = useThemeStore();
 
     return (
         <div className="px-3 sm:px-5 lg:px-8 pt-4 sm:pt-6 pb-16 sm:pb-24 animate-fade-in-up flex flex-col">
@@ -272,7 +275,7 @@ const Contact = () => {
                 />
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 items-stretch">
                     <div className="w-full lg:w-1/2 bg-base-100 rounded-2xl px-5 sm:px-7 py-6 flex flex-col gap-3 border border-base-200">
-                        <p className="font-black text-base sm:text-lg text-blue-950">
+                        <p className={clsx("font-black text-base sm:text-lg", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                             Incluye los siguientes datos:
                         </p>
                         <ol className="flex flex-col gap-2.5">

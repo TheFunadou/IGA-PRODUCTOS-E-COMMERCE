@@ -1,6 +1,7 @@
 import type { ElementType, ReactNode } from "react";
 import clsx from "clsx";
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 interface PageHeroProps {
     image: string;
@@ -92,10 +93,12 @@ export const SectionHeading = ({
     icon: Icon,
     center = false,
 }: SectionHeadingProps) => {
+    const { theme } = useThemeStore();
+
     if (center) {
         return (
             <header className="mb-6 md:mb-8">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl text-center font-black tracking-tight text-blue-950 leading-tight">
+                <h2 className={clsx("text-2xl sm:text-3xl lg:text-4xl text-center font-black tracking-tight leading-tight", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                     {title}
                 </h2>
                 {subtitle && (
@@ -111,7 +114,7 @@ export const SectionHeading = ({
         <header className="mb-6 md:mb-8">
             <div className="flex items-center gap-3">
                 <span className="w-1 h-6 md:h-7 bg-primary rounded-full shrink-0" aria-hidden="true" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-blue-950 leading-tight">
+                <h2 className={clsx("text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                     {title}
                 </h2>
             </div>

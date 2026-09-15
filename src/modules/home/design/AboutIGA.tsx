@@ -30,6 +30,7 @@ import {
 } from "react-icons/fa6";
 import { OverflowXComponent } from "../components/OverflowXComponent";
 import { HomeSection, PageHero, SectionHeading } from "./shared";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 type PrincipleKey = "mision" | "vision" | "policy" | "value";
 
@@ -71,12 +72,12 @@ const NormChip = ({ children }: { children: string }) => (
     </span>
 );
 
-const milestones: { year: string; body: ReactNode }[] = [
+const milestones: { year: string; body: (isDark: boolean) => ReactNode }[] = [
     {
         year: "1999",
-        body: (
+        body: (isDark) => (
             <>
-                <strong className="text-blue-950 font-bold">
+                <strong className={clsx("font-bold", isDark ? "text-base-content" : "text-blue-950")}>
                     PLÁSTICOS DEL GOLFO SUR S.A. DE CV.
                 </strong>{" "}
                 como Asociación Civil se involucra en la transformación y
@@ -87,7 +88,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2003",
-        body: (
+        body: () => (
             <>
                 Incursionamos en el área de seguridad personal, fabricando dos
                 líneas específicas; cascos y lentes de seguridad en varios
@@ -101,7 +102,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2009",
-        body: (
+        body: () => (
             <>
                 Implementamos una serie de equipos de producción de primera
                 calidad para lograr ahorros energéticos substanciales y una
@@ -111,7 +112,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2014-2020",
-        body: (
+        body: () => (
             <>
                 Certificación al proceso Normativos de nuestros cascos de
                 seguridad industrial en las diversas Normas Mexicanas e
@@ -121,7 +122,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2017",
-        body: (
+        body: () => (
             <>
                 Plásticos obtiene la presidencia del subcomité de equipos de
                 protección a la cabeza del comité técnico de normalización
@@ -131,7 +132,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2018",
-        body: (
+        body: () => (
             <>
                 Se obtiene la certificación{" "}
                 <strong className="text-primary font-black">ISO 9001-2015</strong>
@@ -143,7 +144,7 @@ const milestones: { year: string; body: ReactNode }[] = [
     },
     {
         year: "2021",
-        body: (
+        body: () => (
             <>
                 Plásticos del Golfo Sur obtiene el certificado{" "}
                 <strong className="text-primary font-black">
@@ -244,6 +245,7 @@ const AboutIGA = () => {
     const [select, setSelect] = useState<PrincipleKey>("mision");
     const [activeImage, setActiveImage] = useState<(typeof expoGallery)[number] | null>(null);
     const [activeVideo, setActiveVideo] = useState<(typeof sampleVideos)[number] | null>(null);
+    const { theme } = useThemeStore();
 
     const openLightbox = (image: (typeof expoGallery)[number]) => {
         setActiveImage(image);
@@ -353,11 +355,11 @@ const AboutIGA = () => {
                                             <FaCircleCheck className="text-primary text-xl" />
                                         </div>
                                         <div className="timeline-end timeline-box mb-6 md:mb-8 border-base-200 bg-base-100 shadow-sm rounded-xl max-w-none">
-                                            <time className="font-black text-blue-950 text-lg leading-none mb-1 block">
+                                            <time className={clsx("font-black text-lg leading-none mb-1 block", theme === "dark" ? "text-base-content" : "text-blue-950")}>
                                                 {milestone.year}
                                             </time>
                                             <p className="text-xs sm:text-sm leading-5 sm:leading-6 text-justify text-base-content/80">
-                                                {milestone.body}
+                                                {milestone.body(theme === "dark")}
                                             </p>
                                         </div>
                                         {index < milestones.length - 1 && (

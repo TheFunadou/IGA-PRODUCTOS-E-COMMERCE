@@ -4,6 +4,7 @@ import { ChevronDown, Tag } from "lucide-react";
 import clsx from "clsx";
 import type { CategoryType } from "../../categories/CategoriesTypes";
 import type { PublicCategoryTagItem } from "../../products/ProductTypes";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 const CATEGORY_ORDER = ["Cascos", "Suspensiones", "Barboquejos", "Lentes", "Otros Articulos"];
 
@@ -36,6 +37,8 @@ const ShopCategoryFilterList = ({
     pendingTagIds,
     onToggleTag,
 }: ShopCategoryFilterListProps) => {
+    const { theme } = useThemeStore();
+    const isDark = theme === "dark";
     const orderedCategories = useMemo(() => {
         if (!categories) return [];
         const indexByUuid = new Map(categories.map((cat, index) => [cat.uuid, index]));
@@ -159,8 +162,13 @@ const ShopCategoryFilterList = ({
                                                                 className={clsx(
                                                                     "badge badge-sm cursor-pointer transition-all duration-150 gap-1",
                                                                     isSelected
-                                                                        ? "bg-blue-950 border-blue-950 text-white hover:bg-blue-800"
-                                                                        : "bg-base-100 text-base-content/80 border-base-300 hover:border-blue-950/40 hover:bg-blue-950/5 hover:text-blue-950"
+? "bg-blue-950 border-blue-950 text-white hover:bg-blue-800"
+                                                                : clsx(
+                                                                      "bg-base-100 text-base-content/80 border-base-300",
+                                                                      isDark
+                                                                          ? "hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-base-content"
+                                                                          : "hover:border-blue-950/40 hover:bg-blue-950/5 hover:text-blue-950"
+                                                                  )
                                                                 )}
                                                             >
                                                                 <Tag size={9} />

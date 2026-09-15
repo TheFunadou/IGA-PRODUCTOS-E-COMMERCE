@@ -8,6 +8,8 @@ import Marquee from "react-fast-marquee";
 import { paymentMethodsImages } from "../helpers";
 import { useShopExternalTagsStore } from "../../shop/states/shopExternalTagsStore";
 import { useCartTagStore } from "../../shopping/stores/cartTagStore";
+import { useThemeStore } from "../../../layouts/states/themeStore";
+import clsx from "clsx";
 
 
 
@@ -18,6 +20,7 @@ const ChoseYourHelmet = (params: {
 }) => {
     const requestTagFilter = useShopExternalTagsStore((s) => s.requestTagFilter);
     const addTags = useCartTagStore((s) => s.addTags);
+    const { theme } = useThemeStore();
 
     return (
         <div className="card bg-base-100 w-full max-w-96 lg:w-96 lg:max-w-none shadow-sm">
@@ -27,7 +30,7 @@ const ChoseYourHelmet = (params: {
                     alt="Shoes" />
             </figure>
             <div className="card-body flex items-center justify-center">
-                <h2 className="card-title text-blue-950 font-bold text-2xl">{params.title}</h2>
+                <h2 className={clsx("card-title font-bold text-2xl", theme === "dark" ? "text-base-content" : "text-blue-950")}>{params.title}</h2>
                 <div className="card-actions justify-center">
                     <button
                         type="button"
@@ -47,14 +50,15 @@ const ChoseYourHelmet = (params: {
 
 export const MoreAbout = () => {
     const { data: selectedHelmets, isLoading: helmetsLoading } = useFetchSelectedHelmets();
+    const { theme } = useThemeStore();
 
     return (
         <div className="flex items-center justify-center flex-col py-10 lg:py-20">
             <div className="w-full px-4 sm:px-6 lg:px-0 lg:w-80/100 flex flex-col gap-12 lg:gap-20">
                 <section>
                     <div>
-                        <h1 className="text-blue-950 text-3xl sm:text-4xl lg:text-5xl text-center">Encuentra tu Casco Iga ideal</h1>
-                        <p className="text-center mt-2 text-blue-950/60 text-lg lg:text-xl">Selecciona según tu tipo de operación</p>
+                        <h1 className={clsx("text-3xl sm:text-4xl lg:text-5xl text-center", theme === "dark" ? "text-base-content" : "text-blue-950")}>Encuentra tu Casco Iga ideal</h1>
+                        <p className={clsx("text-center mt-2 text-lg lg:text-xl", theme === "dark" ? "text-base-content/60" : "text-blue-950/60")}>Selecciona según tu tipo de operación</p>
                     </div>
                     <div className="mt-5 flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
                         <ChoseYourHelmet
@@ -79,7 +83,7 @@ export const MoreAbout = () => {
                 </section>
                 <section>
                     <div>
-                        <h1 className="text-blue-950 text-3xl sm:text-4xl lg:text-5xl text-center">Modelos más buscados</h1>
+                        <h1 className={clsx("text-3xl sm:text-4xl lg:text-5xl text-center", theme === "dark" ? "text-base-content" : "text-blue-950")}>Modelos más buscados</h1>
                     </div>
                     <div className="mt-5">
                         {helmetsLoading && (

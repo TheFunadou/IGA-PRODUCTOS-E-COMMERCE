@@ -2,6 +2,7 @@ import { FaBarcode, FaBoxOpen, FaHeart, FaStar, FaTag } from "react-icons/fa6";
 import { ArrowUpDown, X } from "lucide-react";
 import clsx from "clsx";
 import type { colorLine, PV3SortField } from "../../products/ProductTypes";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 export type AppliedFilterKey =
     | "favorite"
@@ -30,8 +31,10 @@ interface ShopAppliedFiltersProps {
     onClearAll: () => void;
 }
 
-const badgeBase =
-    "badge badge-sm gap-1 pr-1 h-auto py-1.5 border-blue-950/20 bg-blue-950/5 text-blue-950 hover:text-primary cursor-default transition-colors";
+const badgeBase = (isDark: boolean) =>
+    `badge badge-sm gap-1 pr-1 h-auto py-1.5 border-blue-950/20 bg-blue-950/5 ${
+        isDark ? "text-base-content" : "text-blue-950"
+    } hover:text-primary cursor-default transition-colors`;
 
 const ShopAppliedFilters = ({
     favoriteCheck,
@@ -50,6 +53,8 @@ const ShopAppliedFilters = ({
     onRemoveTagName,
     onClearAll,
 }: ShopAppliedFiltersProps) => {
+    const { theme } = useThemeStore();
+    const isDark = theme === "dark";
     const hasAny =
         favoriteCheck ||
         offerCheck ||
@@ -67,7 +72,7 @@ const ShopAppliedFilters = ({
     return (
         <div className="flex flex-wrap items-center gap-1.5">
             {favoriteCheck && (
-                <span className={clsx(badgeBase, "!border-rose-400/30 !bg-rose-500/10 text-rose-500 hover:text-rose-600")}>
+                <span className={clsx(badgeBase(isDark), "!border-rose-400/30 !bg-rose-500/10 text-rose-500 hover:text-rose-600")}>
                     <FaHeart size={9} />
                     Solo favoritos
                     <button
@@ -82,7 +87,7 @@ const ShopAppliedFilters = ({
             )}
 
             {offerCheck && (
-                <span className={clsx(badgeBase, "!border-warning/40 !bg-warning/15 text-warning-content font-semibold")}>
+                <span className={clsx(badgeBase(isDark), "!border-warning/40 !bg-warning/15 text-warning-content font-semibold")}>
                     <FaTag size={9} />
                     Solo ofertas
                     <button
@@ -97,7 +102,7 @@ const ShopAppliedFilters = ({
             )}
 
             {stockCheck && (
-                <span className={clsx(badgeBase)}>
+                <span className={clsx(badgeBase(isDark))}>
                     <FaBoxOpen size={10} />
                     Con stock
                     <button
@@ -112,7 +117,7 @@ const ShopAppliedFilters = ({
             )}
 
             {ratingFilter !== undefined && (
-                <span className={clsx(badgeBase)}>
+                <span className={clsx(badgeBase(isDark))}>
                     <FaStar size={9} className="text-warning" />
                     Calificación ≥ {ratingFilter}
                     <button
@@ -127,7 +132,7 @@ const ShopAppliedFilters = ({
             )}
 
             {colorLineFilter && (
-                <span className={clsx(badgeBase)}>
+                <span className={clsx(badgeBase(isDark))}>
                     Línea: {colorLineFilter}
                     <button
                         type="button"
@@ -141,7 +146,7 @@ const ShopAppliedFilters = ({
             )}
 
             {priceRange && (
-                <span className={clsx(badgeBase)}>
+                <span className={clsx(badgeBase(isDark))}>
                     Precio: ${priceRange.min}{priceRange.max ? ` - $${priceRange.max}` : "+"}
                     <button
                         type="button"
@@ -155,7 +160,7 @@ const ShopAppliedFilters = ({
             )}
 
             {skuFilter !== undefined && skuFilter.length > 0 && (
-                <span className={clsx(badgeBase)}>
+                <span className={clsx(badgeBase(isDark))}>
                     <FaBarcode size={10} />
                     <span className="max-w-48 truncate">SKUs: {skuFilter.join(", ")}</span>
                     <button
@@ -170,7 +175,7 @@ const ShopAppliedFilters = ({
             )}
 
             {activeSorts?.map((s) => (
-                <span key={s.field} className={clsx(badgeBase)}>
+                <span key={s.field} className={clsx(badgeBase(isDark))}>
                     <ArrowUpDown size={9} />
                     {s.label}
                     <button
@@ -185,7 +190,7 @@ const ShopAppliedFilters = ({
             ))}
 
             {pendingTagNames.map((tag) => (
-                <span key={tag.id} className={badgeBase}>
+                <span key={tag.id} className={badgeBase(isDark)}>
                     <FaTag size={8} />
                     {`etiqueta: ${tag.name}`}
                     <button
@@ -200,7 +205,7 @@ const ShopAppliedFilters = ({
             ))}
 
             {(tagNameFilter ?? []).map((name) => (
-                <span key={`tag-name-${name}`} className={badgeBase}>
+                <span key={`tag-name-${name}`} className={badgeBase(isDark)}>
                     <FaTag size={8} />
                     {`nombre etiqueta: ${name}`}
                     <button
