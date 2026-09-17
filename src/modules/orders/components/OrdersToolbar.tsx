@@ -179,7 +179,7 @@ const OrdersToolbar = ({ state, totalRecords, onPatch, onReset }: Props) => {
                         <select
                             value={state.sortField}
                             onChange={(e) => onPatch({ sortField: e.target.value as OrdersDashboardQueryState["sortField"] })}
-                            className="select select-ghost select-xs font-bold uppercase text-[10px] border-0 bg-transparent"
+                            className="select select-bordered select-sm font-bold"
                             aria-label="Ordenar por"
                         >
                             {ORDER_DASHBOARD_SORT_FIELDS.map((field) => (

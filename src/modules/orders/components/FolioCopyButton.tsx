@@ -36,9 +36,9 @@ const FolioCopyButton = ({ uuid, sizeClass = "text-[11px]" }: Props) => {
                 e.stopPropagation();
                 handleCopy();
             }}
-            data-tip={copied ? "¡Folio copiado!" : "Copiar folio"}
+            data-tip={copied ? "¡Folio copiado!" : "Copiar al portapapeles"}
             aria-label="Copiar folio al portapapeles"
-            className={`inline-flex items-center justify-center rounded-md border px-1.5 py-1 transition-all duration-150 shrink-0 ${
+            className={`tooltip tooltip-top z-50 inline-flex items-center justify-center rounded-md border px-1.5 py-1 transition-all duration-150 shrink-0 ${
                 copied
                     ? "bg-success/10 text-success border-success/30"
                     : "bg-base-200 text-base-content/40 border-base-300 hover:text-base-content hover:border-base-content/30"

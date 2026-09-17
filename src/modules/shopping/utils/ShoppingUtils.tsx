@@ -20,12 +20,16 @@ export const paymentProvider: Record<Exclude<PaymentProvidersType, null>, Paymen
     }
 };
 
-export const paymentMethod: Record<PaymentMethodType, PaymentMethodDetails> = {
+export const paymentMethod: Record<PaymentMethodType, PaymentMethodDetails> & Record<string, PaymentMethodDetails> = {
     visa: {
         image_url: VisaLogo,
         description: "Visa"
     },
     mastercard: {
+        image_url: MastercardLogo,
+        description: "Mastercard"
+    },
+    master: {
         image_url: MastercardLogo,
         description: "Mastercard"
     },
@@ -47,9 +51,23 @@ export const paymentMethod: Record<PaymentMethodType, PaymentMethodDetails> = {
     }
 };
 
+const fallbackPaymentDetails = (raw: string): PaymentMethodDetails => ({
+    image_url: MercadoPagoLogo,
+    description: raw
+        .replace(/_/g, " ")
+        .trim()
+        .replace(/\b\w/g, (char) => char.toUpperCase()),
+});
+
+export const getPaymentMethodDetails = (raw: string): PaymentMethodDetails =>
+    (paymentMethod as Record<string, PaymentMethodDetails>)[raw] ?? fallbackPaymentDetails(raw);
+
+export const getPaymentProviderDetails = (raw: Exclude<PaymentProvidersType, null>): PaymentMethodDetails =>
+    paymentProvider[raw] ?? fallbackPaymentDetails(raw);
+
 export const formatPaymentClass: Record<PaymentClassType, string> = {
-    credit_card: "Tarjeta de credito",
-    debit_card: "Tarjeta de debito",
+    credit_card: "Tarjeta de Crédito",
+    debit_card: "Tarjeta de Débito",
     ticket: "Efectivo",
     transfer: "Transferencia interbancaria"
 };

@@ -10,6 +10,7 @@ import { buildInvoiceMailto } from "../utils/invoice";
 import FolioCopyButton from "./FolioCopyButton";
 import OrderIssueModal from "./OrderIssueModal";
 import ThumbnailGallery from "./ThumbnailGallery";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 type Props = {
     order: CustomerOrdersDashboardCardI;
@@ -20,6 +21,7 @@ type Props = {
 const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
     const [issueOpen, setIssueOpen] = useState(false);
     const navigate = useNavigate();
+    const { theme } = useThemeStore();
 
     const item = order.items[0];
     const buyerName = `${order.buyer.name} ${order.buyer.surname}`.trim();
@@ -35,7 +37,7 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
     return (
         <article
             className={clsx(
-                "w-full rounded-3xl border border-base-300 overflow-hidden shadow-sm relative flex flex-col transition-all duration-200 cursor-pointer",
+                "w-full rounded-3xl border border-base-300 shadow-sm relative flex flex-col transition-all duration-200 cursor-pointer",
                 orderStatusCardTintClass(order.status),
                 isActive ? "shadow-lg ring-1 ring-primary/20" : "hover:shadow-md"
             )}
@@ -44,7 +46,9 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
             aria-expanded={isActive}
             aria-label={`Orden ${order.uuid}`}
         >
-            <span className={clsx("absolute top-0 left-0 right-0 h-1.5", orderStatusStripClass(order.status))} />
+            <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <span className={clsx("absolute top-0 left-0 right-0 h-1.5", orderStatusStripClass(order.status))} />
+            </span>
 
             <div className="p-4 flex flex-col gap-3 flex-1 pt-6">
                 <div className="flex items-start gap-3">
@@ -119,7 +123,7 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
                         <a
                             href={invoiceHref}
                             data-tip="Adjunta tu Constancia de Situación Fiscal, régimen fiscal y uso CFDI"
-                            className="btn btn-xs gap-1.5 font-bold tooltip tooltip-top bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
+                            className="btn btn-xs gap-1.5 font-bold tooltip tooltip-top z-50 bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <FaFileInvoice className="text-[9px]" />
@@ -139,7 +143,15 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
                             Problema
                         </button>
                     )}
-                    <span className="text-[9px] font-bold text-base-content/40 ml-auto">
+                    <span className="flex items-center gap-1.5 text-[9px] font-bold text-base-content/50 ml-auto">
+                        <figure className={clsx("w-5 h-5 rounded-md flex items-center justify-center p-0.5 overflow-hidden", theme === "dark" ? "bg-white/15" : "bg-white")}>
+                            <img
+                                className="w-full h-full object-contain"
+                                src={paymentProvider[order.paymentProvider].image_url}
+                                alt={paymentProvider[order.paymentProvider].description}
+                                loading="lazy"
+                            />
+                        </figure>
                         {paymentProvider[order.paymentProvider].description}
                     </span>
                 </div>

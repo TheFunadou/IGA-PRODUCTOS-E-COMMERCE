@@ -210,6 +210,7 @@ interface PurchaseCardProps {
     selectProductQty: string;
     stockError: string;
     isFavorite: boolean;
+    isAuth: boolean;
     onQtySelect: (v: string) => void;
     onQtySet: (v: string) => void;
     onQtyLimit: (v: string) => void;
@@ -223,7 +224,7 @@ interface PurchaseCardProps {
 
 const PurchaseCard = ({
     unitPrice, finalPrice, isOffer, discount, stock,
-    productQty, selectProductQty, stockError, isFavorite,
+    productQty, selectProductQty, stockError, isFavorite, isAuth,
     onQtySelect, onQtySet, onQtyLimit,
     onAddCart, onBuyNow, onToggleFavorite, onShare, maxStock, status
 }: PurchaseCardProps) => {
@@ -358,19 +359,23 @@ const PurchaseCard = ({
             </div>
 
             <div className="flex items-center justify-around p-1.5 rounded-xl bg-base-200/40 border border-base-200">
-                <button
-                    type="button"
-                    className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-lg text-[11px] font-bold hover:bg-base-100 transition-colors active:scale-95"
-                    onClick={onToggleFavorite}
-                >
-                    {isFavorite
-                        ? <IoMdHeart className="text-lg text-error" />
-                        : <IoIosHeartEmpty className="text-lg text-base-content/60 hover:text-error" />}
-                    <span className={isFavorite ? "text-error" : "text-base-content/60"}>
-                        {isFavorite ? "Guardado" : "Favorito"}
-                    </span>
-                </button>
-                <div className="w-px h-6 bg-base-300" />
+                {isAuth && (
+                    <>
+                        <button
+                            type="button"
+                            className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-lg text-[11px] font-bold hover:bg-base-100 transition-colors active:scale-95"
+                            onClick={onToggleFavorite}
+                        >
+                            {isFavorite
+                                ? <IoMdHeart className="text-lg text-error" />
+                                : <IoIosHeartEmpty className="text-lg text-base-content/60 hover:text-error" />}
+                            <span className={isFavorite ? "text-error" : "text-base-content/60"}>
+                                {isFavorite ? "Guardado" : "Favorito"}
+                            </span>
+                        </button>
+                        <div className="w-px h-6 bg-base-300" />
+                    </>
+                )}
                 <button
                     type="button"
                     className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-lg text-base-content/60 text-[11px] font-bold hover:text-base-content hover:bg-base-100 transition-colors active:scale-95"
@@ -567,6 +572,7 @@ const ProductVersionDetailV3 = () => {
         stock,
         productQty, selectProductQty, stockError,
         isFavorite: isFavorite!,
+        isAuth,
         onQtySelect: handleSelectProductQty,
         onQtySet: handleSetProductQty,
         onQtyLimit: handleQtyLimit,

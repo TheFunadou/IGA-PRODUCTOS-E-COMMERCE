@@ -19,9 +19,10 @@ import { MdVerified } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatAxiosError } from "../../../api/helpers";
 import { formatDate, formatPrice } from "../../products/Helpers";
-import { formatOrderStatus, paymentProvider } from "../../shopping/utils/ShoppingUtils";
+import { formatOrderStatus, formatPaymentClass, getPaymentMethodDetails, getPaymentProviderDetails } from "../../shopping/utils/ShoppingUtils";
 import clsx from "clsx";
 import { useState } from "react";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useFetchOrderDetailsV3 } from "../hooks/useFetchOrders";
 import CheckoutOrderItemV3 from "../../shopping/components/CheckoutOrderItemV3";
 import FolioCopyButton from "../components/FolioCopyButton";
@@ -104,6 +105,7 @@ const SummaryLine = ({
     highlight,
     minus,
     large,
+    isTotalCollected
 }: {
     label: string;
     value: string;
@@ -111,6 +113,7 @@ const SummaryLine = ({
     highlight?: boolean;
     minus?: boolean;
     large?: boolean;
+    isTotalCollected?: boolean
 }) => (
     <div
         className={clsx(
@@ -137,7 +140,7 @@ const SummaryLine = ({
                 minus && "text-success",
             )}
         >
-            {minus ? "− " : "+ "}
+            {!isTotalCollected && (minus ? "− " : "+ ")}
             {value}
         </span>
     </div>
@@ -189,6 +192,7 @@ const OrderDetail = () => {
     const { "order-uuid": orderUUID } = useParams();
     const navigate = useNavigate();
     const [itemsExpanded, setItemsExpanded] = useState(false);
+    const { theme } = useThemeStore();
 
     const { data, isLoading, error, refetch } = useFetchOrderDetailsV3({ orderUUID: orderUUID! });
 
@@ -260,21 +264,21 @@ const OrderDetail = () => {
 
                 {/* ── Header Navigation ── */}
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
                         <button
                             onClick={() => navigate("/mis-ordenes")}
                             className="w-10 h-10 rounded-2xl bg-base-100 flex items-center justify-center border border-base-300 shadow-sm hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all group"
                         >
                             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
                         </button>
-                        <div>
+                        <div className="min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                                 <span className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">Panel de cliente</span>
                                 <span className="w-1 h-1 rounded-full bg-base-content/20" />
                                 <span className="text-[10px] font-black uppercase text-primary tracking-widest">Detalle de orden</span>
                             </div>
-                            <h1 className="text-2xl sm:text-4xl font-black text-base-content tracking-tight flex items-center gap-2">
-                                Orden <span className="text-primary/60 text-xl font-mono">#{order.orderUUID.slice(0, 8)}</span>
+                            <h1 className="text-2xl sm:text-4xl font-black text-base-content tracking-tight flex flex-wrap items-baseline gap-x-2 min-w-0">
+                                Orden <span className="text-primary/60 text-xl font-mono break-all">#{order.orderUUID}</span>
                             </h1>
                         </div>
                     </div>
@@ -289,10 +293,12 @@ const OrderDetail = () => {
 
                             {/* ── Hero: estatus de la orden ── */}
                             <div className={clsx(
-                                "w-full rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden relative",
+                                "w-full rounded-3xl bg-base-100 border border-base-300 shadow-sm relative",
                                 orderStatusCardTintClass(order.status),
                             )}>
-                                <div className={clsx("absolute left-0 top-0 bottom-0 w-1.5", orderStatusStripClass(order.status))} />
+                                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                                    <div className={clsx("absolute left-0 top-0 bottom-0 w-1.5", orderStatusStripClass(order.status))} />
+                                </div>
 
                                 <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
                                     <div className="flex-1 flex flex-col gap-5">
@@ -345,13 +351,13 @@ const OrderDetail = () => {
                                             <div className="flex items-center gap-2 h-[34px] mt-0.5">
                                                 <figure className="h-full bg-base-200 p-1.5 rounded-lg border border-base-300">
                                                     <img
-                                                        src={paymentProvider[order.paymentProvider].image_url}
+                                                        src={getPaymentProviderDetails(order.paymentProvider).image_url}
                                                         alt={order.paymentProvider}
                                                         className="h-full object-contain"
                                                     />
                                                 </figure>
                                                 <span className="text-sm font-bold text-base-content uppercase tracking-tight">
-                                                    {paymentProvider[order.paymentProvider].description}
+                                                    {getPaymentProviderDetails(order.paymentProvider).description}
                                                 </span>
                                             </div>
                                         </div>
@@ -529,8 +535,8 @@ const OrderDetail = () => {
                                             {hasFinancing && (
                                                 <SummaryLine
                                                     label="Interés de financiamiento"
-value={`$${fmt(interest)}`}
-                                                        sub="Comisión por pagar a meses"
+                                                    value={`$${fmt(interest)}`}
+                                                    sub="Comisión por pagar a meses"
                                                 />
                                             )}
                                             <SummaryLine
@@ -544,6 +550,7 @@ value={`$${fmt(interest)}`}
                                                     value={`$${fmt(totalPaid)}`}
                                                     sub="Monto total que se cobra a tu tarjeta"
                                                     large
+                                                    isTotalCollected
                                                 />
                                             )}
                                         </div>
@@ -574,13 +581,13 @@ value={`$${fmt(interest)}`}
                                         <figure className="h-10 bg-base-200 p-1 rounded-lg border border-base-300">
                                             <img
                                                 className="h-full object-contain"
-                                                src={paymentProvider[order.paymentProvider]?.image_url}
+                                                src={getPaymentProviderDetails(order.paymentProvider).image_url}
                                                 alt={order.paymentProvider}
                                             />
                                         </figure>
                                         <div className="flex-1">
                                             <p className="text-sm font-bold text-base-content">
-                                                {paymentProvider[order.paymentProvider]?.description}
+                                                {getPaymentProviderDetails(order.paymentProvider).description}
                                             </p>
                                             <p className="text-xs text-base-content/50">
                                                 Pago procesado de forma segura
@@ -602,18 +609,31 @@ value={`$${fmt(interest)}`}
                                                     ? parseFmt(det.customerInstallmentAmount) ||
                                                     parseFmt(det.paidAmount) / det.installments
                                                     : parseFmt(det.paidAmount);
+                                            const method = getPaymentMethodDetails(det.paymentMethod);
                                             return (
                                                 <div
                                                     key={idx}
                                                     className="bg-base-200 rounded-xl p-4 space-y-3 border border-base-300"
                                                 >
-                                                    <div className="flex justify-between items-start">
-                                                        <Badge label={det.paymentMethod} color="primary" />
+                                                    <div className="flex justify-between items-start gap-3">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <figure className={clsx("h-8 flex items-center justify-center px-1.5 rounded-lg overflow-hidden ring-1 ring-base-300/60", theme === "dark" ? "bg-white/15" : "bg-white")}>
+                                                                <img
+                                                                    className="h-5 w-auto object-contain"
+                                                                    src={method.image_url}
+                                                                    alt={method.description}
+                                                                    loading="lazy"
+                                                                />
+                                                            </figure>
+                                                            <span className="text-sm font-extrabold text-base-content truncate">
+                                                                {method.description}
+                                                            </span>
+                                                        </div>
                                                         <p className="text-lg font-bold text-base-content tabular-nums">${fmt(parseFmt(det.paidAmount))}</p>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-4 text-xs">
                                                         <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
-                                                        <InfoRow label="Tipo" value={det.paymentClass} />
+                                                        <InfoRow label="Tipo" value={formatPaymentClass[det.paymentClass] ?? det.paymentClass} />
                                                         <InfoRow
                                                             label="Pagos"
                                                             value={
@@ -622,7 +642,17 @@ value={`$${fmt(interest)}`}
                                                                     : `${det.installments} pago`
                                                             }
                                                         />
-                                                        <InfoRow label="Estado" value={formatOrderStatus[det.paymentStatus]} />
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <p className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">
+                                                                Estado
+                                                            </p>
+                                                            <span className={clsx(
+                                                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border w-fit",
+                                                                orderStatusBadgeClass(det.paymentStatus),
+                                                            )}>
+                                                                {formatOrderStatus[det.paymentStatus]}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );

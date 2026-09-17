@@ -14,9 +14,11 @@ import {
     orderStatusStripClass,
 } from "../utils/orderStatus";
 import { buildInvoiceMailto } from "../utils/invoice";
+import { formatShippingStatus } from "../utils/shippingStatus";
 import FolioCopyButton from "./FolioCopyButton";
 import OrderIssueModal from "./OrderIssueModal";
 import ThumbnailGallery from "./ThumbnailGallery";
+import { useThemeStore } from "../../../layouts/states/themeStore";
 
 type Props = {
     order: CustomerOrdersDashboardCardI;
@@ -27,6 +29,7 @@ type Props = {
 const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
     const [issueOpen, setIssueOpen] = useState(false);
     const navigate = useNavigate();
+    const { theme } = useThemeStore();
 
     const item = order.items[0];
     const buyerName = `${order.buyer.name} ${order.buyer.surname}`.trim();
@@ -43,7 +46,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
     return (
         <article
             className={clsx(
-                "w-full rounded-3xl border border-base-300 overflow-hidden shadow-sm relative transition-all duration-200 cursor-pointer",
+                "w-full rounded-3xl border border-base-300 shadow-sm relative transition-all duration-200 cursor-pointer",
                 orderStatusCardTintClass(order.status),
                 isActive ? "shadow-lg ring-1 ring-primary/20" : "hover:shadow-md"
             )}
@@ -52,7 +55,9 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
             aria-expanded={isActive}
             aria-label={`Orden ${order.uuid}`}
         >
-            <span className={clsx("absolute left-0 top-0 bottom-0 w-1.5", orderStatusStripClass(order.status))} />
+            <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <span className={clsx("absolute left-0 top-0 bottom-0 w-1.5", orderStatusStripClass(order.status))} />
+            </span>
 
             {/* ── Header ── */}
             <div className="px-5 sm:pl-8 pr-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -131,8 +136,8 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                         <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">
                             Método de pago
                         </p>
-                        <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-base-200">
-                            <figure className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                        <div className="flex items-center gap-2.5 pr-3 rounded-xl border border-base-200 bg-base-200/60">
+                            <figure className={clsx("w-9 h-9 shrink-0 rounded-lg flex items-center justify-center p-1 overflow-hidden ring-1 ring-base-300/60", theme === "dark" ? "bg-white/15" : "bg-white")}>
                                 <img
                                     className="w-full h-full object-contain"
                                     src={paymentProvider[order.paymentProvider].image_url}
@@ -152,7 +157,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                         </p>
                         {order.shippingStatus ? (
                             <span className="badge badge-outline badge-sm font-bold text-base-content/70 justify-start">
-                                {order.shippingStatus.replaceAll("_", " ").toLowerCase()}
+                                {formatShippingStatus(order.shippingStatus)}
                             </span>
                         ) : (
                             <span className="text-xs text-base-content/30 italic">Sin seguimiento</span>
@@ -196,7 +201,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                         <a
                             href={invoiceHref}
                             data-tip="Adjunta tu Constancia de Situación Fiscal, tu régimen fiscal y el uso de CFDI (p. ej. G03 - Gastos en general)"
-                            className="btn btn-sm gap-2 font-bold tooltip tooltip-top bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
+                            className="btn btn-sm gap-2 font-bold tooltip tooltip-top z-50 bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <FaFileInvoice className="text-[11px]" />
