@@ -8,6 +8,7 @@ import type { CustomerOrdersDashboardCardI } from "../OrdersTypes";
 import {
     canRequestInvoice,
     isAbandoned,
+    orderStatusActionButtonClass,
     orderStatusBadgeClass,
     orderStatusCardTintClass,
     orderStatusIconTextClass,
@@ -192,7 +193,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                             e.stopPropagation();
                             navigate(`/mis-ordenes/detalle/${order.uuid}`);
                         }}
-                        className="btn btn-primary btn-sm gap-2 font-bold shadow-sm"
+                        className={clsx("btn btn-sm gap-2 font-bold shadow-sm border", orderStatusActionButtonClass(order.status))}
                     >
                         Ver detalle
                         <FaExternalLinkAlt className="text-[10px]" />
@@ -201,7 +202,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                         <a
                             href={invoiceHref}
                             data-tip="Adjunta tu Constancia de Situación Fiscal, tu régimen fiscal y el uso de CFDI (p. ej. G03 - Gastos en general)"
-                            className="btn btn-sm gap-2 font-bold tooltip tooltip-top z-50 bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
+                            className={clsx("btn btn-sm gap-2 font-bold tooltip tooltip-top z-50 border", orderStatusActionButtonClass(order.status))}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <FaFileInvoice className="text-[11px]" />
@@ -214,7 +215,7 @@ const OrderDashboardCard = ({ order, isActive, onToggleActive }: Props) => {
                                 e.stopPropagation();
                                 setIssueOpen(true);
                             }}
-                            className="btn btn-ghost btn-sm gap-2 font-bold text-warning hover:bg-warning/10"
+                            className={clsx("btn btn-sm gap-2 font-bold border", orderStatusActionButtonClass(order.status))}
                         >
                             <FaExclamationTriangle className="text-xs" />
                             ¿Tienes un problema con tu pedido?

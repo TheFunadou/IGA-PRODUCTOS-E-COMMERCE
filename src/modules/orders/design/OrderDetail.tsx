@@ -29,6 +29,7 @@ import FolioCopyButton from "../components/FolioCopyButton";
 import {
     orderStatusBadgeClass,
     orderStatusCardTintClass,
+    orderStatusIconBoxClass,
     orderStatusIconTextClass,
     orderStatusStripClass,
 } from "../utils/orderStatus";
@@ -78,16 +79,27 @@ const SectionCard = ({
     title,
     children,
     action,
+    tint,
+    strip,
+    iconBoxClass,
 }: {
     icon: React.ReactNode;
     title: string;
     children: React.ReactNode;
     action?: React.ReactNode;
+    tint?: string;
+    strip?: string;
+    iconBoxClass?: string;
 }) => (
-    <div className="w-full rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+    <div className={clsx("w-full rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden relative", tint)}>
+        {strip && (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <div className={clsx("absolute top-0 left-0 right-0 h-1", strip)} />
+            </div>
+        )}
         <div className="px-5 py-4 bg-base-200/40 border-b border-base-300 flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-sm shadow-sm border border-primary/5">
+                <div className={clsx("w-8 h-8 rounded-xl flex items-center justify-center text-sm shadow-sm border", iconBoxClass ?? "bg-primary/10 text-primary border-primary/5")}>
                     {icon}
                 </div>
                 <h2 className="text-xs font-black text-base-content uppercase tracking-widest">{title}</h2>
@@ -253,6 +265,7 @@ const OrderDetail = () => {
     const paymentResume = order.paymentResume;
     const { orderTotal, totalPaid, hasFinancing, interest } =
         getOrderPaymentTotals(order);
+    const unpaid = totalPaid <= 0;
     const itemsToShow = itemsExpanded ? items : items.slice(0, 5);
     const hasMoreItems = items.length > 5;
 
@@ -363,16 +376,26 @@ const OrderDetail = () => {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">Total pagado</p>
-                                            <p className="text-lg font-black text-primary tabular-nums mt-0.5">
-                                                ${fmt(hasFinancing ? totalPaid : orderTotal)}
-                                            </p>
+                                            {unpaid ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border bg-error/10 text-error border-error/20 mt-1">
+                                                    <FaExclamationCircle className="text-[10px]" />
+                                                    No pagada
+                                                </span>
+                                            ) : (
+                                                <p className="text-lg font-black text-primary tabular-nums mt-0.5">
+                                                    ${fmt(hasFinancing ? totalPaid : orderTotal)}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* ── Datos de contacto ── */}
-                            <SectionCard icon={<FaUser />} title="Datos de contacto">
+                            {/* ── Información del comprador ── */}
+                            <SectionCard icon={<FaUser />} title="Información del comprador">
+                                <p className="text-xs text-base-content/40 mb-3 leading-relaxed">
+                                    Quién realizó el pago · puede diferir del destinatario del envío
+                                </p>
                                 <div className="bg-primary/5 rounded-xl p-3 space-y-3">
                                     <InfoRow
                                         label="Nombre completo"
@@ -507,7 +530,7 @@ const OrderDetail = () => {
                             <div className="sticky top-6 flex flex-col gap-6">
 
                                 {/* ── Recibo económico ── */}
-                                <SectionCard icon={<FaReceipt />} title="Resumen de tu compra" action={<Badge label={order.exchange} color="primary" />}>
+                                <SectionCard icon={<FaReceipt />} title="Resumen de tu compra" action={<Badge label={order.exchange} color="primary" />} tint={orderStatusCardTintClass(order.status)} strip={orderStatusStripClass(order.status)} iconBoxClass={orderStatusIconBoxClass(order.status)}>
                                     <div className="space-y-3">
                                         <SummaryLine
                                             label="Subtotal"
@@ -552,6 +575,17 @@ const OrderDetail = () => {
                                                     large
                                                     isTotalCollected
                                                 />
+                                            )}
+                                            {unpaid && (
+                                                <div className="pt-3 mt-1 border-t border-base-300 flex flex-wrap items-center gap-2">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black uppercase border bg-error/10 text-error border-error/20">
+                                                        <FaExclamationCircle className="text-[10px]" />
+                                                        No pagada
+                                                    </span>
+                                                    <span className="text-xs text-base-content/40">
+                                                        No se realizó ningún cobro
+                                                    </span>
+                                                </div>
                                             )}
                                         </div>
 
@@ -632,7 +666,9 @@ const OrderDetail = () => {
                                                         <p className="text-lg font-bold text-base-content tabular-nums">${fmt(parseFmt(det.paidAmount))}</p>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-4 text-xs">
-                                                        <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
+                                                        {order.status !== "PENDING" && (
+                                                            <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
+                                                        )}
                                                         <InfoRow label="Tipo" value={formatPaymentClass[det.paymentClass] ?? det.paymentClass} />
                                                         <InfoRow
                                                             label="Pagos"

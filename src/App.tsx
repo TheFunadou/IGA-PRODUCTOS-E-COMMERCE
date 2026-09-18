@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet, Navigate, useParams } from "react-router-dom"
+import { createBrowserRouter, RouterProvider, Outlet, Navigate, useNavigate, useParams } from "react-router-dom"
 import { lazy, Suspense, useEffect, useState } from "react"
 import type { ComponentType } from "react"
 import './App.css'
@@ -20,6 +20,7 @@ import { useThemeStore } from "./layouts/states/themeStore"
 import ScrollToTop from "./global/components/ScrollToTop"
 
 import { usePageTracking } from "./modules/analytics/usePageTracking";
+import { scrollToTienda } from "./modules/shop/utils/scrollToTienda";
 
 // Wrapper lazy: los providers de Google solo se cargan en /iniciar-sesion
 const AuthProviders = lazy(() => import("./modules/auth/components/AuthProviders"));
@@ -30,7 +31,9 @@ const HomeV2 = lazy(() => import("./modules/home/design/Home/HomeV2"))
 const Login = lazy(() => import("./modules/auth/design/Login"))
 const LoginV3 = lazy(() => import("./modules/auth/design/LoginV3"))
 const CreateAccount = lazy(() => import("./modules/auth/design/CreateAccount"))
+const CreateAccountV3 = lazy(() => import("./modules/auth/design/CreateAccountV3"))
 const RestorePassword = lazy(() => import("./modules/auth/design/RestorePassword"))
+const RestorePasswordV3 = lazy(() => import("./modules/auth/design/RestorePasswordV3"))
 const CustomerAddresses = lazy(() => import("./modules/customers/design/CustomerAddresses"))
 const ShopV2 = lazy(() => import("./modules/shop/design/Shop"))
 const ShopV3 = lazy(() => import("./modules/shop/design/shop/ShopV3"))
@@ -68,7 +71,7 @@ const QRRedirectPlagoCorazaAI = lazy(() =>
     import("./modules/products/components/QRRedirect").then((m) => ({ default: m.QRRedirectPlagoCorazaAI })))
 
 // Preserve V2/V3 lazy imports for rollback - evita errores noUnusedLocals
-void [Home, ShopV2, ShopV3, ProductVersionDetailV2, ShoppingCartV2, CheckoutV2]
+void [Home, Login, ShopV2, ShopV3, ProductVersionDetailV2, ShoppingCartV2, CheckoutV2, CreateAccount, RestorePassword]
 
 // Crear QueryClient fuera del componente para evitar recreación
 const queryClient = new QueryClient({
@@ -98,6 +101,17 @@ function QueryDevTools() {
 function ProductDetailRedirect() {
     const { categoria, slug, sku } = useParams();
     return <Navigate to={`/tienda/${categoria}/${slug}/${sku}`} replace />;
+}
+
+// La tienda está embebida en el Home (/#tienda); /tienda redirige al Home con scroll a la sección
+function ShopRedirect() {
+    const navigate = useNavigate();
+    useEffect(() => {
+        navigate("/", { replace: true });
+        const timer = window.setTimeout(() => scrollToTienda(), 300);
+        return () => window.clearTimeout(timer);
+    }, [navigate]);
+    return null;
 }
 
 // Wrapper para los providers
@@ -137,10 +151,7 @@ const router = createBrowserRouter([
                     },
 
                     // Auth
-                    { path: "/iniciar-sesion", element: <AuthProviders><Login /></AuthProviders> },
-                    { path: "/iniciar-sesion-v3", element: <AuthProviders><LoginV3 /></AuthProviders> },
-                    { path: "/nueva-cuenta", element: <CreateAccount /> },
-                    { path: "/restablecer-contraseña", element: <RestorePassword /> },
+                    // ROLLBACK LoginV2: { path: "/iniciar-sesion", element: <AuthProviders><Login /></AuthProviders> }
 
                     // Home
                     { path: "/", element: <HomeV2 /> },
@@ -154,6 +165,7 @@ const router = createBrowserRouter([
                     // ROLLBACK: { path: "/tienda-v3", element: <ShopV3 /> },
                     // { path: "/tienda", element: <ShopV2 /> },
                     // { path: "/tienda-v3", element: <ShopV3 /> },
+                    { path: "/tienda", element: <ShopRedirect /> },
                     { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV3 /> },
                     // ROLLBACK ProductVersionDetail: { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
                     // Redirect legacy V3 root route (sin /tienda) -> canónica con /tienda
@@ -208,7 +220,35 @@ const router = createBrowserRouter([
                         <Ticket />
                     </Suspense>
                 )
+            },
+            // Rutas auth inmersivas: sin navbar ni footer (patrón tipo Amazon/Mercado Libre)
+            {
+                path: "/iniciar-sesion",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <AuthProviders><LoginV3 /></AuthProviders>
+                    </Suspense>
+                )
+            },
+            // ROLLBACK LoginV3 como /iniciar-sesion-v3: { path: "/iniciar-sesion-v3", element: <Suspense fallback={<PageLoader />}><AuthProviders><LoginV3 /></AuthProviders></Suspense> }
+            {
+                path: "/nueva-cuenta",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <CreateAccountV3 />
+                    </Suspense>
+                )
+            },
+            // ROLLBACK NuevaCuenta: { path: "/nueva-cuenta", element: <Suspense fallback={<PageLoader />}><CreateAccount /></Suspense> }
+            {
+                path: "/restablecer-contraseña",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <RestorePasswordV3 />
+                    </Suspense>
+                )
             }
+            // ROLLBACK Restablecer: { path: "/restablecer-contraseña", element: <Suspense fallback={<PageLoader />}><RestorePassword /></Suspense> }
         ]
     }
 ]);

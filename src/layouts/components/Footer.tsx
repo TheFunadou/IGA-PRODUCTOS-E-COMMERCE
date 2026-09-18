@@ -109,7 +109,7 @@ const Footer = () => {
 
             {/* Sticky Whatsapp Fab (Escondido en móvil por diseño original o en tablet si lo requieren. Lo mantenemos igual) */}
             <div
-                className="hidden md:flex fixed bottom-6 right-0 text-white bg-success hover:bg-green-600 shadow-xl shadow-success/30 rounded-l-2xl p-4 z-[1000] tooltip tooltip-left items-center justify-center hover:-translate-x-1 transition-all duration-300 cursor-pointer"
+                className="hidden md:flex fixed bottom-5 right-0 text-white bg-success hover:bg-green-600 shadow-xl shadow-success/30 rounded-l-2xl p-4 z-[1000] tooltip tooltip-left items-center justify-center hover:-translate-x-1 transition-all duration-300 cursor-pointer"
                 data-tip="Contáctanos por WhatsApp"
             >
                 <a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank" rel="noreferrer">

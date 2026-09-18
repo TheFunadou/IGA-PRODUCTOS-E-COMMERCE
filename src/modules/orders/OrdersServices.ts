@@ -1,4 +1,4 @@
-import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI } from "./OrdersTypes";
+import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PendingOrderResponseI } from "./OrdersTypes";
 import api from "../../api/api.config";
 import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../shopping/ShoppingTypes";
 
@@ -56,8 +56,8 @@ export const cancelGuestOrder = async ({ orderUUID }: { orderUUID: string }): Pr
     return data;
 };
 
-export const linkOrderToCustomer = async ({ orderUUID }: { orderUUID: string }): Promise<string> => {
-    const { data } = await api.post<string>(`/orders/link-to-customer`, { orderUUID });
+export const getPendingOrder = async (): Promise<PendingOrderResponseI> => {
+    const { data } = await api.post<PendingOrderResponseI>(`/orders/pending`, {});
     return data;
 };
 
