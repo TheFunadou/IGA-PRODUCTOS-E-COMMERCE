@@ -5,7 +5,7 @@ import { FaBox, FaExclamationTriangle, FaExternalLinkAlt, FaFileInvoice } from "
 import { formatDate, formatPrice } from "../../products/Helpers";
 import { formatOrderStatus, paymentProvider } from "../../shopping/utils/ShoppingUtils";
 import type { CustomerOrdersDashboardCardI } from "../OrdersTypes";
-import { orderStatusBadgeClass, orderStatusCardTintClass, orderStatusIconTextClass, orderStatusStripClass, canRequestInvoice, isAbandoned } from "../utils/orderStatus";
+import { orderStatusActionButtonClass, orderStatusBadgeClass, orderStatusCardTintClass, orderStatusIconTextClass, orderStatusStripClass, canRequestInvoice, isAbandoned } from "../utils/orderStatus";
 import { buildInvoiceMailto } from "../utils/invoice";
 import FolioCopyButton from "./FolioCopyButton";
 import OrderIssueModal from "./OrderIssueModal";
@@ -114,7 +114,7 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
                             e.stopPropagation();
                             navigate(`/mis-ordenes/detalle/${order.uuid}`);
                         }}
-                        className="btn btn-primary btn-xs gap-1.5 font-bold shadow-sm"
+                        className={clsx("btn btn-xs gap-1.5 font-bold shadow-sm border", orderStatusActionButtonClass(order.status))}
                     >
                         Ver detalle
                         <FaExternalLinkAlt className="text-[9px]" />
@@ -123,7 +123,7 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
                         <a
                             href={invoiceHref}
                             data-tip="Adjunta tu Constancia de Situación Fiscal, régimen fiscal y uso CFDI"
-                            className="btn btn-xs gap-1.5 font-bold tooltip tooltip-top z-50 bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary"
+                            className={clsx("btn btn-xs gap-1.5 font-bold tooltip tooltip-top z-50 border", orderStatusActionButtonClass(order.status))}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <FaFileInvoice className="text-[9px]" />
@@ -136,7 +136,7 @@ const OrderGridCard = ({ order, isActive, onToggleActive }: Props) => {
                                 e.stopPropagation();
                                 setIssueOpen(true);
                             }}
-                            className="btn btn-ghost btn-xs gap-1.5 font-bold text-warning hover:bg-warning/10"
+                            className={clsx("btn btn-xs gap-1.5 font-bold border", orderStatusActionButtonClass(order.status))}
                             aria-label="Reportar un problema con este pedido"
                         >
                             <FaExclamationTriangle className="text-[10px]" />

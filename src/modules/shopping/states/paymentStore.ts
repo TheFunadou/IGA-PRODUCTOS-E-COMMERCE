@@ -11,6 +11,7 @@ interface PaymentStoreState {
     duplicateGuestEmail: string | null;
     createOrder: (data: CreateOrderI) => Promise<boolean>;
     cancelOrder: () => Promise<void>;
+    setOrder: (order: OrderCreatedType | null) => void;
     success: () => void;
     clearError: () => void;
     clearErrorBadge: () => void;
@@ -47,6 +48,9 @@ export const usePaymentStore = create<PaymentStoreState>()(
             },
             cancelOrder: async () => {
                 set({ order: null, isLoading: false });
+            },
+            setOrder: (order: OrderCreatedType | null) => {
+                set({ order });
             },
             success() {
                 usePaymentStore.persist.clearStorage();

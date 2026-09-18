@@ -72,6 +72,28 @@ export const orderStatusIconTextClass = (status: string) => {
     }
 };
 
+export const orderStatusIconBoxClass = (status: string): string => {
+    switch (toneOf(status)) {
+        case "success": return "bg-success/10 text-success border-success/20";
+        case "warning": return "bg-warning/10 text-warning border-warning/20";
+        case "error": return "bg-error/10 text-error border-error/20";
+        case "info": return "bg-info/10 text-info border-info/20";
+        case "primary": return "bg-primary/10 text-primary border-primary/20";
+        default: return "bg-base-200 text-base-content/50 border-base-300";
+    }
+};
+
+export const orderStatusActionButtonClass = (status: string): string => {
+    switch (toneOf(status)) {
+        case "success": return "bg-success/10 text-success border-success/25 hover:bg-success hover:text-success-content hover:border-success";
+        case "warning": return "bg-warning/10 text-warning border-warning/25 hover:bg-warning hover:text-warning-content hover:border-warning";
+        case "error": return "bg-error/10 text-error border-error/25 hover:bg-error hover:text-error-content hover:border-error";
+        case "info": return "bg-info/10 text-info border-info/25 hover:bg-info hover:text-info-content hover:border-info";
+        case "primary": return "bg-primary/10 text-primary border-primary/25 hover:bg-primary hover:text-primary-content hover:border-primary";
+        default: return "bg-base-200 text-base-content/70 border-base-300 hover:bg-base-content/10 hover:text-base-content hover:border-base-content/30";
+    }
+};
+
 export const canRequestInvoice = (status: string): boolean => status === "APPROVED";
 
 export const isAbandoned = (status: string): boolean => status === "ABANDONED";

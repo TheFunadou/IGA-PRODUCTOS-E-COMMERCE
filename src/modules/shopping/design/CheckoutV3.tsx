@@ -55,6 +55,31 @@ const CheckoutV3 = () => {
 
     if (data && data.items.length === 0) navigate("/carrito-de-compras");
 
+    if (data && data.status === "ABANDONED") {
+        return (
+            <div className="w-full flex justify-center items-center">
+                <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl min-h-64 flex flex-col items-center justify-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
+                        <FaExclamationTriangle className="text-warning text-2xl" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-base sm:text-lg font-bold text-base-content">Tu orden quedó abandonada</p>
+                        <p className="text-sm text-base-content/50 mt-1">Esta orden expiró o fue cancelada. Puedes volver al carrito para generar una nueva.</p>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-primary btn-sm sm:btn-md"
+                        onClick={() => {
+                            cancelOrder().then(() => navigate("/carrito-de-compras"));
+                        }}
+                    >
+                        Volver al carrito
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const handleCanceled = async () => {
         await cancelOrderMutation.mutateAsync();
         await cancelOrder().then(() => {

@@ -11,8 +11,8 @@ export const getOrderPaymentTotals = (
         (acc, det) => acc + parseFmt(det.paidAmount),
         0,
     );
-    const hasFinancing = Math.abs(totalPaid - orderTotal) > 0.005;
     const interest = totalPaid - orderTotal;
+    const hasFinancing = interest > 0.005;
 
     return { orderTotal, totalPaid, hasFinancing, interest };
 };

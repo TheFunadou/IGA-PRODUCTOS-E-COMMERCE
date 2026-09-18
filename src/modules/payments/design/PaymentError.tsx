@@ -10,6 +10,7 @@ import {
     FaRedo,
     FaExclamationTriangle,
     FaTimesCircle,
+    FaUser,
 } from "react-icons/fa";
 import { MdOutlinePending } from "react-icons/md";
 import { usePollingPaymentRejectedV2 } from "../usePayment";
@@ -19,6 +20,8 @@ import {
 import { formatAxiosError } from "../../../api/helpers";
 import clsx from "clsx";
 import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
+import { PageFrame, InfoRow, SectionCard } from "./paymentResultUi";
+import { cardToneClass } from "../utils/paymentTone";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -27,62 +30,13 @@ import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 const MAX_POLL_ATTEMPTS = 10;
 
 /* ─────────────────────────────────────────────
-   Helpers de UI
- ───────────────────────────────────────────── */
-
-const InfoRow = ({
-    label,
-    value,
-    icon,
-}: {
-    label: string;
-    value?: string | null;
-    icon?: React.ReactNode;
-}) => (
-    <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-semibold uppercase text-base-content/40 flex items-center gap-1">
-            {icon && <span className="opacity-70">{icon}</span>}
-            {label}
-        </p>
-        <p className="text-sm text-base-content break-words leading-snug">
-            {value || <span className="italic text-base-content/30">—</span>}
-        </p>
-    </div>
-);
-
-const SectionCard = ({
-    icon,
-    title,
-    children,
-    accent,
-}: {
-    icon: React.ReactNode;
-    title: string;
-    children: React.ReactNode;
-    accent?: string;
-}) => (
-    <div
-        className={clsx(
-            "bg-base-100 rounded-2xl border border-base-200 overflow-hidden",
-            accent && `border-l-4 ${accent}`,
-        )}
-    >
-        <div className="px-5 py-4 border-b border-base-200 flex items-center gap-3">
-            <span className="text-primary text-lg">{icon}</span>
-            <h2 className="font-bold text-base-content text-base">{title}</h2>
-        </div>
-        <div className="px-5 py-5">{children}</div>
-    </div>
-);
-
-/* ─────────────────────────────────────────────
    Skeleton loader
  ───────────────────────────────────────────── */
 
 const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttempts: number }) => (
-    <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
+    <PageFrame>
         <div className="max-w-6xl mx-auto space-y-6">
-            <div className="bg-base-100 rounded-2xl border border-base-200 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="rounded-3xl bg-base-100 border border-base-300 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <MdOutlinePending className="text-warning text-2xl" />
                 </div>
@@ -109,7 +63,7 @@ const SkeletonLoader = ({ attempts, maxAttempts }: { attempts: number; maxAttemp
                 </div>
             </div>
         </div>
-    </div>
+    </PageFrame>
 );
 
 /* ─────────────────────────────────────────────
@@ -123,8 +77,8 @@ const PollingTimeoutScreen = ({
     orderUUID: string;
     onRetry: () => void;
 }) => (
-    <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
-        <div className="max-w-md mx-auto flex flex-col items-center text-center gap-6 py-8">
+    <PageFrame>
+        <div className="max-w-md mx-auto flex flex-col items-center text-center gap-6 py-8 px-4 rounded-3xl bg-base-100 border border-base-300">
             <div className="w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center">
                 <FaExclamationTriangle className="text-warning text-3xl" />
             </div>
@@ -153,7 +107,7 @@ const PollingTimeoutScreen = ({
                 </button>
             </div>
         </div>
-    </div>
+    </PageFrame>
 );
 
 /* ─────────────────────────────────────────────
@@ -175,9 +129,9 @@ const PaymentErrorV2 = () => {
     /* ── Guard: sin UUID ── */
     if (!orderUUID) {
         return (
-            <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
+            <PageFrame>
                 <div className="flex items-center justify-center min-h-[40vh]">
-                    <div className="bg-base-100 rounded-2xl border border-error/20 p-8 max-w-md w-full text-center space-y-4">
+                    <div className="rounded-3xl bg-base-100 border border-error/20 p-8 max-w-md w-full text-center space-y-4">
                         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto">
                             <FaTimesCircle className="text-error text-2xl" />
                         </div>
@@ -194,7 +148,7 @@ const PaymentErrorV2 = () => {
                         </button>
                     </div>
                 </div>
-            </div>
+            </PageFrame>
         );
     }
 
@@ -224,12 +178,12 @@ const PaymentErrorV2 = () => {
 
     /* ── Guard: error HTTP ── */
     if (error) {
-        const is404 = (error as any)?.response?.status === 404;
+        const is404 = (error as { response?: { status?: number } }).response?.status === 404;
 
         return (
-            <div className="bg-base-300 rounded-3xl p-4 sm:p-8">
+            <PageFrame>
                 <div className="flex items-center justify-center min-h-[40vh]">
-                    <div className="bg-base-100 rounded-2xl border border-error/20 p-8 max-w-md w-full text-center space-y-4">
+                    <div className="rounded-3xl bg-base-100 border border-error/20 p-8 max-w-md w-full text-center space-y-4">
                         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto">
                             <FaTimesCircle className="text-error text-2xl" />
                         </div>
@@ -264,7 +218,7 @@ const PaymentErrorV2 = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </PageFrame>
         );
     }
 
@@ -281,13 +235,15 @@ const PaymentErrorV2 = () => {
     if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") throw new Error("Error al obtener el estatus de la orden de compra");
 
     const { order } = data;
-    const { shipping, items } = order;
+    const { shipping, items, buyer } = order;
     const isRejected = data.status === "REJECTED";
     const isInProcess = data.status === "IN_PROCESS";
 
+    const cardTone = cardToneClass(isRejected ? "error" : "warning");
+
     return (
-        <div className="bg-base-300 rounded-3xl py-6 px-3 sm:px-6 animate-fade-in-up">
-            <div className="max-w-6xl mx-auto space-y-6">
+        <PageFrame>
+            <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up">
 
                 {/* ══════════════════════════════════════
                     HERO: error/warning según status
@@ -409,18 +365,38 @@ const PaymentErrorV2 = () => {
                 ══════════════════════════════════════ */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                    {/* ── Columna izquierda: Envío ── */}
+                    {/* ── Columna izquierda: Comprador + Envío ── */}
                     <div className="space-y-5">
+                        <SectionCard
+                            icon={<FaUser />}
+                            title="Información del comprador"
+                            {...cardTone}
+                        >
+                            <p className="text-xs text-base-content/40 mb-3 leading-relaxed">
+                                Quién realizó el pago · puede diferir del destinatario del envío
+                            </p>
+                            <div className={clsx("rounded-xl p-3 space-y-3", cardTone.boxClass)}>
+                                <InfoRow
+                                    label="Nombre completo"
+                                    value={`${buyer.name} ${buyer.surname}`}
+                                />
+                                <InfoRow label="Correo" value={buyer.email} />
+                                {buyer.phone && (
+                                    <InfoRow label="Teléfono" value={buyer.phone} icon={<FaPhone />} />
+                                )}
+                            </div>
+                        </SectionCard>
+
                         {shipping.map((shipping, i) => (
                             <SectionCard
                                 key={`${i}-${shipping.number}`}
                                 icon={<FaShippingFast />}
                                 title="Información de envío"
-                                accent="border-primary"
+                                {...cardTone}
                             >
                                 <div className="space-y-4">
-                                    <div className="bg-primary/5 rounded-xl p-3 space-y-3">
-                                        <p className="text-xs font-bold uppercase text-primary/70">
+                                    <div className={clsx("rounded-xl p-3 space-y-3", cardTone.boxClass)}>
+                                        <p className={clsx("text-xs font-bold uppercase", cardTone.labelClass)}>
                                             Destinatario
                                         </p>
                                         <InfoRow
@@ -467,7 +443,7 @@ const PaymentErrorV2 = () => {
                         <SectionCard
                             icon={<FaBoxOpen />}
                             title={`Productos del pedido (${items.length})`}
-                            accent="border-primary"
+                            {...cardTone}
                         >
                             <div className="flex flex-col gap-4">
                                 {items.map((item, idx) => (
@@ -478,7 +454,7 @@ const PaymentErrorV2 = () => {
 
                         <div
                             className={clsx(
-                                "bg-base-100 rounded-2xl border overflow-hidden",
+                                "bg-base-100 rounded-3xl shadow-sm border overflow-hidden",
                                 isRejected && "border-error/30",
                                 isInProcess && "border-warning/30",
                             )}
@@ -527,7 +503,7 @@ const PaymentErrorV2 = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </PageFrame>
     );
 };
 

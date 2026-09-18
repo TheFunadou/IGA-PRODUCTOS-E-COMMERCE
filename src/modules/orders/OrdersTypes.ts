@@ -153,6 +153,7 @@ export interface OrderCheckoutItemIV3 {
 
 export interface CheckoutOrderI {
     orderUUID: string;
+    status: string;
     items: OrderCheckoutItemI[];
     resume: ShoppingCartResumeI;
     couponCode: string | null;
@@ -164,12 +165,25 @@ export type ShippingAddressV3 = NewAddressType & { id: string };
 
 export interface CheckoutOrderIV3 {
     orderUUID: string;
+    status: string;
     items: OrderCheckoutItemIV3[];
     resume: ShoppingCartResumeI;
     couponCode: string | null;
     externalId: string;
     buyer?: { name: string; surname: string; email: string; phone?: string | null };
     shippingAddress: ShippingAddressV3[];
+};
+
+export type PendingOrderI = {
+    orderUUID: string;
+    paymentProvider: Exclude<PaymentProvidersType, null>;
+    status: "IN_PROCESS";
+    createdAt: string;
+    expiresAt: string | null;
+};
+
+export type PendingOrderResponseI = {
+    order: PendingOrderI | null;
 };
 
 export type GetLightOrderExtended = {

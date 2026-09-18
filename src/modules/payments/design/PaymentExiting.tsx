@@ -21,6 +21,9 @@ import { MdOutlinePending, MdVerified } from "react-icons/md";
 import { usePollingPaymentApprovedDetailV2 } from "../usePayment";
 import {
     formatOrderStatus,
+    formatPaymentClass,
+    getPaymentMethodDetails,
+    getPaymentProviderDetails,
     paymentProvider,
 } from "../../shopping/utils/ShoppingUtils";
 import { formatAxiosError } from "../../../api/helpers";
@@ -34,133 +37,18 @@ import RecentlyViewed from "../../shopping/components/RecentlyViewed";
 import FavoritesSectionV3 from "../../shopping/components/FavoritesSectionV3";
 import { trackPurchase } from "../../analytics/MetaEvents";
 import { getOrderPaymentTotals, parseFmt } from "../../orders/utils/paymentSummary";
+import { orderStatusBadgeClass } from "../../orders/utils/orderStatus";
 import type { OrderCheckoutItemIV3 } from "../../orders/OrdersTypes";
+import { useThemeStore } from "../../../layouts/states/themeStore";
+import FolioCopyButton from "../../orders/components/FolioCopyButton";
+import { PageFrame, Badge, InfoRow, SectionCard, SummaryLine } from "./paymentResultUi";
+import { cardToneClass } from "../utils/paymentTone";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
  ───────────────────────────────────────────── */
 
 const MAX_POLL_ATTEMPTS = 10;
-
-/* ─────────────────────────────────────────────
-   Helpers de UI (lenguaje V3)
- ───────────────────────────────────────────── */
-
-const Badge = ({ label, color = "gray" }: { label: string; color?: string }) => (
-    <span
-        className={clsx(
-            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase",
-            color === "success" && "bg-success/20 text-success",
-            color === "warning" && "bg-warning/20 text-warning",
-            color === "error" && "bg-error/20 text-error",
-            color === "primary" && "bg-primary/20 text-primary",
-            color === "gray" && "bg-base-200 text-base-content/70",
-        )}
-    >
-        {label}
-    </span>
-);
-
-const InfoRow = ({
-    label,
-    value,
-    icon,
-}: {
-    label: string;
-    value?: string | null;
-    icon?: React.ReactNode;
-}) => (
-    <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-semibold uppercase text-base-content/40 flex items-center gap-1">
-            {icon && <span className="opacity-70">{icon}</span>}
-            {label}
-        </p>
-        <p className="text-sm text-base-content break-words leading-snug">
-            {value || <span className="italic text-base-content/30">—</span>}
-        </p>
-    </div>
-);
-
-const SectionCard = ({
-    icon,
-    title,
-    children,
-    action,
-}: {
-    icon: React.ReactNode;
-    title: string;
-    children: React.ReactNode;
-    action?: React.ReactNode;
-}) => (
-    <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
-        <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-                <span className="text-primary text-sm">{icon}</span>
-                <h2 className="text-sm font-bold text-base-content uppercase">{title}</h2>
-            </div>
-            {action}
-        </div>
-        <div className="p-4 sm:p-5">{children}</div>
-    </div>
-);
-
-const SummaryLine = ({
-    label,
-    value,
-    sub,
-    highlight,
-    minus,
-    large,
-}: {
-    label: string;
-    value: string;
-    sub?: string;
-    highlight?: boolean;
-    minus?: boolean;
-    large?: boolean;
-}) => (
-    <div
-        className={clsx(
-            "flex justify-between items-start gap-2",
-            large && "pt-3 mt-1 border-t border-base-300",
-        )}
-    >
-        <div className="flex flex-col">
-            <span
-                className={clsx(
-                    large ? "text-base font-bold text-base-content" : "text-sm text-base-content/70",
-                    highlight && "text-success font-semibold",
-                )}
-            >
-                {label}
-            </span>
-            {sub && <span className="text-xs text-base-content/40">{sub}</span>}
-        </div>
-        <span
-            className={clsx(
-                "font-semibold tabular-nums whitespace-nowrap",
-                large ? "text-xl font-extrabold text-primary" : "text-sm text-base-content",
-                highlight && "text-success",
-                minus && "text-success",
-            )}
-        >
-            {minus ? "− " : "+ "}
-            {value}
-        </span>
-    </div>
-);
-
-/* ─────────────────────────────────────────────
-   Marco V3 (contenedor centrado)
- ───────────────────────────────────────────── */
-
-const PageFrame = ({ children }: { children: React.ReactNode }) => (
-    <div className="w-full flex justify-center items-start">
-        <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10">
-            {children}
-        </div>
-    </div>
-);
 
 /* ─────────────────────────────────────────────
    Skeleton loader
@@ -262,6 +150,7 @@ const PaymentExitingV2 = () => {
     const hasTrackedPurchaseRef = useRef(false);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
+    const { theme } = useThemeStore();
 
     /* ── Guard: sin UUID ── */
     if (!orderUUID) {
@@ -334,7 +223,7 @@ const PaymentExitingV2 = () => {
 
     /* ── Guard: error HTTP ── */
     if (error) {
-        const is404 = (error as any)?.response?.status === 404;
+        const is404 = (error as { response?: { status?: number } }).response?.status === 404;
 
         return (
             <PageFrame>
@@ -404,6 +293,8 @@ const PaymentExitingV2 = () => {
 
     const purchasedSkus = items.map((item) => item.sku);
 
+    const cardTone = cardToneClass("success");
+
     return (
         <PageFrame>
             <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up">
@@ -429,9 +320,12 @@ const PaymentExitingV2 = () => {
                     </div>
                     <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
                         <Badge label={formatOrderStatus[data.status]} color="success" />
-                        <p className="text-xs font-mono text-base-content/40 break-all max-w-xs text-right">
-                            Número de pedido: {order.orderUUID}
-                        </p>
+                        <div className="flex items-center gap-2 justify-end w-full">
+                            <p className="text-xs font-mono text-base-content/40 break-all max-w-xs text-right select-all">
+                                Número de pedido: {order.orderUUID}
+                            </p>
+                            <FolioCopyButton uuid={order.orderUUID} />
+                        </div>
                         <p className="text-xs text-base-content/40">
                             {formatDate(order.createdAt, "es-MX")}
                         </p>
@@ -503,8 +397,11 @@ const PaymentExitingV2 = () => {
 
                     {/* ── Main: Comprador + Envío + Artículos ── */}
                     <div className="flex-1 min-w-0 flex flex-col gap-5">
-                        <SectionCard icon={<FaUser />} title="Datos de contacto">
-                            <div className="bg-primary/5 rounded-xl p-3 space-y-3">
+                        <SectionCard icon={<FaUser />} title="Información del comprador" {...cardTone}>
+                            <p className="text-xs text-base-content/40 mb-3 leading-relaxed">
+                                Quién realizó el pago · puede diferir del destinatario del envío
+                            </p>
+                            <div className={clsx("rounded-xl p-3 space-y-3", cardTone.boxClass)}>
                                 <InfoRow
                                     label="Nombre completo"
                                     value={`${buyer.name} ${buyer.surname}`}
@@ -525,10 +422,11 @@ const PaymentExitingV2 = () => {
                                 key={`${i}-${shipping.number}`}
                                 icon={<FaShippingFast />}
                                 title="Información de envío"
+                                {...cardTone}
                             >
                                 <div className="space-y-4">
-                                    <div className="bg-primary/5 rounded-xl p-3 space-y-3">
-                                        <p className="text-xs font-bold uppercase text-primary/70">
+                                    <div className={clsx("rounded-xl p-3 space-y-3", cardTone.boxClass)}>
+                                        <p className={clsx("text-xs font-bold uppercase", cardTone.labelClass)}>
                                             Destinatario
                                         </p>
                                         <InfoRow
@@ -582,6 +480,7 @@ const PaymentExitingV2 = () => {
                         <SectionCard
                             icon={<FaBoxOpen />}
                             title={`Artículos de tu compra (${items.length})`}
+                            {...cardTone}
                         >
                             <div className="flex flex-col gap-4">
                                 {v3Items.map((item, idx) => (
@@ -596,18 +495,19 @@ const PaymentExitingV2 = () => {
                         <SectionCard
                             icon={<FaReceipt />}
                             title="Resumen de tu compra"
+                            {...cardTone}
                         >
                             <div className="space-y-3">
                                 <SummaryLine
                                     label="Subtotal"
-                                    value={`$${paymentResume.itemsSubtotalBeforeTaxes}`}
+                                    value={`$${fmt(parseFmt(paymentResume.itemsSubtotalBeforeTaxes))}`}
                                     sub="Precio base de productos"
                                 />
-                                <SummaryLine label="IVA (16%)" value={`$${paymentResume.iva}`} />
-                                {parseInt(paymentResume.discount) > 0 && (
+                                <SummaryLine label="IVA (16%)" value={`$${fmt(parseFmt(paymentResume.iva))}`} />
+                                {parseFloat(paymentResume.discount) > 0 && (
                                     <SummaryLine
                                         label="Descuentos aplicados"
-                                        value={`$${paymentResume.discount}`}
+                                        value={`$${fmt(parseFmt(paymentResume.discount))}`}
                                         highlight
                                         minus
                                     />
@@ -615,29 +515,34 @@ const PaymentExitingV2 = () => {
                                 {parseFloat(paymentResume.shippingCostBeforeTaxes) > 0 && (
                                     <SummaryLine
                                         label={`Envío (${paymentResume.boxesCount > 1 ? `${paymentResume.boxesCount} cajas` : `${paymentResume.boxesCount} caja`})`}
-                                        value={`$${paymentResume.shippingCostBeforeTaxes}`}
+                                        value={`$${fmt(parseFmt(paymentResume.shippingCostBeforeTaxes))}`}
                                     />
                                 )}
-                                {hasFinancing && (
+                                <div className="mt-4 pt-4 border-t-2 border-dashed border-base-300 space-y-3">
+                                    {hasFinancing && (
+                                        <SummaryLine
+                                            label="Interés de financiamiento"
+                                            value={`$${fmt(interest)}`}
+                                            sub="Comisión por pagar a meses"
+                                        />
+                                    )}
                                     <SummaryLine
-                                        label="Interés de financiamiento"
-                                        value={`$${fmt(interest)}`}
-                                        sub="Comisión por pagar a meses"
+                                        label="Total"
+                                        value={`$${fmt(orderTotal)}`}
+                                        large={!hasFinancing}
+                                        tone="success"
                                     />
-                                )}
-                                <SummaryLine
-                                    label="Total"
-                                    value={`$${fmt(orderTotal)}`}
-                                    large={!hasFinancing}
-                                />
-                                {hasFinancing && (
-                                    <SummaryLine
-                                        label="Total cobrado"
-                                        value={`$${fmt(totalPaid)}`}
-                                        sub="Monto total que se cobra a tu tarjeta"
-                                        large
-                                    />
-                                )}
+                                    {hasFinancing && (
+                                        <SummaryLine
+                                            label="Total cobrado"
+                                            value={`$${fmt(totalPaid)}`}
+                                            sub="Monto total que se cobra a tu tarjeta"
+                                            large
+                                            isTotalCollected
+                                            tone="success"
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             {order.couponCode && (
@@ -662,18 +567,19 @@ const PaymentExitingV2 = () => {
                         <SectionCard
                             icon={<FaCreditCard />}
                             title="Pago"
+                            {...cardTone}
                         >
                             <div className="flex items-center gap-4 mb-5">
-                                <figure className="h-10">
+                                <figure className="h-10 bg-base-200 p-1 rounded-lg border border-base-300">
                                     <img
                                         className="h-full object-contain"
-                                        src={paymentProvider[order.paymentProvider]?.image_url}
+                                        src={getPaymentProviderDetails(order.paymentProvider).image_url}
                                         alt={order.paymentProvider}
                                     />
                                 </figure>
                                 <div className="flex-1">
                                     <p className="text-sm font-bold text-base-content">
-                                        {paymentProvider[order.paymentProvider].description}
+                                        {getPaymentProviderDetails(order.paymentProvider).description}
                                     </p>
                                     <p className="text-xs text-base-content/50">
                                         Pago procesado de forma segura
@@ -695,18 +601,36 @@ const PaymentExitingV2 = () => {
                                             ? parseFmt(det.customerInstallmentAmount) ||
                                               parseFmt(det.paidAmount) / det.installments
                                             : parseFmt(det.paidAmount);
+                                    const method = getPaymentMethodDetails(det.paymentMethod);
                                     return (
                                         <div
                                             key={idx}
                                             className="bg-base-200 rounded-xl p-4 space-y-3 border border-base-300"
                                         >
-                                            <div className="flex justify-between items-start">
-                                                <Badge label={det.paymentMethod} color="primary" />
-                                                <p className="text-lg font-bold text-base-content">${fmt(parseFmt(det.paidAmount))}</p>
+                                            <div className="flex justify-between items-start gap-3">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <figure
+                                                        className={clsx(
+                                                            "h-8 flex items-center justify-center px-1.5 rounded-lg overflow-hidden ring-1 ring-base-300/60",
+                                                            theme === "dark" ? "bg-white/15" : "bg-white",
+                                                        )}
+                                                    >
+                                                        <img
+                                                            className="h-5 w-auto object-contain"
+                                                            src={method.image_url}
+                                                            alt={method.description}
+                                                            loading="lazy"
+                                                        />
+                                                    </figure>
+                                                    <span className="text-sm font-extrabold text-base-content truncate">
+                                                        {method.description}
+                                                    </span>
+                                                </div>
+                                                <p className="text-lg font-bold text-base-content tabular-nums">${fmt(parseFmt(det.paidAmount))}</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4 text-xs">
                                                 <InfoRow label="Tarjeta" value={`**** ${det.lastFourDigits}`} />
-                                                <InfoRow label="Tipo" value={det.paymentClass} />
+                                                <InfoRow label="Tipo" value={formatPaymentClass[det.paymentClass] ?? det.paymentClass} />
                                                 <InfoRow
                                                     label="Pagos"
                                                     value={
@@ -715,7 +639,17 @@ const PaymentExitingV2 = () => {
                                                             : `${det.installments} pago`
                                                     }
                                                 />
-                                                <InfoRow label="Estado" value={formatOrderStatus[det.paymentStatus]} />
+                                                <div className="flex flex-col gap-0.5">
+                                                    <p className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">Estado</p>
+                                                    <span
+                                                        className={clsx(
+                                                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border w-fit",
+                                                            orderStatusBadgeClass(det.paymentStatus),
+                                                        )}
+                                                    >
+                                                        {formatOrderStatus[det.paymentStatus]}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     );
