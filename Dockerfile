@@ -81,7 +81,7 @@ RUN echo "=== DIAGNOSTICO DE COMPILACION ===" && \
 # =========================================================
 # Stage 3: Runner
 # =========================================================
-FROM nginx:stable-alpine AS runner
+FROM nginx:1.30.4-alpine AS runner
 
 # Instalar curl para healthchecks/debug opcional
 # y el módulo brotli para compresión de JS/CSS/HTML
