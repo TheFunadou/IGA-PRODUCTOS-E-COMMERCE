@@ -91,7 +91,7 @@ export const usePollingPaymentApprovedDetailV2 = (args: { orderUUID: string }) =
 
     return useQuery<PaymentDetailsI>({
         queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
-        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["APPROVED"] } }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["APPROVED", "PENDING_CONFIRMATION"] } }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
@@ -120,7 +120,7 @@ export const usePollingPaymentPendingDetailV2 = (args: { orderUUID: string }) =>
 
     return useQuery<PaymentDetailsI>({
         queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
-        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["PENDING"] } }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["PENDING", "PENDING_CONFIRMATION"] } }),
         enabled: !!orderUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -141,7 +141,7 @@ export const usePollingPaymentRejectedV2 = (args: { orderUUID: string }) => {
 
     return useQuery<PaymentDetailsI>({
         queryKey: paymentQueryKeys.getPaymentDetails({ orderUUID }),
-        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["REJECTED", "IN_PROCESS"] } }),
+        queryFn: () => getPaymentDetails({ orderUUID, query: { enablePolling: true, requiredStatus: ["REJECTED", "IN_PROCESS", "PENDING_CONFIRMATION"] } }),
         enabled: !!orderUUID,
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,

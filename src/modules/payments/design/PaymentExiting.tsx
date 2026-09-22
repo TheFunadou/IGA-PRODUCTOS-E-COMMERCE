@@ -41,8 +41,9 @@ import { orderStatusBadgeClass } from "../../orders/utils/orderStatus";
 import type { OrderCheckoutItemIV3 } from "../../orders/OrdersTypes";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import FolioCopyButton from "../../orders/components/FolioCopyButton";
-import { PageFrame, Badge, InfoRow, SectionCard, SummaryLine } from "./paymentResultUi";
+import { PageFrame, InfoRow, SectionCard, SummaryLine } from "./paymentResultUi";
 import { cardToneClass } from "../utils/paymentTone";
+import PaymentVerification from "./PaymentVerification";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -269,12 +270,19 @@ const PaymentExitingV2 = () => {
 
     /* ── Guard: timeout ── */
     if (pollTimedOut) {
+        if (data?.status === "PENDING_CONFIRMATION" && data?.order) {
+            return <PaymentVerification orderUUID={orderUUID} data={data} />;
+        }
         return <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />;
     }
 
     /* ── Guard: cargando / polling ── */
     if (isLoading || !data || data.status === "PENDING" || !data.order) {
         return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
+
+    if (data.status === "PENDING_CONFIRMATION") {
+        return <PaymentVerification orderUUID={orderUUID} data={data} />;
     }
 
     if (data.status !== "APPROVED") {
@@ -300,92 +308,83 @@ const PaymentExitingV2 = () => {
             <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up">
 
                 {/* ══════════════════════════════════════
-                    HEADER V3
-                ══════════════════════════════════════ */}
-                <header className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
-                            <MdVerified className="text-success text-lg sm:text-xl" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
-                                ¡Gracias por tu compra, {buyer.name}!
-                            </h1>
-                            <p className="text-xs sm:text-sm text-base-content/50 mt-1.5">
-                                Hemos enviado un correo a{" "}
-                                <span className="font-semibold text-base-content/70">{buyer.email}</span>{" "}
-                                con los detalles de tu pedido.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
-                        <Badge label={formatOrderStatus[data.status]} color="success" />
-                        <div className="flex items-center gap-2 justify-end w-full">
-                            <p className="text-xs font-mono text-base-content/40 break-all max-w-xs text-right select-all">
-                                Número de pedido: {order.orderUUID}
-                            </p>
-                            <FolioCopyButton uuid={order.orderUUID} />
-                        </div>
-                        <p className="text-xs text-base-content/40">
-                            {formatDate(order.createdAt, "es-MX")}
-                        </p>
-                    </div>
-                </header>
-
-                {/* ══════════════════════════════════════
                     HERO: confirmación (bg-success)
                 ══════════════════════════════════════ */}
-                <div className="bg-success rounded-2xl p-5 sm:p-7 text-success-content relative overflow-hidden">
+                <div className="bg-success rounded-2xl p-5 sm:p-8 text-success-content relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
                         <MdVerified className="text-[10rem] -rotate-12" />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-success-content/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                <MdVerified className="text-xl text-success-content" />
+                    <div className="relative z-10">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-success-content/20 flex items-center justify-center flex-shrink-0">
+                                    <MdVerified className="text-2xl text-success-content" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-success-content/70">
+                                        ¡Pago confirmado!
+                                    </p>
+                                    <h1 className="text-xl sm:text-2xl font-bold leading-tight text-success-content">
+                                        ¡Gracias por tu compra, {buyer.name}!
+                                    </h1>
+                                    <p className="text-sm mt-0.5 text-success-content/70">
+                                        Hemos enviado un correo a{" "}
+                                        <span className="font-semibold text-success-content/90">{buyer.email}</span>{" "}
+                                        con los detalles de tu pedido.
+                                    </p>
+                                    <p className="text-sm mt-0.5 text-success-content/70">
+                                        Tu pedido ya está en preparación. Te notificaremos cuando salga.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-content/20 text-success-content">
+                                    {formatOrderStatus[data.status]}
+                                </span>
+                                <div className="flex items-center gap-2 justify-end w-full">
+                                    <p className="text-success-content/60 text-xs font-mono break-all max-w-xs text-right select-all">
+                                        Número de pedido: {order.orderUUID}
+                                    </p>
+                                    <FolioCopyButton uuid={order.orderUUID} tone="success" />
+                                </div>
+                                <p className="text-success-content/60 text-xs">
+                                    {formatDate(order.createdAt, "es-MX")}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Meta de la orden */}
+                        <div className="mt-5 pt-5 border-t border-success-content/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <p className="text-success-content/60 text-xs uppercase">Total Pagado</p>
+                                <p className="font-bold text-xl text-success-content">
+                                    ${fmt(hasFinancing ? totalPaid : orderTotal)}
+                                </p>
+                                {hasFinancing && (
+                                    <p className="text-sm font-semibold text-success-content/70 mt-0.5">
+                                        (Total de la orden: ${fmt(orderTotal)})
+                                    </p>
+                                )}
                             </div>
                             <div>
-                                <p className="text-xs font-semibold uppercase text-success-content/70">
-                                    ¡Pago confirmado!
-                                </p>
-                                <p className="text-success-content/70 text-sm mt-0.5">
-                                    Tu pedido ya está en preparación. Te notificaremos cuando salga.
+                                <p className="text-success-content/60 text-xs uppercase">Proveedor</p>
+                                <p className="font-semibold text-success-content">
+                                    {paymentProvider[order.paymentProvider].description}
                                 </p>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Meta de la orden */}
-                    <div className="mt-5 pt-5 border-t border-success-content/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm relative z-10">
-                        <div>
-                            <p className="text-success-content/60 text-xs uppercase">Total Pagado</p>
-                            <p className="font-bold text-xl text-success-content">
-                                ${fmt(hasFinancing ? totalPaid : orderTotal)}
-                            </p>
-                            {hasFinancing && (
-                                <p className="text-sm font-semibold text-success-content/70 mt-0.5">
-                                    (Total de la orden: ${fmt(orderTotal)})
+                            <div>
+                                <p className="text-success-content/60 text-xs uppercase">Productos</p>
+                                <p className="font-semibold text-success-content">
+                                    {items.length} {items.length === 1 ? "artículo" : "artículos"}
                                 </p>
-                            )}
-                        </div>
-                        <div>
-                            <p className="text-success-content/60 text-xs uppercase">Proveedor</p>
-                            <p className="font-semibold text-success-content">
-                                {paymentProvider[order.paymentProvider].description}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-success-content/60 text-xs uppercase">Productos</p>
-                            <p className="font-semibold text-success-content">
-                                {items.length} {items.length === 1 ? "artículo" : "artículos"}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-success-content/60 text-xs uppercase">Tipo de orden</p>
-                            <p className="font-semibold text-success-content">
-                                {order.isGuestOrder ? "Invitado" : "Cliente registrado"}
-                            </p>
+                            </div>
+                            <div>
+                                <p className="text-success-content/60 text-xs uppercase">Tipo de orden</p>
+                                <p className="font-semibold text-success-content">
+                                    {order.isGuestOrder ? "Invitado" : "Cliente registrado"}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

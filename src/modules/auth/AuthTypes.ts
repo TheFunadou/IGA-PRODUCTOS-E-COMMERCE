@@ -40,6 +40,7 @@ export type UpdateEmailType = Pick<CustomerPayloadType, "email">;
 export type AuthenticatedCustomerType = {
   payload: CustomerPayloadType;
   csrfToken: string;
+  isNewCustomer?: boolean;
 };
 
 

@@ -16,7 +16,6 @@ import '@fontsource/roboto/700.css';
 import { TriggerAlertProvider } from "./modules/alerts/states/TriggerAlert"
 import { ThemeProvider } from "./modules/products/states/ThemeContext"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { useThemeStore } from "./layouts/states/themeStore"
 import ScrollToTop from "./global/components/ScrollToTop"
 
 import { usePageTracking } from "./modules/analytics/usePageTracking";
@@ -34,6 +33,7 @@ const CreateAccount = lazy(() => import("./modules/auth/design/CreateAccount"))
 const CreateAccountV3 = lazy(() => import("./modules/auth/design/CreateAccountV3"))
 const RestorePassword = lazy(() => import("./modules/auth/design/RestorePassword"))
 const RestorePasswordV3 = lazy(() => import("./modules/auth/design/RestorePasswordV3"))
+const VerifyEmailV3 = lazy(() => import("./modules/auth/design/VerifyEmailV3"))
 const CustomerAddresses = lazy(() => import("./modules/customers/design/CustomerAddresses"))
 const ShopV2 = lazy(() => import("./modules/shop/design/Shop"))
 const ShopV3 = lazy(() => import("./modules/shop/design/shop/ShopV3"))
@@ -235,7 +235,7 @@ const router = createBrowserRouter([
                 path: "/nueva-cuenta",
                 element: (
                     <Suspense fallback={<PageLoader />}>
-                        <CreateAccountV3 />
+                        <AuthProviders><CreateAccountV3 /></AuthProviders>
                     </Suspense>
                 )
             },
@@ -244,18 +244,24 @@ const router = createBrowserRouter([
                 path: "/restablecer-contraseña",
                 element: (
                     <Suspense fallback={<PageLoader />}>
-                        <RestorePasswordV3 />
+                        <AuthProviders><RestorePasswordV3 /></AuthProviders>
+                    </Suspense>
+                )
+            },
+            // ROLLBACK Restablecer: { path: "/restablecer-contraseña", element: <Suspense fallback={<PageLoader />}><RestorePassword /></Suspense> }
+            {
+                path: "/verificar-correo",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <AuthProviders><VerifyEmailV3 /></AuthProviders>
                     </Suspense>
                 )
             }
-            // ROLLBACK Restablecer: { path: "/restablecer-contraseña", element: <Suspense fallback={<PageLoader />}><RestorePassword /></Suspense> }
         ]
     }
 ]);
 
 function App() {
-    const { theme } = useThemeStore();
-    useEffect(() => { document.documentElement.setAttribute("data-theme", theme!) }, [theme]);
     return <RouterProvider router={router} />
 }
 

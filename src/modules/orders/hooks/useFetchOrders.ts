@@ -1,6 +1,7 @@
 
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatAxiosError } from "../../../api/helpers";
 import { cancelOrder, cancelGuestOrder, getBuyNowItem, getBuyNowItemV3, getCheckoutOrderV2, getCheckoutOrderV3, getOrders, getOrdersDashboardV3 } from "../../orders/OrdersServices";
 import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedI, PaymentDetailsExtendedV3I } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
@@ -98,8 +99,8 @@ export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
             queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });
         },
-        onError: () => {
-            showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden., intente nuevamente", { duration: 3000 });
+        onError: (error) => {
+            showTriggerAlert("Error", formatAxiosError(error), { duration: 4000 });
         }
     });
 };
@@ -115,8 +116,8 @@ export const useCancelGuestOrder = ({ orderUUID }: { orderUUID: string }) => {
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
             queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });
         },
-        onError: () => {
-            showTriggerAlert("Error", "Ocurrio un error inesperado al cancelar la orden, intente nuevamente", { duration: 3000 });
+        onError: (error) => {
+            showTriggerAlert("Error", formatAxiosError(error), { duration: 4000 });
         }
     });
 };

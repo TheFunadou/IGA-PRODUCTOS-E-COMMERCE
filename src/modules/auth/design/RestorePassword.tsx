@@ -226,7 +226,7 @@ const RestorePassword = () => {
     }, [watchPwd]);
 
     const sendTokenMut = useMutation({
-        mutationFn: async (mail: string) => await sendRestorePasswordToken({ email: mail }),
+        mutationFn: async (mail: string) => await sendRestorePasswordToken({ email: mail, recaptchaToken: "" }),
         onSuccess: (_, mail) => {
             setEmailTarget(mail);
             setStep(2);
@@ -254,7 +254,7 @@ const RestorePassword = () => {
     });
 
     const resendTokenMut = useMutation({
-        mutationFn: async () => await resendRestorePasswordToken({ email: emailTarget }),
+        mutationFn: async () => await resendRestorePasswordToken({ email: emailTarget, recaptchaToken: "" }),
         onSuccess: () => {
             showTriggerAlert("Successfull", "Se ha reenviado tu código", { duration: 3000 });
             setCanResend(false);

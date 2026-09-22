@@ -53,7 +53,7 @@ export type PaymentProvidersType = "mercado_pago" | "paypal" | null;
 export type PaymentProviders = "mercado_pago" | "paypal";
 export type PaymentMethodType = "visa" | "mastercard" | "master" | "oxxo" | "paycash" | "bancomer" | "clabe";
 export type PaymentClassType = "credit_card" | "debit_card" | "ticket" | "transfer";
-export type OrderStatusType = "APPROVED" | "PENDING" | "REJECTED" | "IN_PROCESS" | "REFUNDED" | "CANCELLED" | "AUTHORIZED" | "ABANDONED" | "IN_MEDIATION" | "CHARGED_BACK" | "PARTIALLY_REFUNDED" | "CANCELLATION_REQUESTED";
+export type OrderStatusType = "APPROVED" | "PENDING" | "REJECTED" | "IN_PROCESS" | "REFUNDED" | "CANCELLED" | "AUTHORIZED" | "ABANDONED" | "IN_MEDIATION" | "CHARGED_BACK" | "PARTIALLY_REFUNDED" | "CANCELLATION_REQUESTED" | "PENDING_CONFIRMATION";
 
 export interface PaymentProviderDetails {
     icon: JSX.Element;

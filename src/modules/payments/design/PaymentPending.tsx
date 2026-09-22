@@ -37,6 +37,7 @@ import { orderStatusBadgeClass } from "../../orders/utils/orderStatus";
 import FolioCopyButton from "../../orders/components/FolioCopyButton";
 import { PageFrame, InfoRow, SectionCard, SummaryLine } from "./paymentResultUi";
 import { cardToneClass } from "../utils/paymentTone";
+import PaymentVerification from "./PaymentVerification";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -178,7 +179,9 @@ const PaymentPendingV2 = () => {
 
         // Si ya está como PENDING (o SUCCESS/APPROVED), limpiamos el store
         if (
-            (data.status === "PENDING" || data.status === "APPROVED") &&
+            (data.status === "PENDING" ||
+                data.status === "APPROVED" ||
+                data.status === "PENDING_CONFIRMATION") &&
             data.order.orderUUID === orderStore?.orderUUID
         ) {
             success();
@@ -258,6 +261,9 @@ const PaymentPendingV2 = () => {
 
     /* ── Guard: timeout ── */
     if (pollTimedOut) {
+        if (data?.status === "PENDING_CONFIRMATION" && data?.order) {
+            return <PaymentVerification orderUUID={orderUUID} data={data} />;
+        }
         return <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />;
     }
 
@@ -267,6 +273,9 @@ const PaymentPendingV2 = () => {
     }
 
     // Aquí permitimos PENDING o APPROVED para mostrar información
+    if (data.status === "PENDING_CONFIRMATION") {
+        return <PaymentVerification orderUUID={orderUUID} data={data} />;
+    }
     if (data.status !== "PENDING" && data.status !== "APPROVED") throw new Error("Error al obtener el estatus de la orden de compra");
 
     const { order } = data;

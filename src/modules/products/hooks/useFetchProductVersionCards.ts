@@ -9,6 +9,7 @@ export const productQueryKeys = {
     versionCardsV3: (params: PV3Params) => buildKey("product:version-cards:v3", { params }),
     publicTags: (categoryUuid?: string) => buildKey("tags:public", { categoryUuid }),
     stock: (skuList: string[]) => buildKey("product:version:stock", { skuList }),
+    versionDetailsV3: (sku: string) => ["product:product_version:details:v3", { sku }],
 };
 
 export const useFetchProductVersionCards = (params: ProductVersionCardFilters) => {
@@ -65,7 +66,7 @@ export const useFetchProductVersionDetailV2 = ({ sku }: { sku: string }) => {
 
 export const useFetchProductVersionDetailV3 = ({ sku }: { sku: string }) => {
     return useQuery<ProductVersionDetailV3I | null>({
-        queryKey: ["product:product_version:details:v3", { sku }],
+        queryKey: productQueryKeys.versionDetailsV3(sku),
         queryFn: async () => await getProductVersionDetailV3(sku),
         staleTime: 4 * 60 * 1000,
         gcTime: 5 * 60 * 1000,

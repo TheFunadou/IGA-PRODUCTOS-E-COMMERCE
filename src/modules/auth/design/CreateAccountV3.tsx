@@ -9,6 +9,8 @@ import { MdEmail, MdLock, MdSupportAgent } from "react-icons/md";
 import { useAuthStore } from "../states/authStore";
 import { useSendVerificationToken, useRegisterCustomer, useResendVerificationToken } from "../useAuth";
 import { trackCompleteRegistration } from "../../analytics/MetaEvents";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { meetsPasswordPolicy, PASSWORD_POLICY_MESSAGE } from "../helpers";
 import IGALogo from "../../../assets/logo/IGA-LOGO.webp";
 
 type VerificationFormType = { verificationToken: string; };
@@ -129,6 +131,7 @@ const CreateAccountV3 = () => {
     document.title = "Iga Productos | Crear cuenta";
     const { isAuth } = useAuthStore();
     const navigate = useNavigate();
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const sendTokenMutation = useSendVerificationToken();
     const registerMutation = useRegisterCustomer();
     const resendTokenMutation = useResendVerificationToken();
@@ -152,7 +155,11 @@ const CreateAccountV3 = () => {
 
     const onSubmitStep1: SubmitHandler<NewCustomerType> = async (data) => {
         setFormData(data);
-        await sendTokenMutation.mutateAsync({ email: data.email });
+        let _recaptchaToken = "";
+        if (executeRecaptcha) {
+            _recaptchaToken = await executeRecaptcha('send_verification_token');
+        }
+        await sendTokenMutation.mutateAsync({ email: data.email, recaptchaToken: _recaptchaToken });
         setStep(2); setCanResend(false); setCountdownKey((k) => k + 1);
     };
 
@@ -168,7 +175,11 @@ const CreateAccountV3 = () => {
     const handleResend = async () => {
         if (!formData) return;
         resetVerification();
-        await resendTokenMutation.mutateAsync({ email: formData.email });
+        let _recaptchaToken = "";
+        if (executeRecaptcha) {
+            _recaptchaToken = await executeRecaptcha('resend_verification_token');
+        }
+        await resendTokenMutation.mutateAsync({ email: formData.email, recaptchaToken: _recaptchaToken });
         setCanResend(false); setCountdownKey((k) => k + 1);
     };
 
@@ -297,7 +308,7 @@ const CreateAccountV3 = () => {
                                     <Field label="Contraseña" error={errors.password?.message}>
                                         <div className="relative">
                                             <MdLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/30 text-sm pointer-events-none" />
-                                            <input {...register("password", { required: "Campo requerido", validate: (v) => stringStrengthEvaluator(v) >= 55 || "Ingresa una contraseña más segura" })} id="password" type="password" placeholder="Mínimo 8 caracteres" className={clsx(inputClass(!!errors.password), "pl-11")} />
+                                            <input {...register("password", { required: "Campo requerido", validate: (v) => meetsPasswordPolicy(v) || PASSWORD_POLICY_MESSAGE })} id="password" type="password" placeholder="Mínimo 8 caracteres" className={clsx(inputClass(!!errors.password), "pl-11")} />
                                         </div>
                                         <PasswordStrengthBar strength={passwordStrength} />
                                     </Field>
@@ -341,7 +352,7 @@ const CreateAccountV3 = () => {
                                     Verifica tu correo
                                 </h2>
                                 <p className="text-sm text-base-content/50 mb-4">
-                                    Te enviamos un código de 6 dígitos a:
+                                    Te enviamos un código de 8 caracteres a:
                                 </p>
 
                                 <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 mb-5 text-[0.80rem] font-medium text-primary break-all">
@@ -360,8 +371,8 @@ const CreateAccountV3 = () => {
                                 <form onSubmit={handleSubmitV(onSubmitStep2)} className="flex flex-col gap-4">
                                     <Field label="Código de verificación" error={errorsV.verificationToken?.message}>
                                         <input
-                                            {...registerV("verificationToken", { required: "El código es requerido", minLength: { value: 6, message: "Debe tener al menos 6 caracteres" } })}
-                                            id="verificationToken" type="text" placeholder="000000" maxLength={8} autoComplete="one-time-code"
+                                            {...registerV("verificationToken", { required: "El código es requerido", minLength: { value: 8, message: "Debe tener al menos 8 caracteres" } })}
+                                            id="verificationToken" type="text" placeholder="00000000" maxLength={8} autoComplete="one-time-code"
                                             className={clsx(inputClass(!!errorsV.verificationToken), "text-center tracking-[0.35em] text-xl font-semibold h-[52px] tabular-nums")}
                                         />
                                     </Field>

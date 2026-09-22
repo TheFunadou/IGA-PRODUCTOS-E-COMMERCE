@@ -1,0 +1,279 @@
+{
+    "accounts_info": null,
+    "acquirer_reconciliation": [],
+    "additional_info": {
+        "ip_address": "187.225.12.144",
+        "items": [
+            {
+                "category_id": "Cascos",
+                "id": "CAS1-AI-001",
+                "picture_url": "https://http2.mlstatic.com/D_NQ_NP_894572-MLM116330966708_092026-F.jpg",
+                "quantity": "1",
+                "title": "Casco de Seguridad Industrial Marca Iga Tipo Cachucha Plagosur de Ajuste de Intervalo Clase E (Dielectrico)",
+                "unit_price": "217.8"
+            }
+        ],
+        "payer": {
+            "first_name": "Joel",
+            "last_name": "Baez"
+        },
+        "shipments": {
+            "receiver_address": {
+                "city_name": "Coatzacoalcos",
+                "state_name": "Veracruz",
+                "street_name": "Uruguay",
+                "street_number": "13",
+                "zip_code": "96760"
+            }
+        },
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+    },
+    "authorization_code": "000000",
+    "binary_mode": false,
+    "brand_id": null,
+    "build_version": "3.173.0-rc-9",
+    "call_for_authorize_id": null,
+    "captured": true,
+    "card": {
+        "bin": null,
+        "cardholder": {
+            "identification": {
+                "number": null,
+                "type": null
+            },
+            "name": null
+        },
+        "country": null,
+        "date_created": null,
+        "date_last_updated": null,
+        "expiration_month": null,
+        "expiration_year": null,
+        "first_six_digits": null,
+        "id": "9878931000",
+        "last_four_digits": "2647",
+        "tags": []
+    },
+    "charges_details": [
+        {
+            "accounts": {
+                "from": "payer",
+                "to": "mp"
+            },
+            "amounts": {
+                "original": 311.75,
+                "refunded": 0
+            },
+            "client_id": 0,
+            "date_created": "2026-09-18T17:53:19.000-04:00",
+            "id": "179750612864-001",
+            "last_updated": "2026-09-18T17:53:19.000-04:00",
+            "metadata": {
+                "source": "client",
+                "source_detail": "px-checkout-flows"
+            },
+            "name": "shipping_not_specified",
+            "refund_charges": [],
+            "reserve_id": null,
+            "type": "shipping",
+            "update_charges": []
+        },
+        {
+            "accounts": {
+                "from": "collector",
+                "to": "mp"
+            },
+            "amounts": {
+                "original": 26.09,
+                "refunded": 0
+            },
+            "client_id": 0,
+            "date_created": "2026-09-18T17:53:19.000-04:00",
+            "external_charge_id": "01M2V84YV0PZ4SWVYG8JBV2P8N",
+            "id": "179750612864-002",
+            "last_updated": "2026-09-18T17:53:19.000-04:00",
+            "metadata": {
+                "reason": "",
+                "source": "proc-svc-charges",
+                "source_detail": "processing_fee_charge"
+            },
+            "name": "mercadopago_fee",
+            "refund_charges": [],
+            "reserve_id": null,
+            "type": "fee",
+            "update_charges": []
+        }
+    ],
+    "charges_execution_info": {
+        "internal_execution": {
+            "date": "2026-09-18T17:53:19.721-04:00",
+            "execution_id": "01M2V84YTEZ610WFR9540K7JQJ"
+        }
+    },
+    "collector_id": 2543243254,
+    "corporation_id": null,
+    "counter_currency": null,
+    "coupon_amount": 0,
+    "currency_id": "MXN",
+    "date_approved": null,
+    "date_created": "2026-09-18T17:53:19.000-04:00",
+    "date_last_updated": "2026-09-18T17:53:20.000-04:00",
+    "date_of_expiration": null,
+    "deduction_schema": null,
+    "description": "Casco de Seguridad Industrial Marca Iga Tipo Cachucha Plagosur de Ajuste de Intervalo Clase E (Dielectrico)",
+    "differential_pricing_id": null,
+    "external_reference": "ef61ef3c-9471-4f02-b13f-47e143aa9464",
+    "fee_details": [],
+    "financing_group": null,
+    "id": 179750612864,
+    "idempotency_key": "idempotencyKeyPostPay_db89c11b-350a-4045-9988-84da391bdb03debmaster2f643268e51bcbb1c09a40c7a4b08d27_3466456757717857",
+    "installments": 1,
+    "integrator_id": null,
+    "issuer_id": "160",
+    "live_mode": true,
+    "marketplace_owner": null,
+    "merchant_account_id": null,
+    "merchant_number": null,
+    "metadata": {},
+    "money_release_date": null,
+    "money_release_schema": null,
+    "money_release_status": "released",
+    "notification_url": "https://roijg-187-225-12-144.free.pinggy.net/payment/mercadopago/webhook",
+    "operation_type": "regular_payment",
+    "order": {
+        "id": "44587913856",
+        "type": "mercadopago"
+    },
+    "payer": {
+        "email": null,
+        "entity_type": null,
+        "first_name": null,
+        "id": "2952634770",
+        "identification": {
+            "number": null,
+            "type": null
+        },
+        "last_name": null,
+        "operator_id": null,
+        "phone": {
+            "number": null,
+            "extension": null,
+            "area_code": null
+        },
+        "type": null
+    },
+    "payment_method": {
+        "data": {
+            "routing_data": {
+                "merchant_account_id": "112"
+            }
+        },
+        "id": "debmaster",
+        "issuer_id": "160",
+        "type": "debit_card"
+    },
+    "payment_method_id": "debmaster",
+    "payment_type_id": "debit_card",
+    "platform_id": null,
+    "point_of_interaction": {
+        "application_data": {
+            "name": "checkout-off",
+            "operating_system": null,
+            "version": "v2"
+        },
+        "business_info": {
+            "branch": "Merchant Services",
+            "sub_unit": "checkout_pro",
+            "unit": "online_payments"
+        },
+        "location": {
+            "source": "Collector",
+            "state_id": "NN"
+        },
+        "transaction_data": {
+            "e2e_id": null
+        },
+        "type": "CHECKOUT"
+    },
+    "pos_id": null,
+    "processing_mode": "aggregator",
+    "refunds": [],
+    "release_info": null,
+    "shipping_amount": 311.75,
+    "sponsor_id": null,
+    "statement_descriptor": "Mercadopago*fake",
+    "status": "in_process",
+    "status_detail": "pending_contingency",
+    "store_id": null,
+    "tags": null,
+    "taxes_amount": 0,
+    "tenant_context": "mp",
+    "transaction_amount": 217.8,
+    "transaction_amount_refunded": 0,
+    "transaction_details": {
+        "acquirer_reference": null,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "installment_amount": 529.55,
+        "net_received_amount": 0,
+        "overpaid_amount": 0,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null,
+        "total_paid_amount": 529.55
+    },
+    "api_response": {
+        "status": 200,
+        "headers": {
+            "date": [
+                "Fri, 18 Sep 2026 21:53:20 GMT"
+            ],
+            "content-type": [
+                "application/json;charset=UTF-8"
+            ],
+            "transfer-encoding": [
+                "chunked"
+            ],
+            "connection": [
+                "keep-alive"
+            ],
+            "vary": [
+                "Accept-Encoding, Accept,Accept-Encoding"
+            ],
+            "cache-control": [
+                "max-age=0"
+            ],
+            "x-api-server-segment": [
+                "legacy"
+            ],
+            "x-content-type-options": [
+                "nosniff"
+            ],
+            "x-request-id": [
+                "123026d7-cc38-4328-970a-2393374ed0f2"
+            ],
+            "x-xss-protection": [
+                "1; mode=block"
+            ],
+            "strict-transport-security": [
+                "max-age=16070400; includeSubDomains; preload, max-age=31536000; includeSubDomains; preload"
+            ],
+            "access-control-allow-origin": [
+                "*"
+            ],
+            "access-control-allow-headers": [
+                "Content-Type"
+            ],
+            "access-control-allow-methods": [
+                "PUT, GET, POST, DELETE, OPTIONS"
+            ],
+            "access-control-max-age": [
+                "86400"
+            ],
+            "timing-allow-origin": [
+                "*"
+            ],
+            "content-encoding": [
+                "gzip"
+            ]
+        }
+    }
+}

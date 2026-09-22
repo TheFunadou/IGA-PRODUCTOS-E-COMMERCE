@@ -84,6 +84,7 @@ export const formatOrderStatus: Record<OrderStatusType, string> = {
     IN_MEDIATION: "En mediación",
     CHARGED_BACK: "Contracargo",
     PARTIALLY_REFUNDED: "Reembolso parcial",
-    CANCELLATION_REQUESTED: "Cancelación solicitada"
+    CANCELLATION_REQUESTED: "Cancelación solicitada",
+    PENDING_CONFIRMATION: "Pago en verificación"
 };
 

@@ -5,6 +5,7 @@ import { useAuthStore } from "../../auth/states/authStore";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { formatAxiosError } from "../../../api/helpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
+import { productQueryKeys } from "./useFetchProductVersionCards";
 
 export const PVDetailQueryKeys = {
     detail: (sku: string | undefined) => buildKey("product:product-version:detail", { sku }),
@@ -103,15 +104,13 @@ export function useAddPVReview() {
             return { previousReviews, tempUUID };
         },
 
-        onError: (error, variables, context) => {
-            if (!context?.previousReviews) return;
-
+        onError: (error, variables) => {
             const queryKey = PVDetailQueryKeys.reviews(variables.data.sku);
 
-            queryClient.setQueryData(
+            queryClient.invalidateQueries({
                 queryKey,
-                context.previousReviews
-            );
+                refetchType: "active"
+            });
 
             showTriggerAlert("Error", formatAxiosError(error));
         },
@@ -141,7 +140,11 @@ export function useAddPVReview() {
             const sku = variables.data.sku;
             queryClient.invalidateQueries({
                 queryKey: PVDetailQueryKeys.reviewsResume(sku),
-                refetchType: "inactive"
+                refetchType: "active"
+            });
+            queryClient.invalidateQueries({
+                queryKey: productQueryKeys.versionDetailsV3(sku),
+                refetchType: "active"
             });
         }
 
