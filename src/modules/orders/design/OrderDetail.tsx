@@ -286,6 +286,7 @@ const OrderDetail = () => {
     const fmt = (n: number) => formatPrice(n.toString(), "es-MX");
 
     return (
+        <>
         <div className="w-full flex justify-center items-start">
             <div className="w-full px-2 sm:px-3 md:px-4 py-6 md:py-10">
 
@@ -795,6 +796,7 @@ const OrderDetail = () => {
             </div>
         </div>
         <CancelOrderForm ref={cancelOrderRef} onCanceled={handleAbandonPending} />
+        </>
     );
 };
 
