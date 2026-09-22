@@ -15,6 +15,7 @@ const STATUS_TONE: Record<OrderStatusType, Tone> = {
     CHARGED_BACK: "error",
     IN_MEDIATION: "warning",
     CANCELLATION_REQUESTED: "warning",
+    PENDING_CONFIRMATION: "info",
 };
 
 const toneOf = (status: string): Tone => STATUS_TONE[status as OrderStatusType] ?? "neutral";

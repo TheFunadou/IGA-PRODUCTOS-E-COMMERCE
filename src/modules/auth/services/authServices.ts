@@ -25,33 +25,38 @@ export const registerCustomer = async (dto: NewCustomerWithToken): Promise<strin
     return data;
 };
 
+export const verifyEmail = async ({ verificationToken }: { verificationToken: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer/verify-email", { verificationToken });
+    return data;
+};
+
 export const getCustomerProfile = async (): Promise<AuthenticatedCustomerType> => {
     const { data } = await api.get<AuthenticatedCustomerType>("/customer-auth/profile");
     return data;
 };
 
-export const sendVerificationToken = async ({ email }: { email: string }): Promise<string> => {
-    const { data } = await api.post<string>("/customer-auth/verification/token/send", { email });
+export const sendVerificationToken = async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/verification/token/send", { email, recaptchaToken });
     return data;
 };
 
-export const resendVerificationToken = async ({ email }: { email: string }): Promise<string> => {
-    const { data } = await api.post<string>("/customer-auth/verification/token/resend", { email });
+export const resendVerificationToken = async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/verification/token/resend", { email, recaptchaToken });
     return data;
 };
 
-export const sendRestorePasswordToken = async ({ email }: { email: string }): Promise<string> => {
-    const { data } = await api.post<string>("/customer-auth/password/restore/send", { email });
+export const sendRestorePasswordToken = async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/password/restore/token/send", { email, recaptchaToken });
     return data;
 };
 
 export const validateRestorePasswordToken = async ({ restorePasswordToken, email }: { restorePasswordToken: string, email: string }): Promise<boolean> => {
-    const { data } = await api.post<boolean>("/customer-auth/password/restore/validate", { restorePasswordToken, email });
+    const { data } = await api.post<boolean>("/customer-auth/password/restore/token/validate", { restorePasswordToken, email });
     return data;
 };
 
-export const resendRestorePasswordToken = async ({ email }: { email: string }): Promise<string> => {
-    const { data } = await api.post<string>("/customer-auth/password/restore/resend", { email });
+export const resendRestorePasswordToken = async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+    const { data } = await api.post<string>("/customer-auth/password/restore/token/resend", { email, recaptchaToken });
     return data;
 };
 

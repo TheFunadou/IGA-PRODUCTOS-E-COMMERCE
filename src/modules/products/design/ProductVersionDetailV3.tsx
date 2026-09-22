@@ -436,11 +436,12 @@ const ProductVersionDetailV3 = () => {
     const [selectedRating, setSelectedRating] = useState(1);
     const [reviewPage, setReviewPage] = useState(1);
     const [activeTab, setActiveTab] = useState(0);
+    const [hasReviewed, setHasReviewed] = useState(false);
 
     const galleryModalRef = useRef<HTMLDialogElement>(null);
     const pdfModalRef = useRef<HTMLDialogElement>(null);
 
-    const { register, handleSubmit, formState: { errors: formErrors }, watch, setValue, setError, reset } = useForm<AddPVReviewType>({
+    const { register, handleSubmit, formState: { errors: formErrors, isSubmitting }, watch, setValue, setError, reset } = useForm<AddPVReviewType>({
         defaultValues: { rating: 1, title: "", comment: "" }
     });
     const reviewTitle = watch("title");
@@ -536,7 +537,7 @@ const ProductVersionDetailV3 = () => {
             return;
         }
         const response = await addReview.mutateAsync({ data: formData });
-        if (response) { showTriggerAlert("Successfull", "¡Gracias por tu opinión!"); reset(); }
+        if (response) { showTriggerAlert("Successfull", "¡Gracias por tu opinión!"); reset(); setHasReviewed(true); }
     };
 
     const quickSpecs = data ? [
@@ -1124,7 +1125,7 @@ const ProductVersionDetailV3 = () => {
 
                             {/* Formulario */}
                             <div className="mt-6">
-                                {isAuth && !data.details.isReviewed && (
+                                {isAuth && !data.details.isReviewed && !hasReviewed && (
                                     <div className="rounded-xl bg-base-100 border border-base-200 p-6">
                                         <div className="mb-5">
                                             <h3 className="text-lg font-black text-base-content">Escribir una opinión</h3>
@@ -1177,8 +1178,8 @@ const ProductVersionDetailV3 = () => {
                                                 </div>
                                             </div>
                                             <div className="flex justify-end">
-                                                <button type="submit" className="btn btn-primary btn-sm px-8 font-black uppercase tracking-wider rounded-lg shadow-md shadow-primary/20">
-                                                    Publicar opinión
+                                                <button type="submit" disabled={addReview.isPending || isSubmitting} className="btn btn-primary btn-sm px-8 font-black uppercase tracking-wider rounded-lg shadow-md shadow-primary/20">
+                                                    {addReview.isPending ? "Publicando..." : "Publicar opinión"}
                                                 </button>
                                             </div>
                                         </form>

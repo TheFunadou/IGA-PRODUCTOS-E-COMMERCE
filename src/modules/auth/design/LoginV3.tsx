@@ -7,7 +7,6 @@ import { usePaymentStore } from "../../shopping/states/paymentStore";
 import { getPendingOrder } from "../../orders/OrdersServices";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import clsx from "clsx";
-import { trackCompleteRegistration } from "../../analytics/MetaEvents";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { MdEmail, MdLock, MdSupportAgent } from "react-icons/md";
@@ -106,8 +105,12 @@ const LoginV3 = () => {
             setSubmitting(true);
             const { credential } = credentialResponse;
             if (credential) {
-                await loginWithGoogle(credential);
-                trackCompleteRegistration();
+                const response = await loginWithGoogle(credential);
+                // H7: solo se registra el píxel de registro cuando es una cuenta nueva
+                if (response?.isNewCustomer) {
+                    const { trackCompleteRegistration } = await import("../../analytics/MetaEvents");
+                    trackCompleteRegistration();
+                }
                 await resolvePostAuthNavigation();
             }
         } catch (err) {

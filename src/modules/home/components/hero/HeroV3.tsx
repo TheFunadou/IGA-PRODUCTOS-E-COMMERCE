@@ -1,14 +1,18 @@
 import { FaCheckCircle } from "react-icons/fa";
-import wallpeaper2 from "../../../../assets/hero/wallpeaperherocoraza.webp";
+import wallpeaper2 from "../../../../assets/hero/wallpeaperherov5.webp";
 import { scrollToTienda } from "../../../shop/utils/scrollToTienda";
 import { getWhatsAppLink } from "../../../../global/GlobalHelpers";
 import { useMediaQuery } from "../../../../global/hooks/useMediaQuery";
+import { useThemeStore } from "../../../../layouts/states/themeStore";
 
 const HERO_QUOTE_MESSAGE = `Hola, buen día. Vengo del sitio web de Iga Productos y me interesa cotizar cascos por volumen. ¿Me podrían apoyar con una cotización?
 
 Quedo atento a su pronta respuesta. Saludos cordiales.`;
 
 const HeroV3Web = () => {
+    const { theme } = useThemeStore();
+    const quoteClass = theme === "dark" ? "text-base-content" : "text-blue-950";
+
     return (
         <section className="relative min-h-160 lg:min-h-140 xl:min-h-160 2xl:min-h-180 2xl:max-h-[860px] overflow-hidden">
 
@@ -56,7 +60,7 @@ const HeroV3Web = () => {
                                 href={getWhatsAppLink(HERO_QUOTE_MESSAGE)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-sm md:btn-base border border-blue-950 text-blue-950 px-5 py-3 lg:p-6 xl:px-8 xl:py-7 rounded-lg hover:ring-2 hover:ring-blue-900 transition-all duration-300"
+                                className={`btn btn-sm md:btn-base border px-5 py-3 lg:p-6 xl:px-8 xl:py-7 rounded-lg hover:ring-2 hover:ring-blue-900 transition-all duration-300 border-blue-950 ${quoteClass}`}
                             >
                                 COTIZAR POR VOLUMÉN
                             </a>
@@ -86,6 +90,9 @@ const HeroV3Web = () => {
 };
 
 const HeroV3Mobile = () => {
+    const { theme } = useThemeStore();
+    const quoteClass = theme === "dark" ? "text-base-content" : "text-blue-950";
+
     return (
         <section className="relative min-h-[80vh] overflow-hidden">
             <div className="absolute inset-0 bg-base-200">
@@ -123,7 +130,7 @@ const HeroV3Mobile = () => {
                         href={getWhatsAppLink(HERO_QUOTE_MESSAGE)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-sm md:btn-base border border-blue-950 text-blue-950 px-5 py-3 lg:p-6 xl:px-8 xl:py-7 rounded-lg hover:ring-2 hover:ring-blue-900 transition-all duration-300"
+                        className={`btn btn-sm md:btn-base border px-5 py-3 lg:p-6 xl:px-8 xl:py-7 rounded-lg hover:ring-2 hover:ring-blue-900 transition-all duration-300 border-blue-950 ${quoteClass}`}
                     >
                         COTIZAR POR VOLUMÉN
                     </a>

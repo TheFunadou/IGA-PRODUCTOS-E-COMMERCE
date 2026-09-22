@@ -1,17 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTriggerAlert } from "../alerts/states/TriggerAlert";
-import { registerCustomer, sendVerificationToken } from "./services/authServices";
+import { registerCustomer, resendVerificationToken, sendVerificationToken } from "./services/authServices";
 import type { NewCustomerType } from "./AuthTypes";
 import { formatAxiosError } from "../../api/helpers";
 
 export function useSendVerificationToken() {
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
-        mutationFn: async ({ email }: { email: string }): Promise<string> => {
-            return await sendVerificationToken({ email });
+        mutationFn: async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+            return await sendVerificationToken({ email, recaptchaToken });
         },
         onSuccess: () => {
-            showTriggerAlert("Successfull", "Tu código de verificación ha sidoenviado a tu correo", {
+            showTriggerAlert("Successfull", "Tu código de verificación ha sido enviado a tu correo", {
                 duration: 3500,
                 delay: 1000
             });
@@ -28,8 +28,8 @@ export function useSendVerificationToken() {
 export function useResendVerificationToken() {
     const { showTriggerAlert } = useTriggerAlert();
     return useMutation({
-        mutationFn: async ({ email }: { email: string }): Promise<string> => {
-            return await sendVerificationToken({ email });
+        mutationFn: async ({ email, recaptchaToken }: { email: string, recaptchaToken: string }): Promise<string> => {
+            return await resendVerificationToken({ email, recaptchaToken });
         },
         onSuccess: () => {
             showTriggerAlert("Successfull", "Tu código de verificación ha sido reenviado a tu correo", {

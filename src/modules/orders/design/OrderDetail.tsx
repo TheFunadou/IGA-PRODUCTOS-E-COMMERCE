@@ -7,6 +7,7 @@ import {
     FaDownload,
     FaExclamationCircle,
     FaExclamationTriangle,
+    FaHourglassHalf,
     FaHome,
     FaPhone,
     FaReceipt,
@@ -21,10 +22,12 @@ import { formatAxiosError } from "../../../api/helpers";
 import { formatDate, formatPrice } from "../../products/Helpers";
 import { formatOrderStatus, formatPaymentClass, getPaymentMethodDetails, getPaymentProviderDetails } from "../../shopping/utils/ShoppingUtils";
 import clsx from "clsx";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useThemeStore } from "../../../layouts/states/themeStore";
-import { useFetchOrderDetailsV3 } from "../hooks/useFetchOrders";
+import { useCancelOrder, useFetchOrderDetailsV3 } from "../hooks/useFetchOrders";
 import CheckoutOrderItemV3 from "../../shopping/components/CheckoutOrderItemV3";
+import CancelOrderForm from "../../shopping/components/CancelOrderForm";
+import { showModal } from "../../../global/GlobalHelpers";
 import FolioCopyButton from "../components/FolioCopyButton";
 import {
     orderStatusBadgeClass,
@@ -205,8 +208,15 @@ const OrderDetail = () => {
     const navigate = useNavigate();
     const [itemsExpanded, setItemsExpanded] = useState(false);
     const { theme } = useThemeStore();
+    const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
 
     const { data, isLoading, error, refetch } = useFetchOrderDetailsV3({ orderUUID: orderUUID! });
+    const cancelOrderMutation = useCancelOrder({ orderUUID: orderUUID!, type: "ABANDONED" });
+
+    const handleAbandonPending = async () => {
+        await cancelOrderMutation.mutateAsync();
+        await refetch();
+    };
 
     if (isLoading) {
         return <SkeletonLoader />;
@@ -266,6 +276,10 @@ const OrderDetail = () => {
     const { orderTotal, totalPaid, hasFinancing, interest } =
         getOrderPaymentTotals(order);
     const unpaid = totalPaid <= 0;
+    const isVerifying = order.status === "PENDING_CONFIRMATION";
+    // Solo las ordenes PENDING sin cobro pueden abandonarse desde el detalle.
+    // APPROVED / PENDING_CONFIRMATION / AUTHORIZED quedan bloqueadas en backend.
+    const canAbandonPending = order.status === "PENDING";
     const itemsToShow = itemsExpanded ? items : items.slice(0, 5);
     const hasMoreItems = items.length > 5;
 
@@ -376,7 +390,17 @@ const OrderDetail = () => {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-black uppercase text-base-content/30 tracking-widest">Total pagado</p>
-                                            {unpaid ? (
+                                            {isVerifying ? (
+                                                <>
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border bg-info/10 text-info border-info/20 mt-1">
+                                                        <FaHourglassHalf className="text-[10px]" />
+                                                        Cargo en verificación
+                                                    </span>
+                                                    <p className="text-lg font-black text-primary tabular-nums mt-0.5">
+                                                        ${fmt(totalPaid > 0 ? totalPaid : orderTotal)}
+                                                    </p>
+                                                </>
+                                            ) : unpaid ? (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase border bg-error/10 text-error border-error/20 mt-1">
                                                     <FaExclamationCircle className="text-[10px]" />
                                                     No pagada
@@ -390,6 +414,35 @@ const OrderDetail = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* ── Banner: pago en verificación ── */}
+                            {isVerifying && (
+                                <div className="w-full rounded-3xl bg-info/10 border border-info/20 p-5 md:p-6 flex flex-col sm:flex-row items-start gap-4">
+                                    <div className="w-11 h-11 rounded-2xl bg-info/15 flex items-center justify-center flex-shrink-0">
+                                        <FaHourglassHalf className="text-info text-xl" />
+                                    </div>
+                                    <div className="text-sm">
+                                        <p className="font-bold text-base-content">Tu pago está en verificación</p>
+                                        <p className="text-base-content/60 mt-1 leading-relaxed">
+                                            Tu banco aún no confirma el cargo. Esto puede tardar hasta 48 horas
+                                            y es normal: tu dinero está a salvo y tus productos quedaron reservados.
+                                            Te avisaremos por correo cuando se resuelva. Por favor no vuelvas a
+                                            pagar esta orden para evitar un cargo duplicado.
+                                        </p>
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs font-semibold">
+                                            <a href="mailto:atencionaclientes@igaproductos.com" className="text-primary hover:underline">
+                                                atencionaclientes@igaproductos.com
+                                            </a>
+                                            <a href="https://wa.me/529211963246" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                                                WhatsApp +52 921 196 3246
+                                            </a>
+                                            <a href="tel:+529211963246" className="text-primary hover:underline">
+                                                +52 921 196 3246
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* ── Información del comprador ── */}
                             <SectionCard icon={<FaUser />} title="Información del comprador">
@@ -606,6 +659,25 @@ const OrderDetail = () => {
                                                 <FaDownload /> Descargar comprobante
                                             </a>
                                         )}
+
+                                        {canAbandonPending && (
+                                            <div className="mt-4 flex flex-col gap-2 rounded-xl border border-error/20 bg-error/5 p-3">
+                                                <p className="text-xs text-base-content/60 leading-relaxed">
+                                                    Dejaste esta orden pendiente de pago. Puedes abandonarla para liberarla de tu historial.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline btn-error btn-sm w-full"
+                                                    disabled={cancelOrderMutation.isPending}
+                                                    onClick={() => showModal(cancelOrderRef.current)}
+                                                >
+                                                    {cancelOrderMutation.isPending ? (
+                                                        <span className="loading loading-spinner loading-xs" />
+                                                    ) : null}
+                                                    Abandonar orden
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </SectionCard>
 
@@ -707,9 +779,14 @@ const OrderDetail = () => {
                                     <p className="text-sm font-medium opacity-80 leading-relaxed">
                                         Si tienes algún inconveniente con tu pedido o necesitas facturar tu compra, contacta a nuestro equipo de soporte con tu número de folio.
                                     </p>
-                                    <button className="btn btn-white btn-sm w-full font-black uppercase tracking-widest mt-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                    <a
+                                        href="https://wa.me/529211963246"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="btn btn-white btn-sm w-full font-black uppercase tracking-widest mt-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    >
                                         Contactar Soporte
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -717,6 +794,7 @@ const OrderDetail = () => {
                 </div>
             </div>
         </div>
+        <CancelOrderForm ref={cancelOrderRef} onCanceled={handleAbandonPending} />
     );
 };
 

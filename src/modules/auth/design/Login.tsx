@@ -3,7 +3,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import type { AuthCustomerCredentialsType } from "../AuthTypes";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../states/authStore";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import clsx from "clsx";
 import { trackCompleteRegistration } from "../../analytics/MetaEvents";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
@@ -77,13 +77,15 @@ const Login = () => {
         }
     };
 
-    const handleGoogleSuccess = async (credentialResponse: any) => {
+    const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
         try {
             setSubmitting(true);
             const { credential } = credentialResponse;
             if (credential) {
-                await loginWithGoogle(credential);
-                trackCompleteRegistration();
+                const response = await loginWithGoogle(credential);
+                if (response?.isNewCustomer) {
+                    trackCompleteRegistration();
+                }
             }
         } catch (err) {
             console.error("Error with Google Login", err);

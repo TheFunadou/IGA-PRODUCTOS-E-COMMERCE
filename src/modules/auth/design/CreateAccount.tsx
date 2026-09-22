@@ -146,7 +146,7 @@ const CreateAccount = () => {
 
     const onSubmitStep1: SubmitHandler<NewCustomerType> = async (data) => {
         setFormData(data);
-        await sendTokenMutation.mutateAsync({ email: data.email });
+        await sendTokenMutation.mutateAsync({ email: data.email, recaptchaToken: "" });
         setStep(2); setCanResend(false); setCountdownKey((k) => k + 1);
     };
 
@@ -162,7 +162,7 @@ const CreateAccount = () => {
     const handleResend = async () => {
         if (!formData) return;
         resetVerification();
-        await resendTokenMutation.mutateAsync({ email: formData.email });
+        await resendTokenMutation.mutateAsync({ email: formData.email, recaptchaToken: "" });
         setCanResend(false); setCountdownKey((k) => k + 1);
     };
 

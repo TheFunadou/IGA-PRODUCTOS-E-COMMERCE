@@ -1,3 +1,13 @@
+// Misma política que en el backend: 8+ caracteres, mayúscula, minúscula, número y símbolo
+export const PASSWORD_POLICY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+export const PASSWORD_POLICY_MESSAGE =
+    "La contraseña debe tener al menos 8 caracteres e incluir una mayúscula, una minúscula, un número y un símbolo";
+
+export function meetsPasswordPolicy(password: string): boolean {
+    return PASSWORD_POLICY_REGEX.test(password);
+}
+
 export function stringStrengthEvaluator(password: string): number {
     let puntuacion = 0;
 
@@ -30,7 +40,7 @@ export function stringStrengthEvaluator(password: string): number {
     }
 
     // Validar que tenga al menos un carácter especial (25 puntos)
-    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         puntuacion += 25;
     }
 

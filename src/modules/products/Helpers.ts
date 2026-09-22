@@ -197,24 +197,28 @@ export const containsOffensiveLanguage = (text: string): boolean => {
     ];
 
     // ================================
-    // Normalización
+    // Normalización endurecida
     // ================================
+    const leetMap: Record<string, string> = {
+        "0": "o",
+        "1": "i",
+        "3": "e",
+        "4": "a",
+        "5": "s",
+        "7": "t",
+        "8": "b",
+        "@": "a",
+        "$": "s",
+    };
     const normalized = text
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
+        .split("")
+        .map(char => leetMap[char] ?? char)
+        .join("")
+        .replace(/[^a-z0-9]+/g, " ")
         .trim();
-
-    // ================================
-    // Permitir crítica negativa válida
-    // ================================
-    if (
-        allowedNegativePhrases.some(phrase =>
-            normalized.includes(phrase)
-        )
-    ) {
-        return false;
-    }
 
     // ================================
     // Utils internas
@@ -245,10 +249,15 @@ export const containsOffensiveLanguage = (text: string): boolean => {
         normalized.includes(word)
     );
 
+    const isRecognizedCriticism = allowedNegativePhrases.some(phrase =>
+        normalized.includes(phrase)
+    );
+
     // ================================
     // Regla final
     // ================================
-    if (score >= 3) return true;              // ofensivo directo
+    if (score >= 3) return true;               // ofensivo directo
+    if (isRecognizedCriticism) return false;    // crítica válida reconocida
     if (score >= 1 && !hasProductContext) return true; // grosería sin contexto
 
     return false;

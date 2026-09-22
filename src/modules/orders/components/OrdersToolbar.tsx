@@ -32,6 +32,7 @@ const STATUS_OPTIONS: (OrderStatusType | "ALL")[] = [
     "REFUNDED",
     "PARTIALLY_REFUNDED",
     "ABANDONED",
+    "PENDING_CONFIRMATION",
 ];
 
 const FILTER_OPTIONS: { value: ActiveFilter; label: string }[] = [

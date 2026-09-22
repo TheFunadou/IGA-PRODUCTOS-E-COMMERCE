@@ -11,7 +11,10 @@ import {
     FaExclamationTriangle,
     FaTimesCircle,
     FaUser,
+    FaLock,
+    FaShoppingCart,
 } from "react-icons/fa";
+import { FaShieldHalved } from "react-icons/fa6";
 import { MdOutlinePending } from "react-icons/md";
 import { usePollingPaymentRejectedV2 } from "../usePayment";
 import {
@@ -22,6 +25,7 @@ import clsx from "clsx";
 import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 import { PageFrame, InfoRow, SectionCard } from "./paymentResultUi";
 import { cardToneClass } from "../utils/paymentTone";
+import PaymentVerification from "./PaymentVerification";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -224,12 +228,19 @@ const PaymentErrorV2 = () => {
 
     /* ── Guard: timeout ── */
     if (pollTimedOut) {
+        if (data?.status === "PENDING_CONFIRMATION" && data?.order) {
+            return <PaymentVerification orderUUID={orderUUID} data={data} />;
+        }
         return <PollingTimeoutScreen orderUUID={orderUUID} onRetry={handleRetry} />;
     }
 
     /* ── Guard: cargando / polling ── */
     if (isLoading || !data || !data.order) {
         return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
+
+    if (data.status === "PENDING_CONFIRMATION") {
+        return <PaymentVerification orderUUID={orderUUID} data={data} />;
     }
 
     if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") throw new Error("Error al obtener el estatus de la orden de compra");
@@ -287,8 +298,8 @@ const PaymentErrorV2 = () => {
                                     )}
                                 >
                                     {isRejected
-                                        ? "Ocurrió un error al procesar tu pago"
-                                        : "Tu orden aún está en espera de tu pago"}
+                                        ? "Tu pago no se pudo completar"
+                                        : "Estamos a la espera de tu pago"}
                                 </h1>
                                 <p
                                     className={clsx(
@@ -298,8 +309,8 @@ const PaymentErrorV2 = () => {
                                     )}
                                 >
                                     {isRejected
-                                        ? "Puedes intentar realizar tu pago nuevamente."
-                                        : "Puedes volver a finalizar tu pago en el carrito de compras."}
+                                        ? "Ocurrió un problema al procesar tu pago. Verifica los datos de tu tarjeta o intenta con otro método de pago. No se realizó ningún cargo a tu cuenta."
+                                        : "Tu orden está confirmada y tus productos reservados. Completa tu pago para concretar la compra."}
                                 </p>
                             </div>
                         </div>
@@ -473,14 +484,14 @@ const PaymentErrorV2 = () => {
                                 <h2 className="font-bold text-base-content text-base">
                                     {isRejected
                                         ? "Tu pago no se pudo completar"
-                                        : "Tu pago está en proceso"}
+                                        : "Estamos a la espera de tu pago"}
                                 </h2>
                             </div>
                             <div className="px-5 py-5 space-y-3">
                                 <p className="text-sm text-base-content/60 text-balance">
                                     {isRejected
-                                        ? "El pago fue rechazado por el proveedor. Verifica los datos de tu tarjeta o utiliza otro método de pago."
-                                        : "Tu transacción está siendo revisada. Recibirás una confirmación por correo electrónico en cuanto el pago sea aprobado."}
+                                        ? "El pago fue rechazado por el proveedor. Verifica los datos de tu tarjeta o utiliza otro método de pago. No se realizó ningún cargo a tu cuenta."
+                                        : "Aún no hemos recibido el pago de tu orden. Puedes completarlo desde tu carrito para confirmar la compra y conservar la reserva de tus productos."}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     {isRejected && (
@@ -489,6 +500,14 @@ const PaymentErrorV2 = () => {
                                             className="flex-1 btn btn-primary gap-2"
                                         >
                                             <FaRedo /> Intentar pagar nuevamente
+                                        </Link>
+                                    )}
+                                    {isInProcess && (
+                                        <Link
+                                            to="/carrito-de-compras"
+                                            className="flex-1 btn btn-primary gap-2"
+                                        >
+                                            <FaShoppingCart /> Completar mi pago
                                         </Link>
                                     )}
                                     <button
@@ -500,6 +519,61 @@ const PaymentErrorV2 = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Trust badges: solo cuando la orden está IN_PROCESS */}
+                        {isInProcess && (
+                            <div className="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-5 sm:p-6 space-y-4">
+                                <h2 className="font-bold text-base-content text-base">
+                                    Estás a un paso: paga con confianza
+                                </h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <Link
+                                        to="/politica-de-compras"
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-base-200/50 border border-base-300 hover:border-primary/30 transition-colors"
+                                    >
+                                        <FaLock className="text-primary text-lg flex-shrink-0" />
+                                        <span className="text-xs font-semibold text-base-content/70 leading-tight">
+                                            Pago 100% seguro
+                                        </span>
+                                    </Link>
+                                    <Link
+                                        to="/politica-de-privacidad"
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-base-200/50 border border-base-300 hover:border-primary/30 transition-colors"
+                                    >
+                                        <FaShieldHalved className="text-primary text-lg flex-shrink-0" />
+                                        <span className="text-xs font-semibold text-base-content/70 leading-tight">
+                                            Tus datos protegidos
+                                        </span>
+                                    </Link>
+                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-base-200/50 border border-base-300">
+                                        <FaShippingFast className="text-primary text-lg flex-shrink-0" />
+                                        <span className="text-xs font-semibold text-base-content/70 leading-tight">
+                                            Envíos a todo México
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-base-200/50 border border-base-300">
+                                        <FaStore className="text-primary text-lg flex-shrink-0" />
+                                        <span className="text-xs font-semibold text-base-content/70 leading-tight">
+                                            Compra directa con fabricantes mexicanos
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="pt-2 border-t border-base-200 flex flex-wrap gap-x-5 gap-y-2">
+                                    <Link to="/politica-de-compras" className="text-xs text-primary/80 hover:text-primary transition-colors">
+                                        Política de compra
+                                    </Link>
+                                    <Link to="/politica-de-privacidad" className="text-xs text-primary/80 hover:text-primary transition-colors">
+                                        Política de privacidad
+                                    </Link>
+                                    <Link to="/politica-de-devolucion" className="text-xs text-primary/80 hover:text-primary transition-colors">
+                                        Política de devolución
+                                    </Link>
+                                    <Link to="/terminos-y-condiciones" className="text-xs text-primary/80 hover:text-primary transition-colors">
+                                        Términos y condiciones
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

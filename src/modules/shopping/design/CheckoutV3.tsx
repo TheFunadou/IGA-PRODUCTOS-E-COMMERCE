@@ -15,6 +15,7 @@ import {
     FaShippingFast,
     FaTag,
     FaExclamationTriangle,
+    FaHourglassHalf,
     FaUser,
     FaUserShield,
 } from "react-icons/fa";
@@ -75,6 +76,39 @@ const CheckoutV3 = () => {
                     >
                         Volver al carrito
                     </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (data && data.status === "PENDING_CONFIRMATION") {
+        return (
+            <div className="w-full flex justify-center items-center">
+                <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl min-h-64 flex flex-col items-center justify-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-info/10 flex items-center justify-center">
+                        <FaHourglassHalf className="text-info text-2xl" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-base sm:text-lg font-bold text-base-content">Tu pago está en verificación</p>
+                        <p className="text-sm text-base-content/50 mt-1">Tu banco aún no confirma el cargo (puede tardar hasta 48 horas). Tu pedido quedó reservado: no vuelvas a pagarlo para evitar un cargo duplicado.</p>
+                        <p className="text-xs font-mono text-base-content/40 mt-2">Folio: {data.orderUUID}</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm sm:btn-md"
+                            onClick={() => navigate(`/mis-ordenes/detalle/${data.orderUUID}`)}
+                        >
+                            Ver mi pedido
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-ghost btn-sm sm:btn-md"
+                            onClick={() => navigate("/")}
+                        >
+                            Ir a la tienda
+                        </button>
+                    </div>
                 </div>
             </div>
         );

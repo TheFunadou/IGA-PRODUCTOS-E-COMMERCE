@@ -33,7 +33,8 @@ const MainLayout = () => {
     };
 
     useEffect(() => {
-        if (isAuth && !authCustomer) getProfile();
+        // H9: revalidar la sesión al boot cuando hay sesión persistida
+        if (isAuth) getProfile();
         if (!theme) setTheme("ligth");
     }, []);
 

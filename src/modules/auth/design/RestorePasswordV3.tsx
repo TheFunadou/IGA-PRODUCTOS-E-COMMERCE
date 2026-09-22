@@ -7,9 +7,10 @@ import { FaExclamationTriangle, FaLock, FaShieldAlt, FaTruck } from "react-icons
 import { MdEmail, MdLock, MdSupportAgent } from "react-icons/md";
 
 import { useAuthStore } from "../states/authStore";
-import { stringStrengthEvaluator } from "../helpers";
+import { stringStrengthEvaluator, meetsPasswordPolicy, PASSWORD_POLICY_MESSAGE } from "../helpers";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
 import { formatAxiosError } from "../../../api/helpers";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
     sendRestorePasswordToken,
     validateRestorePasswordToken,
@@ -195,6 +196,7 @@ const RestorePasswordV3 = () => {
     const { isAuth } = useAuthStore();
     const navigate = useNavigate();
     const { showTriggerAlert } = useTriggerAlert();
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const currentYear = new Date().getFullYear();
 
     const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -221,7 +223,13 @@ const RestorePasswordV3 = () => {
     }, [watchPwd]);
 
     const sendTokenMut = useMutation({
-        mutationFn: async (mail: string) => await sendRestorePasswordToken({ email: mail }),
+        mutationFn: async (mail: string) => {
+            let _recaptchaToken = "";
+            if (executeRecaptcha) {
+                _recaptchaToken = await executeRecaptcha('send_restore_password_token');
+            }
+            return await sendRestorePasswordToken({ email: mail, recaptchaToken: _recaptchaToken });
+        },
         onSuccess: (_, mail) => {
             setEmailTarget(mail);
             setStep(2);
@@ -249,7 +257,13 @@ const RestorePasswordV3 = () => {
     });
 
     const resendTokenMut = useMutation({
-        mutationFn: async () => await resendRestorePasswordToken({ email: emailTarget }),
+        mutationFn: async () => {
+            let _recaptchaToken = "";
+            if (executeRecaptcha) {
+                _recaptchaToken = await executeRecaptcha('resend_restore_password_token');
+            }
+            return await resendRestorePasswordToken({ email: emailTarget, recaptchaToken: _recaptchaToken });
+        },
         onSuccess: () => {
             showTriggerAlert("Successfull", "Se ha reenviado tu código", { duration: 3000 });
             setCanResend(false);
@@ -447,7 +461,7 @@ const RestorePasswordV3 = () => {
                                     Verifica tu identidad
                                 </h2>
                                 <p className="text-sm text-base-content/50 mb-4 leading-relaxed">
-                                    Ingresa el código de 6 dígitos enviado a tu correo.
+                                    Ingresa el código de 8 caracteres enviado a tu correo.
                                 </p>
 
                                 <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-xl px-3 py-2 mb-5 text-[0.80rem] font-medium text-primary break-all">
@@ -474,11 +488,11 @@ const RestorePasswordV3 = () => {
                                         <input
                                             {...regToken("restorePasswordToken", {
                                                 required: "El código es requerido",
-                                                minLength: { value: 6, message: "Debe tener al menos 6 caracteres" },
+                                                minLength: { value: 8, message: "Debe tener al menos 8 caracteres" },
                                             })}
                                             id="restorePasswordToken"
                                             type="text"
-                                            placeholder="000000"
+                                            placeholder="00000000"
                                             maxLength={8}
                                             autoComplete="one-time-code"
                                             className={clsx(
@@ -548,7 +562,7 @@ const RestorePasswordV3 = () => {
                                                 {...regPwd("newPassword", {
                                                     required: "Campo requerido",
                                                     validate: (v) =>
-                                                        stringStrengthEvaluator(v) >= 55 || "Ingresa una contraseña más segura",
+                                                        meetsPasswordPolicy(v) || PASSWORD_POLICY_MESSAGE,
                                                 })}
                                                 id="newPassword" type="password" placeholder="Mínimo 8 caracteres"
                                                 className={clsx(inputClass(!!errPwd.newPassword), "pl-11")}

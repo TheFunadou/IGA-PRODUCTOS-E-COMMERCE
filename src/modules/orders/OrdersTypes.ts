@@ -177,7 +177,7 @@ export interface CheckoutOrderIV3 {
 export type PendingOrderI = {
     orderUUID: string;
     paymentProvider: Exclude<PaymentProvidersType, null>;
-    status: "IN_PROCESS";
+    status: OrderStatusType;
     createdAt: string;
     expiresAt: string | null;
 };
