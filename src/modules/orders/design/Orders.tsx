@@ -171,7 +171,7 @@ const Orders = () => {
                             <div className="max-w-sm">
                                 <p className="text-xl font-bold text-base-content">Inicia sesión para ver tus órdenes</p>
                                 <p className="text-sm text-base-content/50 mt-2 leading-relaxed">
-                                    Necesitas una cuenta para consultar el historial de tus compras y solicitar facturas.
+                                    Necesitas una cuenta para consultar el historial de tus compras.
                                 </p>
                             </div>
                             <div className="flex flex-wrap items-center justify-center gap-3">

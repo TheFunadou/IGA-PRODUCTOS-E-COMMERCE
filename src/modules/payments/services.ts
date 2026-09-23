@@ -1,16 +1,6 @@
 import api from "../../api/api.config";
 import type { PaymentDetailsExtendedI, PaymentDetailsExtendedV3I } from "../orders/OrdersTypes";
-import type { OrderStatusType } from "../shopping/ShoppingTypes";
-import type { GetPaidOrderDetails, GetPaymentDetailsQueryDTO, PaymentDetailsI } from "./types";
-
-export const getOrderStatusWithDetails = async (args: { orderUUID: string, requiredStatus: OrderStatusType[] }) => {
-    const { requiredStatus, orderUUID } = args;
-    const queryString = requiredStatus.map(status => `status=${status}`).join('&');
-    const { data } = await api.get<GetPaidOrderDetails>(
-        `/payment/order/status/${orderUUID}?${queryString}`
-    );
-    return data;
-};
+import type { GetPaymentDetailsQueryDTO, PaymentDetailsI } from "./types";
 
 export const getPaymentDetails = async (args: { orderUUID: string, query: GetPaymentDetailsQueryDTO }) => {
     const { query, orderUUID } = args;

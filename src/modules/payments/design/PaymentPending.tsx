@@ -31,6 +31,7 @@ import { useAuthStore } from "../../auth/states/authStore";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
+import { shoppingCartV3QKs } from "../../shopping/hooks/useShoppingCartV3";
 import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 import { getOrderPaymentTotals, parseFmt } from "../../orders/utils/paymentSummary";
 import { orderStatusBadgeClass } from "../../orders/utils/orderStatus";
@@ -135,7 +136,7 @@ const PaymentPendingV2 = () => {
 
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { order: orderStore, success } = usePaymentStoreV2();
+    const { success } = usePaymentStoreV2();
     const { authCustomer } = useAuthStore();
     const { theme } = useThemeStore();
     const { search } = useLocation();
@@ -179,15 +180,18 @@ const PaymentPendingV2 = () => {
 
         // Si ya está como PENDING (o SUCCESS/APPROVED), limpiamos el store
         if (
-            (data.status === "PENDING" ||
-                data.status === "APPROVED" ||
-                data.status === "PENDING_CONFIRMATION") &&
-            data.order.orderUUID === orderStore?.orderUUID
+            data.status === "PENDING" ||
+            data.status === "APPROVED" ||
+            data.status === "PENDING_CONFIRMATION"
         ) {
             success();
             if (authCustomer?.uuid) {
                 queryClient.invalidateQueries({
                     queryKey: shoppingCartQueryKeys.shoppingCart(authCustomer.uuid),
+                });
+            } else {
+                queryClient.invalidateQueries({
+                    queryKey: shoppingCartV3QKs.loadShoppingCart("guest-client"),
                 });
             }
         }
@@ -232,6 +236,11 @@ const PaymentPendingV2 = () => {
                                 ? "No existe ninguna orden asociada a esta referencia de pago. Verifica tu correo de confirmación o contacta a soporte."
                                 : "Ocurrió un error inesperado al consultar el estado de tu orden."}
                         </p>
+                        {is404 && (
+                            <p className="text-xs text-base-content/50">
+                                Si pagaste en otro dispositivo o navegador, abre este enlace donde realizaste la compra.
+                            </p>
+                        )}
                         {!is404 && (
                             <p className="text-xs text-error bg-error/10 px-3 py-2 rounded-xl text-left font-mono break-all">
                                 {formatAxiosError(error)}
@@ -276,7 +285,11 @@ const PaymentPendingV2 = () => {
     if (data.status === "PENDING_CONFIRMATION") {
         return <PaymentVerification orderUUID={orderUUID} data={data} />;
     }
-    if (data.status !== "PENDING" && data.status !== "APPROVED") throw new Error("Error al obtener el estatus de la orden de compra");
+    // Estado transitorio (p. ej. snapshot con IN_PROCESS/REJECTED): seguir
+    // polleando en lugar de romper la pantalla; al agotar intentos cae al timeout.
+    if (data.status !== "PENDING" && data.status !== "APPROVED") {
+        return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
 
     const { order } = data;
     const { shipping, items, paymentResume, buyer, paymentDetails } = order;

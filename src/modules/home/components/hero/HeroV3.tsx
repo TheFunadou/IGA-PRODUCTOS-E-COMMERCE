@@ -1,5 +1,5 @@
 import { FaCheckCircle } from "react-icons/fa";
-import wallpeaper2 from "../../../../assets/hero/wallpeaperherov5.webp";
+import wallpeaper2 from "../../../../assets/hero/wallpeaperherov6.webp";
 import { scrollToTienda } from "../../../shop/utils/scrollToTienda";
 import { getWhatsAppLink } from "../../../../global/GlobalHelpers";
 import { useMediaQuery } from "../../../../global/hooks/useMediaQuery";

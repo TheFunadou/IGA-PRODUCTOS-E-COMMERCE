@@ -32,6 +32,7 @@ import clsx from "clsx";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { shoppingCartQueryKeys } from "../../shopping/hooks/useFetchShoppingCart";
+import { shoppingCartV3QKs } from "../../shopping/hooks/useShoppingCartV3";
 import CheckoutOrderItemV3 from "../../shopping/components/CheckoutOrderItemV3";
 import RecentlyViewed from "../../shopping/components/RecentlyViewed";
 import FavoritesSectionV3 from "../../shopping/components/FavoritesSectionV3";
@@ -141,7 +142,7 @@ const PaymentExitingV2 = () => {
 
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { order: orderStore, success } = usePaymentStoreV2();
+    const { success } = usePaymentStoreV2();
     const { authCustomer, isAuth } = useAuthStore();
     const { search } = useLocation();
     const query = new URLSearchParams(search);
@@ -189,14 +190,15 @@ const PaymentExitingV2 = () => {
             hasTrackedPurchaseRef.current = true;
         }
 
-        if (
-            data.status === "APPROVED" &&
-            data.order.orderUUID === orderStore?.orderUUID
-        ) {
+        if (data.status === "APPROVED") {
             success();
             if (authCustomer?.uuid) {
                 queryClient.invalidateQueries({
                     queryKey: shoppingCartQueryKeys.shoppingCart(authCustomer.uuid),
+                });
+            } else {
+                queryClient.invalidateQueries({
+                    queryKey: shoppingCartV3QKs.loadShoppingCart("guest-client"),
                 });
             }
         }
@@ -241,6 +243,11 @@ const PaymentExitingV2 = () => {
                                 ? "No existe ninguna orden asociada a esta referencia de pago. Verifica tu correo de confirmación o contacta a soporte."
                                 : "Ocurrió un error inesperado al consultar el estado de tu orden."}
                         </p>
+                        {is404 && (
+                            <p className="text-xs text-base-content/50">
+                                Si pagaste en otro dispositivo o navegador, abre este enlace donde realizaste la compra.
+                            </p>
+                        )}
                         {!is404 && (
                             <p className="text-xs text-error bg-error/10 px-3 py-2 rounded-xl text-left font-mono break-all">
                                 {formatAxiosError(error)}
