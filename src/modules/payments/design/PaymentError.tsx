@@ -26,6 +26,8 @@ import CheckoutOrderItemV2 from "../../shopping/components/CheckoutOrderItem";
 import { PageFrame, InfoRow, SectionCard } from "./paymentResultUi";
 import { cardToneClass } from "../utils/paymentTone";
 import PaymentVerification from "./PaymentVerification";
+import { usePaymentStore } from "../../shopping/states/paymentStore";
+import { useAuthStore } from "../../auth/states/authStore";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -125,8 +127,11 @@ const PaymentErrorV2 = () => {
     const { search } = useLocation();
     const query = new URLSearchParams(search);
     const orderUUID = query.get("external_reference");
+    const { isAuth } = useAuthStore();
+    const { success } = usePaymentStore();
 
     const pollAttemptsRef = useRef(0);
+    const hasClearedStoreRef = useRef(false);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
 
@@ -159,6 +164,13 @@ const PaymentErrorV2 = () => {
     const { data, error, isLoading, refetch } = usePollingPaymentRejectedV2({ orderUUID });
 
     useEffect(() => {
+        /* Invitado con pago REJECTED: la orden ya no es reintentable (el stock
+           lo liberó el webhook), así que se limpia del store para forzar nueva
+           orden. Solo aplica a invitados; el flujo registrado queda intacto. */
+        if (!isAuth && data?.status === "REJECTED" && !hasClearedStoreRef.current) {
+            hasClearedStoreRef.current = true;
+            success();
+        }
         if (isLoading && !data) return;
         if (!data) return;
 
@@ -199,6 +211,11 @@ const PaymentErrorV2 = () => {
                                 ? "No existe ninguna orden asociada a esta referencia de pago. Verifica tu correo de confirmación o contacta a soporte."
                                 : "Ocurrió un error inesperado al consultar el estado de tu orden."}
                         </p>
+                        {is404 && (
+                            <p className="text-xs text-base-content/50">
+                                Si pagaste en otro dispositivo o navegador, abre este enlace donde realizaste la compra.
+                            </p>
+                        )}
                         {!is404 && (
                             <p className="text-xs text-error bg-error/10 px-3 py-2 rounded-xl text-left font-mono break-all">
                                 {formatAxiosError(error)}
@@ -243,7 +260,11 @@ const PaymentErrorV2 = () => {
         return <PaymentVerification orderUUID={orderUUID} data={data} />;
     }
 
-    if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") throw new Error("Error al obtener el estatus de la orden de compra");
+    // Estado transitorio: seguir polleando en lugar de romper la pantalla;
+    // al agotar intentos cae al timeout.
+    if (data.status !== "REJECTED" && data.status !== "IN_PROCESS") {
+        return <SkeletonLoader attempts={pollAttempts} maxAttempts={MAX_POLL_ATTEMPTS} />;
+    }
 
     const { order } = data;
     const { shipping, items, buyer } = order;
@@ -491,10 +512,12 @@ const PaymentErrorV2 = () => {
                                 <p className="text-sm text-base-content/60 text-balance">
                                     {isRejected
                                         ? "El pago fue rechazado por el proveedor. Verifica los datos de tu tarjeta o utiliza otro método de pago. No se realizó ningún cargo a tu cuenta."
-                                        : "Aún no hemos recibido el pago de tu orden. Puedes completarlo desde tu carrito para confirmar la compra y conservar la reserva de tus productos."}
+                                        : (!isAuth
+                                            ? "Aún no hemos recibido el pago de tu orden. Puedes completarlo ahora para confirmar la compra y conservar la reserva de tus productos."
+                                            : "Aún no hemos recibido el pago de tu orden. Puedes completarlo desde tu carrito para confirmar la compra y conservar la reserva de tus productos.")}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-3">
-                                    {isRejected && (
+                                    {(isAuth ? isRejected : isInProcess) && (
                                         <Link
                                             to="/pagar-productos"
                                             className="flex-1 btn btn-primary gap-2"
@@ -502,7 +525,15 @@ const PaymentErrorV2 = () => {
                                             <FaRedo /> Intentar pagar nuevamente
                                         </Link>
                                     )}
-                                    {isInProcess && (
+                                    {!isAuth && isRejected && (
+                                        <Link
+                                            to="/carrito-de-compras"
+                                            className="flex-1 btn btn-primary gap-2"
+                                        >
+                                            <FaShoppingCart /> Crear nueva orden
+                                        </Link>
+                                    )}
+                                    {isAuth && isInProcess && (
                                         <Link
                                             to="/carrito-de-compras"
                                             className="flex-1 btn btn-primary gap-2"
