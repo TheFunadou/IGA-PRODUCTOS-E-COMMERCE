@@ -278,15 +278,15 @@ const FrecuentQuestions = () => {
 
                         <div className="flex flex-col gap-3">
                             <FAQItem question="¿Hasta dónde llega su cobertura de envíos?">
-                                Contamos con una red logística nacional robusta e internacional; puedes revisar las zonas específicas en nuestra sección de <Link to="/cobertura" className="text-primary font-bold hover:underline">Cobertura</Link>. Si tu zona es de difícil acceso, nuestro equipo te contactará para más detalles.
+                                Nuestros envíos son gestionados por <strong>Paquete Express</strong>. La disponibilidad de cobertura es definida por ellos y a su vez es informada a Iga Productos; puedes revisar las zonas específicas en nuestra sección de <Link to="/cobertura" className="text-primary font-bold hover:underline">Cobertura</Link>. Las tarifas de envío publicadas son aplicables únicamente para envíos <strong>nacionales (dentro de México)</strong>. Los envíos internacionales se coordinan directamente con la <strong>Subdelegación de Envíos</strong> de Iga Productos; si tu zona es de difícil acceso, nuestro equipo te contactará para más detalles.
                             </FAQItem>
 
                             <FAQItem question="¿Cuánto tiempo tardará en llegar mi paquete?">
-                                El tiempo promedio de entrega es de 3 a 7 días hábiles, dependiendo de tu ubicación geográfica. Este periodo comienza a contar a partir de que el pago es verificado y la orden es procesada en nuestro almacén.
+                                El tiempo estimado de entrega es determinado por la paquetería (Paquete Express) y puede variar de acuerdo a los días hábiles y otras condiciones externas tanto a la paquetería como a Iga Productos. Una vez que tu pedido es procesado, Iga Productos te proporcionará el <strong>número de seguimiento</strong> y el <strong>enlace</strong> para consultar el estatus de tu envío, tanto por correo como en el apartado de detalle de tu orden para clientes registrados.
                             </FAQItem>
 
-                            <FAQItem question="¿Puedo modificar mi dirección una vez realizado el pago?">
-                                Una vez que la orden ha sido pagada y entra en proceso de preparación para envío, no podemos garantizar cambios de domicilio por motivos de seguridad y logística externa. Te recomendamos validar tus datos cuidadosamente antes de finalizar la transacción.
+                            <FAQItem question="¿Puedo modificar mi dirección de envío una vez realizado el pago?">
+                                Sí, es posible modificar la dirección de envío después del pago, siempre y cuando se cumplan ciertas condiciones: <strong>1) la solicitud se realice en un lapso de tiempo corto</strong> y <strong>2) no se haya generado la guía de envío</strong> por parte de Iga Productos. Si la guía de envío ya fue generada y deseas cambiar la dirección, se pueden generar recargos adicionales; en ese caso, contacta a <a href="mailto:atencionaclientes@igaproductos.com" className="text-primary font-bold hover:underline">atencionaclientes@igaproductos.com</a> para solicitar el cambio de dirección de envío.
                             </FAQItem>
                         </div>
                     </div>

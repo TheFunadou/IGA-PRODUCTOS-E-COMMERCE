@@ -24,7 +24,7 @@ import { formatOrderStatus, formatPaymentClass, getPaymentMethodDetails, getPaym
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useThemeStore } from "../../../layouts/states/themeStore";
-import { useCancelOrder, useFetchOrderDetailsV3 } from "../hooks/useFetchOrders";
+import { useCancelOrder, useFetchGuestOrderDetailsV3, useFetchOrderDetailsV3 } from "../hooks/useFetchOrders";
 import CheckoutOrderItemV3 from "../../shopping/components/CheckoutOrderItemV3";
 import CancelOrderForm from "../../shopping/components/CancelOrderForm";
 import { showModal } from "../../../global/GlobalHelpers";
@@ -201,7 +201,7 @@ const SkeletonLoader = () => (
    Main Component
 ───────────────────────────────────────────── */
 
-const OrderDetail = () => {
+const OrderDetail = ({ guestMode = false }: { guestMode?: boolean }) => {
     document.title = "Iga Productos | Detalle de orden";
 
     const { "order-uuid": orderUUID } = useParams();
@@ -210,8 +210,12 @@ const OrderDetail = () => {
     const { theme } = useThemeStore();
     const cancelOrderRef = useRef<HTMLDialogElement | null>(null);
 
-    const { data, isLoading, error, refetch } = useFetchOrderDetailsV3({ orderUUID: orderUUID! });
+    // Flujo registrado intacto; en modo invitado se usa el endpoint público con cookie de lookup
+    const registeredQuery = useFetchOrderDetailsV3({ orderUUID: orderUUID!, enabled: !guestMode });
+    const guestQuery = useFetchGuestOrderDetailsV3({ orderUUID: orderUUID!, enabled: guestMode });
+    const { data, isLoading, error, refetch } = guestMode ? guestQuery : registeredQuery;
     const cancelOrderMutation = useCancelOrder({ orderUUID: orderUUID!, type: "ABANDONED" });
+    const backPath = guestMode ? "/consultar-mi-orden" : "/mis-ordenes";
 
     const handleAbandonPending = async () => {
         await cancelOrderMutation.mutateAsync();
@@ -248,11 +252,11 @@ const OrderDetail = () => {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
                             <button
-                                onClick={() => navigate("/mis-ordenes")}
+                                onClick={() => navigate(backPath)}
                                 className="btn btn-ghost border-base-300 gap-2 font-bold px-6"
                             >
                                 <FaArrowLeft className="text-xs" />
-                                Mis ordenes
+                                {guestMode ? "Consultar otra orden" : "Mis ordenes"}
                             </button>
                             {!is404 && (
                                 <button
@@ -279,7 +283,8 @@ const OrderDetail = () => {
     const isVerifying = order.status === "PENDING_CONFIRMATION";
     // Solo las ordenes PENDING sin cobro pueden abandonarse desde el detalle.
     // APPROVED / PENDING_CONFIRMATION / AUTHORIZED quedan bloqueadas en backend.
-    const canAbandonPending = order.status === "PENDING";
+    // En modo invitado la consulta es de solo lectura (el abandono vive en el checkout).
+    const canAbandonPending = !guestMode && order.status === "PENDING";
     const itemsToShow = itemsExpanded ? items : items.slice(0, 5);
     const hasMoreItems = items.length > 5;
 
@@ -294,14 +299,14 @@ const OrderDetail = () => {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex items-center gap-4 min-w-0">
                         <button
-                            onClick={() => navigate("/mis-ordenes")}
+                            onClick={() => navigate(backPath)}
                             className="w-10 h-10 rounded-2xl bg-base-100 flex items-center justify-center border border-base-300 shadow-sm hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all group"
                         >
                             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
                         </button>
                         <div className="min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">Panel de cliente</span>
+                                <span className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">{guestMode ? "Consulta de invitado" : "Panel de cliente"}</span>
                                 <span className="w-1 h-1 rounded-full bg-base-content/20" />
                                 <span className="text-[10px] font-black uppercase text-primary tracking-widest">Detalle de orden</span>
                             </div>

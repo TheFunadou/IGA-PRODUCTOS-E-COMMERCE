@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatAxiosError } from "../../../api/helpers";
-import { cancelOrder, cancelGuestOrder, getBuyNowItem, getBuyNowItemV3, getCheckoutOrderV2, getCheckoutOrderV3, getOrders, getOrdersDashboardV3 } from "../../orders/OrdersServices";
+import { cancelOrder, cancelGuestOrder, getBuyNowItem, getBuyNowItemV3, getCheckoutOrderV2, getCheckoutOrderV3, getGuestOrderDetailsV3, getOrders, getOrdersDashboardV3, lookupGuestOrder } from "../../orders/OrdersServices";
 import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedI, PaymentDetailsExtendedV3I } from "../OrdersTypes";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useTriggerAlert } from "../../alerts/states/TriggerAlert";
@@ -75,8 +75,8 @@ export const useFetchOrderDetails = (args: { orderUUID: string }) => {
     });
 };
 
-export const useFetchOrderDetailsV3 = (args: { orderUUID: string }) => {
-    const { orderUUID } = args;
+export const useFetchOrderDetailsV3 = (args: { orderUUID: string, enabled?: boolean }) => {
+    const { orderUUID, enabled = true } = args;
 
     return useQuery<PaymentDetailsExtendedV3I>({
         queryKey: [...paymentQueryKeys.getPaymentDetails({ orderUUID }), "v3"],
@@ -84,6 +84,7 @@ export const useFetchOrderDetailsV3 = (args: { orderUUID: string }) => {
         staleTime: 8 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
+        enabled: enabled && !!orderUUID,
     });
 };
 
@@ -102,6 +103,31 @@ export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "
         onError: (error) => {
             showTriggerAlert("Error", formatAxiosError(error), { duration: 4000 });
         }
+    });
+};
+
+export const useGuestOrderLookup = () => {
+    const { showTriggerAlert } = useTriggerAlert();
+
+    return useMutation({
+        mutationFn: async (dto: { orderUUID: string, email: string }) => await lookupGuestOrder(dto),
+        onError: (error) => {
+            showTriggerAlert("Error", formatAxiosError(error), { duration: 4000 });
+        }
+    });
+};
+
+export const useFetchGuestOrderDetailsV3 = (args: { orderUUID: string, enabled?: boolean }) => {
+    const { orderUUID, enabled = true } = args;
+
+    return useQuery<PaymentDetailsExtendedV3I>({
+        queryKey: ["order:guest:details:v3", { orderUUID }],
+        queryFn: () => getGuestOrderDetailsV3({ orderUUID }),
+        staleTime: 8 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        enabled: enabled && !!orderUUID,
+        retry: false,
     });
 };
 

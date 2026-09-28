@@ -51,6 +51,7 @@ const PaymentPendingV2 = lazy(() => import("./modules/payments/design/PaymentPen
 const PaymentErrorV2 = lazy(() => import("./modules/payments/design/PaymentError"))
 const Orders = lazy(() => import("./modules/orders/design/Orders"))
 const OrderDetail = lazy(() => import("./modules/orders/design/OrderDetail"))
+const GuestOrderLookup = lazy(() => import("./modules/orders/design/GuestOrderLookup"))
 const Ticket = lazy(() => import("./modules/orders/design/Ticket"))
 const CustomerFavorites = lazy(() => import("./modules/customers/design/CustomerFavorites"))
 const CustomerPersonalInfo = lazy(() => import("./modules/customers/design/CustomerPersonalInfo"))
@@ -179,6 +180,9 @@ const router = createBrowserRouter([
                     // Orders
                     { path: "/mis-ordenes", element: <Orders /> },
                     { path: "/mis-ordenes/detalle/:order-uuid", element: <OrderDetail /> },
+                    // Consulta pública de órdenes para invitados (guest-only)
+                    { path: "/consultar-mi-orden", element: <GuestOrderLookup /> },
+                    { path: "/consultar-mi-orden/detalle/:order-uuid", element: <OrderDetail guestMode /> },
                     { path: "/mis-favoritos", element: <CustomerFavorites /> },
                     { path: "/mi-cuenta/informacion-personal", element: <CustomerPersonalInfo /> },
 
