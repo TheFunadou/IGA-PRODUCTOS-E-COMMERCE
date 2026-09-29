@@ -1,11 +1,12 @@
 import { useState } from "react";
 import clsx from "clsx";
 import Header1 from "../../../assets/headers/HEADER_1.webp";
-import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.jpg";
+import CertCorazaPlagoAM from "../../../assets/certs/certificacion-coraza-y-plagosur-am-clase-e.png";
 import CertPlagosurC from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.jpg";
 import TestReportPlagosurAM from "../../../assets/certs/test-report-plagosur-am.jpg";
 import TestReportPlagosurAMPDF from "../../../assets/certs/test-report-plagosur-am.pdf";
 import CertAnceCorazaPlagosur from "../../../assets/certs/igaproductos-certificado-ance.pdf";
+import CertPlagosurCAI from "../../../assets/certs/certificacion-plagosur-c-coraza-a-i-clase-e.pdf";
 import { PiCertificateBold } from "react-icons/pi";
 import { BiSolidCertification } from "react-icons/bi";
 import { MdKeyboardArrowRight, MdOpenInNew } from "react-icons/md";
@@ -79,19 +80,22 @@ const certImages = [
         url: CertAnceCorazaPlagosur,
         image: CertCorazaPlagoAM,
         alt: "Certificado de conformidad de producto 1",
-        label: "Certificado ANCE 1",
+        label: "Certificación NOM-115-STPS-2009 para Cascos Iga Coraza A y Plagosur C de Ajuste de Matraca",
+        download: "certificacion-nom-115-stps-2009-cascos-coraza-a-matraca.pdf",
     },
     {
-        url: CertAnceCorazaPlagosur,
+        url: CertPlagosurCAI,
         image: CertPlagosurC,
         alt: "Certificado de conformidad de producto 2",
-        label: "Certificado ANCE 2",
+        label: "Certificación NOM-115-STPS-2009 para Cascos Iga Coraza A y Plagosur C de Ajuste de Intervalo",
+        download: "certificacion-nom-115-stps-2009-cascos-coraza-a-intervalo.pdf",
     },
     {
         url: TestReportPlagosurAMPDF,
         image: TestReportPlagosurAM,
         alt: "Certificado de conformidad de producto 3",
-        label: "Certificado ICS",
+        label: "Certificación ANSI/ISEA Z89.1-2014 (R2019) para Cascos Iga Plagosur C",
+        download: "certificacion-ansi-isea-z891-2014-cascos-iga-plagosur-c.pdf",
     },
 ];
 
@@ -202,7 +206,7 @@ const Certifications = () => {
                             href={img.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            download="igaproductos-certificado-ance.pdf"
+                            download={img.download}
                             className="group relative rounded-2xl overflow-hidden border border-base-200 bg-base-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-primary"
                         >
                             <figure className="w-full overflow-hidden bg-base-200/40">
