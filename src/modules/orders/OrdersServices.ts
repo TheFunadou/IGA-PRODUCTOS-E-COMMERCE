@@ -1,4 +1,4 @@
-import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PendingOrderResponseI } from "./OrdersTypes";
+import type { CheckoutOrderI, CheckoutOrderIV3, CustomerOrdersDashboardInputI, GetCustomerOrdersDashboardI, GetOrdersSummaryI, PaymentDetailsExtendedV3I, PendingOrderResponseI } from "./OrdersTypes";
 import api from "../../api/api.config";
 import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../shopping/ShoppingTypes";
 
@@ -58,6 +58,16 @@ export const cancelGuestOrder = async ({ orderUUID }: { orderUUID: string }): Pr
 
 export const getPendingOrder = async (): Promise<PendingOrderResponseI> => {
     const { data } = await api.post<PendingOrderResponseI>(`/orders/pending`, {});
+    return data;
+};
+
+export const lookupGuestOrder = async ({ orderUUID, email }: { orderUUID: string, email: string }): Promise<{ orderUUID: string }> => {
+    const { data } = await api.post<{ orderUUID: string }>(`/payment/details/guest/lookup`, { orderUUID, email });
+    return data;
+};
+
+export const getGuestOrderDetailsV3 = async ({ orderUUID }: { orderUUID: string }): Promise<PaymentDetailsExtendedV3I> => {
+    const { data } = await api.get<PaymentDetailsExtendedV3I>(`/payment/details/guest/${orderUUID}?enablePolling=false`);
     return data;
 };
 

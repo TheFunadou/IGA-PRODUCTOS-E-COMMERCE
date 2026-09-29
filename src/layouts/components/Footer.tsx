@@ -3,8 +3,10 @@ import { FaFacebook, FaWhatsapp, FaInstagram, FaXTwitter } from "react-icons/fa6
 import { IoArrowUp } from "react-icons/io5";
 import PlasticosDelGolfoLogo from "../../assets/logo/plasticos-del-golfo.webp";
 import { smoothScrollToSection } from "../../global/GlobalHelpers";
+import { useAuthStore } from "../../modules/auth/states/authStore";
 
 const Footer = () => {
+    const { isAuth } = useAuthStore();
 
     const smoothScrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -42,6 +44,9 @@ const Footer = () => {
                             <h3 className="text-lg font-black uppercase tracking-wider">Servicio al Cliente</h3>
                             <ul className="flex flex-col gap-3 text-sm font-medium opacity-70 [&_a:hover]:opacity-100 [&_a]:transition-opacity">
                                 <li><Link to={"/preguntas-frecuentes"}>Preguntas Frecuentes</Link></li>
+                                {!isAuth && (
+                                    <li><Link to={"/consultar-mi-orden"}>Consultar mi orden de compra</Link></li>
+                                )}
                                 <li><a href="mailto:atencionaclientes@igaproductos.com" target="_blank" rel="noreferrer">Soporte a Compras</a></li>
                                 <li><a href="https://api.whatsapp.com/send?phone=529211963246" target="_blank" rel="noreferrer">Asesoría con Expertos</a></li>
                             </ul>
