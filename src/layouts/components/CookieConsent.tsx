@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { MdOutlineCookie, MdChevronRight, MdClose } from "react-icons/md";
-import { SiMeta } from "react-icons/si";
+import { SiMeta, SiPosthog } from "react-icons/si";
 import { useState } from "react";
 import type { ConsentStatus } from "../../modules/auth/states/cookieStore";
 
@@ -80,6 +80,10 @@ const CookieConsent = ({ onSetConsent }: Props) => {
                         <div className="flex items-start gap-2">
                             <SiMeta size={10} className="text-primary mt-0.5 flex-shrink-0" />
                             <p>Esta información se comparte con Meta Platforms, Inc. y se sujeta a su <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer" className="underline text-primary">política de privacidad</a>.</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <SiPosthog size={10} className="text-primary mt-0.5 flex-shrink-0" />
+                            <p>Herramienta de análisis que nos ayuda a entender cómo se usa la tienda para mejorarla. Los datos se recopilan de forma anónima.</p>
                         </div>
                     </div>
                 </details>

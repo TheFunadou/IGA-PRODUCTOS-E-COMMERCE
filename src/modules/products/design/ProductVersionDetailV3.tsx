@@ -39,6 +39,7 @@ import {
 import ProductVersionCardV3 from "../components/ProductVersionCardV3";
 import { useShopProducts } from "../../shop/hooks/useShopProducts";
 import { trackAddToCart, trackAddToWishlist, trackViewContent } from "../../analytics/MetaEvents";
+import { phAddToCartBlocked } from "../../analytics/PostHogEvents";
 import { useRecentlyViewedStore, getTabSessionId } from "../../../global/states/recentlyViewedStore";
 
 const WHATSAPP_NUMBER = "529211963246";
@@ -580,6 +581,7 @@ const ProductVersionDetailV3 = () => {
         onAddCart: () => {
             if (!data) return;
             if (data.stock <= 0 || productIsPaused) {
+                phAddToCartBlocked(data.sku, productIsPaused ? "paused" : "out_of_stock");
                 showTriggerAlert("Message", productIsPaused
                     ? "Este producto está pausado, contáctanos para consultar su disponibilidad"
                     : "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");
@@ -598,6 +600,7 @@ const ProductVersionDetailV3 = () => {
         onBuyNow: () => {
             if (!data) return;
             if (data.stock <= 0 || productIsPaused) {
+                phAddToCartBlocked(data.sku, productIsPaused ? "paused" : "out_of_stock");
                 showTriggerAlert("Message", productIsPaused
                     ? "Este producto está pausado, contáctanos para consultar su disponibilidad"
                     : "Sin stock por el momento, puedes ver más detalles y contactarte con nosotros para consultar disponibilidad");

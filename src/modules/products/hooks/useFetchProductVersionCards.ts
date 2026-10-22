@@ -109,3 +109,47 @@ export const useFetchSelectedHelmets = () => {
         refetchOnWindowFocus: false,
     });
 };
+
+/* ── Ofertas destacadas (home "Promos") ─────────────────────────────────── */
+
+const featuredOffersParams: PV3Params = {
+    pagination: { page: 1, limit: 12 },
+    filters: { onlyOffers: true },
+    sort: { created_at: "desc" },
+};
+
+// Solo productos con oferta vigente (el backend resuelve status + fechas + usos).
+export const useFetchFeaturedOffers = () => {
+    return useQuery<PV3Response>({
+        queryKey: ["product:version-cards:v3:featured-offers"],
+        queryFn: async () => await searchProductVersionCardsV3(featuredOffersParams),
+        staleTime: 30 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+};
+
+/* ── Día de Muertos (home "Promos") ─────────────────────────────────────── */
+
+export const DAY_OF_DEAD_SKUS = [
+    "CAS1-AI-009",
+    "CAS2-AM1-003",
+    "CAS4-AM1-001",
+    "CAS3-AI2-001",
+];
+
+const dayOfDeadParams: PV3Params = {
+    pagination: { page: 1, limit: 8 },
+    filters: { sku: DAY_OF_DEAD_SKUS },
+};
+
+// Colección temática estable (SKUs fijos): TTL largo como SelectedHelmets.
+export const useFetchDayOfDeadHelmets = () => {
+    return useQuery<PV3Response>({
+        queryKey: ["product:version-cards:v3:day-of-dead"],
+        queryFn: async () => await searchProductVersionCardsV3(dayOfDeadParams),
+        staleTime: 30 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+};

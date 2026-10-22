@@ -10,6 +10,7 @@ import {
     loadShoppingCartV3
 } from "../services/ShoppingCartService";
 import { buildKey } from "../../../global/GlobalHelpers";
+import { phCartItemRemoved, phCartQuantityDecreased } from "../../analytics/PostHogEvents";
 
 /**
  * Flujo V3 canónico (shopping-cart:load:v3) – Usar este para Navbar, ProductVersionCardV3, ProductVersionDetailV3 y ShoppingCartV3.
@@ -163,12 +164,15 @@ export const useShoppingCartV3 = ({
         ShoppingCartI[],
         unknown,
         { item: ShoppingCartI },
-        { previous: LoadShoppingCartV3I | undefined }
+        { previous: LoadShoppingCartV3I | undefined; previousQty?: number }
     >({
         mutationFn: async ({ item }) => setItem({ item: { type: "set", item } }),
 
-        onMutate: async ({ item }) =>
-            optimisticUpdate((old) => {
+        onMutate: async ({ item }) => {
+            // Detectar disminución de cantidad (cantidad absoluta enviada por ButtonQtyCounter).
+            const previousItems = queryClient.getQueryData<LoadShoppingCartV3I>(queryKey)?.shoppingCart;
+            const previousQty = previousItems?.find(i => i.item.sku === item.item.sku)?.quantity;
+            const result = await optimisticUpdate((old) => {
                 const exists = old.find(i => i.item.sku === item.item.sku);
                 if (exists) {
                     return old.map(i =>
@@ -176,14 +180,24 @@ export const useShoppingCartV3 = ({
                     );
                 }
                 return [...old, item];
-            }),
+            });
+            return { ...result, previousQty };
+        },
 
         onError: (_err, _vars, context) => {
             rollback(context);
             showTriggerAlert("Error", "No se pudo agregar el item", { duration: 3500 });
         },
 
-        onSuccess: (data) => {
+        onSuccess: (data, { item }, context) => {
+            // Señal de abandono: el usuario bajó la cantidad de un producto.
+            const previousQty = context?.previousQty;
+            if (
+                previousQty !== undefined &&
+                item.quantity < previousQty
+            ) {
+                phCartQuantityDecreased(item.item.sku, item.quantity, previousQty);
+            }
             queryClient.setQueryData<LoadShoppingCartV3I>(queryKey, (old) => {
                 if (!old) return old;
                 return { ...old, shoppingCart: data };
@@ -247,7 +261,9 @@ export const useShoppingCartV3 = ({
             showTriggerAlert("Error", "No se pudo eliminar el item", { duration: 3500 });
         },
 
-        onSuccess: (data) => {
+        onSuccess: (data, { sku }) => {
+            // Señal de abandono: el usuario quitó un producto del carrito.
+            phCartItemRemoved(sku);
             queryClient.setQueryData<LoadShoppingCartV3I>(queryKey, (old) => {
                 if (!old) return old;
                 return { ...old, shoppingCart: data };

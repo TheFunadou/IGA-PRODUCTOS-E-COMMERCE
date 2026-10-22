@@ -26,6 +26,7 @@ import CheckoutOrderItemV3 from "../components/CheckoutOrderItemV3";
 import CheckoutAdBanner from "../components/CheckoutAdBanner";
 import type { CheckoutOrderIV3, OrderCreatedType } from "../../orders/OrdersTypes";
 import { trackInitiateCheckout } from "../../analytics/MetaEvents";
+import { phShippingCostRevealed, phCouponApplied } from "../../analytics/PostHogEvents";
 import { useEffect } from "react";
 import TrustBadgesV3 from "../components/TrustBadgesV3";
 
@@ -46,11 +47,37 @@ const CheckoutV3 = () => {
         : useCancelGuestOrder({ orderUUID: order.orderUUID });
     const { data, isLoading, error, refetch } = useFetchCheckoutOrderV3({ orderUUID: order.orderUUID });
     const hasTrackedRef = useRef(false);
+    const hasTrackedShippingRef = useRef(false);
+    const hasTrackedCouponRef = useRef(false);
 
     useEffect(() => {
         if (data && data.items.length > 0 && !hasTrackedRef.current) {
             trackInitiateCheckout(parseFloat(data.resume.total), data.items.length);
             hasTrackedRef.current = true;
+        }
+
+        // El usuario llegó a ver el costo de envío en el resumen (causa #1 de abandono).
+        if (data && !hasTrackedShippingRef.current) {
+            hasTrackedShippingRef.current = true;
+            phShippingCostRevealed(
+                parseFloat(data.resume.shippingCostBeforeTaxes) || 0,
+                data.resume.boxesCount || 0
+            );
+        }
+
+        // El cupón surtió efecto (hay código + descuento en el resume).
+        if (
+            data &&
+            data.couponCode &&
+            !hasTrackedCouponRef.current &&
+            (parseFloat(data.resume.discount?.replace(/,/g, "") || "0") +
+                parseFloat(data.resume.automaticDiscount?.replace(/,/g, "") || "0")) > 0
+        ) {
+            hasTrackedCouponRef.current = true;
+            phCouponApplied(
+                data.couponCode,
+                parseFloat(data.resume.discount?.replace(/,/g, "") || "0")
+            );
         }
     }, [data]);
 

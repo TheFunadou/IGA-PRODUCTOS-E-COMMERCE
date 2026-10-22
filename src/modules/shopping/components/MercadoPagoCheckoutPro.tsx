@@ -1,5 +1,6 @@
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { phPaymentInitiated } from "../../analytics/PostHogEvents";
 
 type Props = {
     preferenceId: string | null | undefined;
@@ -9,6 +10,8 @@ const nodeEnv: string = import.meta.env.VITE_NODE_ENV;
 
 const MercadoPagoCheckoutPro = ({ preferenceId }: Props) => {
     const [id, setId] = useState<string | null>(null);
+    // Evita duplicar el evento si el effect se re-ejecuta con el mismo preferenceId.
+    const hasTrackedInitiatedRef = useRef(false);
 
     useEffect(() => {
         if (!preferenceId) return;
@@ -24,6 +27,13 @@ const MercadoPagoCheckoutPro = ({ preferenceId }: Props) => {
 
         initMercadoPago(publicKey, { locale: "es-MX" });
         setId(preferenceId);
+
+        // El botón de pago quedó disponible: el usuario está a un click de pagar.
+        // (El widget es un iframe de MP, no podemos capturar el click en sí.)
+        if (!hasTrackedInitiatedRef.current) {
+            hasTrackedInitiatedRef.current = true;
+            phPaymentInitiated("mercado_pago");
+        }
     }, [preferenceId]); // ← re-ejecutar cuando llegue el preferenceId del servidor
 
     if (!preferenceId) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FaListUl, FaCheckCircle, FaClock, FaMapMarkerAlt } from "react-icons/fa";
+import { FaListUl, FaCheckCircle, FaClock, FaMapMarkerAlt, FaChartLine } from "react-icons/fa";
 import { FaShieldHalved } from "react-icons/fa6";
 import { MdTimer } from "react-icons/md";
 
@@ -232,12 +232,14 @@ const PrivacyPolicy = () => {
                                 <li><strong>Cookies de Sesión:</strong> Tienen una duración estricta de 24 horas.</li>
                                 <li><strong>Persistencia de inicio de sesión:</strong> Sus datos de acceso se guardan en el navegador de forma persistente únicamente mientras su sesión esté activa. Estos datos se borran automáticamente al cerrar la sesión de forma manual (Logout).</li>
                                 <li><strong>Usuarios Invitados:</strong> No generan datos en caché. Solo almacenamos en el <code>localStorage</code> un identificador de sesión único (Session ID) para gestionar el carrito de compras y el proceso de checkout temporal sin requerir una cuenta.</li>
+                                <li><strong>Cookies de Análisis y Publicidad:</strong> Se crean únicamente si acepta las cookies en el banner de consentimiento. Permiten medir de forma anónima cómo se navega la tienda y mostrar contenido relevante. Puede rechazarlas sin que esto afecte su experiencia de compra. Duración: hasta 1 año.</li>
                             </ul>
 
                             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 not-prose">
                                 {[
                                     { type: "Cookies de Sesión", duration: "24 horas", desc: "Mantenimiento del estado técnico", icon: <FaClock className="text-xs" /> },
                                     { type: "LocalStorage (Guest)", duration: "Temporal", desc: "ID de sesión único para compras", icon: <MdTimer className="text-xs" /> },
+                                    { type: "Cookies de Análisis", duration: "Hasta 1 año", desc: "Métricas anónimas de uso (solo si acepta)", icon: <FaChartLine className="text-xs" /> },
                                 ].map((c) => (
                                     <div key={c.type} className="bg-base-200 rounded-xl px-4 py-3 border border-base-300">
                                         <p className="text-xs font-bold text-primary">{c.type}</p>
@@ -382,6 +384,49 @@ const PrivacyPolicy = () => {
                                             rel="noreferrer"
                                         >
                                             Términos y Políticas de Mercado Pago
+                                        </a>.
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-primary pl-4">
+                                    <h3 className="font-bold text-base text-base-content mb-2">Analítica del Sitio (PostHog)</h3>
+                                    <p className="text-sm">
+                                        Utilizamos <strong>PostHog</strong>, una herramienta de analítica de producto alojada en PostHog Cloud
+                                        (Estados Unidos), para entender de forma anónima cómo se navega nuestra tienda y mejorarla,
+                                        en particular para detectar puntos de fricción en el proceso de compra.
+                                        La herramienta recopila páginas visitadas, interacciones con la interfaz y eventos de compra,
+                                        asociados a un identificador anónimo. Esta recopilación <strong>solo se activa si usted acepta</strong>{" "}
+                                        las cookies de análisis en nuestro banner de consentimiento, y puede revocar ese consentimiento
+                                        en cualquier momento rechazando las cookies desde dicho banner.
+                                        Puede consultar más detalles en la{" "}
+                                        <a
+                                            href="https://posthog.com/privacy"
+                                            className="text-primary hover:underline font-medium"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            Política de Privacidad de PostHog
+                                        </a>.
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-primary pl-4">
+                                    <h3 className="font-bold text-base text-base-content mb-2">Publicidad y Medición (Meta Pixel)</h3>
+                                    <p className="text-sm">
+                                        Utilizamos <strong>Meta Pixel</strong>, herramienta de Meta Platforms, Inc., para medir la efectividad
+                                        de nuestros anuncios y mostrar contenido publicitario relevante en las plataformas de Meta
+                                        (Facebook e Instagram). Meta recopila información sobre su navegación en nuestro sitio
+                                        (páginas visitadas e interacciones con productos) asociada a un identificador de navegador.
+                                        Al igual que con la analítica, esta herramienta <strong>solo se activa si usted acepta</strong>{" "}
+                                        las cookies en nuestro banner de consentimiento, y puede rechazarlas en cualquier momento
+                                        para desactivarla. El tratamiento de estos datos se sujeta a la{" "}
+                                        <a
+                                            href="https://www.facebook.com/privacy/policy/"
+                                            className="text-primary hover:underline font-medium"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            Política de Privacidad de Meta Platforms
                                         </a>.
                                     </p>
                                 </div>
