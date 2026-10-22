@@ -28,6 +28,11 @@ FROM node:${NODE_VERSION}-alpine AS builder
 
 ENV CI=true
 
+# Rollup transforma en un solo hilo: darle heap generoso a Node evita
+# que en servidores con poca RAM el build muera de "heap out of memory"
+# o se quede en bucles de garbage collection que parecen un colgado.
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
 RUN apk add --no-cache libc6-compat
 
 RUN npm install --global pnpm@12.15.0
