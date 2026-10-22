@@ -10,6 +10,7 @@ import type { LoadShoppingCartI, LoadShoppingCartV3I, ShoppingCartI } from "../.
 import { getPaymentDetailsExtended, getPaymentDetailsExtendedV3 } from "../../payments/services";
 import { buildKey } from "../../../global/GlobalHelpers";
 import { paymentQueryKeys } from "../../payments/usePayment";
+import { phOrderAbandoned } from "../../analytics/PostHogEvents";
 
 export const customerQueryKeys = {
     getOrders: (params: { pagination: { page: number, limit: number }, orderBy: "recent" | "oldest" }) => buildKey("customer:orders", { params }),
@@ -96,6 +97,8 @@ export const useCancelOrder = ({ orderUUID, type }: { orderUUID: string, type: "
     return useMutation({
         mutationFn: async () => await cancelOrder({ orderUUID, type }),
         onSuccess: (data) => {
+            // Solo ABANDONED importa para el embudo (CANCELLED es una acción explícita del usuario).
+            if (type === "ABANDONED") phOrderAbandoned(type, orderUUID);
             showTriggerAlert("Successfull", data, { duration: 3000 });
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
             queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });
@@ -138,6 +141,8 @@ export const useCancelGuestOrder = ({ orderUUID }: { orderUUID: string }) => {
     return useMutation({
         mutationFn: async () => await cancelGuestOrder({ orderUUID }),
         onSuccess: (data) => {
+            // Cancelar una orden de invitado desde el checkout = abandono explícito.
+            phOrderAbandoned("ABANDONED", orderUUID);
             showTriggerAlert("Successfull", data, { duration: 3000 });
             queryClient.invalidateQueries({ queryKey: customerQueryKeys.getOrders({ pagination: { page: 1, limit: 10 }, orderBy: "recent" }) });
             queryClient.invalidateQueries({ queryKey: ["customer:orders:dashboard:v3"] });

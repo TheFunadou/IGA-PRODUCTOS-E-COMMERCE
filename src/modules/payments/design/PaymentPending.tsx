@@ -38,6 +38,7 @@ import { orderStatusBadgeClass } from "../../orders/utils/orderStatus";
 import FolioCopyButton from "../../orders/components/FolioCopyButton";
 import { PageFrame, InfoRow, SectionCard, SummaryLine } from "./paymentResultUi";
 import { cardToneClass } from "../utils/paymentTone";
+import { phPaymentPending } from "../../analytics/PostHogEvents";
 import PaymentVerification from "./PaymentVerification";
 
 /* ─────────────────────────────────────────────
@@ -144,6 +145,7 @@ const PaymentPendingV2 = () => {
     const orderUUID = query.get("external_reference");
 
     const pollAttemptsRef = useRef(0);
+    const hasTrackedPaymentPendingRef = useRef(false);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
 
@@ -184,6 +186,14 @@ const PaymentPendingV2 = () => {
             data.status === "APPROVED" ||
             data.status === "PENDING_CONFIRMATION"
         ) {
+            // Pago pendiente/in process: se registra una sola vez (polling repite renders).
+            if (
+                data.status !== "APPROVED" &&
+                !hasTrackedPaymentPendingRef.current
+            ) {
+                hasTrackedPaymentPendingRef.current = true;
+                phPaymentPending(data.status, orderUUID);
+            }
             success();
             if (authCustomer?.uuid) {
                 queryClient.invalidateQueries({

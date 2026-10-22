@@ -109,7 +109,7 @@ const LoginV3 = () => {
                 // H7: solo se registra el píxel de registro cuando es una cuenta nueva
                 if (response?.isNewCustomer) {
                     const { trackCompleteRegistration } = await import("../../analytics/MetaEvents");
-                    trackCompleteRegistration();
+                    trackCompleteRegistration("google");
                 }
                 await resolvePostAuthNavigation();
             }

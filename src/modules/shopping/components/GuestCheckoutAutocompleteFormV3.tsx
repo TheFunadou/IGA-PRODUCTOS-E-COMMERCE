@@ -1,10 +1,11 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { FaMapMarkerAlt, FaShippingFast, FaUserAlt } from "react-icons/fa";
 import type { GuestCreateOrderFormType } from "../../customers/CustomerTypes";
 import type { CountriesPhoneCodeType } from "../../../global/GlobalTypes";
 import CountriesAreaCodesJSON from "../../../global/json/CountriesAreaCodes.json";
 import { useSepomexZipCodes } from "../../../global/sepomex/useSepomexZipCodes";
+import { phCheckoutFormError, phZipCodeLookupFailed } from "../../analytics/PostHogEvents";
 import clsx from "clsx";
 
 interface GuestCheckoutAutocompleteFormV3Props {
@@ -139,6 +140,27 @@ const GuestCheckoutAutocompleteFormV3 = ({
     const showColoniaSelect = isMexico && !!sepomexData && !sepomexFetching && colonias.length >= 2;
     const showZipError = isMexico && watchedZipCode?.length >= 5 && sepomexError;
 
+    // Guard para registrar "Zip Code Lookup Failed" una sola vez por código (el
+    // debounce de Sepomex puede reintentar y re-renderizar con el mismo error).
+    const zipErrorTrackedRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!sepomexError) return;
+        if (zipErrorTrackedRef.current === watchedZipCode) return;
+        zipErrorTrackedRef.current = watchedZipCode;
+        // Solo se envían los 5 dígitos del CP (dato público, no PII).
+        phZipCodeLookupFailed(watchedZipCode);
+    }, [sepomexError, watchedZipCode]);
+
+    // Errores de validación al intentar enviar el formulario de invitado.
+    // Solo se envía el NOMBRE del campo y el TIPO de error, jamás los valores.
+    const handleInvalidSubmit = (formErrors: FieldErrors<GuestCreateOrderFormType>) => {
+        const fields = Object.entries(formErrors).map(([field, error]) => ({
+            field,
+            error_type: (error as { type?: string })?.type ?? "unknown",
+        }));
+        if (fields.length > 0) phCheckoutFormError(fields);
+    };
+
     const cpSearchable = /^\d{5}$/.test(watchedZipCode || "");
     const autocompleteReady =
         isMexico &&
@@ -179,7 +201,7 @@ const GuestCheckoutAutocompleteFormV3 = ({
         );
 
     return (
-        <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSave, handleInvalidSubmit)} className="flex flex-col gap-5">
             <div>
                 <div className="flex items-center gap-2 mb-3">
                     <FaUserAlt className="text-primary text-sm" />

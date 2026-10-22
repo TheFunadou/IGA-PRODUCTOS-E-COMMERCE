@@ -19,6 +19,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ScrollToTop from "./global/components/ScrollToTop"
 
 import { usePageTracking } from "./modules/analytics/usePageTracking";
+import PostHogConsentSync from "./modules/analytics/PostHogConsentSync";
+import PostHogIdentitySync from "./modules/analytics/PostHogIdentitySync";
 import { scrollToTienda } from "./modules/shop/utils/scrollToTienda";
 
 // Wrapper lazy: los providers de Google solo se cargan en /iniciar-sesion
@@ -121,6 +123,10 @@ function RootLayout() {
     return (
         <QueryClientProvider client={queryClient}>
             <QueryDevTools />
+            {/* Aplica el consentimiento de cookies del banner a PostHog (opt-in/out). */}
+            <PostHogConsentSync />
+            {/* Identifica al usuario en PostHog tras login; resetea al logout. */}
+            <PostHogIdentitySync />
             <ThemeProvider>
                 <TriggerAlertProvider>
                     <ScrollToTop />

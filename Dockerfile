@@ -1,7 +1,7 @@
 # =========================================================
 # Stage 1: Dependencies
 # =========================================================
-ARG NODE_VERSION=22.16.0
+ARG NODE_VERSION=26.12.1
 
 FROM node:${NODE_VERSION}-alpine AS deps
 

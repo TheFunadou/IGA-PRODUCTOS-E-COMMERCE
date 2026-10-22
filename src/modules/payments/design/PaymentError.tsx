@@ -28,6 +28,7 @@ import { cardToneClass } from "../utils/paymentTone";
 import PaymentVerification from "./PaymentVerification";
 import { usePaymentStore } from "../../shopping/states/paymentStore";
 import { useAuthStore } from "../../auth/states/authStore";
+import { phPaymentFailed } from "../../analytics/PostHogEvents";
 
 /* ─────────────────────────────────────────────
    Constantes de polling
@@ -132,6 +133,7 @@ const PaymentErrorV2 = () => {
 
     const pollAttemptsRef = useRef(0);
     const hasClearedStoreRef = useRef(false);
+    const hasTrackedPaymentFailedRef = useRef(false);
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const [pollAttempts, setPollAttempts] = useState(0);
 
@@ -173,6 +175,12 @@ const PaymentErrorV2 = () => {
         }
         if (isLoading && !data) return;
         if (!data) return;
+
+        // Pago REJECTED confirmado: se registra una sola vez (el polling repite renders).
+        if (data.status === "REJECTED" && !hasTrackedPaymentFailedRef.current) {
+            hasTrackedPaymentFailedRef.current = true;
+            phPaymentFailed(data.status, orderUUID);
+        }
 
         const isResolved = data.status === "REJECTED" || data.status === "IN_PROCESS";
         if (isResolved) return;

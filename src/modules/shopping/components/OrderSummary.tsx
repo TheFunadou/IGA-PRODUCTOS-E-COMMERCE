@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { FaTag, FaShippingFast, FaShoppingBag, FaClipboardList, FaExclamation } from "react-icons/fa";
 import { BiMinus, BiPlus } from "react-icons/bi";
 import { formatPrice } from "../../products/Helpers";
 import type { ShoppingCartI, ShoppingCartResumeI } from "../ShoppingTypes";
+import { phShippingCostRevealed, phCouponSubmitted } from "../../analytics/PostHogEvents";
 
 interface OrderSummaryProps {
     allItems: ShoppingCartI[];
@@ -36,7 +38,20 @@ const OrderSummary = ({
     pendingOrder = false,
     onPendingPayment,
     onOpenAddress,
-}: OrderSummaryProps) => (
+}: OrderSummaryProps) => {
+    // Registrar una sola vez que el usuario vio el costo de envío en el resumen
+    // del carrito (se muestra cuando ya hay dirección/selección de destino).
+    const hasTrackedShippingRevealRef = useRef(false);
+    const shippingCostValue = parseFloat(handleCart.data?.resume?.shippingCostBeforeTaxes || "0") || 0;
+    useEffect(() => {
+        if (hasTrackedShippingRevealRef.current) return;
+        if (destination && shippingCostValue > 0) {
+            hasTrackedShippingRevealRef.current = true;
+            phShippingCostRevealed(shippingCostValue, handleCart.data?.resume?.boxesCount || 0);
+        }
+    }, [destination, shippingCostValue, handleCart.data?.resume?.boxesCount]);
+
+    return (
     <div className="w-full rounded-2xl bg-base-100 border border-base-300">
         <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex gap-1 items-center">
             <FaClipboardList className="text-primary" />
@@ -126,6 +141,11 @@ const OrderSummary = ({
                 </label>
                 <input
                     onChange={(e) => setCouponCode(e.target.value)}
+                    onBlur={(e) => {
+                        // Se registra al salir del campo (no por keystroke) si escribió algo.
+                        const code = e.target.value.trim();
+                        if (code) phCouponSubmitted(code);
+                    }}
                     type="text"
                     className="input input-sm w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
                     placeholder="Introduce tu código"
@@ -162,6 +182,7 @@ const OrderSummary = ({
             )}
         </div>
     </div>
-);
+    );
+};
 
 export default OrderSummary;
