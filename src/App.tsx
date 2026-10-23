@@ -158,20 +158,11 @@ const router = createBrowserRouter([
                     },
 
                     // Auth
-                    // ROLLBACK LoginV2: { path: "/iniciar-sesion", element: <AuthProviders><Login /></AuthProviders> }
 
                     // Home
                     { path: "/", element: <HomeV2 /> },
-                    // ROLLBACK Home: { path: "/", element: <Home /> },
-                    // REMOVED /homev2 - ahora HomeV2 es la ruta raíz "/"
-                    // { path: "/homev2", element: <HomeV2 /> },
 
                     // Shop
-                    // Tienda integrada en HomeV2 (ShopV3 embebido) - rutas standalone comentadas para preservar rollback
-                    // ROLLBACK: { path: "/tienda", element: <ShopV2 /> },
-                    // ROLLBACK: { path: "/tienda-v3", element: <ShopV3 /> },
-                    // { path: "/tienda", element: <ShopV2 /> },
-                    // { path: "/tienda-v3", element: <ShopV3 /> },
                     { path: "/tienda", element: <ShopRedirect /> },
                     { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV3 /> },
                     // ROLLBACK ProductVersionDetail: { path: "/tienda/:categoria/:slug/:sku", element: <ProductVersionDetailV2 /> },
