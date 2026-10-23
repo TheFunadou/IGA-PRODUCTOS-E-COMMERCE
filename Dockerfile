@@ -17,6 +17,9 @@ RUN pnpm install --frozen-lockfile
 FROM node:${NODE_VERSION}-alpine AS builder
 
 ENV CI=true
+# Limita el heap de Node para evitar que Vite/Rollup rebase la RAM del host
+# (VPS de 4GB sin swap suficiente provoca OOM kills durante "transforming...")
+ENV NODE_OPTIONS=--max-old-space-size=3072
 
 RUN apk add --no-cache libc6-compat
 
