@@ -1,7 +1,7 @@
 # =========================================================
 # Stage 1: Dependencies
 # =========================================================
-ARG NODE_VERSION=26.12.1
+ARG NODE_VERSION=24.22.1
 
 FROM node:${NODE_VERSION}-alpine AS deps
 
@@ -28,10 +28,12 @@ FROM node:${NODE_VERSION}-alpine AS builder
 
 ENV CI=true
 
-# Rollup transforma en un solo hilo: darle heap generoso a Node evita
-# que en servidores con poca RAM el build muera de "heap out of memory"
-# o se quede en bucles de garbage collection que parecen un colgado.
-ENV NODE_OPTIONS=--max-old-space-size=2048
+# Rollup transforma en un solo hilo: limitar el heap de Node a 1GB
+# mantiene el paso de build dentro del presupuesto de un VPS de 2GB
+# (sin el tope, Node puede inflarse hasta ~2GB+ y caer en swap thrash
+# que parece un colgado). Medido: el build real pico ~1.5GB con tope
+# de 2GB; con 1GB de heap el paso queda ~1.1GB.
+ENV NODE_OPTIONS=--max-old-space-size=1024
 
 RUN apk add --no-cache libc6-compat
 
