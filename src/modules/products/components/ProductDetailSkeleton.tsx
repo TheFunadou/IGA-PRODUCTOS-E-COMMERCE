@@ -1,21 +1,23 @@
 
 const ProductDetailSkeleton = () => {
     return (
-        <div className="w-full px-5 py-10 rounded-xl bg-base-300">
-            <div className="w-full flex border-b border-gray-400 pb-5">
-                <div className="w-30/100 relative">
-                    <div className="sticky top-5">
-                        <div className="w-full bg-gray-300 h-130 skeleton">
+        <div className="w-full px-2 sm:px-5 py-10 rounded-xl bg-base-300">
+            {/* Título (mobile): refleja el nuevo orden título → imágenes → ... */}
+            <div className="lg:hidden skeleton h-6 w-3/5 bg-gray-300 mb-5" />
+            <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-0 border-b border-gray-400 pb-5">
+                <div className="w-full lg:w-30/100 relative">
+                    <div className="lg:sticky top-5">
+                        <div className="w-full bg-gray-300 h-80 lg:h-130 skeleton">
                         </div>
-                        <div className="[&_div]:bg-gray-300 flex gap-2 items-center justify-start flex-wrap mt-5">
-                            <div className="w-30 h-30 skeleton" />
-                            <div className="w-30 h-30 skeleton" />
-                            <div className="w-30 h-30 skeleton" />
-                            <div className="w-30 h-30 skeleton" />
+                        <div className="[&_div]:bg-gray-300 flex gap-2 items-center justify-start flex-nowrap lg:flex-wrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mt-5">
+                            <div className="w-30 h-30 skeleton shrink-0" />
+                            <div className="w-30 h-30 skeleton shrink-0" />
+                            <div className="w-30 h-30 skeleton shrink-0" />
+                            <div className="w-30 h-30 skeleton shrink-0" />
                         </div>
                     </div>
                 </div>
-                <div className="w-50/100 px-10">
+                <div className="w-full lg:w-50/100 px-0 lg:px-10">
                     <div className="[&_div]:bg-gray-300 flex flex-col">
                         <div className="skeleton w-full p-15" />
                         <div className="skeleton w-full p-5 mt-4"></div>
@@ -36,7 +38,7 @@ const ProductDetailSkeleton = () => {
                     {/* Description */}
 
                 </div>
-                <div className="w-20/100">
+                <div className="w-full lg:w-20/100">
                     <div className="w-full bg-base-200 shadow-2xl rounded-xl p-5">
                         <div className="border-b border-gray-400 pb-2">
                             <div className="skeleton p-2 w-1/2 bg-gray-300"></div>

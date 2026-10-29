@@ -53,15 +53,15 @@ const AddressSection = ({
                     )}
                     {!addressesLoading && !addressesError && selectedAddress && (
                         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                            <div className="flex-1">
-                                <p className="text-base sm:text-lg font-extrabold text-base-content">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-base sm:text-lg font-extrabold text-base-content break-words">
                                     {selectedAddress.recipientName} {selectedAddress.recipientLastName}
                                     <span className="ml-2 badge badge-sm badge-primary badge-outline">{selectedAddress.addressType}</span>
                                 </p>
-                                <p className="text-sm text-base-content/70 mt-1">
+                                <p className="text-sm text-base-content/70 mt-1 break-words">
                                     {selectedAddress.countryPhoneCode} {selectedAddress.contactNumber}
                                 </p>
-                                <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed">
+                                <p className="text-sm text-base-content/60 mt-0.5 leading-relaxed break-words">
                                     {`${selectedAddress.streetName} #${selectedAddress.number}${selectedAddress.aditionalNumber !== "N/A" && selectedAddress.aditionalNumber !== "" ? ` Int. ${selectedAddress.aditionalNumber}` : ""}, ${selectedAddress.neighborhood}, ${selectedAddress.zipCode}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`}
                                 </p>
                                 {selectedAddress.defaultAddress && (
@@ -125,7 +125,7 @@ const AddressSection = ({
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <FaUserPlus className="text-primary text-lg" />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                             <p className="font-bold text-base-content text-sm sm:text-base">¿Ya tienes cuenta? Inicia sesión</p>
                             <p className="text-xs text-base-content/50 mt-0.5">Accede a tus direcciones guardadas y completa tu compra más rápido</p>
                         </div>
@@ -191,11 +191,11 @@ const AddressSection = ({
                     </button>
                 </div>
                 <div className="p-4 sm:p-5 flex flex-col gap-2">
-                    <p className="text-base font-extrabold text-base-content">
+                    <p className="text-base font-extrabold text-base-content break-words">
                         {guestAddressForm.firstName} {guestAddressForm.lastName}
                     </p>
-                    <p className="text-sm text-base-content/70">{guestAddressForm.email}</p>
-                    <p className="text-sm text-base-content/60 leading-relaxed">
+                    <p className="text-sm text-base-content/70 break-words">{guestAddressForm.email}</p>
+                    <p className="text-sm text-base-content/60 leading-relaxed break-words">
                         {`${guestAddressForm.streetName} #${guestAddressForm.number}${guestAddressForm.aditionalNumber ? ` Int. ${guestAddressForm.aditionalNumber}` : ""}, ${guestAddressForm.neighborhood}, ${guestAddressForm.locality}, ${guestAddressForm.city}, ${guestAddressForm.state}, ${guestAddressForm.country}`}
                     </p>
                     <span className="inline-flex items-center gap-1 text-xs text-success font-bold mt-1">

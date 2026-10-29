@@ -109,11 +109,13 @@ const HeroV3Mobile = () => {
             <div className="absolute inset-0 bg-black/10" />
 
             <div className="relative z-10 flex min-h-[80vh] flex-col justify-center p-6 sm:p-10">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-staatliches text-white">
+                {/* -webkit-text-stroke hereda: borde azul marino en todos los textos
+                    del hero mobile (el web conserva el look sólido) */}
+                <h1 className="text-6xl md:text-6xl font-staatliches text-white [-webkit-text-stroke:0.10px_#172554]">
                     CASCOS DE SEGURIDAD CERTIFICADOS PARA CADA INDUSTRIA
                 </h1>
 
-                <div className="mt-3 md:mt-4 text-xs sm:text-lg text-white font-bold">
+                <div className="mt-3 md:mt-4 text-lg text-blue-950 font-bold shadow-lg bg-white/60 rounded-md p-1">
                     <p className="underline">Compra directamente con fabricantes mexicanos.</p>
                     <p>Modelos para industria, construcción, energia y trabajos en altura.</p>
                 </div>
@@ -136,7 +138,7 @@ const HeroV3Mobile = () => {
                     </a>
                 </div>
 
-                <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-x-5 text-xs sm:text-base text-white">
+                <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-x-5 text-xs sm:text-base text-white [-webkit-text-stroke:0.1px_#172554]">
                     <div className="flex items-center gap-2">
                         <FaCheckCircle />
                         <p>Fabricación Mexicana</p>

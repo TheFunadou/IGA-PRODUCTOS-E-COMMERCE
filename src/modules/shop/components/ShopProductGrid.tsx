@@ -3,7 +3,7 @@ import clsx from "clsx";
 // import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
 import ProductVersionCardV3Skeleton from "../../products/components/ProductVersionCardV3Skeleton";
 import type { PV3CardData } from "../../products/ProductTypes";
-import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
+import ProductVersionCardV5 from "../../products/components/ProductVersionCardV5";
 
 interface ShopProductGridProps {
     products: PV3CardData[];
@@ -40,7 +40,7 @@ const ShopProductGrid = ({ products, isLoading, viewMode }: ShopProductGridProps
                 )}
             >
                 {products.map((card) => (
-                    <ProductVersionCardV3
+                    <ProductVersionCardV5
                         key={`${card.version.sku}-${card.product.id}`}
                         data={card}
                         viewMode={viewMode}

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { FaHistory } from "react-icons/fa";
 import ProductVersionCardV3 from "../../products/components/ProductVersionCardV3";
+import ProductVersionCardV5 from "../../products/components/ProductVersionCardV5";
 import ProductVersionCardV3Skeleton from "../../products/components/ProductVersionCardV3Skeleton";
 import { useFetchProductVersionCardsV3 } from "../../products/hooks/useFetchProductVersionCards";
 import type { PV3CardData } from "../../products/ProductTypes";
@@ -8,11 +9,19 @@ import { useRecentlyViewedStore } from "../../../global/states/recentlyViewedSto
 
 interface RecentlyViewedProps {
     excludeSkus?: string[];
+    /**
+     * true → en mobile (<sm) renderiza las tarjetas en versión lista (la misma
+     * ProductVersionCardV5 de la tienda y "Productos similares"); ≥sm conserva
+     * el grid original. Doble render con clases de Tailwind (patrón de
+     * SimilarProducts: sin flash ni JS). Solo lo pasa el carrito; el resto de
+     * páginas que consumen este componente mantienen el grid en todos los anchos.
+     */
+    mobileList?: boolean;
 }
 
 const MAX_VISIBLE = 4;
 
-const RecentlyViewed = ({ excludeSkus = [] }: RecentlyViewedProps) => {
+const RecentlyViewed = ({ excludeSkus = [], mobileList = false }: RecentlyViewedProps) => {
     const skus = useRecentlyViewedStore((state) => state.skus);
 
     const normalizedNegative = useMemo(
@@ -47,21 +56,50 @@ const RecentlyViewed = ({ excludeSkus = [] }: RecentlyViewedProps) => {
                 </div>
             </div>
 
-            {isLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                    {[...Array(4)].map((_, i) => <ProductVersionCardV3Skeleton key={i} viewMode="grid" />)}
+            {/* Mobile (<sm): tarjetas en versión lista (solo si mobileList).
+                El doble render es el patrón de SimilarProducts: sin flash ni JS,
+                y la rama oculta no carga imágenes lazy. */}
+            {mobileList && (
+                <div className="sm:hidden flex flex-col gap-4">
+                    {isLoading ? (
+                        [...Array(MAX_VISIBLE)].map((_, i) => (
+                            <ProductVersionCardV3Skeleton key={i} viewMode="list" />
+                        ))
+                    ) : (
+                        cards.map((item: PV3CardData) => (
+                            <ProductVersionCardV5
+                                key={`${item.version.sku}-${item.product.id}`}
+                                data={item}
+                                viewMode="list"
+                                imageLoading="lazy"
+                            />
+                        ))
+                    )}
                 </div>
-            ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                    {cards.map((item: PV3CardData) => (
+            )}
+
+            {/* Grid original: único cuando no hay variante mobile; con variante,
+                oculto por debajo de sm (sm:grid gana sobre hidden por venir
+                después en el CSS emitido). */}
+            <div
+                className={
+                    mobileList
+                        ? "hidden sm:grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+                        : "grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+                }
+            >
+                {isLoading ? (
+                    [...Array(MAX_VISIBLE)].map((_, i) => <ProductVersionCardV3Skeleton key={i} viewMode="grid" />)
+                ) : (
+                    cards.map((item: PV3CardData) => (
                         <ProductVersionCardV3
                             key={`${item.version.sku}-${item.product.id}`}
                             data={item}
                             imageLoading="lazy"
                         />
-                    ))}
-                </div>
-            )}
+                    ))
+                )}
+            </div>
         </div>
     );
 };

@@ -145,14 +145,11 @@ const ShopMobileFilters = ({
                         categoriesError={categoriesError}
                         refetchCategories={refetchCategories}
                         selectedCategory={selectedCategory}
-                        onSelectCategory={(cat) => {
-                            onSelectCategory(cat);
-                            onClose();
-                        }}
-                        onClearSelection={() => {
-                            onClearSelection();
-                            onClose();
-                        }}
+                        /* El drawer NO se cierra al elegir/limpiar categoría:
+                           el usuario lo cierra con ✕, backdrop, Escape o
+                           "Ver resultados" (conserva contexto de selección) */
+                        onSelectCategory={onSelectCategory}
+                        onClearSelection={onClearSelection}
 
                         tagsByTier={tagsByTier}
                         tagsLoading={tagsLoading}

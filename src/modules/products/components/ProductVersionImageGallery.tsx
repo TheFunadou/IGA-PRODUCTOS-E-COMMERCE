@@ -121,7 +121,7 @@ const ProductVersionImageGallery = ({
 
     return (
         <dialog className="modal" ref={ref}>
-            <div className="modal-box w-full max-w-xs sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl p-4 sm:p-6 md:p-8 rounded-2xl bg-base-100 text-base-content">
+            <div className="modal-box w-full max-w-[calc(100vw-1.5rem)] sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl p-4 sm:p-6 md:p-8 rounded-2xl bg-base-100 text-base-content">
 
                 {/* Close */}
                 <form method="dialog">
@@ -189,7 +189,7 @@ const ProductVersionImageGallery = ({
                                 {/* Hint cuando zoom = 1 */}
                                 {zoom === 1 && (
                                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-base-content/60 text-base-100 text-[10px] sm:text-xs font-medium px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none whitespace-nowrap">
-                                        Clic para hacer zoom
+                                        Acerca para ampliar
                                     </div>
                                 )}
 

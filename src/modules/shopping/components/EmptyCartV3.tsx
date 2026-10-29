@@ -31,7 +31,7 @@ const EmptyCartV3 = () => {
                         </Link>
                     </div>
                 </div>
-                <RecentlyViewed />
+                <RecentlyViewed mobileList />
                 <FavoritesSectionV3 />
             </div>
             <div className="w-full lg:w-80 xl:w-96 shrink-0 flex flex-col gap-4">

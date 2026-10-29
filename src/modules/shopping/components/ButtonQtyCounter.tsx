@@ -39,6 +39,16 @@ const ButtonQtyCounterV2 = ({
     const isInputChange = useRef(false);
     const isUpdatingRef = useRef(false);
 
+    // onQty llega como closure nueva en cada render del padre (handleShoppingCartV3
+    // devuelve arrows inline). Con lo en deps, el efecto de envío se re-disparaba en
+    // cada render y, si debouncedQuantity ≠ lastSentQuantity en esa ventana (eco
+    // externo recién aplicado), REENVIABA un valor viejo → ping-pong de valores.
+    // Se lee vía ref para que solo se ejecute cuando cambia debouncedQuantity.
+    const onUpdateQtyRef = useRef(onUpdateQty);
+    useEffect(() => {
+        onUpdateQtyRef.current = onUpdateQty;
+    });
+
     // Sincronización con cambios externos (por ejemplo, si el carrito se actualiza desde otro lugar)
     useEffect(() => {
         const numericInitQty = Number(initQty);
@@ -60,7 +70,8 @@ const ButtonQtyCounterV2 = ({
         if (debouncedQuantity === lastSentQuantity.current) return;
 
         const performUpdate = async () => {
-            if (!onUpdateQty) return;
+            const updateQty = onUpdateQtyRef.current;
+            if (!updateQty) return;
 
             try {
                 setIsUpdating(true);
@@ -69,7 +80,7 @@ const ButtonQtyCounterV2 = ({
 
                 // Construir el objeto ShoppingCartI para enviarlo
                 // Nota: Se envía la cantidad absoluta deseada
-                onUpdateQty({
+                updateQty({
                     item: {
                         productUUID: item.productUUID,
                         sku: item.sku
@@ -93,7 +104,8 @@ const ButtonQtyCounterV2 = ({
         };
 
         performUpdate();
-    }, [debouncedQuantity, item.sku, onUpdateQty]);
+        // onUpdateQty va vía ref (ver arriba): no debe disparar el envío por sí mismo.
+    }, [debouncedQuantity, item.sku, item.productUUID]);
 
     const handleIncrement = () => {
         const currentQty = Number(quantity);

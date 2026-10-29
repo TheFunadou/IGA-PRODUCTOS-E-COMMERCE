@@ -16,12 +16,15 @@ const ProductVersionCardV3Skeleton = ({ viewMode = "grid" }: Props) => {
             <div
                 className={clsx(
                     "shrink-0 bg-base-300 animate-pulse",
-                    isList ? "w-32 sm:w-44 aspect-square" : "w-full aspect-square"
+                    isList ? "w-40/100 sm:w-44 aspect-square self-start" : "w-full aspect-square"
                 )}
             />
 
             {/* Contenido */}
-            <div className="flex flex-col gap-2.5 px-3 py-3 flex-1 min-w-0">
+            <div className={clsx(
+                "flex flex-col gap-2.5 px-1 sm:px-3 py-3 min-w-0",
+                isList ? "w-60/100 sm:w-auto sm:flex-1" : "flex-1"
+            )}>
                 <div className="h-3.5 w-4/5 bg-base-300 rounded animate-pulse" />
                 <div className="h-3 w-3/5 bg-base-300 rounded animate-pulse" />
 
