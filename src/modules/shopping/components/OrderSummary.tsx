@@ -59,9 +59,9 @@ const OrderSummary = ({
         </div>
         <div className="p-4 flex flex-col gap-4">
             <div className="flex flex-col gap-2.5">
-                <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1">
-                        <FaShoppingBag className="text-primary" />
+                <div className="flex items-center justify-between text-sm gap-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                        <FaShoppingBag className="text-primary flex-shrink-0" />
                         <span className="text-base-content/60">
                             Subtotal ({allItems.length} {allItems.length === 1 ? "producto" : "productos"})
                         </span>
@@ -71,9 +71,9 @@ const OrderSummary = ({
                     </div>
                     <span className="font-medium">+ ${handleCart.data?.resume?.itemsSubtotalBeforeTaxes || "0.00"}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1">
-                        <FaShippingFast className="text-primary" />
+                <div className="flex items-center justify-between text-sm gap-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                        <FaShippingFast className="text-primary flex-shrink-0" />
                         <span className="text-base-content/60">
                             Envío ({handleCart.data?.resume?.boxesCount || 0} {(handleCart.data?.resume?.boxesCount || 0) === 1 ? "caja" : "cajas"})
                         </span>
@@ -96,8 +96,8 @@ const OrderSummary = ({
                         <span className="text-xs text-base-content italic bg-warning/50 px-2 rounded-xl">{isAuth ? "Seleccionar dirección de envío" : "Rellenar formulario de envío"}</span>
                     )}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1">
+                <div className="flex items-center justify-between text-sm gap-2">
+                    <div className="flex items-center gap-1 min-w-0">
                         <span className="text-base-content/60">IVA (16%)</span>
                         <div className="tooltip tooltip-right" data-tip="Impuesto del 16% calculado sobre subtotal + envío. Los descuentos se aplican sobre precio + IVA">
                             <span className="w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-[8px] font-bold cursor-help">?</span>
@@ -106,8 +106,8 @@ const OrderSummary = ({
                     <span className="font-medium flex items-center gap-0.5"><BiPlus className="text-xs" />${handleCart.data?.resume?.iva || "0.00"}</span>
                 </div>
                 {(parseFloat(handleCart.data?.resume?.discount || "0") + parseFloat(handleCart.data?.resume?.automaticDiscount || "0")) > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-primary font-bold flex items-center gap-1.5">
+                    <div className="flex items-center justify-between text-sm gap-2">
+                        <span className="text-primary font-bold flex items-center gap-1.5 min-w-0">
                             <FaTag className="text-xs" />Descuento
                         </span>
                         <span className="text-primary font-bold flex items-center gap-0.5">
@@ -177,7 +177,7 @@ const OrderSummary = ({
             {error && (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm">
                     <span className="text-lg flex-shrink-0"><FaExclamation /></span>
-                    <span>{error}</span>
+                    <span className="min-w-0 break-words">{error}</span>
                 </div>
             )}
         </div>

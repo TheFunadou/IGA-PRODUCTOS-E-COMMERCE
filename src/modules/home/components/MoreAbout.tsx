@@ -65,13 +65,13 @@ export const MoreAbout = () => {
                             key={"card-1"}
                             imgUrl={IndustryAndConstruction}
                             title="Industria y construcción"
-                            tagNames={["Cachucha Plagosur"]}
+                            tagNames={["Plago"]}
                         />
                         <ChoseYourHelmet
                             key={"card-2"}
                             imgUrl={WorkAtHeight}
                             title="Trabajos en altura"
-                            tagNames={["Cascos de Alturas"]}
+                            tagNames={["Wings Para Trabajos de Altura"]}
                         />
                         <ChoseYourHelmet
                             key={"card-3"}

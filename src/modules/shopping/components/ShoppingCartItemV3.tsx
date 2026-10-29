@@ -111,7 +111,7 @@ const ShoppingCartItemV3 = ({
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
                             <Link
                                 to={productUrl}
-                                className="text-sm sm:text-base md:text-lg font-bold text-base-content hover:text-primary hover:underline underline-offset-2 transition-colors duration-150 leading-snug"
+                                className="text-sm sm:text-base md:text-lg font-bold text-base-content hover:text-primary hover:underline underline-offset-2 transition-colors duration-150 leading-snug min-w-0 break-words"
                             >
                                 {product.product_name}
                             </Link>
@@ -162,12 +162,12 @@ const ShoppingCartItemV3 = ({
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
                         <span
                             className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-base-300 flex-shrink-0 shadow-sm"
                             style={{ backgroundColor: version.color_code }}
                         />
-                        <span className="text-xs sm:text-sm text-base-content/60">
+                        <span className="text-xs sm:text-sm text-base-content/60 min-w-0 break-words">
                             SKU — <span className="text-base-content font-medium uppercase">{sku}</span>
                         </span>
                     </div>

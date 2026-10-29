@@ -1,5 +1,5 @@
 import { MdRemoveShoppingCart, MdShoppingBag } from "react-icons/md";
-import ShoppingCartItemV3 from "./ShoppingCartItemV3";
+import CartItemRow from "./CartItemRow";
 import type { PV3CardData } from "../../products/ProductTypes";
 import type { ShoppingCartI } from "../ShoppingTypes";
 
@@ -34,20 +34,22 @@ const CartItems = ({ allItems, cardsMap, handleCart, isAuth }: CartItemsProps) =
             )}
         </div>
         <div className="flex flex-col divide-y divide-base-200">
-            {allItems.map((item, index) => {
+            {allItems.map((item) => {
                 const cardData = cardsMap.get(item.item.sku.toLowerCase());
                 if (!cardData) return null;
                 return (
-                    <div key={index} className="p-3 sm:p-4">
-                        <ShoppingCartItemV3
-                            cartItem={item}
-                            cardData={cardData}
-                            stockLimit={cardData.version.stock ?? 0}
-                            onRemoveItem={handleCart.removeItem}
-                            onUpdateQty={handleCart.setItem}
-                            isAuth={isAuth}
-                        />
-                    </div>
+                    // Key por SKU: identidad estable por producto. Con key={index},
+                    // si /v3/load y /v2/item devuelven los arrays en distinto orden,
+                    // React reusaba la instancia del contador para OTRO producto
+                    // (heredaba cantidad vieja con sku nuevo → envíos cruzados).
+                    <CartItemRow
+                        key={item.item.sku}
+                        item={item}
+                        cardData={cardData}
+                        isAuth={isAuth}
+                        onUpdateQty={handleCart.setItem}
+                        onRemoveItem={handleCart.removeItem}
+                    />
                 );
             })}
             <div className="px-4 py-3 bg-base-200 flex items-center justify-between">

@@ -31,6 +31,10 @@ function loadViewMode(): ViewMode {
     } catch {
         // localStorage no disponible (modo privado): se usa el valor por defecto
     }
+    // Default según viewport: lista en mobile (< sm), grid en desktop
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches) {
+        return "list";
+    }
     return "grid";
 }
 
@@ -272,6 +276,26 @@ export const ShopV3 = () => {
         activeFilterCount: filters.activeFilterCount,
     };
 
+    /* Props compartidas de filtros aplicados: web (dentro del toolbar) y
+       mobile (<lg, sección propia debajo del toolbar con chips compactos) */
+    const appliedFiltersProps = {
+        favoriteCheck: filters.favoriteCheck,
+        offerCheck: filters.offerCheck,
+        stockCheck: filters.stockCheck,
+        ratingFilter: filters.ratingFilter,
+        colorLineFilter: filters.colorLineFilter,
+        priceRange: filters.priceRange,
+        skuFilter: filters.skuFilter,
+        activeSorts,
+        pendingTagNames,
+        tagNameFilter: filters.tagNameFilter,
+        onRemoveFilter: handleRemoveFilter,
+        onRemoveSort: handleRemoveSort,
+        onRemoveTag: handleRemoveTag,
+        onRemoveTagName: filters.removeTagName,
+        onClearAll: handleClearAll,
+    };
+
     return (
         <div id="tienda" className="px-4 py-8 sm:px-8 lg:px-20 lg:py-14 scroll-mt-24">
             {/* Title */}
@@ -304,24 +328,18 @@ export const ShopV3 = () => {
                             onViewModeChange={handleToggleView}
                             onOpenMobileFilters={() => setShowMobileFilters(true)}
                         >
-                            <ShopAppliedFilters
-                                favoriteCheck={filters.favoriteCheck}
-                                offerCheck={filters.offerCheck}
-                                stockCheck={filters.stockCheck}
-                                ratingFilter={filters.ratingFilter}
-                                colorLineFilter={filters.colorLineFilter}
-                                priceRange={filters.priceRange}
-                                skuFilter={filters.skuFilter}
-                                activeSorts={activeSorts}
-                                pendingTagNames={pendingTagNames}
-                                tagNameFilter={filters.tagNameFilter}
-                                onRemoveFilter={handleRemoveFilter}
-                                onRemoveSort={handleRemoveSort}
-                                onRemoveTag={handleRemoveTag}
-                                onRemoveTagName={filters.removeTagName}
-                                onClearAll={handleClearAll}
-                            />
+                            {/* Web (≥lg): tags dentro del toolbar (diseño intacto) */}
+                            <div className="hidden lg:flex">
+                                <ShopAppliedFilters {...appliedFiltersProps} />
+                            </div>
                         </ShopToolbar>
+
+                        {/* Mobile (<lg): tags en sección propia bajo el toolbar,
+                            con chips compactos. `empty:hidden` evita el gap del
+                            layout flex cuando no hay filtros aplicados */}
+                        <div className="lg:hidden empty:hidden">
+                            <ShopAppliedFilters {...appliedFiltersProps} compact />
+                        </div>
 
                         {/* Resultados */}
                         <section className="relative flex flex-col items-center gap-4">

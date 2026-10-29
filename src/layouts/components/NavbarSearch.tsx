@@ -114,7 +114,7 @@ const NavbarSearch = ({ variant }: NavbarSearchProps) => {
                     ref={dropdownRef}
                     className={clsx(
                         "absolute top-full mt-2 bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden",
-                        isDesktop ? "w-full" : "left-0 right-0 mx-4"
+                        isDesktop ? "w-full" : "left-1/2 -translate-x-1/2 w-[95vw]"
                     )}
                 >
                     <div className="flex items-center justify-between px-4 py-2 border-b border-base-200">
@@ -147,7 +147,7 @@ const NavbarSearch = ({ variant }: NavbarSearchProps) => {
                     ref={dropdownRef}
                     className={clsx(
                         "absolute top-full mt-2 bg-base-100 border border-base-300 rounded-xl shadow-xl z-60 overflow-hidden",
-                        isDesktop ? "w-full" : "left-0 right-0 mx-4"
+                        isDesktop ? "w-full" : "left-1/2 -translate-x-1/2 w-[95vw]"
                     )}
                 >
                     {data.data.length === 0 ? (
@@ -158,15 +158,27 @@ const NavbarSearch = ({ variant }: NavbarSearchProps) => {
                             </p>
                         </div>
                     ) : (
-                        <ul className="max-h-[60vh] overflow-y-auto divide-y divide-base-200/70">
+                        <ul className={clsx(
+                            "overflow-y-auto divide-y divide-base-200/70",
+                            isDesktop ? "max-h-[60vh]" : "max-h-[85vh]"
+                        )}>
                             {data.data.map((card) => (
                                 <li key={card.version.sku}>
                                     <button
                                         type="button"
                                         onClick={() => handleResultClick(card)}
-                                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-base-200/80 text-left transition-colors"
+                                        className={clsx(
+                                            "w-full flex items-center hover:bg-base-200/80 text-left transition-colors",
+                                            isDesktop ? "gap-3 px-3 py-2.5" : "gap-2 px-4 py-2.5"
+                                        )}
                                     >
-                                        <div className="w-12 h-12 rounded-lg bg-base-200 shrink-0 overflow-hidden flex items-center justify-center">
+                                        {/* Mobile: imagen 22% del ancho de fila (altura con aspect-square) */}
+                                        <div
+                                            className={clsx(
+                                                "bg-base-200 shrink-0 overflow-hidden flex items-center justify-center",
+                                                isDesktop ? "w-12 h-12 rounded-lg" : "w-[22%] aspect-square rounded-xl"
+                                            )}
+                                        >
                                             {card.version.image_url ? (
                                                 <img
                                                     src={card.version.image_url}
@@ -178,12 +190,25 @@ const NavbarSearch = ({ variant }: NavbarSearchProps) => {
                                                 <FaBoxOpen className="text-lg text-base-content/25" />
                                             )}
                                         </div>
-                                        <div className="min-w-0 flex flex-col gap-0.5">
-                                            <span className="text-sm font-semibold text-base-content line-clamp-1 leading-snug">
+                                        <div
+                                            className={clsx(
+                                                "min-w-0 flex flex-col",
+                                                isDesktop ? "gap-0.5" : "w-[78%] gap-0.5"
+                                            )}
+                                        >
+                                            {/* Mobile: nombre completo (sin line-clamp) */}
+                                            <span className={clsx(
+                                                "font-semibold text-base-content leading-snug",
+                                                isDesktop ? "text-sm line-clamp-1" : "text-sm"
+                                            )}>
                                                 {card.product.product_name}
                                             </span>
-                                            <span className="text-xs text-base-content/60 truncate">{card.version.color_name}</span>
-                                            <span className="text-[11px] font-mono text-base-content/40 truncate">SKU: {card.version.sku}</span>
+                                            <span className="text-xs text-base-content/60 truncate">
+                                                {card.version.color_name}
+                                            </span>
+                                            <span className="text-[11px] font-mono text-base-content/40 truncate">
+                                                SKU: {card.version.sku}
+                                            </span>
                                         </div>
                                     </button>
                                 </li>

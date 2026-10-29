@@ -122,7 +122,7 @@ const ImageZoomViewer = ({ image_url, alt, onClick }: Props) => {
             <div className="mt-3 flex justify-center lg:hidden">
                 <span className="text-[11px] font-bold text-primary/40 uppercase tracking-[0.2em] flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-                    Tocar para ampliar
+                    Acerca para ampliar
                 </span>
             </div>
         </div>

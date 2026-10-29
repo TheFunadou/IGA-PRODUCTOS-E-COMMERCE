@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { FaShoppingBag, FaUserShield } from "react-icons/fa";
 import { MdShoppingBag } from "react-icons/md";
 import { useAuthStore } from "../../auth/states/authStore";
 import { usePaymentStore } from "../states/paymentStore";
@@ -12,7 +11,8 @@ import PaymentMethod from "../components/PaymentMethod";
 import OrderSummary from "../components/OrderSummary";
 import TrustBadgesV3 from "../components/TrustBadgesV3";
 import SideAdBanner from "../components/SideAdBanner";
-import ShoppingCartItemV3 from "../components/ShoppingCartItemV3";
+import CartItemRow from "../components/CartItemRow";
+import PageHeader from "../components/PageHeader";
 import RecentlyViewed from "../components/RecentlyViewed";
 import FavoritesSectionV3 from "../components/FavoritesSectionV3";
 import type { PV3CardData } from "../../products/ProductTypes";
@@ -232,36 +232,24 @@ const BuyNowV3 = () => {
     const cardData = singleItem ? cardsMap.get(singleItem.item.sku.toLowerCase()) as PV3CardData | undefined : undefined;
 
     return (
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center overflow-x-clip">
             <div className="w-full md:w-80/100 px-2 sm:px-3 md:px-4 py-6 md:py-10 rounded-2xl">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <MdShoppingBag className="text-primary text-lg sm:text-xl" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content leading-none">
-                                Comprar ahora
-                            </h1>
-                            {!isAuth && (
-                                <div className="tooltip tooltip-bottom" data-tip="Estás comprando como invitado. Solo la información del pedido será persistida.">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-warning/50 text-warning-content text-xs font-bold tracking-widest uppercase cursor-help">
-                                        <FaUserShield className="text-[10px]" />
-                                        Invitado
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                        <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
-                            Finaliza tu compra de forma rápida y segura
-                        </p>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Comprar ahora"
+                    subtitle="Finaliza tu compra de forma rápida y segura"
+                    guestTip="Estás comprando como invitado. Solo la información del pedido será persistida."
+                    isAuth={isAuth}
+                />
 
                 <section className="w-full flex flex-col lg:flex-row gap-5">
-                    {/* Left Column: Address → Payment → Product */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-5">
-                        <div ref={addressSectionRef}>
+                    {/* lg+ (desktop, idéntico al carrito): Left = Dirección → Pago →
+                        Producto → Vistos → Favoritos | Right = Resumen → Sellos →
+                        Publicidad. Mobile (<lg): ambas columnas son `contents` y
+                        cada bloque lleva `order-N lg:order-none` → Dirección → Pago →
+                        Producto → Resumen del pedido + Sellos → Favoritos →
+                        Vistos (lista <sm) → Publicidad. */}
+                    <div className="contents lg:flex lg:flex-1 lg:min-w-0 lg:flex-col lg:gap-5">
+                        <div ref={addressSectionRef} className="order-1 lg:order-none empty:contents">
                             <AddressSection
                                 isAuth={isAuth}
                                 selectedAddress={selectedAddress}
@@ -275,57 +263,75 @@ const BuyNowV3 = () => {
                             />
                         </div>
                         {!pendingOrder && (
-                            <PaymentMethod
-                                paymentProvider={paymentProvider}
-                                setPaymentProvider={setPaymentProvider}
-                            />
-                        )}
-                        <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
-                            <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
-                                <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
-                                    <FaShoppingBag className="text-primary" />
-                                    Producto (1)
-                                </h2>
+                            <div className="order-2 lg:order-none empty:contents">
+                                <PaymentMethod
+                                    paymentProvider={paymentProvider}
+                                    setPaymentProvider={setPaymentProvider}
+                                />
                             </div>
-                            <div className="flex flex-col divide-y divide-base-200">
-                                {singleItem && cardData && (
-                                    <div className="p-3 sm:p-4">
-                                        <ShoppingCartItemV3
-                                            cartItem={singleItem}
+                        )}
+                        <div className="order-3 lg:order-none">
+                            <div className="w-full rounded-2xl bg-base-100 border border-base-300 overflow-hidden">
+                                <div className="px-4 py-3 bg-base-200 border-b border-base-300 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-base-content uppercase flex items-center gap-2">
+                                        <MdShoppingBag className="text-primary" />
+                                        Producto (1)
+                                    </h2>
+                                </div>
+                                <div className="flex flex-col divide-y divide-base-200">
+                                    {singleItem && cardData && (
+                                        <CartItemRow
+                                            item={singleItem}
                                             cardData={cardData}
-                                            stockLimit={cardData.version.stock ?? 0}
-                                            onRemoveItem={() => { }}
-                                            onUpdateQty={(item) => handleQuantityChange(item.quantity)}
                                             isAuth={isAuth}
                                             isBuyNow
+                                            onUpdateQty={(item) => handleQuantityChange(item.quantity)}
+                                            onRemoveItem={() => { }}
                                         />
+                                    )}
+                                    <div className="px-4 py-3 bg-base-200 flex items-center justify-between">
+                                        <span className="text-sm text-base-content/60">Subtotal (1 producto)</span>
+                                        <span className="text-base sm:text-lg font-extrabold text-base-content">
+                                            ${data.resume?.itemsSubtotal || "0.00"}
+                                        </span>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         </div>
-                        <RecentlyViewed excludeSkus={[currentSku]} />
-                        <FavoritesSectionV3 />
+                        {/* DOM en este orden para desktop; en mobile Favoritos(6) → Vistos(7) */}
+                        <div className="order-7 lg:order-none empty:contents">
+                            <RecentlyViewed excludeSkus={[currentSku]} mobileList />
+                        </div>
+                        <div className="order-6 lg:order-none empty:contents">
+                            <FavoritesSectionV3 />
+                        </div>
                     </div>
 
                     {/* Right Column: Summary + Trust Badges */}
-                    <div className="w-full lg:w-80 xl:w-96 shrink-0 flex flex-col gap-4">
-                        <OrderSummary
-                            allItems={singleItem ? [singleItem] : []}
-                            handleCart={{ data }}
-                            destination={destination}
-                            couponCode={couponCode}
-                            setCouponCode={setCouponCode}
-                            orderLoading={orderLoading}
-                            handleCreateOrder={handleCreateOrder}
-                            error={error}
-                            isAuth={isAuth}
-                            isSubmitDisabled={pendingOrder ? false : isSubmitDisabled}
-                            pendingOrder={pendingOrder}
-                            onPendingPayment={handlePendingPayment}
-                            onOpenAddress={handleOpenAddress}
-                        />
-                        <TrustBadgesV3 />
-                        <SideAdBanner />
+                    <div className="contents lg:flex lg:w-80 xl:w-96 shrink-0 lg:flex-col lg:gap-4">
+                        <div className="order-4 lg:order-none empty:contents">
+                            <OrderSummary
+                                allItems={singleItem ? [singleItem] : []}
+                                handleCart={{ data }}
+                                destination={destination}
+                                couponCode={couponCode}
+                                setCouponCode={setCouponCode}
+                                orderLoading={orderLoading}
+                                handleCreateOrder={handleCreateOrder}
+                                error={error}
+                                isAuth={isAuth}
+                                isSubmitDisabled={pendingOrder ? false : isSubmitDisabled}
+                                pendingOrder={pendingOrder}
+                                onPendingPayment={handlePendingPayment}
+                                onOpenAddress={handleOpenAddress}
+                            />
+                        </div>
+                        <div className="order-4 lg:order-none empty:contents">
+                            <TrustBadgesV3 />
+                        </div>
+                        <div className="order-8 lg:order-none empty:contents">
+                            <SideAdBanner />
+                        </div>
                     </div>
                 </section>
             </div>
