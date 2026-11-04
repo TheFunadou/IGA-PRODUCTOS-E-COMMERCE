@@ -1,4 +1,28 @@
+import type { DragEvent as ReactDragEvent } from "react";
 import type { ProductVersionCardType, ProductVersionDetailType } from "./ProductTypes";
+
+/**
+ * Devuelve la URL absoluta de una ruta interna de la app.
+ * Requerido para construir el payload de drag & drop (dataTransfer).
+ * @example getAbsoluteAppUrl("/tienda/cascos/casco-iga/iga-001") => "https://sitio.com/tienda/cascos/casco-iga/iga-001"
+ */
+export const getAbsoluteAppUrl = (path: string): string =>
+    new URL(path, window.location.origin).href;
+
+/**
+ * Escribe la URL del detalle del producto en el payload de arrastre.
+ * Así, al soltar la tarjeta sobre la barra de pestañas del navegador se abre
+ * el detalle del producto en vez de la imagen.
+ */
+export const setProductLinkDragData = (
+    e: ReactDragEvent<HTMLElement>,
+    detailUrl: string
+) => {
+    const url = getAbsoluteAppUrl(detailUrl);
+    e.dataTransfer.setData("text/uri-list", url);
+    e.dataTransfer.setData("text/plain", url);
+    e.dataTransfer.effectAllowed = "copyLink";
+};
 
 export const extractLinkID = (link: string): string | null => {
     const match = link.match(/\/file\/d\/([^/]+)\//);

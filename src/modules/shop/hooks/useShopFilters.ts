@@ -1,114 +1,134 @@
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo, type Dispatch, type SetStateAction } from "react";
 import useDebounce from "../../../global/hooks/useDebounce";
 import { useDebounceCallback } from "../../../global/hooks/useDebounceCallback";
-import type { colorLine, PV3Sort, PV3SortField } from "../../products/ProductTypes";
+import type { colorLine, PV3SortField } from "../../products/ProductTypes";
+import { useShopSessionStore } from "../states/shopSessionStore";
 
 export type SortDirection = "asc" | "desc";
 
 const TAG_DEBOUNCE_MS = 1000;
 
 export function useShopFilters() {
-    const [sorts, setSortsState] = useState<PV3Sort>({});
-    const [favoriteCheck, setFavoriteCheck] = useState<boolean>(false);
-    const [offerCheck, setOfferCheck] = useState<boolean>(false);
-    const [stockCheck, setStockCheck] = useState<boolean>(false);
-    const [ratingFilter, setRatingFilter] = useState<number | undefined>(undefined);
-    const [colorLineFilter, setColorLineFilter] = useState<colorLine | undefined>(undefined);
-    const [skuFilter, setSkuFilterState] = useState<string[] | undefined>(undefined);
-    const [localPriceRange, setLocalPriceRange] = useState<{ min: string; max: string }>({ min: "", max: "" });
-    const [priceRange, setPriceRange] = useState<{ min: number; max: number } | undefined>(undefined);
+    const sorts = useShopSessionStore((s) => s.sorts);
+    const favoriteCheck = useShopSessionStore((s) => s.favoriteCheck);
+    const offerCheck = useShopSessionStore((s) => s.offerCheck);
+    const stockCheck = useShopSessionStore((s) => s.stockCheck);
+    const ratingFilter = useShopSessionStore((s) => s.ratingFilter);
+    const colorLineFilter = useShopSessionStore((s) => s.colorLineFilter);
+    const skuFilter = useShopSessionStore((s) => s.skuFilter);
+    const localPriceRange = useShopSessionStore((s) => s.localPriceRange);
+    const priceRange = useShopSessionStore((s) => s.priceRange);
+    const pendingTagIds = useShopSessionStore((s) => s.pendingTagIds);
+    const tagNameFilter = useShopSessionStore((s) => s.tagNameFilter);
+    const patch = useShopSessionStore((s) => s.patch);
 
     // Tags: selección inmediata en UI (pending) + consulta diferida 1000ms
-    const [pendingTagIds, setPendingTagIds] = useState<string[]>([]);
     const debouncedTagIds = useDebounce(pendingTagIds, TAG_DEBOUNCE_MS);
     const isTagDebouncing = JSON.stringify(pendingTagIds) !== JSON.stringify(debouncedTagIds);
 
-    // Nombres de tag aplicados desde fuera de la tienda (MoreAbout): efecto inmediato
-    const [tagNameFilter, setTagNameFilter] = useState<string[]>([]);
+    /** Mantiene la firma de `useState` para los inputs de precio (valores y updater). */
+    const setLocalPriceRange: Dispatch<SetStateAction<{ min: string; max: string }>> = useCallback(
+        (value) => {
+            const prev = useShopSessionStore.getState().localPriceRange;
+            const next = typeof value === "function" ? value(prev) : value;
+            patch({ localPriceRange: next });
+        },
+        [patch]
+    );
 
     const setSortDirection = useCallback((field: PV3SortField, dir?: SortDirection) => {
-        setSortsState((prev) => {
-            if (!dir) {
-                if (!(field in prev)) return prev;
-                const next = { ...prev };
-                delete next[field];
-                return next;
-            }
-            if (prev[field] === dir) return prev;
-            return { ...prev, [field]: dir };
-        });
-    }, []);
+        const prev = useShopSessionStore.getState().sorts;
+        if (!dir) {
+            if (!(field in prev)) return;
+            const next = { ...prev };
+            delete next[field];
+            patch({ sorts: next });
+            return;
+        }
+        if (prev[field] === dir) return;
+        patch({ sorts: { ...prev, [field]: dir } });
+    }, [patch]);
 
     const setFavoriteFilter = useDebounceCallback((checked: boolean) => {
-        setFavoriteCheck(checked);
+        patch({ favoriteCheck: checked });
     }, 250);
 
     const setOfferFilter = useDebounceCallback((checked: boolean) => {
-        setOfferCheck(checked);
+        patch({ offerCheck: checked });
     }, 250);
 
     const setStockFilter = useDebounceCallback((checked: boolean) => {
-        setStockCheck(checked);
+        patch({ stockCheck: checked });
     }, 250);
 
     const setRating = useDebounceCallback((rating?: number) => {
-        setRatingFilter(rating);
+        patch({ ratingFilter: rating });
     }, 250);
 
     const setColorLine = useDebounceCallback((value: string) => {
         const val = value === "" ? undefined : (value as colorLine);
-        setColorLineFilter(val);
+        patch({ colorLineFilter: val });
     }, 250);
 
     const setSkuFilter = useDebounceCallback((skus?: string[]) => {
-        setSkuFilterState(skus && skus.length > 0 ? skus : undefined);
+        patch({ skuFilter: skus && skus.length > 0 ? skus : undefined });
     }, 250);
 
     const applyPriceRange = useCallback(() => {
         const min = localPriceRange.min ? parseFloat(localPriceRange.min) : undefined;
         const max = localPriceRange.max ? parseFloat(localPriceRange.max) : undefined;
         if (!min && !max) {
-            setPriceRange(undefined);
+            patch({ priceRange: undefined });
             return;
         }
         if (priceRange && priceRange.min === min && priceRange.max === max) return;
-        setPriceRange({ min: min ?? 0, max: max ?? 0 });
-    }, [localPriceRange, priceRange]);
+        patch({ priceRange: { min: min ?? 0, max: max ?? 0 } });
+    }, [localPriceRange, priceRange, patch]);
 
     const clearPriceRange = useCallback(() => {
-        setLocalPriceRange({ min: "", max: "" });
-        setPriceRange(undefined);
-    }, []);
+        patch({ localPriceRange: { min: "", max: "" }, priceRange: undefined });
+    }, [patch]);
 
     const toggleTag = useCallback((tagId: string) => {
-        setPendingTagIds((prev) =>
-            prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-        );
-    }, []);
+        const prev = useShopSessionStore.getState().pendingTagIds;
+        patch({
+            pendingTagIds: prev.includes(tagId)
+                ? prev.filter((id) => id !== tagId)
+                : [...prev, tagId],
+        });
+    }, [patch]);
 
     const clearTags = useCallback(() => {
-        setPendingTagIds([]);
-    }, []);
+        patch({ pendingTagIds: [] });
+    }, [patch]);
+
+    /** Reemplaza los ids de tag sin pasar por el debounce (poda de datos restaurados). */
+    const replaceTags = useCallback((tagIds: string[]) => {
+        const prev = useShopSessionStore.getState().pendingTagIds;
+        if (prev.length === tagIds.length && prev.every((id) => tagIds.includes(id))) return;
+        patch({ pendingTagIds: tagIds });
+    }, [patch]);
 
     /** Reemplaza los nombres de tag externos (MoreAbout → tienda). */
     const applyTagNames = useCallback((names: string[]) => {
-        setTagNameFilter(names.map((name) => name.trim()).filter(Boolean));
-    }, []);
+        patch({ tagNameFilter: names.map((name) => name.trim()).filter(Boolean) });
+    }, [patch]);
 
     /** Quita un nombre de tag externo (badge con X). */
     const removeTagName = useCallback((name: string) => {
-        setTagNameFilter((prev) => prev.filter((n) => n !== name));
-    }, []);
+        const prev = useShopSessionStore.getState().tagNameFilter;
+        patch({ tagNameFilter: prev.filter((n) => n !== name) });
+    }, [patch]);
 
     /** Quita un filtro aplicado por su clave (para los badges con X). */
     const removeFilter = useCallback(
         (key: "favorite" | "offer" | "stock" | "rating" | "colorLine" | "priceRange" | "sku") => {
             switch (key) {
                 case "favorite":
-                    setFavoriteCheck(false);
+                    setFavoriteFilter(false);
                     break;
                 case "offer":
-                    setOfferCheck(false);
+                    setOfferFilter(false);
                     break;
                 case "stock":
                     setStockFilter(false);
@@ -127,22 +147,25 @@ export function useShopFilters() {
                     break;
             }
         },
-        [setStockFilter, setRating, setColorLine, setSkuFilter, clearPriceRange]
+        [setStockFilter, setRating, setColorLine, setSkuFilter, setFavoriteFilter, setOfferFilter, clearPriceRange]
     );
 
+    /** Limpia solo los filtros (la categoría y la página se conservan). */
     const resetFilters = useCallback(() => {
-        setSortsState({});
-        setFavoriteCheck(false);
-        setOfferCheck(false);
-        setStockCheck(false);
-        setRatingFilter(undefined);
-        setColorLineFilter(undefined);
-        setSkuFilterState(undefined);
-        setLocalPriceRange({ min: "", max: "" });
-        setPriceRange(undefined);
-        setPendingTagIds([]);
-        setTagNameFilter([]);
-    }, []);
+        patch({
+            sorts: {},
+            favoriteCheck: false,
+            offerCheck: false,
+            stockCheck: false,
+            ratingFilter: undefined,
+            colorLineFilter: undefined,
+            skuFilter: undefined,
+            localPriceRange: { min: "", max: "" },
+            priceRange: undefined,
+            pendingTagIds: [],
+            tagNameFilter: [],
+        });
+    }, [patch]);
 
     const hasActiveSorts = Object.keys(sorts).length > 0;
 
@@ -203,6 +226,7 @@ export function useShopFilters() {
         clearPriceRange,
         toggleTag,
         clearTags,
+        replaceTags,
         applyTagNames,
         removeTagName,
         removeFilter,

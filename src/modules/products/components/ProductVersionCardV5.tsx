@@ -3,9 +3,9 @@ import type { PV3CardData, ProductVersionCardI, ProductVersionCardType } from ".
 import { useFavorite } from "../hooks/useProductFavorites";
 import { useEffect, useMemo, useState } from "react";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
-import { formatPrice, makeSlug } from "../Helpers";
+import { formatPrice, makeSlug, setProductLinkDragData } from "../Helpers";
 import { IoIosHeartEmpty, IoMdHeart } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 import clsx from "clsx";
 import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
@@ -182,10 +182,8 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
        desktop conserva el tamaño fijo actual. */
     const imageBlock = (
         <div
-            role="button"
-            onClick={() => navigate(detailUrl)}
             className={clsx(
-                "relative overflow-hidden cursor-pointer group/images",
+                "relative z-[2] pointer-events-none overflow-hidden cursor-pointer",
                 isList
                     ? "w-40/100 sm:w-44 shrink-0 aspect-square self-start rounded-l-2xl flex justify-center items-center"
                     : "w-full aspect-square rounded-t-2xl"
@@ -193,10 +191,11 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
         >
             {/* Mobile version (single image) */}
             <img
-                className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105 block sm:hidden"
+                className="w-full h-full object-contain object-center transition-transform duration-500 group-hover/card:scale-105 block sm:hidden"
                 src={images[0]}
                 alt={product.product_name}
                 loading={imageLoading}
+                draggable={false}
             />
 
             {/* Desktop Version */}
@@ -210,21 +209,23 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                                 alt={`${product.product_name} - Imagen ${i + 1}`}
                                 loading={imageLoading}
                                 className="object-contain"
+                                draggable={false}
                             />
                         ))}
                     </figure>
                 ) : (
                     <img
-                        className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain object-center transition-transform duration-500 group-hover/card:scale-105"
                         src={images[0]}
                         alt={product.product_name}
                         loading={imageLoading}
+                        draggable={false}
                     />
                 )}
             </div>
 
             {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/images:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
             {/* SKU badge */}
             <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-mono font-semibold shadow-md pointer-events-none">
@@ -251,7 +252,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                     onClick={handleFavoriteBump}
                     aria-label={isFavorite ? "Desmarcar favorito" : "Marcar como favorito"}
                     className={clsx(
-                        "absolute bottom-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-200 z-10",
+                        "pointer-events-auto absolute bottom-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-200 z-10",
                         "hover:scale-110 active:scale-95",
                         isDark ? "bg-black/40 hover:bg-black/60" : "bg-white/60 hover:bg-white/90"
                     )}
@@ -272,7 +273,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
        Desktop: comportamiento actual (máx. 4 + contador "+N", altura fija). */
     const tagsBlock = (
         <>
-            <div className="flex gap-1.5 mt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
+            <div className="pointer-events-auto flex gap-1.5 mt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
                 {sortedTags.map((tag) => (
                     <span
                         key={tag.id}
@@ -340,7 +341,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                             type="button"
                             onClick={(e) => handleColorClick(e, parent.sku)}
                             className={clsx(
-                                "shrink-0 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
+                                "pointer-events-auto shrink-0 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
                                 isList ? "w-6 h-6" : "w-4 h-4",
                                 sku === parent.sku.toLowerCase() && "ring-1 ring-primary ring-offset-1 scale-110"
                             )}
@@ -359,7 +360,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                                 type="button"
                                 onClick={(e) => handleColorClick(e, parent.sku)}
                                 className={clsx(
-                                    "w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
+                                    "pointer-events-auto w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
                                     sku === parent.sku.toLowerCase() && "ring-1 ring-primary ring-offset-1 scale-110"
                                 )}
                                 style={{ backgroundColor: parent.color_code }}
@@ -368,7 +369,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                         ))}
                         {extraParentsCount > 0 && (
                             <span
-                                className="text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
+                                className="pointer-events-auto text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
                                 onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
                             >
                                 + {extraParentsCount} más...
@@ -458,7 +459,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                     onClick={() => { handleSetBuyNow() }}
                     aria-label="Comprar ahora"
                     className={clsx(
-                        "group/btn h-9 sm:h-10 rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97]",
+                        "pointer-events-auto group/btn h-9 sm:h-10 rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97]",
                         "inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm w-full",
                         "shadow-sm hover:shadow-md",
                         "text-white bg-blue-950 hover:bg-blue-900",
@@ -477,7 +478,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                     onClick={() => handleAddItem()}
                     aria-label="Agregar al carrito"
                     className={clsx(
-                        "group/cart h-9 sm:h-10 w-full rounded-xl font-bold tracking-wide",
+                        "pointer-events-auto group/cart h-9 sm:h-10 w-full rounded-xl font-bold tracking-wide",
                         "inline-flex items-center justify-center text-xs sm:text-sm",
                         "shadow-sm active:scale-[0.97] transition-all duration-300",
                         "bg-yellow-300 text-black hover:bg-yellow-600 hover:shadow-md"
@@ -494,23 +495,20 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
        del contenedor junto al 40% de la imagen (40+60=100, sin excedente). */
     const contentBlock = (
         <div className={clsx(
-            "flex flex-col gap-1.5 px-1 py-2.5 sm:px-3 min-w-0",
+            "relative z-[2] pointer-events-none flex flex-col gap-1.5 px-1 py-2.5 sm:px-3 min-w-0",
             isList && "w-60/100 sm:w-auto sm:flex-1"
         )}>
             {/* Product name */}
-            <button
-                type="button"
-                onClick={() => navigate(detailUrl)}
-                aria-label="Ver producto"
+            <span
                 className={clsx(
                     "font-bold line-clamp-2 text-left leading-tight transition-colors duration-200 w-fit max-w-full sm:text-sm",
                     isList ? "text-sm h-[35px]" : "text-xs h-[30px]",
-                    "hover:text-primary hover:underline underline-offset-2 sm:h-[35px]",
+                    "group-hover/card:text-primary group-hover/card:underline underline-offset-2 sm:h-[35px]",
                     isDark ? "text-white" : "text-gray-900"
                 )}
             >
                 {product.product_name.toUpperCase()}
-            </button>
+            </span>
 
             {/* Categoría (solo mobile en lista) */}
             {isList && (
@@ -541,7 +539,7 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
 
     return (
         <div className={clsx(
-            "relative border transition-all duration-300",
+            "group/card relative border transition-all duration-300",
             isList ? "flex flex-row rounded-2xl" : "flex flex-col rounded-2xl w-full h-auto",
             "hover:shadow-xl",
             isList ? "hover:-translate-y-0.5" : "hover:-translate-y-1",
@@ -550,6 +548,13 @@ const ProductVersionCardV5 = ({ data, viewMode = "grid", className, imageLoading
                 : "bg-gray-900 border-gray-700 shadow-md shadow-black/30",
             className
         )}>
+            <Link
+                to={detailUrl}
+                aria-label={`Ver detalles de ${product.product_name}`}
+                draggable
+                onDragStart={(e) => setProductLinkDragData(e, detailUrl)}
+                className="absolute inset-0 z-[1] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+            />
             {imageBlock}
             {contentBlock}
         </div>

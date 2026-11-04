@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { FaFire } from "react-icons/fa6";
 import type { PV3CardData } from "../../products/ProductTypes";
-import { formatPrice, makeSlug } from "../../products/Helpers";
+import { formatPrice, makeSlug, setProductLinkDragData } from "../../products/Helpers";
 import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { useThemeStore } from "../../../layouts/states/themeStore";
 
@@ -81,16 +81,15 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
     /* ── Imagen ── */
     const imageBlock = (
         <div
-            role="button"
-            onClick={() => navigate(detailUrl)}
-            className="relative overflow-hidden cursor-pointer group/images w-full aspect-square"
+            className="relative z-[2] pointer-events-none overflow-hidden cursor-pointer w-full aspect-square"
         >
             {/* Mobile version (single image) */}
             <img
-                className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105 block sm:hidden"
+                className="w-full h-full object-contain object-center transition-transform duration-500 group-hover/card:scale-105 block sm:hidden"
                 src={images[0]}
                 alt={product.product_name}
                 loading={imageLoading}
+                draggable={false}
             />
 
             {/* Desktop Version */}
@@ -104,21 +103,23 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
                                 alt={`${product.product_name} - Imagen ${i + 1}`}
                                 loading={imageLoading}
                                 className="object-contain"
+                                draggable={false}
                             />
                         ))}
                     </figure>
                 ) : (
                     <img
-                        className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain object-center transition-transform duration-500 group-hover/card:scale-105"
                         src={images[0]}
                         alt={product.product_name}
                         loading={imageLoading}
+                        draggable={false}
                     />
                 )}
             </div>
 
             {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/images:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
             {/* SKU badge */}
             <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-mono font-semibold shadow-md pointer-events-none">
@@ -194,7 +195,7 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
                     type="button"
                     onClick={(e) => handleColorClick(e, parent.sku)}
                     className={clsx(
-                        "w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
+                        "pointer-events-auto w-4 h-4 rounded-full border border-base-300 shadow-sm transition-all hover:scale-110",
                         sku === parent.sku.toLowerCase() && "ring-1 ring-primary ring-offset-1 scale-110"
                     )}
                     style={{ backgroundColor: parent.color_code }}
@@ -203,7 +204,7 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
             ))}
             {extraParentsCount > 0 && (
                 <span
-                    className="text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
+                    className="pointer-events-auto text-[10px] sm:text-xs text-primary underline underline-offset-2 cursor-pointer ml-1 hover:opacity-70"
                     onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
                 >
                     + {extraParentsCount} más...
@@ -246,29 +247,33 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
 
     return (
         <div className={clsx(
-            "relative overflow-hidden border transition-all duration-300",
+            "group/card relative overflow-hidden border transition-all duration-300",
             "flex flex-col rounded-2xl w-full h-auto hover:shadow-xl hover:-translate-y-1",
             !isDark
                 ? "bg-white border-gray-200 shadow-md shadow-gray-200/60"
                 : "bg-gray-900 border-gray-700 shadow-md shadow-black/30",
             className
         )}>
+            <Link
+                to={detailUrl}
+                aria-label={`Ver detalles de ${product.product_name}`}
+                draggable
+                onDragStart={(e) => setProductLinkDragData(e, detailUrl)}
+                className="absolute inset-0 z-[1] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+            />
             {imageBlock}
 
             {/* Contenido */}
-            <div className="flex flex-col gap-1.5 px-3 py-2.5 min-w-0 flex-1">
-                <button
-                    type="button"
-                    onClick={() => navigate(detailUrl)}
-                    aria-label="Ver producto"
+            <div className="relative z-[2] pointer-events-none flex flex-col gap-1.5 px-3 py-2.5 min-w-0 flex-1">
+                <span
                     className={clsx(
                         "font-bold line-clamp-2 text-left leading-tight transition-colors duration-200 text-xs sm:text-sm w-fit max-w-full",
-                        "hover:text-primary hover:underline underline-offset-2",
+                        "group-hover/card:text-primary group-hover/card:underline underline-offset-2",
                         isDark ? "text-white" : "text-gray-900"
                     )}
                 >
                     {product.product_name.toUpperCase()}
-                </button>
+                </span>
 
                 {ratingBlock}
                 {tagsBlock}
@@ -279,14 +284,13 @@ const SelectedHelmetCard = ({ data, className, imageLoading }: Props) => {
                 </div>
 
                 {/* Único CTA: ver más detalles */}
-                <button
-                    type="button"
-                    onClick={() => navigate(detailUrl)}
+                <Link
+                    to={detailUrl}
                     aria-label="Ver más detalles"
-                    className="h-9 sm:h-10 w-full rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97] inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-sm hover:shadow-md text-white bg-blue-950 hover:bg-blue-900 mt-1"
+                    className="pointer-events-auto h-9 sm:h-10 w-full rounded-xl font-bold tracking-wide transition-all duration-300 active:scale-[0.97] inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-sm hover:shadow-md text-white bg-blue-950 hover:bg-blue-900 mt-1"
                 >
                     Ver más detalles
-                </button>
+                </Link>
             </div>
         </div>
     );

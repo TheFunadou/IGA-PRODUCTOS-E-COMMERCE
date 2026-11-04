@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet, Navigate, useNavigate, useParams } from "react-router-dom"
+import { createBrowserRouter, RouterProvider, Outlet, Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { lazy, Suspense, useEffect, useState } from "react"
 import type { ComponentType } from "react"
 import './App.css'
@@ -21,7 +21,6 @@ import ScrollToTop from "./global/components/ScrollToTop"
 import { usePageTracking } from "./modules/analytics/usePageTracking";
 import PostHogConsentSync from "./modules/analytics/PostHogConsentSync";
 import PostHogIdentitySync from "./modules/analytics/PostHogIdentitySync";
-import { scrollToTienda } from "./modules/shop/utils/scrollToTienda";
 
 // Wrapper lazy: los providers de Google solo se cargan en /iniciar-sesion
 const AuthProviders = lazy(() => import("./modules/auth/components/AuthProviders"));
@@ -106,14 +105,19 @@ function ProductDetailRedirect() {
     return <Navigate to={`/tienda/${categoria}/${slug}/${sku}`} replace />;
 }
 
-// La tienda está embebida en el Home (/#tienda); /tienda redirige al Home con scroll a la sección
+// La tienda está embebida en el Home (/#tienda); /tienda redirige al Home
+// conservando el querystring (?category=...) y pidiendo la restauración del scroll.
 function ShopRedirect() {
     const navigate = useNavigate();
+    const { search } = useLocation();
+
     useEffect(() => {
-        navigate("/", { replace: true });
-        const timer = window.setTimeout(() => scrollToTienda(), 300);
-        return () => window.clearTimeout(timer);
-    }, [navigate]);
+        navigate(
+            { pathname: "/", search },
+            { replace: true, state: { restoreShopScroll: true } }
+        );
+    }, [navigate, search]);
+
     return null;
 }
 
