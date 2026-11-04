@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useFetchMainCategories } from "../../categories/hooks/useFetchCategories";
 import type { CategoryType } from "../../categories/CategoriesTypes";
+import { useShopSessionStore } from "../states/shopSessionStore";
 
 export function useShopNavigation() {
-    const [selectedCategory, setSelectedCategory] = useState<CategoryType | undefined>(undefined);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const selectedCategory = useShopSessionStore((s) => s.selectedCategory);
+    const currentPage = useShopSessionStore((s) => s.currentPage);
+    const patch = useShopSessionStore((s) => s.patch);
 
     const {
         data: categories,
@@ -14,21 +16,23 @@ export function useShopNavigation() {
     } = useFetchMainCategories();
 
     const selectCategory = useCallback((category: CategoryType) => {
-        setSelectedCategory((prev) => {
-            if (prev?.uuid === category.uuid) return prev;
-            return { uuid: category.uuid, name: category.name };
+        const prev = useShopSessionStore.getState().selectedCategory;
+        patch({
+            selectedCategory:
+                prev?.uuid === category.uuid
+                    ? prev
+                    : { uuid: category.uuid, name: category.name },
+            currentPage: 1,
         });
-        setCurrentPage(1);
-    }, []);
+    }, [patch]);
 
     const clearSelection = useCallback(() => {
-        setSelectedCategory(undefined);
-        setCurrentPage(1);
-    }, []);
+        patch({ selectedCategory: undefined, currentPage: 1 });
+    }, [patch]);
 
     const setPage = useCallback((page: number) => {
-        setCurrentPage(page);
-    }, []);
+        patch({ currentPage: page });
+    }, [patch]);
 
     return {
         categories,

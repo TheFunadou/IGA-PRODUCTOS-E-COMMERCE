@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigationType, useSearchParams } from "react-router-dom";
 import { useShopNavigation } from "../../hooks/useShopNavigation";
 import { useShopFilters } from "../../hooks/useShopFilters";
 import { useShopProducts } from "../../hooks/useShopProducts";
@@ -13,6 +13,13 @@ import ShopProductGrid from "../../components/ShopProductGrid";
 import ShopEmptyState from "../../components/ShopEmptyState";
 import ShopBackToTop from "../../components/ShopBackToTop";
 import { scrollToTienda } from "../../utils/scrollToTienda";
+import { findCategoryByParam } from "../../utils/categoryMatch";
+import {
+    clearShopScroll,
+    peekShopScroll,
+    rememberShopScroll,
+    scrollToYWithRetry,
+} from "../../utils/shopScrollMemory";
 import { useShopExternalTagsStore } from "../../states/shopExternalTagsStore";
 import { useCartTagStore } from "../../../shopping/stores/cartTagStore";
 import PaginationComponent from "../../../../global/components/PaginationComponent";
@@ -54,6 +61,21 @@ export const ShopV3 = () => {
 
     const { isAuth } = useAuthStore();
     const { theme } = useThemeStore();
+
+    /* ── Memoria de scroll: se restaura al volver al Home ── */
+    const location = useLocation();
+    const navigationType = useNavigationType();
+    const explicitRestoreRequested = Boolean(
+        (location.state as { restoreShopScroll?: boolean } | null)?.restoreShopScroll
+    );
+    const wantsShopScrollRestore = useRef(
+        navigationType === "POP" || explicitRestoreRequested
+    );
+    const wantsSectionFallback = useRef(explicitRestoreRequested);
+    const pendingRestoreRef = useRef<number | "section" | null>(null);
+    const restoreConsumedRef = useRef(false);
+    const restoreStartedRef = useRef(false);
+    const cancelScrollRestoreRef = useRef<(() => void) | null>(null);
 
     const navigation = useShopNavigation();
     const filters = useShopFilters();
@@ -122,6 +144,8 @@ export const ShopV3 = () => {
         selectedCategory: navigation.selectedCategory,
         tagGroups,
         tagNameFilter: filters.tagNameFilter,
+        // Evita lanzar una consulta sin tags mientras se restauran los tags de la categoría.
+        enabled: filters.pendingTagIds.length === 0 || !tagsLoading,
     });
 
     /* ── Handlers ── */
@@ -130,6 +154,12 @@ export const ShopV3 = () => {
     };
 
     const handleSelectCategory = (category: { uuid: string; name: string }) => {
+        // La elección manual descarta cualquier restauración de scroll pendiente.
+        pendingRestoreRef.current = null;
+        restoreStartedRef.current = true;
+        cancelScrollRestoreRef.current?.();
+        cancelScrollRestoreRef.current = null;
+
         navigation.selectCategory(category);
         filters.clearTags();
         scrollToTienda();
@@ -163,23 +193,85 @@ export const ShopV3 = () => {
         saveViewMode(mode);
     };
 
-    /* Reset página al cambiar cualquier filtro o al terminar el debounce de tags */
-    useEffect(() => {
-        if (navigation.currentPage !== 1) {
-            navigation.setPage(1);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        filters.sorts,
+    /* Reset de página al cambiar filtros (no en el montaje: así se conserva la
+       página restaurada). Se compara una firma en ref para ser inmune al doble
+       efecto de StrictMode. */
+    const filterSignature = [
+        JSON.stringify(filters.sorts),
         filters.favoriteCheck,
         filters.offerCheck,
         filters.stockCheck,
-        filters.ratingFilter,
-        filters.colorLineFilter,
-        filters.skuFilter,
-        filters.priceRange,
-        filters.debouncedTagIds,
-        filters.tagNameFilter,
+        filters.ratingFilter ?? "",
+        filters.colorLineFilter ?? "",
+        JSON.stringify(filters.skuFilter ?? []),
+        JSON.stringify(filters.priceRange ?? null),
+        JSON.stringify(filters.debouncedTagIds),
+        JSON.stringify(filters.tagNameFilter),
+    ].join("|");
+    const lastFilterSignatureRef = useRef(filterSignature);
+
+    useEffect(() => {
+        if (filterSignature === lastFilterSignatureRef.current) return;
+        lastFilterSignatureRef.current = filterSignature;
+        if (navigation.currentPage !== 1) navigation.setPage(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filterSignature, navigation.currentPage, navigation.setPage]);
+
+    /* ── Guardar la posición de scroll al salir del Home ── */
+    const lastScrollYRef = useRef(0);
+    useEffect(() => {
+        const trackScroll = () => {
+            lastScrollYRef.current = window.scrollY;
+        };
+        trackScroll();
+
+        const handlePageHide = () => rememberShopScroll(lastScrollYRef.current);
+
+        window.addEventListener("scroll", trackScroll, { passive: true });
+        window.addEventListener("pagehide", handlePageHide);
+        return () => {
+            window.removeEventListener("scroll", trackScroll);
+            window.removeEventListener("pagehide", handlePageHide);
+            // Se usa el último valor observado, no window.scrollY: ScrollToTop
+            // puede haber movido la ventana en el mismo commit de navegación.
+            rememberShopScroll(lastScrollYRef.current);
+        };
+    }, []);
+
+    /* Decidir una sola vez al montar si hay que restaurar el scroll. */
+    useEffect(() => {
+        if (restoreConsumedRef.current) return;
+        restoreConsumedRef.current = true;
+        if (!wantsShopScrollRestore.current) return;
+
+        const y = peekShopScroll();
+        if (y !== null) pendingRestoreRef.current = y;
+        else if (wantsSectionFallback.current) pendingRestoreRef.current = "section";
+    }, []);
+
+    /* Restaurar cuando el layout ya tiene su altura definitiva. */
+    useEffect(() => {
+        const pending = pendingRestoreRef.current;
+        if (pending === null || restoreStartedRef.current) return;
+        if (navigation.categoriesLoading || tagsLoading) return;
+        if (products.isLoading) return;
+        if (!products.data && !products.error) return;
+
+        restoreStartedRef.current = true;
+        cancelScrollRestoreRef.current?.();
+        cancelScrollRestoreRef.current = null;
+
+        if (pending === "section") {
+            scrollToTienda();
+            return;
+        }
+        cancelScrollRestoreRef.current = scrollToYWithRetry(pending);
+    }, [
+        navigation.categoriesLoading,
+        tagsLoading,
+        products.isLoading,
+        products.data,
+        products.error,
     ]);
 
     /* ── Filtro por nombres de tag solicitado desde fuera (MoreAbout) ──
@@ -189,6 +281,11 @@ export const ShopV3 = () => {
 
     useEffect(() => {
         if (!pendingExternalTags || pendingExternalTags.length === 0) return;
+        pendingRestoreRef.current = null;
+        restoreStartedRef.current = true;
+        cancelScrollRestoreRef.current?.();
+        cancelScrollRestoreRef.current = null;
+        clearShopScroll();
         navigation.clearSelection();
         filters.resetFilters();
         filters.applyTagNames(pendingExternalTags);
@@ -203,30 +300,67 @@ export const ShopV3 = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /* Scroll a #tienda cuando termina el debounce de etiquetas (salta el montaje inicial) */
+    /* Scroll a #tienda cuando termina el debounce de etiquetas (no en el montaje). */
+    const lastTagScrollSignatureRef = useRef(JSON.stringify(filters.debouncedTagIds));
     useEffect(() => {
+        const signature = JSON.stringify(filters.debouncedTagIds);
+        if (signature === lastTagScrollSignatureRef.current) return;
+        lastTagScrollSignatureRef.current = signature;
         if (filters.debouncedTagIds.length === 0) return;
+        cancelScrollRestoreRef.current?.();
+        cancelScrollRestoreRef.current = null;
         scrollToTienda();
     }, [filters.debouncedTagIds]);
 
-    /* ── Categoría solicitada desde fuera (cart → home con ?category=uuid) ──
-       Selecciona la categoría, renderiza sus tags en el sidebar y hace scroll a la tienda. */
+    /* ── Categoría solicitada desde fuera (nav/carrito/breadcrumb → ?category=...) ──
+       Acepta uuid, nombre o slug. Si es la misma categoría, conserva filtros y página. */
     useEffect(() => {
         if (!categoryParam) return;
         if (!navigation.categories || navigation.categories.length === 0) return;
 
-        const category =
-            navigation.categories.find((c) => c.uuid === categoryParam) ??
-            navigation.categories.find(
-                (c) => c.name.toLowerCase() === categoryParam.toLowerCase()
-            );
-
+        const category = findCategoryByParam(categoryParam, navigation.categories);
+        setSearchParams({}, { replace: true });
         if (!category) return;
+        if (navigation.selectedCategory?.uuid === category.uuid) return;
+
+        // Otra categoría: se descarta el scroll pendiente y se empieza de cero.
+        pendingRestoreRef.current = null;
+        restoreStartedRef.current = true;
+        cancelScrollRestoreRef.current?.();
+        cancelScrollRestoreRef.current = null;
+        clearShopScroll();
+
+        filters.resetFilters();
         navigation.selectCategory(category);
         scrollToTienda();
-        setSearchParams({}, { replace: true });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [categoryParam, navigation.categories]);
+
+    /* ── Poda de datos persistidos que ya no existen ── */
+    useEffect(() => {
+        if (!navigation.selectedCategory || navigation.categoriesLoading) return;
+        if (!navigation.categories) return;
+
+        const exists = navigation.categories.some(
+            (category) => category.uuid === navigation.selectedCategory?.uuid
+        );
+        if (!exists) {
+            navigation.clearSelection();
+            filters.clearTags();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigation.selectedCategory, navigation.categories, navigation.categoriesLoading]);
+
+    useEffect(() => {
+        if (!navigation.selectedCategory || tagsLoading) return;
+
+        const validTagIds = new Set(categoryTags.map((tag) => tag.id));
+        const nextTagIds = filters.pendingTagIds.filter((id) => validTagIds.has(id));
+        if (nextTagIds.length !== filters.pendingTagIds.length) {
+            filters.replaceTags(nextTagIds);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigation.selectedCategory, tagsLoading, categoryTags, filters.pendingTagIds]);
 
     /* ── Track tag names for cart recommendations ── */
     const addCartTags = useCartTagStore((s) => s.addTags);

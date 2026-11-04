@@ -74,7 +74,6 @@ const ProductVersionDetailV3 = () => {
         <div className="w-full bg-base-100 min-h-screen pb-16 overflow-x-clip">
             {/* ══ BARRA SUPERIOR ════════════════════════════════════════════ */}
             <BreadcrumbBar
-                categorySlug={categorySlug}
                 categoryName={data.category.name}
                 productName={data.name}
             />
