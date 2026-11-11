@@ -62,7 +62,7 @@ const ProductGallery = ({ data, selectedMedia, sortedMedia, onSelectMedia, galle
                 /* Thumbnails: on mobile (<lg) inline with horizontal scroll (as
                    now); on web (lg+) flex-wrap so every image fits in one or
                    several rows without scrolling. */
-                <div className="flex gap-2.5 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex flex-nowrap gap-2.5 p-2 overflow-x-auto lg:flex-wrap lg:overflow-x-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {sortedMedia.map((media, index) => (
                         <button
                             key={`${media.url}-${index}`}
