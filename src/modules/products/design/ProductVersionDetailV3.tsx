@@ -27,15 +27,15 @@ import DesktopPurchaseColumn from "../components/detail-v3/desktop/DesktopPurcha
 
 import SimilarProducts from "../components/detail-v3/SimilarProducts";
 
-/* Página de detalle de producto V3: solo composición. Toda la lógica vive en
-   useProductVersionDetailV3Controller; los bloques visuales están separados en
-   subcomponentes shared / mobile / desktop bajo components/detail-v3.
+/* V3 product detail page: composition only. All the logic lives in
+   useProductVersionDetailV3Controller; the visual blocks are split into
+   shared / mobile / desktop subcomponents under components/detail-v3.
 
-   Garantía anti-desborde horizontal (X): la raíz lleva `overflow-x-clip` como
-   red final (no crea scroll container, no rompe los `sticky`), los hijos de
-   flex/grid que contienen texto llevan `min-w-0`, el texto dinámico de BD lleva
-   `break-words`, y cada fila horizontal es un scroller `overflow-x-auto` con
-   interno `w-max`. */
+   Horizontal overflow guarantee (X): the root uses `overflow-x-clip` as the
+   final safety net (it does not create a scroll container and does not break
+   the `sticky` elements), flex/grid children containing text use `min-w-0`,
+   dynamic DB text uses `break-words`, and each horizontal row is an
+   `overflow-x-auto` scroller with an inner `w-max`. */
 const ProductVersionDetailV3 = () => {
     const c = useProductVersionDetailV3Controller();
 
@@ -65,14 +65,14 @@ const ProductVersionDetailV3 = () => {
         </div>
     );
 
-    /* SKU y rating reutilizados: el SKU en mobile ahora es un badge sobre la imagen
-       y el rating va bajo el nombre; en desktop ambos quedan en la columna de info */
+    /* Reused SKU and rating: on mobile the SKU is now a badge over the image
+       and the rating goes below the name; on desktop both stay in the info column */
     const skuBadgeBlock = <SkuBadgeBlock sku={data.sku} />;
     const ratingBlock = <RatingBlock reviewsResume={reviewsResume} />;
 
     return (
         <div className="w-full bg-base-100 min-h-screen pb-16 overflow-x-clip">
-            {/* ══ BARRA SUPERIOR ════════════════════════════════════════════ */}
+            {/* ══ TOP BAR ═══════════════════════════════════════════════════ */}
             <BreadcrumbBar
                 categorySlug={categorySlug}
                 categoryName={data.category.name}
@@ -80,18 +80,18 @@ const ProductVersionDetailV3 = () => {
             />
 
             <div className="max-w-[90rem] mx-auto px-2 sm:px-6 lg:px-8 pt-5">
-                {/* Título + tags + rating (mobile) */}
+                {/* Title + tags + rating (mobile) */}
                 <MobileTitleSection name={data.name} tags={sortedTags} ratingBlock={ratingBlock} />
 
-                {/* Tags (solo desktop, arriba del layout como hasta ahora) */}
+                {/* Tags (desktop only, above the layout as before) */}
                 <DesktopTags tags={sortedTags} />
 
-                {/* ══ SECCIÓN PRINCIPAL ═════════════════════════════════════ */}
-                {/* gap-y-2 en mobile: la PurchaseCard queda a ~mt-2 de la sección de versiones
-                    (único límite de fila visible en mobile: galería → info) */}
+                {/* ══ MAIN SECTION ════════════════════════════════════════════ */}
+                {/* gap-y-2 on mobile: the PurchaseCard stays at ~mt-2 from the versions section
+                    (only visible row boundary on mobile: gallery → info) */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-2 lg:gap-7">
 
-                    {/* ── Galería ── */}
+                    {/* ── Gallery ── */}
                     <div className="lg:col-span-5">
                         <ProductGallery
                             data={data}
@@ -101,7 +101,7 @@ const ProductVersionDetailV3 = () => {
                             galleryModalRef={galleryModalRef}
                         />
 
-                        {/* Versiones (mobile): debajo de la sección de imágenes */}
+                        {/* Versions (mobile): below the images section */}
                         <MobileVersionsRow
                             sortedParents={sortedParents}
                             currentSku={params.sku}
@@ -110,18 +110,18 @@ const ProductVersionDetailV3 = () => {
                         />
                     </div>
 
-                    {/* ── Info del producto ── */}
-                    {/* min-w-0 defensivo: la columna flex se contrae en vez de expandir el grid */}
+                    {/* ── Product info ── */}
+                    {/* Defensive min-w-0: the flex column shrinks instead of expanding the grid */}
                     <div className="lg:col-span-4 flex flex-col gap-5 min-w-0">
                         <DesktopInfoHeader name={data.name} skuBadgeBlock={skuBadgeBlock} ratingBlock={ratingBlock} />
 
-                        {/* Purchase card móvil */}
+                        {/* Purchase card (mobile) */}
                         <MobilePurchaseBlock {...purchaseCardProps} />
 
-                        {/* Color + ficha técnica */}
+                        {/* Color + tech sheet */}
                         <ColorSpecRow color={data.color} techSheetUrl={techSheetUrl} pdfModalRef={pdfModalRef} />
 
-                        {/* Presentaciones disponibles (solo desktop; en mobile van bajo la galería) */}
+                        {/* Available variants (desktop only; on mobile they go below the gallery) */}
                         <DesktopVersions
                             sortedParents={sortedParents}
                             currentSku={params.sku}
@@ -131,7 +131,7 @@ const ProductVersionDetailV3 = () => {
 
                         <QuickSpecsList specs={quickSpecs} />
 
-                        {/* Badges de contacto (desktop) */}
+                        {/* Contact badges (desktop) */}
                         <DesktopInfoBadges
                             productName={data.name}
                             sku={data.sku}
@@ -144,7 +144,7 @@ const ProductVersionDetailV3 = () => {
                     <DesktopPurchaseColumn {...purchaseCardProps} />
                 </div>
 
-                {/* Badges de contacto (móvil) */}
+                {/* Contact badges (mobile) */}
                 <MobileContactBadges
                     productName={data.name}
                     sku={data.sku}
@@ -152,12 +152,12 @@ const ProductVersionDetailV3 = () => {
                     stock={data.stock}
                 />
 
-                {/* ══ DETALLES + RECURSOS ═══════════════════════════════════ */}
+                {/* ══ DETAILS + RESOURCES ═════════════════════════════════════ */}
                 <TrustStrip />
 
                 <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Tabs técnicos */}
-                    {/* min-w-0 defensivo: la columna flex/grid se contrae en vez de expandir */}
+                    {/* Technical tabs */}
+                    {/* Defensive min-w-0: the flex/grid column shrinks instead of expanding */}
                     <div className="lg:col-span-7 xl:col-span-8 min-w-0">
                         <h2 className="text-xl font-black text-base-content mb-4 flex items-center gap-2.5">
                             <FaFileLines className="text-primary" /> Detalles del producto
@@ -165,7 +165,7 @@ const ProductVersionDetailV3 = () => {
                         <DetailTabs availableTabs={availableTabs} activeTab={activeTab} onSelectTab={setActiveTab} />
                     </div>
 
-                    {/* Ficha técnica, certificaciones y recursos */}
+                    {/* Tech sheet, certifications and resources */}
                     <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-3 min-w-0">
                         <ResourcesPanel
                             techSheetUrl={techSheetUrl}
@@ -176,7 +176,7 @@ const ProductVersionDetailV3 = () => {
                     </div>
                 </div>
 
-                {/* ══ RESEÑAS Y OPINIONES ═══════════════════════════════════ */}
+                {/* ══ REVIEWS AND OPINIONS ═════════════════════════════════════ */}
                 <ReviewsSection
                     reviewsResume={reviewsResume}
                     reviewsResumeLoading={reviewsResumeLoading}
@@ -195,10 +195,10 @@ const ProductVersionDetailV3 = () => {
                 />
             </div>
 
-            {/* ══ PRODUCTOS SIMILARES ════════════════════════════════════ */}
+            {/* ══ SIMILAR PRODUCTS ═════════════════════════════════════════ */}
             <SimilarProducts similarProducts={similarProducts} currentSku={params.sku} />
 
-            {/* ══ MODALES ═══════════════════════════════════════════════════ */}
+            {/* ══ MODALS ═════════════════════════════════════════════════════ */}
             <ProductVersionImageGallery
                 ref={galleryModalRef}
                 currentMedia={selectedMedia}

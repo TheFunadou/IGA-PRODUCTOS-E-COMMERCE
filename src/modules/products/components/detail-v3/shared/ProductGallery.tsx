@@ -5,9 +5,9 @@ import ImageZoomViewer from "../../ImageZoomViewer";
 import { showModal } from "../../../../../global/GlobalHelpers";
 import type { ProductVersionDetailV3I, PVDetailMedia } from "../../../ProductTypes";
 
-/* Galería de media: badge de oferta + badge SKU (mobile) + visor con zoom
-   (abre el modal de galería) + fila de miniaturas con scroll-x horizontal.
-   Cada ítem puede ser imagen o video (mediaType). */
+/* Media gallery: offer badge + SKU badge (mobile) + zoom viewer
+   (opens the gallery modal) + row of thumbnails with horizontal scroll.
+   Each item can be an image or a video (mediaType). */
 interface ProductGalleryProps {
     data: ProductVersionDetailV3I;
     selectedMedia?: PVDetailMedia;
@@ -28,8 +28,8 @@ const ProductGallery = ({ data, selectedMedia, sortedMedia, onSelectMedia, galle
                         <p className="text-xs font-extrabold text-white tracking-wide">-{data.offer.discount}%</p>
                     </div>
                 )}
-                {/* SKU (mobile): badge flotante sobre la imagen, en la esquina
-                    superior izquierda (debajo del badge de oferta si existe) */}
+                {/* SKU (mobile): floating badge over the image, in the top
+                    left corner (below the offer badge when there is one) */}
                 <div className={clsx(
                     "absolute z-10 lg:hidden px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm pointer-events-none",
                     "bg-base-content/60 text-base-100 text-[11px] font-mono font-bold tracking-wide",
@@ -38,7 +38,7 @@ const ProductGallery = ({ data, selectedMedia, sortedMedia, onSelectMedia, galle
                     {data.sku}
                 </div>
                 {isVideo ? (
-                    /* Video: se reproduce solo al seleccionarlo (autoplay muted,
+                    /* Video: plays automatically when selected (autoplay muted,
                        el usuario puede activar el sonido con los controles) */
                     <video
                         key={selectedMedia!.url}
@@ -59,6 +59,9 @@ const ProductGallery = ({ data, selectedMedia, sortedMedia, onSelectMedia, galle
             </div>
 
             {sortedMedia.length > 1 && (
+                /* Thumbnails: on mobile (<lg) inline with horizontal scroll (as
+                   now); on web (lg+) flex-wrap so every image fits in one or
+                   several rows without scrolling. */
                 <div className="flex gap-2.5 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {sortedMedia.map((media, index) => (
                         <button

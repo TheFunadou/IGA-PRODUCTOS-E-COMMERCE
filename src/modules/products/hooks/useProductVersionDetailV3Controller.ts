@@ -4,7 +4,7 @@ import { containsOffensiveLanguage, formatPrice, makeSlug } from "../Helpers";
 import { useFavorite } from "./useProductFavorites";
 import type { AddPVReviewType, PVDetailMedia } from "../ProductTypes";
 import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
-// ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
+// ROLLBACK V2: to go back to the V2 flow, change the import to: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import { useAuthStore } from "../../auth/states/authStore";
 import {
     useAddPVReview,
@@ -18,9 +18,9 @@ import { trackAddToCart, trackAddToWishlist, trackViewContent } from "../../anal
 import { phAddToCartBlocked } from "../../analytics/PostHogEvents";
 import { useRecentlyViewedStore, getTabSessionId } from "../../../global/states/recentlyViewedStore";
 
-/* Controlador de la página de detalle V3: toda la lógica (estado, handlers,
-   datos derivados) vive aquí, extraída verbatim del design original para que
-   el orquestador sea solo composición de subcomponentes. */
+/* V3 product detail page controller: all the logic (state, handlers,
+   derived data) lives here, extracted verbatim from the original design so
+   the orchestrator is just a composition of subcomponents. */
 export const useProductVersionDetailV3Controller = () => {
     const params = useParams();
     const navigate = useNavigate();
@@ -51,7 +51,7 @@ export const useProductVersionDetailV3Controller = () => {
     const { showTriggerAlert } = useTriggerAlert();
     const recentOwnerId = isAuth ? (authCustomer?.uuid ?? getTabSessionId()) : getTabSessionId();
     const addRecentSku = useRecentlyViewedStore((state) => state.addSku);
-    // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
+    // Isolated V3 flow (shopping-cart:load:v3) – deprecated V2 kept for rollback
     const { updateQtyItem } = useHandleShoppingCartV3({
         isAuth,
         authCustomer: { uuid: authCustomer?.uuid || "" },
@@ -84,8 +84,8 @@ export const useProductVersionDetailV3Controller = () => {
         initialFavoriteState: data?.isFavorite ?? false,
     });
 
-    // Datos derivados (sin estado redundante)
-    // Orden: imagen principal → resto de imágenes → videos
+    // Derived data (no redundant state)
+    // Order: main image → remaining images → videos
     const sortedMedia = useMemo(() => {
         if (!data) return [];
         const media = [...(data.media ?? [])];

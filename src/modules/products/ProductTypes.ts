@@ -184,7 +184,7 @@ export type ProductResourceI = {
 
 export type PVDetailMediaType = "image" | "video";
 
-/** Media del detalle v3: imagen o video */
+/** v3 detail media: image or video */
 export interface PVDetailMedia {
     url: string;
     mainImage: boolean;

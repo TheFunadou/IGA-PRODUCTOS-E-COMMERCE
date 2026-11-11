@@ -62,7 +62,7 @@ const ProductVersionImageGallery = ({
         if (next === 1) setPan({ x: 0, y: 0 });
     };
 
-    // Clic sobre la imagen: activa/desactiva zoom y centra en el punto clicado
+    // Click on the image: toggles the zoom on/off and centers it on the clicked point
     const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (selectedIsVideo) return;
         if (zoom > 1) {
@@ -77,7 +77,7 @@ const ProductVersionImageGallery = ({
         setPan({ x: 0, y: 0 });
     }, [zoom, selectedIsVideo]);
 
-    // Panning con mouse mientras hay zoom
+    // Panning with the mouse while zoomed
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         if (zoom <= 1) return;
         e.preventDefault();
@@ -88,11 +88,11 @@ const ProductVersionImageGallery = ({
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         if (zoom <= 1) return;
 
-        // Navegación suave solo con mover el cursor (sin click sostenido)
+        // Smooth navigation by just moving the cursor (without holding the click)
         const rect = imgContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
 
-        // Posición del cursor relativa al contenedor (0 a 1)
+        // Cursor position relative to the container (0 to 1)
         const relX = (e.clientX - rect.left) / rect.width;
         const relY = (e.clientY - rect.top) / rect.height;
 
@@ -100,13 +100,13 @@ const ProductVersionImageGallery = ({
         const maxPanX = (rect.width * (zoom - 1)) / 2;
         const maxPanY = (rect.height * (zoom - 1)) / 2;
 
-        // Mapea la posición del cursor al rango [-maxPan, +maxPan]
+        // Maps the cursor position to the [-maxPan, +maxPan] range
         const targetX = -(relX - 0.5) * 2 * maxPanX;
         const targetY = -(relY - 0.5) * 2 * maxPanY;
 
         setPan({ x: targetX, y: targetY });
 
-        // Si además tiene el botón presionado, también actualiza lastMouse para el drag
+        // If the button is also held down, it updates lastMouse for the drag
         if (isPanning) {
             const dx = e.clientX - lastMouse.x;
             const dy = e.clientY - lastMouse.y;
@@ -118,7 +118,7 @@ const ProductVersionImageGallery = ({
     const handleMouseUp = useCallback(() => setIsPanning(false), []);
     const handleMouseLeave = useCallback(() => {
         setIsPanning(false);
-        // Al salir del contenedor, centra la imagen suavemente
+        // When leaving the container, the image is smoothly centered
         setPan({ x: 0, y: 0 });
     }, []);
 
@@ -135,7 +135,7 @@ const ProductVersionImageGallery = ({
 
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mt-2">
 
-                    {/* ── GALERÍA ── */}
+                    {/* ── GALLERY ── */}
                     <section className="flex flex-col-reverse sm:flex-row gap-3 md:gap-4 flex-1 min-w-0">
 
                         {/* Thumbnails */}
@@ -170,9 +170,9 @@ const ProductVersionImageGallery = ({
                             ))}
                         </div>
 
-                        {/* Imagen principal */}
+                        {/* Main image */}
                         <div className="relative flex-1 min-w-0">
-                            {/* Contenedor con overflow hidden para el crop del zoom */}
+                            {/* Container with overflow hidden for the zoom crop */}
                             <div
                                 ref={imgContainerRef}
                                 onClick={handleImageClick}
@@ -221,13 +221,13 @@ const ProductVersionImageGallery = ({
                                     </div>
                                 )}
 
-                                {/* Contador */}
+                                {/* Counter */}
                                 <div className="absolute top-3 left-3 bg-base-content/50 text-base-100 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm pointer-events-none">
                                     {currentIndex + 1} / {media.length}
                                 </div>
                             </div>
 
-                            {/* Controles de zoom */}
+                            {/* Zoom controls */}
                             {!selectedIsVideo && (
                                 <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
                                     <button
@@ -258,7 +258,7 @@ const ProductVersionImageGallery = ({
                                 </div>
                             )}
 
-                            {/* Flechas navegación */}
+                            {/* Navigation arrows */}
                             {media.length > 1 && (
                                 <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none">
                                     <button
@@ -280,7 +280,7 @@ const ProductVersionImageGallery = ({
                         </div>
                     </section>
 
-                    {/* ── INFO DEL PRODUCTO ── */}
+                    {/* ── PRODUCT INFO ── */}
                     <section className="flex flex-col gap-4 md:w-56 lg:w-64 xl:w-72 flex-shrink-0">
 
                         <div>
