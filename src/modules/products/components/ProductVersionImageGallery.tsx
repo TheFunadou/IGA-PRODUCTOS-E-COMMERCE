@@ -1,10 +1,11 @@
 import { type RefObject, useState, useEffect, useRef, useCallback } from "react";
-import { FaX, FaChevronLeft, FaChevronRight, FaMagnifyingGlassPlus, FaMagnifyingGlassMinus } from "react-icons/fa6";
+import { FaX, FaChevronLeft, FaChevronRight, FaMagnifyingGlassPlus, FaMagnifyingGlassMinus, FaCirclePlay } from "react-icons/fa6";
+import type { PVDetailMedia } from "../ProductTypes";
 
 interface Props {
     ref: RefObject<HTMLDialogElement | null>;
-    currentImage: string;
-    images: string[];
+    currentMedia?: PVDetailMedia;
+    media: PVDetailMedia[];
     productData: {
         productName: string;
         subcategories: string[];
@@ -20,11 +21,11 @@ const ZOOM_STEP = 0.75;
 
 const ProductVersionImageGallery = ({
     ref,
-    currentImage,
-    images,
+    currentMedia,
+    media,
     productData: { productName, subcategories, colorLine, colorName, colorCode },
 }: Props) => {
-    const [selected, setSelected] = useState(currentImage);
+    const [selected, setSelected] = useState<PVDetailMedia | undefined>(currentMedia);
     const [zoom, setZoom] = useState(1);
     const [origin, setOrigin] = useState({ x: 50, y: 50 }); // % para transform-origin
     const [isPanning, setIsPanning] = useState(false);
@@ -33,9 +34,9 @@ const ProductVersionImageGallery = ({
     const imgContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setSelected(currentImage);
+        setSelected(currentMedia);
         resetZoom();
-    }, [currentImage]);
+    }, [currentMedia]);
 
     const resetZoom = () => {
         setZoom(1);
@@ -43,15 +44,16 @@ const ProductVersionImageGallery = ({
         setPan({ x: 0, y: 0 });
     };
 
-    const changeImage = (img: string) => {
-        setSelected(img);
+    const changeMedia = (item: PVDetailMedia) => {
+        setSelected(item);
         resetZoom();
     };
 
-    const currentIndex = images.indexOf(selected);
+    const currentIndex = media.findIndex(m => m.url === selected?.url);
+    const selectedIsVideo = selected?.mediaType === "video";
 
-    const goPrev = () => changeImage(images[(currentIndex - 1 + images.length) % images.length]);
-    const goNext = () => changeImage(images[(currentIndex + 1) % images.length]);
+    const goPrev = () => changeMedia(media[(currentIndex - 1 + media.length) % media.length]);
+    const goNext = () => changeMedia(media[(currentIndex + 1) % media.length]);
 
     const zoomIn = () => setZoom(z => Math.min(z + ZOOM_STEP, MAX_ZOOM));
     const zoomOut = () => {
@@ -62,6 +64,7 @@ const ProductVersionImageGallery = ({
 
     // Clic sobre la imagen: activa/desactiva zoom y centra en el punto clicado
     const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (selectedIsVideo) return;
         if (zoom > 1) {
             resetZoom();
             return;
@@ -72,7 +75,7 @@ const ProductVersionImageGallery = ({
         setOrigin({ x: xPct, y: yPct });
         setZoom(2);
         setPan({ x: 0, y: 0 });
-    }, [zoom]);
+    }, [zoom, selectedIsVideo]);
 
     // Panning con mouse mientras hay zoom
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -137,21 +140,32 @@ const ProductVersionImageGallery = ({
 
                         {/* Thumbnails */}
                         <div className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden sm:max-h-[420px] md:max-h-[500px] lg:max-h-[580px] pb-1 sm:pb-0 sm:pr-1 flex-shrink-0 [scrollbar-width:thin] [scrollbar-color:var(--color-primary)_var(--color-base-200)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-base-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary">
-                            {images.map((img, i) => (
+                            {media.map((item, i) => (
                                 <button
-                                    key={i}
+                                    key={`${item.url}-${i}`}
                                     type="button"
-                                    onClick={() => changeImage(img)}
+                                    onClick={() => changeMedia(item)}
                                     className={`
-                                        flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200
+                                        flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 relative
                                         w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20
                                         hover:border-primary hover:scale-105
-                                        ${img === selected
+                                        ${item.url === selected?.url
                                             ? "border-primary shadow-md shadow-primary/20"
                                             : "border-base-300 hover:border-primary/60"}
                                     `}
                                 >
-                                    <img src={img} alt={`${productName} vista ${i + 1}`} className="w-full h-full object-cover" />
+                                    {item.mediaType === "video" ? (
+                                        <>
+                                            <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                                            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <span className="bg-black/55 text-white rounded-full p-1">
+                                                    <FaCirclePlay className="text-xs" />
+                                                </span>
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <img src={item.url} alt={`${productName} vista ${i + 1}`} className="w-full h-full object-cover" />
+                                    )}
                                 </button>
                             ))}
                         </div>
@@ -171,23 +185,37 @@ const ProductVersionImageGallery = ({
                                     bg-base-200 border border-base-300
                                     aspect-square md:aspect-[4/3] lg:aspect-square
                                     select-none
-                                    ${zoom > 1 ? (isPanning ? "cursor-grabbing" : "cursor-zoom-out") : "cursor-zoom-in"}
+                                    ${selectedIsVideo
+                                        ? "cursor-default"
+                                        : zoom > 1 ? (isPanning ? "cursor-grabbing" : "cursor-zoom-out") : "cursor-zoom-in"}
                                 `}
                             >
-                                <img
-                                    key={selected}
-                                    src={selected}
-                                    alt={productName}
-                                    draggable={false}
-                                    className="w-full h-full object-contain transition-transform duration-300 ease-out pointer-events-none"
-                                    style={{
-                                        transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                                        transformOrigin: zoom === 1 ? "center center" : `${origin.x}% ${origin.y}%`,
-                                    }}
-                                />
+                                {selectedIsVideo ? (
+                                    <video
+                                        key={selected!.url}
+                                        src={selected!.url}
+                                        className="w-full h-full object-contain bg-black"
+                                        autoPlay
+                                        muted
+                                        playsInline
+                                        controls
+                                    />
+                                ) : (
+                                    <img
+                                        key={selected?.url}
+                                        src={selected?.url ?? ""}
+                                        alt={productName}
+                                        draggable={false}
+                                        className="w-full h-full object-contain transition-transform duration-300 ease-out pointer-events-none"
+                                        style={{
+                                            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                                            transformOrigin: zoom === 1 ? "center center" : `${origin.x}% ${origin.y}%`,
+                                        }}
+                                    />
+                                )}
 
                                 {/* Hint cuando zoom = 1 */}
-                                {zoom === 1 && (
+                                {zoom === 1 && !selectedIsVideo && (
                                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-base-content/60 text-base-100 text-[10px] sm:text-xs font-medium px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none whitespace-nowrap">
                                         Acerca para ampliar
                                     </div>
@@ -195,41 +223,43 @@ const ProductVersionImageGallery = ({
 
                                 {/* Contador */}
                                 <div className="absolute top-3 left-3 bg-base-content/50 text-base-100 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm pointer-events-none">
-                                    {currentIndex + 1} / {images.length}
+                                    {currentIndex + 1} / {media.length}
                                 </div>
                             </div>
 
                             {/* Controles de zoom */}
-                            <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
-                                <button
-                                    type="button"
-                                    onClick={zoomIn}
-                                    disabled={zoom >= MAX_ZOOM}
-                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-base-100/90 border border-base-300 shadow-md backdrop-blur-sm flex items-center justify-center hover:bg-base-200 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base-content"
-                                    aria-label="Zoom in"
-                                >
-                                    <FaMagnifyingGlassPlus className="text-xs sm:text-sm" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={zoomOut}
-                                    disabled={zoom <= MIN_ZOOM}
-                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-base-100/90 border border-base-300 shadow-md backdrop-blur-sm flex items-center justify-center hover:bg-base-200 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base-content"
-                                    aria-label="Zoom out"
-                                >
-                                    <FaMagnifyingGlassMinus className="text-xs sm:text-sm" />
-                                </button>
+                            {!selectedIsVideo && (
+                                <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
+                                    <button
+                                        type="button"
+                                        onClick={zoomIn}
+                                        disabled={zoom >= MAX_ZOOM}
+                                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-base-100/90 border border-base-300 shadow-md backdrop-blur-sm flex items-center justify-center hover:bg-base-200 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base-content"
+                                        aria-label="Zoom in"
+                                    >
+                                        <FaMagnifyingGlassPlus className="text-xs sm:text-sm" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={zoomOut}
+                                        disabled={zoom <= MIN_ZOOM}
+                                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-base-100/90 border border-base-300 shadow-md backdrop-blur-sm flex items-center justify-center hover:bg-base-200 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base-content"
+                                        aria-label="Zoom out"
+                                    >
+                                        <FaMagnifyingGlassMinus className="text-xs sm:text-sm" />
+                                    </button>
 
-                                {/* Indicador de nivel */}
-                                {zoom > 1 && (
-                                    <div className="text-center text-[10px] font-semibold text-base-content/60">
-                                        {zoom.toFixed(1)}x
-                                    </div>
-                                )}
-                            </div>
+                                    {/* Indicador de nivel */}
+                                    {zoom > 1 && (
+                                        <div className="text-center text-[10px] font-semibold text-base-content/60">
+                                            {zoom.toFixed(1)}x
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Flechas navegación */}
-                            {images.length > 1 && (
+                            {media.length > 1 && (
                                 <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none">
                                     <button
                                         type="button"
@@ -296,14 +326,15 @@ const ProductVersionImageGallery = ({
                         <div className="divider my-0" />
 
                         {/* Dots */}
-                        {images.length > 1 && (
+                        {media.length > 1 && (
                             <div className="flex gap-1.5 flex-wrap">
-                                {images.map((img, i) => (
+                                {media.map((item, i) => (
                                     <button
-                                        key={i}
+                                        key={`${item.url}-${i}`}
                                         type="button"
-                                        onClick={() => changeImage(img)}
-                                        className={`h-2 rounded-full transition-all duration-200 ${img === selected
+                                        onClick={() => changeMedia(item)}
+                                        aria-label={item.mediaType === "video" ? `Ver video ${i + 1}` : `Ver imagen ${i + 1}`}
+                                        className={`h-2 rounded-full transition-all duration-200 ${item.url === selected?.url
                                             ? "bg-primary w-5"
                                             : "bg-base-300 w-2 hover:bg-base-content/40"
                                             }`}

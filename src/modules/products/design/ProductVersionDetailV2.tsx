@@ -1065,8 +1065,8 @@ const ProductVersionDetailV2 = () => {
             {data && (
                 <ProductVersionImageGallery
                     ref={imageGalleryModal}
-                    currentImage={image!}
-                    images={data.images.map(img => img.url)}
+                    currentMedia={image ? { url: image, mainImage: false, mediaType: "image" } : undefined}
+                    media={data.images.map(img => ({ url: img.url, mainImage: img.mainImage, mediaType: "image" as const }))}
                     productData={{
                         productName: data.name,
                         subcategories: data.subcategories.map(s => s.name),

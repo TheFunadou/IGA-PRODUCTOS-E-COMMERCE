@@ -40,8 +40,8 @@ const ProductVersionDetailV3 = () => {
     const c = useProductVersionDetailV3Controller();
 
     const {
-        params, navigate, data, isLoading, error, image, setImage,
-        sortedImageUrls, sortedTags, certificationResources, otherResources,
+        params, navigate, data, isLoading, error, selectedMedia, setSelectedMedia,
+        sortedMedia, sortedTags, certificationResources, otherResources,
         techSheetUrl, categorySlug, productIsPaused,
         reviews, reviewsLoading, reviewsResume, reviewsResumeLoading,
         galleryModalRef, pdfModalRef,
@@ -95,9 +95,9 @@ const ProductVersionDetailV3 = () => {
                     <div className="lg:col-span-5">
                         <ProductGallery
                             data={data}
-                            image={image}
-                            sortedImageUrls={sortedImageUrls}
-                            onSelectImage={setImage}
+                            selectedMedia={selectedMedia}
+                            sortedMedia={sortedMedia}
+                            onSelectMedia={setSelectedMedia}
                             galleryModalRef={galleryModalRef}
                         />
 
@@ -201,8 +201,8 @@ const ProductVersionDetailV3 = () => {
             {/* ══ MODALES ═══════════════════════════════════════════════════ */}
             <ProductVersionImageGallery
                 ref={galleryModalRef}
-                currentImage={image!}
-                images={data.images.map(img => img.url)}
+                currentMedia={selectedMedia}
+                media={sortedMedia}
                 productData={{
                     productName: data.name,
                     subcategories: [],
