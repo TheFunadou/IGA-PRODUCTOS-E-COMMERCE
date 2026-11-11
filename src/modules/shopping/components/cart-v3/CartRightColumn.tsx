@@ -29,6 +29,7 @@ const CartRightColumn = ({ c }: CartRightColumnProps) => (
                 pendingOrder={c.pendingOrder}
                 onPendingPayment={c.handlePendingPayment}
                 onOpenAddress={c.handleOpenAddress}
+                showCheckoutActions={c.isAuth || c.hasSavedGuestAddress || c.pendingOrder}
             />
         </div>
         <div className="order-4 lg:order-none empty:contents">

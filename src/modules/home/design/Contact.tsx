@@ -117,13 +117,29 @@ const Contact = () => {
                 }
                 badges={
                     <>
-                        <HeroPill icon={<MdEmail className="text-sm" />}>
+                        <HeroPill
+                            icon={<MdEmail className="text-sm" />}
+                            href={`mailto:${CONTACT_EMAIL}`}
+                            title={`Escribir a ${CONTACT_EMAIL}`}
+                            onClick={() => trackLead()}
+                        >
                             Correo electrónico
                         </HeroPill>
-                        <HeroPill icon={<FaWhatsapp className="text-sm text-green-400" />}>
+                        <HeroPill
+                            icon={<FaWhatsapp className="text-sm text-green-400" />}
+                            href={WHATSAPP_URL}
+                            external
+                            title={`Escribir por WhatsApp al ${CONTACT_PHONE_DISPLAY}`}
+                            onClick={() => trackLead()}
+                        >
                             WhatsApp
                         </HeroPill>
-                        <HeroPill icon={<MdPhone className="text-sm" />}>
+                        <HeroPill
+                            icon={<MdPhone className="text-sm" />}
+                            href={`tel:${CONTACT_PHONE}`}
+                            title={`Llamar al ${CONTACT_PHONE_DISPLAY}`}
+                            onClick={() => trackLead()}
+                        >
                             Teléfono
                         </HeroPill>
                     </>

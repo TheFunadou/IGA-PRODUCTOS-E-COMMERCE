@@ -22,6 +22,9 @@ interface OrderSummaryProps {
     pendingOrder?: boolean;
     onPendingPayment?: () => void;
     onOpenAddress?: () => void;
+    /* Controla cupón, botón de pago y leyenda. Por defecto visible para no
+       alterar otros consumidores (p. ej. BuyNowV3). */
+    showCheckoutActions?: boolean;
 }
 
 const OrderSummary = ({
@@ -38,6 +41,7 @@ const OrderSummary = ({
     pendingOrder = false,
     onPendingPayment,
     onOpenAddress,
+    showCheckoutActions = true,
 }: OrderSummaryProps) => {
     // Registrar una sola vez que el usuario vio el costo de envío en el resumen
     // del carrito (se muestra cuando ya hay dirección/selección de destino).
@@ -134,45 +138,49 @@ const OrderSummary = ({
                 </span>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-base-content/60 uppercase flex items-center gap-1.5">
-                    <FaTag className="text-xs text-primary" />
-                    Cupón de descuento
-                </label>
-                <input
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    onBlur={(e) => {
-                        // Se registra al salir del campo (no por keystroke) si escribió algo.
-                        const code = e.target.value.trim();
-                        if (code) phCouponSubmitted(code);
-                    }}
-                    type="text"
-                    className="input input-sm w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
-                    placeholder="Introduce tu código"
-                    defaultValue={couponCode ?? ""}
-                />
-            </div>
+            {showCheckoutActions && (
+                <>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-base-content/60 uppercase flex items-center gap-1.5">
+                            <FaTag className="text-xs text-primary" />
+                            Cupón de descuento
+                        </label>
+                        <input
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            onBlur={(e) => {
+                                // Se registra al salir del campo (no por keystroke) si escribió algo.
+                                const code = e.target.value.trim();
+                                if (code) phCouponSubmitted(code);
+                            }}
+                            type="text"
+                            className="input input-sm w-full text-sm bg-base-200 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
+                            placeholder="Introduce tu código"
+                            defaultValue={couponCode ?? ""}
+                        />
+                    </div>
 
-            <button
-                className={`w-full btn rounded-2xl font-bold gap-2 tracking-wide tooltip tooltip-bottom ${pendingOrder
-                        ? "bg-warning hover:bg-warning/90 text-white border-0"
-                        : "btn-primary"
-                    }`}
-                data-tip={pendingOrder ? "Continúa con el pago de tu orden pendiente." : "Realiza las acciones indicadas para continuar."}
-                disabled={pendingOrder ? !onPendingPayment : isSubmitDisabled}
-                onClick={pendingOrder ? onPendingPayment : handleCreateOrder}
-                onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
-            >
-                {orderLoading && <span className="loading loading-spinner loading-sm" />}
-                {orderLoading ? "Procesando..." : pendingOrder ? "Terminar compra" : "Proceder al pago"}
-            </button>
+                    <button
+                        className={`w-full btn rounded-2xl font-bold gap-2 tracking-wide tooltip tooltip-bottom ${pendingOrder
+                                ? "bg-warning hover:bg-warning/90 text-white border-0"
+                                : "btn-primary"
+                            }`}
+                        data-tip={pendingOrder ? "Continúa con el pago de tu orden pendiente." : "Realiza las acciones indicadas para continuar."}
+                        disabled={pendingOrder ? !onPendingPayment : isSubmitDisabled}
+                        onClick={pendingOrder ? onPendingPayment : handleCreateOrder}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+                    >
+                        {orderLoading && <span className="loading loading-spinner loading-sm" />}
+                        {orderLoading ? "Procesando..." : pendingOrder ? "Terminar compra" : "Proceder al pago"}
+                    </button>
 
-            <p className="text-[11px] text-base-content/50 text-center leading-relaxed">
-                Al hacer click en "Proceder al pago" confirmo haber leído y aceptado los{" "}
-                <Link to="/terminos-y-condiciones" className="text-primary underline underline-offset-2 hover:text-primary/80" target="_blank">
-                    términos y condiciones
-                </Link>
-            </p>
+                    <p className="text-[11px] text-base-content/50 text-center leading-relaxed">
+                        Al hacer click en "Proceder al pago" confirmo haber leído y aceptado los{" "}
+                        <Link to="/terminos-y-condiciones" className="text-primary underline underline-offset-2 hover:text-primary/80" target="_blank">
+                            términos y condiciones
+                        </Link>
+                    </p>
+                </>
+            )}
 
             {error && (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm">

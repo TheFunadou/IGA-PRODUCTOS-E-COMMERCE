@@ -144,15 +144,50 @@ export const StampBadge = ({ icon: Icon, className }: StampBadgeProps) => (
     </span>
 );
 
+interface HeroPillProps {
+    icon: ReactNode;
+    children: ReactNode;
+    href?: string;
+    external?: boolean;
+    onClick?: () => void;
+    title?: string;
+}
+
+const heroPillClassName =
+    "flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs px-3 py-1.5 rounded-full font-medium";
+
 export const HeroPill = ({
     icon,
     children,
-}: {
-    icon: ReactNode;
-    children: ReactNode;
-}) => (
-    <span className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs px-3 py-1.5 rounded-full font-medium">
-        {icon}
-        {children}
-    </span>
-);
+    href,
+    external,
+    onClick,
+    title,
+}: HeroPillProps) => {
+    if (href) {
+        return (
+            <a
+                href={href}
+                onClick={onClick}
+                title={title}
+                {...(external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                className={clsx(
+                    heroPillClassName,
+                    "transition-all duration-200 hover:bg-white/25 hover:border-white/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                )}
+            >
+                {icon}
+                {children}
+            </a>
+        );
+    }
+
+    return (
+        <span className={heroPillClassName}>
+            {icon}
+            {children}
+        </span>
+    );
+};

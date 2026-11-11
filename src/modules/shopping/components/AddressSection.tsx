@@ -164,7 +164,7 @@ const AddressSection = ({
                     <button
                         type="button"
                         onClick={() => setShowGuestForm(true)}
-                        className="btn btn-ghost btn-sm border border-base-300 hover:bg-base-200 gap-2 text-base-content/60 w-full"
+                        className="btn btn-warning btn-sm border-0 gap-2 text-warning-content font-bold shadow-sm hover:bg-warning/90 w-full"
                     >
                         <FaUserAlt className="text-xs" />
                         Continuar como invitado y rellenar formulario de envio

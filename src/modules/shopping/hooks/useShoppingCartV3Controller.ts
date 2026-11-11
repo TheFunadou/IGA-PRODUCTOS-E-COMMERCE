@@ -38,6 +38,13 @@ export const useShoppingCartV3Controller = () => {
         return null;
     }, [isAuth, selectedAddress, guestAddressForm]);
 
+    /* Solo cuenta como rellenado si el invitado guardó el formulario; abrirlo o
+       estar editándolo (showGuestForm/showGuestFormEdit) no lo marca como listo. */
+    const hasSavedGuestAddress = useMemo(
+        () => !isAuth && !!guestAddressForm,
+        [isAuth, guestAddressForm]
+    );
+
     const destination = useMemo(() => addressForShipping?.zipCode ?? null, [addressForShipping]);
     const destinationCity = useMemo(() => addressForShipping?.city ?? undefined, [addressForShipping]);
     const destinationState = useMemo(() => addressForShipping?.state ?? undefined, [addressForShipping]);
@@ -160,6 +167,7 @@ export const useShoppingCartV3Controller = () => {
         isAuth,
         pendingOrder,
         destination,
+        hasSavedGuestAddress,
         isSubmitDisabled,
         handleCart,
         cardsMap,
