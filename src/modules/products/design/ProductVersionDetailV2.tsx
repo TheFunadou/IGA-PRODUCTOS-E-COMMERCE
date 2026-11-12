@@ -315,7 +315,7 @@ const PurchaseCard = ({
     </div>
 );
 
-// ── Componente principal ───────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 const ProductVersionDetailV2 = () => {
     const SHIPPING_COST = 264.00;
     const params = useParams();
@@ -543,10 +543,10 @@ const ProductVersionDetailV2 = () => {
             </div>
 
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-                {/* ══ SECCIÓN PRINCIPAL ═══════════════════════════════════════ */}
+                {/* ══ MAIN SECTION ══════════════════════════════════════════ */}
                 <div className="w-full flex flex-col lg:flex-row gap-10 lg:gap-14">
 
-                    {/* ── Galería ── */}
+                    {/* ── Gallery ── */}
                     <div className="w-full lg:w-[38%] xl:w-[42%]">
                         <div className="lg:sticky lg:top-20 flex flex-col gap-4 z-40">
                             <div className="relative w-full rounded-2xl">
@@ -600,7 +600,7 @@ const ProductVersionDetailV2 = () => {
                         </div>
                     </div>
 
-                    {/* ── Info del producto ── */}
+                    {/* ── Product info ── */}
                     <div className="w-full lg:w-[38%] xl:w-[38%] flex flex-col gap-6">
 
                         {/* Nombre, estado y rating */}
@@ -653,7 +653,7 @@ const ProductVersionDetailV2 = () => {
                             )}
                         </div>
 
-                        {/* Purchase card móvil */}
+                        {/* Purchase card (mobile) */}
                         <div className="lg:hidden mt-2">
                             <PurchaseCard {...purchaseCardProps} />
                         </div>
@@ -888,7 +888,7 @@ const ProductVersionDetailV2 = () => {
                             </div>
                         </div>
 
-                        {/* Lista + formulario */}
+                        {/* List + form */}
                         <div className="flex-1 min-w-0">
                             {reviewsLoading && (
                                 <div className="flex flex-col gap-4">
@@ -1028,7 +1028,7 @@ const ProductVersionDetailV2 = () => {
                 </div>
             </div>
 
-            {/* ══ PRODUCTOS RELACIONADOS ══════════════════════════════════════ */}
+            {/* ══ RELATED PRODUCTS ═══════════════════════════════════════════ */}
             <div className="w-full py-12 bg-base-200/30 border-t border-base-200">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between mb-8">
@@ -1061,12 +1061,12 @@ const ProductVersionDetailV2 = () => {
                 </div>
             </div>
 
-            {/* ══ MODAL GALERÍA ════════════════════════════════════════════════ */}
+            {/* ══ GALLERY MODAL ═══════════════════════════════════════════════ */}
             {data && (
                 <ProductVersionImageGallery
                     ref={imageGalleryModal}
-                    currentImage={image!}
-                    images={data.images.map(img => img.url)}
+                    currentMedia={image ? { url: image, mainImage: false, mediaType: "image" } : undefined}
+                    media={data.images.map(img => ({ url: img.url, mainImage: img.mainImage, mediaType: "image" as const }))}
                     productData={{
                         productName: data.name,
                         subcategories: data.subcategories.map(s => s.name),

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { containsOffensiveLanguage, formatPrice, makeSlug } from "../Helpers";
-import NotFoundSVG from "../../../assets/products/NotFound.svg";
 import { useFavorite } from "./useProductFavorites";
-import type { AddPVReviewType } from "../ProductTypes";
+import type { AddPVReviewType, PVDetailMedia } from "../ProductTypes";
 import { useHandleShoppingCartV3 } from "../../shopping/hooks/handleShoppingCartV3";
-// ROLLBACK V2: para volver a flujo V2, cambiar import a: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
+// ROLLBACK V2: to go back to the V2 flow, change the import to: import { useHandleShoppingCart } from "../../shopping/hooks/handleShoppingCart";
 import { useAuthStore } from "../../auth/states/authStore";
 import {
     useAddPVReview,
@@ -19,9 +18,9 @@ import { trackAddToCart, trackAddToWishlist, trackViewContent } from "../../anal
 import { phAddToCartBlocked } from "../../analytics/PostHogEvents";
 import { useRecentlyViewedStore, getTabSessionId } from "../../../global/states/recentlyViewedStore";
 
-/* Controlador de la página de detalle V3: toda la lógica (estado, handlers,
-   datos derivados) vive aquí, extraída verbatim del design original para que
-   el orquestador sea solo composición de subcomponentes. */
+/* V3 product detail page controller: all the logic (state, handlers,
+   derived data) lives here, extracted verbatim from the original design so
+   the orchestrator is just a composition of subcomponents. */
 export const useProductVersionDetailV3Controller = () => {
     const params = useParams();
     const navigate = useNavigate();
@@ -52,7 +51,7 @@ export const useProductVersionDetailV3Controller = () => {
     const { showTriggerAlert } = useTriggerAlert();
     const recentOwnerId = isAuth ? (authCustomer?.uuid ?? getTabSessionId()) : getTabSessionId();
     const addRecentSku = useRecentlyViewedStore((state) => state.addSku);
-    // Flujo V3 aislado (shopping-cart:load:v3) – V2 deprecado conservado para rollback
+    // Isolated V3 flow (shopping-cart:load:v3) – deprecated V2 kept for rollback
     const { updateQtyItem } = useHandleShoppingCartV3({
         isAuth,
         authCustomer: { uuid: authCustomer?.uuid || "" },
@@ -62,7 +61,7 @@ export const useProductVersionDetailV3Controller = () => {
     const [selectProductQty, setSelectProductQty] = useState("1");
     const [productQty, setProductQty] = useState(1);
     const [stockError, setStockError] = useState("");
-    const [image, setImage] = useState<string | undefined>(NotFoundSVG);
+    const [selectedMedia, setSelectedMedia] = useState<PVDetailMedia | undefined>(undefined);
     const [stock, setStock] = useState(1);
     const [selectedRating, setSelectedRating] = useState(1);
     const [reviewPage, setReviewPage] = useState(1);
@@ -85,13 +84,18 @@ export const useProductVersionDetailV3Controller = () => {
         initialFavoriteState: data?.isFavorite ?? false,
     });
 
-    // Datos derivados (sin estado redundante)
-    const sortedImageUrls = useMemo(() => {
+    // Derived data (no redundant state)
+    // Order: main image → remaining images → videos
+    const sortedMedia = useMemo(() => {
         if (!data) return [];
-        const urls = [...data.images]
-            .sort((a, b) => (a.mainImage === b.mainImage ? 0 : a.mainImage ? -1 : 1))
-            .map(img => img.url);
-        return urls.length > 0 ? urls : [NotFoundSVG as string];
+        const media = [...(data.media ?? [])];
+        const byType = (a: PVDetailMedia, b: PVDetailMedia) =>
+            a.mediaType === b.mediaType ? 0 : a.mediaType === "image" ? -1 : 1;
+        return media.sort((a, b) => {
+            if (a.mainImage && !b.mainImage) return -1;
+            if (!a.mainImage && b.mainImage) return 1;
+            return byType(a, b);
+        });
     }, [data]);
 
     const sortedTags = useMemo(() =>
@@ -132,8 +136,8 @@ export const useProductVersionDetailV3Controller = () => {
     }, [data, addRecentSku, recentOwnerId]);
 
     useEffect(() => {
-        setImage(sortedImageUrls[0] ?? NotFoundSVG);
-    }, [sortedImageUrls]);
+        setSelectedMedia(sortedMedia[0]);
+    }, [sortedMedia]);
 
     const handleSelectProductQty = (input: string) => {
         setSelectProductQty(input);
@@ -256,9 +260,9 @@ export const useProductVersionDetailV3Controller = () => {
         data,
         isLoading,
         error,
-        image,
-        setImage,
-        sortedImageUrls,
+        selectedMedia,
+        setSelectedMedia,
+        sortedMedia,
         sortedTags,
         certificationResources,
         otherResources,

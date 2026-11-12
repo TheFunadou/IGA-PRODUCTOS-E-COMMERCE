@@ -182,6 +182,15 @@ export type ProductResourceI = {
     updatedAt: Date | string;
 };
 
+export type PVDetailMediaType = "image" | "video";
+
+/** v3 detail media: image or video */
+export interface PVDetailMedia {
+    url: string;
+    mainImage: boolean;
+    mediaType: PVDetailMediaType;
+}
+
 export interface ProductVersionDetailV3I {
     productUUID: string;
     name: string;
@@ -193,7 +202,7 @@ export interface ProductVersionDetailV3I {
     finalPrice: string;
     isFavorite: boolean;
     stock: number;
-    images: { url: string, mainImage: boolean }[];
+    media: PVDetailMedia[];
     rating: number;
     offer: {
         isOffer: boolean,
